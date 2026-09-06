@@ -66,7 +66,7 @@ graph, so there is no privilege-escalation path to get wrong; what is missing is
 | | Status | Where it stands |
 |---|---|---|
 | Create a user account with credentials | **Partial** | Done through **handover**: the partner issues a link, the couple sets their own password. There is no "create the couple an account with a password and hand it over". Deliberate — we never hold a couple's password — but it is not what "account creation" usually means, and it is worth confirming that is what you want. |
-| Tier selection at creation | **Missing** | The wizard has no plan step. Every catalogue gets the same default caps. |
+| Tier selection at creation | **Missing** | The wizard has no plan step. Every catalogue gets the same default caps. Tiers are now Deliver (90 days) / Keep / Cinema (`PRICING.md`, Sept 2026); a Deliver catalogue needs the 90-day term from N-24. |
 | Skin selection from a marketplace | **Missing** | Three hardcoded templates (`keepsake`, `films-only`, `anniversary`) chosen in the wizard. **No marketplace, no purchasable skins.** See §6. |
 | Customisation — layout, text, message | **Built** | The customizer: drag or keyboard reorder, in-place heading editing, per-section editors, live preview of the real guest components. |
 | **Saving is legible everywhere** | **Partial** | Three different models in one console and one of them is silent. The customizer autosaves and says *"Saved as draft"*; Settings has a Save button and a status line; **the film list saves on blur and says nothing at all.** An operator renaming a film has no way to know it worked. |

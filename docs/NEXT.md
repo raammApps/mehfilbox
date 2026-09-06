@@ -9,7 +9,7 @@ then debt. Within a tier, cheapest first.
 
 **6 September 2026:** [`ROADMAP.md`](./ROADMAP.md) groups this backlog into phases and adds
 N-34 to N-50 from the competitor and feature review. Phase 1 is Tier 2 below, in this order:
-held items → N-50 → N-21 → N-22 → N-23 → N-29 → N-35 → N-36 → N-24a → real footage.
+held items → N-50 → N-21 → N-22 → N-23 → N-29 → N-35 → N-36 → N-24a → real footage → N-51.
 
 Update this file as items land — move them out, do not leave them ticked.
 
@@ -62,8 +62,9 @@ Supabase Auth sends registration and reset mail through Resend (N-17). **The app
 sends nothing** — no migration email, no delivery message, no warning — because there is no
 provider to send through. Build it the way `VideoProvider` was built: one interface
 (`NotificationProvider.send({ to, channel, template, params })`), a `fake` driver the suite runs
-against, a `resend` driver first, then `whatsapp` (Interakt, Gupshup or MSG91 — pick one now,
-template approval takes days) and `sms` (MSG91). Every template exists in English and Hindi, and
+against, a `resend` driver first (it is already the auth mailer), then `msg91` for WhatsApp and
+SMS — **decided 6 September**; start the WhatsApp Business API application and template approval
+now, it takes days. Every template exists in English and Hindi, and
 `tests/unit/i18n.test.ts` should cover them like guest strings.
 
 - Channel preference lives on the couple's org: which channels they gave, which they opted out of.
@@ -121,12 +122,23 @@ message (and an email) with the poster, the couple's names, "now streaming" copy
 catalogue's locale, and the link; records that it was sent. This is the moment the product gets
 forwarded to two hundred people, and today the operator writes it themselves.
 
+### N-51 · The landing page  ·  ~1 session  ·  **Phase 1, last — after real footage**
+
+`heirloomfilms.in` is an operator sign-in. Rebuild it in the shape viddrop's page has, which is the
+shape that sold Sandeep on their pricing: the price in the hero sentence ("₹1,999 per wedding, no
+subscription"), a With/Without table against Google Drive (request-access wall, compression, dead
+links, a folder instead of a running order), the three templates as real screenshots, an FAQ that
+answers "what happens after 90 days" in one sentence ("it archives — nothing is deleted"), and the
+public demo catalogue one tap away. Do **not** claim "no compression": say *originals always
+downloadable, streaming tuned for 4G*, which is true and better here.
+
 ### N-24 · Lifecycle: renewal, lapse, **archive**  ·  doc 15  ·  **Phase 2**
 
 > Rewritten 6 September 2026: **no automatic deletion.** `PRICING.md` §2 and `ROADMAP.md` §4.
 
 The state machine exists and `resolveAccess` honours it. Nothing writes it. Needs: the renewal
-path (N-20 writes it), the lapse transition at expiry, **90 days' grace** with the catalogue
+path (N-20 writes it), the **90-day Deliver term** with the day-60 Keep offer sent to the studio
+(N-50), the lapse transition at expiry, **90 days' grace** with the catalogue
 read-only for the couple and download offered, then the **archive transition**: streaming paused,
 a restore-on-payment screen for guests, files retained. Measure first whether moving renditions
 out of Stream into Edge Storage saves enough to be worth the code; at ₹0.95/GB/month it may not.
@@ -196,8 +208,10 @@ Keep read-only as the default stance; add writes one at a time, with an audit tr
 ### N-20 · Razorpay  ·  doc 15 §4  ·  **Phase 2**
 
 Two flows that should not share a code path: partners buy catalogue credits in advance, couples
-pay renewal, archive, long-term archive and storage after the included months. The `plans` rows
-for archive (₹499 / ₹999 / ₹1,499) and the Studio plan (`ROADMAP.md` §3, R3 and R7) land here. The subscription state machine already exists
+pay renewal, archive, long-term archive and storage after the included months — **and nothing is
+billed to a couple inside twelve months of delivery** (`PRICING.md`, "Who is billed when"). The
+`plans` rows for Deliver, Keep, Cinema, archive (₹999 / ₹1,499), the Studio plan with its three
+included credits, and the Deliver → Keep upgrade (`ROADMAP.md` §3) land here. The subscription state machine already exists
 and `resolveAccess` honours it — what is missing is only the thing that *writes* it. Verify the
 webhook the way the Bunny one is verified, and assume it gets lost, because that lesson is
 already paid for.

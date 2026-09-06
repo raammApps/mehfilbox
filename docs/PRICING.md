@@ -11,40 +11,58 @@ All prices **exclude 18% GST** (SAC 998314).
 
 ## The plans
 
-| | Storage | Holds at 720p | 4K included | **1 year** | **3 years** |
-|---|---|---|---|---|---|
-| **Highlights** | 10 GB | ~4.5 hrs | — | **₹2,500** | **₹5,000** |
-| **Wedding** | 40 GB | ~16.5 hrs | 20 min | **₹7,000** | **₹14,000** |
-| **Cinema** | 80 GB | ~28 hrs | 90 min | **₹12,000** | **₹24,000** |
+> **Revised 6 September 2026.** Highlights is gone; **Deliver** replaces it. The ladder is now
+> shaped like viddrop's (the per-wedding competitor `COMPETITORS.md` §1 added in September) and
+> priced in rupees for the Indian studio. Originals are kept for the paid term. The decisions and
+> the arithmetic behind them are in [`ROADMAP.md`](./ROADMAP.md) §4 and §7.
 
-*Prices to the partner. With GST: ₹2,950 · ₹8,260 · ₹14,160.*
+| | Term | Storage (originals + renditions) | 4K included | **Price to the studio** | **incl. 18% GST** |
+|---|---|---|---|---|---|
+| **Deliver** | 90 days | 100 GB | — | **₹1,999** · 5 for **₹7,999** (₹1,600 each) · 180 days = 2 credits | ₹2,359 |
+| **Keep** | 12 months, renewable | 100 GB | 20 min | **₹6,000** · 3 years **₹12,000** | ₹7,080 · ₹14,160 |
+| **Cinema** | 12 months, renewable | 200 GB | 90 min | **₹12,000** · 3 years **₹24,000** | ₹14,160 · ₹28,320 |
 
 **Three years costs two.** Sell it that way — see [§4](#4-sell-three-years-not-one).
 
-| Also | |
-|---|---|
-| Extra storage | **₹25 / GB / month**, for the months left on the plan |
-| Extra 4K | **₹1,999** per 20 minutes |
-| Renewal | **₹1,000 · ₹2,500 · ₹4,000** per year |
-| Archive (storage only, restore on demand) — *proposed* | **₹499 · ₹999 · ₹1,499** per year; see §2 |
-| Studio plan — *proposed* | **₹4,999–9,999 / yr**: custom domain served, presets, team seats, lapse dashboard. First three catalogues on any plan are free |
-| Suggested retail | ₹6,000–8,000 · ₹18,000–25,000 · ₹30,000–40,000 |
+| Also | To whom | |
+|---|---|---|
+| Studio plan | Studio, yearly | **₹4,999** (₹5,899 incl.): registration, branding, presets, team seats, custom domain served, lapse dashboard. **Includes three Deliver credits in the first year**, so a studio that delivers three weddings has paid nothing for the platform. |
+| Deliver → Keep, inside year one | Studio (marks up to the couple) | **₹2,500** base |
+| Keep renewal / Cinema renewal | Couple, directly, from year two | **₹2,500 / ₹4,000** per year |
+| Archive (storage only, restore on demand) | Couple | **₹999 / ₹1,499** per year; free for the first 12 months after grace |
+| Long-term archive, prepaid | Couple or a relative | **₹3,999 / 5 yrs · ₹6,999 / 10 yrs** (Keep); ₹5,999 / 5 yrs (Cinema) |
+| Extra storage | Whoever holds the catalogue | **₹25 / GB / month**, for the months left on the plan |
+| Extra 4K | Studio | **₹1,999** per 20 minutes |
+| Suggested retail | — | Deliver ₹5,000–8,000 · Keep ₹15,000–20,000 · Cinema ₹30,000–40,000 |
 
 The full list of what is sold, who pays and what each line needs built is `ROADMAP.md` §3.
 
+### Who is billed when — the one rule
+
+**For twelve months after delivery every rupee goes through the studio. After that, the couple
+deals with Heirloom directly.** A couple who paid their studio must never receive an invoice from a
+company they have not heard of inside that first year — it costs the studio their trust, and the
+studio is the channel. So a Deliver → Keep conversion at day 60 is a studio purchase at the ₹2,500
+base, which they quote to the couple as they like; the day-60 message goes to the studio, with a
+copy to the couple that says *"ask your studio"*. Direct billing begins at the first renewal, by
+which time the migration email (§2) has already introduced us.
+
 ### What each one is for
 
-**Highlights** — a pre-wedding shoot, one function, or a highlights-only delivery. **It cannot
-hold a whole wedding**, and should never be sold as one.
+**Deliver** — the studio's delivery job, priced against viddrop ($25) and against Google Drive
+(free). Every function, both sides, originals downloadable, streaming tuned for 4G, the studio's
+brand on it. At day 60 the studio is offered Keep for the couple; **nothing is deleted at day 90**
+— the catalogue archives (§2) and can be restored by the couple later.
 
-**Wedding** — every function from both sides, 10–15 hours, plus a 4K master of the highlights
-film. **This is the normal purchase.**
+**Keep** — the couple's keepsake. Twelve months, handover to the couple, a 4K master of the
+highlights film, renewable directly. **This is what we are actually selling**; Deliver is how a
+studio discovers it.
 
-**Cinema** — a multi-day wedding with a film per function, and an hour and a half in 4K.
+**Cinema** — a multi-day wedding with a film per function, an hour and a half in 4K, and the
+living-room TV in mind.
 
-I dropped the 20 GB tier. At 9.3 hours it cannot hold a wedding either, so its only job was to
-make 40 GB look reasonable — and a partner *will* buy it for a full wedding and hit the cap at 80%
-uploaded. Two plans that cannot do the job is one too many.
+Highlights (10 GB, ₹2,500) is withdrawn: it could not hold a wedding, and Deliver holds one for
+less. A pre-wedding shoot or a single function is a Deliver.
 
 ---
 
@@ -75,7 +93,8 @@ fits nothing on the list.
 
 ## 2. What happens at the end
 
-This is the part your three changes rewrote, and they rewrote it well.
+This is the part your three changes rewrote, and they rewrote it well. (September 2026 revised
+the ending again: archive, not deletion.)
 
 ### At handover, the couple is told they own it
 
@@ -112,18 +131,21 @@ offered throughout) → **Archive**: streaming paused, every file retained, a on
 moment a renewal or archive fee is paid. `deleted` exists in the state machine only for an
 explicit, recorded request from the couple.
 
-**What it does for cost.** Bunny standard storage is about ₹0.95/GB/month, so a 40 GB Wedding
-catalogue kept in archive costs ₹458 a year, a Cinema catalogue ₹917, a Highlights ₹115. The
-archive tier is priced to cover that twice:
+**What it does for cost.** An archived catalogue holds the best rendition only (originals were
+downloadable for the whole paid term; 4K films keep theirs), so a Keep-sized archive is ≈30 GB —
+about ₹340 a year at Bunny's ₹0.95/GB-month — and a Cinema archive ≈₹1,000. The archive tier is
+priced to cover that with margin:
 
-| | Highlights | Wedding | Cinema |
-|---|---|---|---|
-| **Archive** (storage only, restore on demand) | **₹499 / yr** | **₹999 / yr** | **₹1,499 / yr** |
-| **Long-term archive**, prepaid | ₹1,999 / 5 yrs | **₹3,999 / 5 yrs · ₹6,999 / 10 yrs** | ₹5,999 / 5 yrs |
+| | Keep | Cinema |
+|---|---|---|
+| **Archive** (storage only, restore on demand) | **₹999 / yr** | **₹1,499 / yr** |
+| **Long-term archive**, prepaid | **₹3,999 / 5 yrs · ₹6,999 / 10 yrs** | ₹5,999 / 5 yrs |
+
+A Deliver catalogue that was never converted archives at the Keep rate.
 
 A lapsed catalogue that nobody pays for is archived at our cost for **twelve months after grace**,
 then reminded again; the fee only starts once a couple chooses archive over renewal. The storage
-bill still stops climbing — an archived catalogue is a fixed ₹115–917 a year, not a growing
+bill still stops climbing — an archived catalogue is a fixed ₹340–1,000 a year, not a growing
 Stream library — but it stops climbing because couples are paying to keep their wedding, not
 because we removed it.
 
@@ -156,7 +178,7 @@ happens mid-delivery with a couple waiting.
 
 **Downgrading:** at renewal only, and only if the content fits.
 
-> "You are using 27 GB. To renew on Highlights, remove 17 GB — or renew on Wedding."
+> "You are using 120 GB. To renew on Keep, remove 20 GB — or renew on Cinema."
 
 Mid-term downgrades are refused because the capacity has already been used. A second-year couple
 deleting the long functions to keep the highlights film **is a save, not a loss** — the alternative
@@ -170,19 +192,18 @@ was not a full-price renewal, it was cancellation.
 
 | | 1 year | 3 years | Effective |
 |---|---|---|---|
-| Highlights | ₹2,500 | **₹5,000** | ₹1,667/yr |
-| Wedding | ₹7,000 | **₹14,000** | ₹4,667/yr |
+| Keep | ₹6,000 | **₹12,000** | ₹4,000/yr |
 | Cinema | ₹12,000 | **₹24,000** | ₹8,000/yr |
 
-Margins barely move — 85% on a three-year Wedding against 84% on one year — because storage is
-₹458 a year and nothing else recurs.
+Years two and three cost us ≈₹340–1,000 each (best rendition only, §5), so the three-year margin
+is close to the one-year margin.
 
 **Why it is worth more than the discount costs:**
 
 - The partner sells it **once**, while the couple is happy and already spending on the wedding.
 - **No renewal conversation with a stranger** for three years — the thing most likely to fail.
 - **Cash up front**, which matters far more at 60 weddings than at 600.
-- **The 30-day deletion rule never comes near a customer** in their emotional first year.
+- **No renewal or archive conversation** for three years.
 
 Lead with three years. Quote one year as the alternative, not the default.
 
@@ -190,29 +211,43 @@ Lead with three years. Quote one year as the alternative, not the default.
 
 ## 5. The economics
 
-Per wedding, year one, at typical traffic (300 guests × 20 minutes):
+Per wedding, year one, with originals kept for the term (Bunny storage ₹0.95/GB-month, renditions
+≈30% on top of originals, delivery at typical traffic of 300 guests × 20 minutes for Keep and
+Cinema, ~50 viewers for Deliver):
 
-| Plan | Price | Storage | 4K encoding | Delivery | Cost | **Contribution** | Break-even |
-|---|---|---|---|---|---|---|---|
-| Highlights | ₹2,500 | ₹115 | — | ₹227 | ₹341 | **₹2,159 (86%)** | 23.9 |
-| **Wedding** | ₹7,000 | ₹458 | ₹286 | ₹341 | ₹1,086 | **₹5,914 (84%)** | **8.7** |
-| Cinema | ₹12,000 | ₹917 | ₹1,289 | ₹341 | ₹2,547 | **₹9,453 (79%)** | **5.5** |
+| Plan | Price | Storage | 4K encoding | Delivery | Cost | **Contribution** |
+|---|---|---|---|---|---|---|
+| **Deliver** (100 GB, 90 days) | ₹1,999 | ₹370 | — | ₹130 | ₹500 | **₹1,499 (75%)** |
+| Deliver, in a 5-pack | ₹1,600 | ₹370 | — | ₹130 | ₹500 | **₹1,100 (69%)** |
+| **Keep** (100 GB, 12 months) | ₹6,000 | ₹1,480 | ₹286 | ₹341 | ₹2,107 | **₹3,893 (65%)** |
+| Cinema (200 GB, 12 months) | ₹12,000 | ₹2,960 | ₹1,289 | ₹341 | ₹4,590 | **₹7,410 (62%)** |
 
-Renewals, where the encoding is already paid and the traffic has passed:
+Originals are what moved these margins down from the 84% in the August model; the trade is
+deliberate — "your originals, downloadable for a year" is the claim viddrop leads with, and a
+studio judges delivery by it.
 
-| Plan | Renewal | Cost | Margin |
+From the first renewal the originals are no longer kept (except for 4K films): the couple has had
+twelve months of *download everything*, and the archive holds the best rendition. Storage for a
+Keep-sized catalogue drops to ≈₹30 GB, ₹340 a year:
+
+| | Price | Cost | Margin |
 |---|---|---|---|
-| Highlights | ₹1,000 | ₹149 | 85% |
-| Wedding | ₹2,500 | ₹492 | 80% |
-| Cinema | ₹4,000 | ₹951 | 76% |
+| Keep renewal | ₹2,500 | ₹490 | 80% |
+| Cinema renewal (4K originals retained) | ₹4,000 | ₹1,350 | 66% |
+| Archive, Keep | ₹999 | ₹340 | 66% |
+| Archive, Cinema | ₹1,499 | ₹1,000 | 33% |
+
+**Deliver → Keep at ₹2,500** inside year one carries the year-one storage (originals kept until
+the twelve months end), so it is a ≈35% line on its own — acceptable because the studio already
+paid ₹1,999 for the same catalogue, and the pair together is ₹4,499 against ≈₹2,100 of cost.
 
 **Break-even is against ₹51,570/year of Supabase Pro and Vercel Pro — and that is optional today.**
 On the free tiers you are in profit on wedding #1. See [`SCALE-PLAN.md`](./SCALE-PLAN.md).
 
 ### At your projected volume
 
-60 weddings in six months, 10 of them Cinema: **roughly 83% gross margin**, with infrastructure at
-about 17% of revenue — over half of which is that fixed ₹45/month.
+60 weddings in six months, 10 of them Cinema, the rest split Deliver/Keep: **roughly 65–70%
+gross margin** with originals kept, against 83% in the August model without them.
 
 ---
 
@@ -220,27 +255,24 @@ about 17% of revenue — over half of which is that fixed ₹45/month.
 
 **Two things, and neither is arithmetic.**
 
-### Your market says ₹5,000. This says ₹18,000–25,000.
+### Your market says ₹5,000. Deliver now fits it; Keep still has to be tested.
 
-You told me partners currently sell at ₹5,000 for four months. The suggested retail for Wedding is
-**3.6–5×** that.
+You told me partners currently sell at ₹5,000 for four months. **Deliver at ₹1,999 wholesale for
+90–180 days is that product**, with a 60% studio margin, so the objection is gone at the bottom of
+the ladder. It remains at the top: the suggested retail for Keep is ₹15,000–20,000, three to four
+times what the market has seen. The September answer is that the studio does not have to sell
+Keep at all — they sell Deliver, and Keep is offered to them for the couple at ₹2,500 on day 60,
+which they mark up or pass through. **Whether studios take that upgrade is now the biggest untested
+assumption**, and it is cheaper to test than the old one: it needs three Deliver catalogues
+reaching day 60.
 
-Either the ₹5,000 product is genuinely lesser — four months, no 4K, no custom domain, fewer
-functions — or **your market is more price-sensitive than value-based logic assumes.**
-
-**This is the biggest untested assumption here.** Ask the studio owner what a couple would actually
-pay for "every function, three years, a 4K highlights film, their own address". **If the answer is
-₹10,000, halve the ladder** — at 84% margins you can, and the model still works. What you must not
-do is guess.
-
-[`COMPETITORS.md`](./COMPETITORS.md) §3 is the evidence that this question is real: per wedding we
-are **3–18× dearer** than Pixieset, ShootProof or OurStoria, because they sell the studio a
-subscription and we sell the couple a product. Which frame the studio is in decides whether that
-gap is irrelevant or fatal.
+[`COMPETITORS.md`](./COMPETITORS.md) §3 is the evidence: against the subscription tools we are
+3–18× dearer per wedding; against the per-wedding sellers we are now level.
 
 ### GST
 
-Prices above are **exclusive**, and the price list must say so. Your Bunny, Vercel and Supabase
+Prices are listed **exclusive with the inclusive figure beside them**, inclusive first on anything a
+studio reads (September decision) — studios think in inclusive numbers, invoices need the split. Your Bunny, Vercel and Supabase
 bills are imports of service and attract reverse-charge GST, reclaimable as input credit **only if
 registered**. An accountant, not me — but decide it before quoting.
 
@@ -250,11 +282,16 @@ registered**. An accountant, not me — but decide it before quoting.
 
 1. **Set the encoding ladder to 360p–720p** by default. Without this, nothing on this list holds a
    wedding.
-2. **Confirm Keep Original Files and MP4 Fallback are off** — each roughly doubles storage.
+2. **Originals are kept for the paid term** (September decision). Decide *where*: Bunny Stream's
+   "Keep Original Files" is the zero-code option and stores them beside the renditions; a copy in
+   Edge Storage with a signed download URL is cheaper to reason about at archive time, when the
+   original goes and the rendition stays. MP4 Fallback stays **off**. Whichever it is, the 100 GB
+   cap counts originals plus renditions, and §5 assumed renditions ≈30% of originals.
 3. **Upload one real 15-hour wedding** and read the actual GB off the catalogue overview. Correct
    §1 with the measurement.
 4. **Decide GST treatment**, and print it on the price list.
-5. **Ask the studio owner the retail question** in §6.
+5. **Ask the studio owner the retail question** in §6 — now "would you offer your couple Keep at
+   day 60, and at what price?"
 
 Then build, in order: the **migration email at handover**, the **expiry warnings and download
 offer**, **delivery metering**, the **archive transition**, and **billing**. That is Phases 1 and

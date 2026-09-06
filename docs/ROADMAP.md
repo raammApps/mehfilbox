@@ -119,13 +119,14 @@ What is sold, who pays, what it needs built, and where it stands. Prices are the
 
 | # | Stream | Who pays | Price | Needs | Status |
 |---|---|---|---|---|---|
-| R1 | **Catalogue plan, year one** — Highlights / Wedding / Cinema | Studio (resold to the couple in their package) | ₹2,500 / ₹7,000 / ₹12,000; three years for the price of two | Manual invoice today; N-20 for self-service | **Sellable now, invoiced by hand** |
-| R2 | **Couple renewal** (streaming) | Couple, directly | ₹1,000 / ₹2,500 / ₹4,000 per year | N-50, N-21, N-20, N-24 | Missing |
-| R3 | **Archive tier** *(new)* — storage only, streaming paused, one-click restore | Couple | *proposed* ₹499 / ₹999 / ₹1,499 per year by plan size | N-24 (archive state), N-20 | Missing |
-| R4 | **Long-term prepaid archive** *(new)* — 5 or 10 years | Couple, or a relative as a gift | *proposed* ₹3,999 / ₹6,999 (Wedding size) | N-24, N-20 | Missing |
+| R1 | **Catalogue credits** — Deliver (90 days) / Keep (12 months) / Cinema | Studio (resold to the couple in their package) | ₹1,999 (5 for ₹7,999) / ₹6,000 / ₹12,000; three years for the price of two on Keep and Cinema | Manual invoice today; N-20 for self-service; a Deliver term needs N-24 | **Keep and Cinema sellable now, invoiced by hand; Deliver needs the 90-day lifecycle** |
+| R10 | **Deliver → Keep upgrade** *(new, Sept)* — offered to the studio at day 60 | Studio (marks up to the couple) | ₹2,500 base | N-24, N-50, N-20 | Missing |
+| R2 | **Couple renewal** (streaming) | Couple, directly, from year two | ₹2,500 / ₹4,000 per year | N-50, N-21, N-20, N-24 | Missing |
+| R3 | **Archive tier** *(new)* — storage only, streaming paused, one-click restore | Couple | ₹999 / ₹1,499 per year; free for 12 months after grace | N-24 (archive state), N-20 | Missing |
+| R4 | **Long-term prepaid archive** *(new)* — 5 or 10 years | Couple, or a relative as a gift | ₹3,999 / ₹6,999 (Keep); ₹5,999 / 5 yrs (Cinema) | N-24, N-20 | Missing |
 | R5 | **Extra storage** | Studio or couple | ₹25 / GB / month for the months left | N-20, N-23 | Missing |
 | R6 | **Extra 4K** | Studio | ₹1,999 per 20 minutes | N-20; premium-encoding flag on the library | Missing |
-| R7 | **Studio plan** *(new)* — custom domain served, presets, team seats, portfolio page, lapse dashboard, analytics | Studio, yearly | *proposed* ₹4,999–9,999 per year; first three catalogues on any plan free | N-26, N-27, N-37, N-44 | Missing |
+| R7 | **Studio plan** *(new)* — registration, branding, presets, team seats, custom domain served, lapse dashboard | Studio, yearly | ₹4,999 per year, **including three Deliver credits in year one** | N-26, N-27, N-37, N-44; N-20 to sell it | Missing — registration and branding exist, the fee does not |
 | R8 | **In-catalogue upsell** *(new)* — studio offers extended cut, raw download, album, USB; we take a commission | Couple, via the studio | *proposed* 10% of the item | N-20, a `store` module | Missing — Phase 4 |
 | R9 | **Referral lead** *(new)* — "Get your wedding on Heirloom" on every catalogue, routed to the delivering studio | Nobody, directly | Free; it is the studio's reason to promote renewals | N-36 | Missing — Phase 3 |
 
@@ -139,11 +140,18 @@ year five) is instead bought by the archive fee — with the difference that the
 gladly, and nobody ever posts that we deleted their wedding. `PRICING.md` §2 is rewritten in the
 same commit as this file.
 
-**R7 is where the studio's money goes once R1 is free-to-start.** The competitor review found the
-per-wedding market at ₹1,900–9,500 (viddrop, WeddingFilmHub) and the subscription market at
-₹800–2,300 per wedding for a 30-wedding studio. Charging a studio anything *before* they have
-delivered a wedding on the platform is the thing most likely to lose them. "First three free, then
-per catalogue" costs at most ₹3,000 of contribution per studio and removes the objection entirely.
+**R7 is a fee that pays for itself.** Sandeep wants a studio fee, because a studio registers and
+manages branding on the platform and that is worth something. The competitor review also found
+that charging a studio *before* they have delivered a wedding is the thing most likely to lose
+them. The reconciliation: the ₹4,999 Studio plan includes three Deliver credits (₹6,000 of
+catalogue) in its first year. A studio that delivers three weddings has paid nothing net for the
+platform; one that delivers none has paid for a branded console they did not use. Renewal of the
+plan in year two carries no credits.
+
+**R10 is the funnel.** viddrop deletes at day 90 and the studio's problem ends there. Deliver
+ends the same way for the studio — but at day 60 they are offered Keep for the couple at ₹2,500,
+which they mark up. The studio pays for delivery; the couple, through the studio, pays to keep.
+Billing stays with the studio for the first twelve months (`PRICING.md`, "Who is billed when").
 
 **R9 is the answer to "no cut on renewals".** A studio that earns nothing when a couple renews
 will not remind them to. A studio whose credit and enquiry link stay on the page for as long as
@@ -164,7 +172,15 @@ earlier. The earlier text is edited in place with a note; this list is the recor
 | **Multi-channel notifications** | Email only (N-17 wired Resend into Supabase Auth; the app sends nothing itself) | A notification seam with email, WhatsApp Business API and SMS drivers; every lifecycle message goes on all channels the couple has; the studio is prompted to phone high-value couples from their dashboard | `NEXT.md` N-50, N-21; `PRODUCT.md` §2 |
 | **Studio branding survives renewal** | `presentedBy` snapshotted at handover — a field, not a promise | A permanent "Filmed by" credit and the studio's referral link on the couple's page, for as long as the catalogue exists, on every renewal; couple cannot remove the credit, can hide the link | `PRODUCT.md` §1.3, spec doc 15 §2 (banner) |
 | **No revenue share to the studio** | Already decided in `PRICING.md` §2 | Unchanged — restated here because R9 is what replaces it | — |
-| **Studio pays to integrate; couple pays year one via the studio; couple renews with us** | Doc 01 §7 had the planner's licence covering three months, then the couple paying monthly | Twelve months included in the studio's purchase (already in `PRICING.md`); the "integration" fee becomes the Studio plan (R7), optional, with the first three catalogues free | `PRICING.md` §1 |
+| **Studio pays to integrate; couple pays year one via the studio; couple renews with us** | Doc 01 §7 had the planner's licence covering three months, then the couple paying monthly | Twelve months included in the studio's purchase; the integration fee is the ₹4,999 Studio plan with three Deliver credits included | `PRICING.md` |
+| **Deliver replaces Highlights** *(6 Sept, after the viddrop review)* | Highlights: 10 GB, ₹2,500, 12 months, could not hold a wedding | Deliver: 100 GB, ₹1,999, 90 days (180 for two credits), originals downloadable, studio-branded, archives rather than deletes; the studio is offered Keep at day 60 | `PRICING.md`, `COMPETITORS.md` §8 |
+| **Originals kept for the paid term, then the best rendition** | Keep Original Files off; renditions only | Originals downloadable for the whole paid term (4K films keep theirs after); archive holds the best rendition. Keeps renewal at ₹2,500 and archive at ₹999 with margin | `PRICING.md` §5, §7 |
+| **All year-one money goes through the studio** | Couple pays renewal and storage after the included months | For twelve months after delivery, every purchase — including Deliver → Keep — is the studio's, at a base they mark up. Direct couple billing starts at the first renewal | `PRICING.md`, spec doc 15 §4 (banner) |
+| **Archive free for 12 months after grace, then the fee** | — | A wedding never disappears within about two years of being filmed | `PRICING.md` §2 |
+| **GST shown inclusive first, with the split** | Exclusive only | Studios think in inclusive numbers; invoices carry the split | `PRICING.md` §6 |
+| **MSG91 for WhatsApp, SMS and email** | Provider undecided | One account, rupee billing, three channels behind one driver; Resend stays for auth mail until it is worth consolidating | `NEXT.md` N-50 |
+| **Keep at ₹6,000** | Wedding at ₹7,000 | Three times Deliver; a clean step | `PRICING.md` |
+| **Landing page rebuilt in Phase 1, after real footage** | Operator sign-in only | Price in the hero, With/Without table, three layout previews, FAQ, public demo — viddrop's shape | `NEXT.md` N-51 |
 
 ---
 
@@ -188,6 +204,7 @@ demo is real.
 | N-29 | Locale at account creation | A Hindi-first studio should not operate in English |
 | N-35 | Legible saves everywhere | Embarrassing in front of a planner |
 | N-36 | Delivery message — one-click launch to the couple with poster, names and "now streaming" | The moment the product gets forwarded |
+| N-51 | Landing page in viddrop's shape — price in the hero, With/Without Drive table, three template previews, FAQ, public demo | The pitch, once the demo has real frames; last in the phase |
 | N-24a | Encoding ladder set to 360p–720p; Keep Original and MP4 Fallback confirmed off | Nothing on the price list holds a wedding otherwise |
 | N-6 / N-14 | Real footage in the demo; publish `swarit-and-smriti-2026` as the public demo | The pitch. Sandeep, not an agent |
 | held | Migration 0008, `platform_admins` row, three key rotations | Listed in `NEXT.md`; do them first |
@@ -200,7 +217,7 @@ console, and the couple receives it on WhatsApp and email with a working link. I
 | Ticket | Item |
 |---|---|
 | N-20 | Razorpay: partner credits, couple renewal, storage and 4K add-ons; webhook verified and reconciled like the Bunny one |
-| N-24 | Lifecycle driver: included → active → grace → archive; restore on payment; explicit-request deletion only, logged. Archive moves renditions to storage and releases the Stream entry, or keeps them in place if the cost difference is negligible — measure first |
+| N-24 | Lifecycle driver: included → active → grace → archive; the **90-day Deliver term** and the day-60 Keep offer to the studio; restore on payment; explicit-request deletion only, logged. At archive the originals go and the best rendition stays (4K films excepted) |
 | N-25 | Delivery metering |
 | N-27 | Platform admin writes: create tenant, assign plan, suspend, revenue and usage view, audit trail |
 | R3, R4 | Archive and long-term archive as purchasable plans (rows in `plans`) |
@@ -246,22 +263,25 @@ paying studio asks for it by name.
 
 ## 6. Open questions that gate pricing, not code
 
-1. **The retail question** (`PRICING.md` §6) is still unanswered: what will a couple actually pay
-   a studio for "every function, three years, a 4K highlights film". Ask one studio owner before
-   Phase 2 sets prices in `plans`.
-2. **WhatsApp Business API provider** — Interakt, Gupshup, MSG91 or Twilio. Template approval takes
-   days, so pick one during Phase 1 even if the driver ships in Phase 2.
-3. **Archive default at lapse** — does a lapsed catalogue archive automatically at ₹0 (our cost,
-   our goodwill) or only once the archive fee is paid? Proposed: 12 months free archive after
-   grace, then the fee; a wedding never disappears inside two years of being filmed.
-4. **GST registration** — decided before the first self-service invoice.
+1. **The upgrade question** (`PRICING.md` §6): will a studio offer their couple Keep at day 60,
+   and at what markup? Needs three Deliver catalogues reaching day 60. Ask one studio owner
+   before then anyway.
+2. **Where originals live** (`PRICING.md` §7 item 2): Bunny Stream's Keep Original Files, or a
+   copy in Edge Storage. Decide in N-24a; it changes what the archive transition deletes.
+3. **GST registration** — decided before the first self-service invoice. Display is settled
+   (inclusive first); registration is the accountant's.
+4. **Trademark search** in classes 41 and 42 (`PRODUCT.md`, "The name") — still outstanding.
+
+Decided on 6 September and no longer open: archive default (12 months free), WhatsApp provider
+(MSG91), Deliver tier and its price, originals policy, who is billed in year one, Keep price, GST
+display, landing-page timing. All recorded in §4.
 
 ---
 
 | Related | |
 |---|---|
 | [`PRODUCT.md`](./PRODUCT.md) | Surface-by-surface status; the rows this file adds are marked *(new)* there too |
-| [`NEXT.md`](./NEXT.md) | The ordered backlog; tickets N-34 to N-50 originate here |
+| [`NEXT.md`](./NEXT.md) | The ordered backlog; tickets N-34 to N-51 originate here |
 | [`PRICING.md`](./PRICING.md) | The ladder; §2 rewritten for archive |
 | [`COMPETITORS.md`](./COMPETITORS.md) | §1 and §3 updated with the per-wedding competitors found in September |
 | `reference/competitor-and-feature-plan-2026-09.docx` | The review this file merges |

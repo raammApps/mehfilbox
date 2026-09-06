@@ -4,9 +4,9 @@ Who else sells this, what they charge, and where we genuinely differ.
 
 Prices from the providers' own pages, August 2026, at ₹95.5/USD. Sources at the bottom.
 
-> **Read §3 before §2.** Per wedding, we are three to eighteen times more expensive than everyone
-> here, and that is not an oversight in their pricing — it is a different business model. Whether
-> ours survives contact with a studio is the open question this document exists to frame.
+> **Read §3 before §2.** Against the subscription tools we are three to eighteen times more
+> expensive per wedding — a different business model, not an oversight. Against the per-wedding
+> sellers (§1, added in September) the Deliver tier is level. §8 is what viddrop teaches.
 
 ---
 
@@ -90,9 +90,9 @@ A studio doing **30 weddings a year**:
 | viddrop | per wedding | **₹1,910–2,388** |
 | WeddingFilmHub | per wedding | **₹9,455** |
 | | | |
-| **Us — Highlights 10 GB** | — | **₹2,500** |
-| **Us — Wedding 40 GB** | — | **₹7,000** |
-| **Us — Cinema 80 GB** | — | **₹12,000** |
+| **Us — Deliver 100 GB, 90 days** | — | **₹1,999** (₹1,600 in a 5-pack) |
+| **Us — Keep 100 GB, 12 months** | — | **₹6,000** |
+| **Us — Cinema 200 GB, 12 months** | — | **₹12,000** |
 
 ---
 
@@ -100,8 +100,8 @@ A studio doing **30 weddings a year**:
 
 **Against the subscription tools we are 3–18× more expensive per wedding.** That stands.
 
-**Against the per-wedding sellers we are in the same band.** viddrop at ₹1,900–2,400 sits under
-Highlights; WeddingFilmHub at ₹9,455 sits between Wedding and Cinema. The September review found
+**Against the per-wedding sellers we are in the same band.** Deliver at ₹1,999 is viddrop's
+price (₹1,900–2,400); WeddingFilmHub at ₹9,455 sits between Keep and Cinema. The September review found
 what August did not: a segment of the market already buys delivery *per wedding*, at prices a
 studio marks up inside a package — which is exactly the frame `PRICING.md` assumes. So the
 question is no longer whether that frame exists; it is whether Indian studios are in it. The two
@@ -115,12 +115,12 @@ about:
 | Who pays | The **studio**, monthly, forever | The **couple**, once, via the studio |
 | What it is to the studio | **Overhead** | **A product they resell** |
 | Studio's margin on it | None — it is a cost | **57–69%** |
-| What happens if they stop paying | **Every gallery goes dark** | The wedding is the couple's; it renews or is deleted |
+| What happens if they stop paying | **Every gallery goes dark** | The wedding is the couple's; it renews or archives — never deleted |
 | Capacity for 15 hours | No | Yes |
 
 **The strategic risk is framing, not price.** Pixieset and OurStoria have spent a decade training
 studios to think of delivery as a monthly overhead — a line item to minimise. A studio in that
-frame hears "₹7,000 per wedding" against "₹955" and stops listening, and no feature list recovers
+frame hears "₹6,000 per wedding" against "₹955" and stops listening, and no feature list recovers
 the conversation.
 
 A studio in the other frame hears "sell this to your couple for ₹20,000 and keep ₹13,000", which
@@ -306,6 +306,29 @@ are buying — which is the same reframe §3 says the whole pricing model depend
 A studio judges this in about four seconds of looking at their own work on the screen, and no
 amount of the above substitutes. It is the highest-value item on the backlog for exactly this
 reason.
+
+## 8. What viddrop teaches, and what it does not
+
+Added 6 September 2026 after reading their pricing and landing pages properly.
+
+**Why $25 works for them.** Four product choices dressed as cost choices: hosting is time-boxed
+(90 days, 180 for two credits, then deleted), so storage never compounds; files are stored as-is
+and played by the browser — no transcoding, no adaptive ladder, "ready after upload"; the
+audience is the couple downloading, not two hundred guests streaming, so egress is near zero on
+R2- or B2-class storage; and the product is small enough for a very small team. Our estimate of
+their cost is $1–3 per wedding. They are not cheap because they are efficient; they are cheap
+because the product is deliberately small.
+
+**Can we match it.** Yes: a 100 GB, 90-day, 720p-ladder, originals-kept catalogue costs us about
+₹500 (`PRICING.md` §5) — 75% margin at ₹1,999. And we keep what they gave up: adaptive playback
+on 4G, Hindi, a catalogue rather than a grid, WhatsApp share. That is the **Deliver** tier.
+
+**What we take from them.** Flat per-wedding price with a five-pack; credits that never expire;
+"no setup, no processing, no bandwidth fees" said out loud; the price in the hero sentence; a
+With/Without table; three layouts as pictures; a one-sentence FAQ answer on what happens at the
+end. **What we do differently, and say so:** *nothing is deleted at day 90* — it archives, and the
+couple can keep it — and *streaming tuned for 4G* rather than "no compression". Their deletion is
+our funnel.
 
 ## Sources
 
