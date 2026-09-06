@@ -356,19 +356,31 @@ Until it is verified, leave Supabase's SMTP sender as `hello@heirloomfilms.in` �
 verified and sending. Switching the sender before the new domain verifies means registration mail
 stops.
 
-## 3. Then tell me, and I will do the rest
+## 3. The switch — ✅ done 7 September, except two dashboard settings
 
-**In one sitting, because apart they fail silently:**
+| | |
+|---|---|
+| `ROOT_DOMAIN` → `mehfilbox.com` | ✅ redeployed |
+| Bunny `WebhookUrl` → `https://mehfilbox.com/api/webhooks/bunny` | ✅ library also renamed `mehfilbox` |
+| Photo zone → `mehfilbox-photos` | ✅ 163 objects copied, 21 rows rewritten |
+| `heirloomfilms.in` still serving | ✅ both catalogues answer on both domains |
+| Supabase **Site URL** | ⬜ **yours** |
+| Supabase **SMTP sender** → `hello@mehfilbox.com` | ⬜ **yours** |
 
-1. `ROOT_DOMAIN` → `mehfilbox.com`, redeploy.
-2. The Bunny library's `WebhookUrl` → `https://mehfilbox.com/api/webhooks/bunny`. Left behind, it
-   keeps answering from the old host: uploads succeed, transcoding finishes, titles never leave
-   `processing`.
-3. Supabase **Site URL** → `https://mehfilbox.com`, and the redirect allow-list. Verified by
-   reading the delivered message, not by trusting the dashboard — that is how the last wrong Site
-   URL was found.
-4. The photo zone: `mehfilbox-photos`, copy, repoint, delete. `scripts/repoint-photo-cdn.ts` does
-   it; `photos.url` holds absolute URLs, so the rows are rewritten too.
+### The two left, and why they are yours
+
+Both live in the Supabase dashboard, which has no API this repo holds a token for.
+
+1. **Authentication → URL Configuration → Site URL** → `https://mehfilbox.com`, and add
+   `https://mehfilbox.com/**` to the redirect allow-list. **This is the one that failed silently
+   last time**: it pointed at a raw Vercel URL, which served `200`, so every check passed while
+   every new partner confirmed their email and landed on the wrong host.
+2. **Authentication → SMTP Settings → sender** → `hello@mehfilbox.com`. Safe now that Resend has
+   verified the domain; it was not before.
+
+Tell me when both are set and I will register a throwaway partner and **read the delivered
+message** to confirm the confirmation link's host — the only check that catches a wrong Site URL,
+because the wrong one looks healthy from every other angle.
 
 ## 4. What proves it worked
 
