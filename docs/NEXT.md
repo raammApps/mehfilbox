@@ -7,6 +7,10 @@ left, in the order it should be taken up.** Read CLAUDE.md → PROGRESS.md → t
 Ordering rule: unretired risk first, then things that would embarrass us in front of a planner,
 then debt. Within a tier, cheapest first.
 
+**6 September 2026:** [`ROADMAP.md`](./ROADMAP.md) groups this backlog into phases and adds
+N-34 to N-50 from the competitor and feature review. Phase 1 is Tier 2 below, in this order:
+held items → N-50 → N-21 → N-22 → N-23 → N-29 → N-35 → N-36 → N-24a → real footage.
+
 Update this file as items land — move them out, do not leave them ticked.
 
 ---
@@ -52,22 +56,42 @@ Hindi-first studio in Jaipur sets up every wedding in English and hopes guests f
 - Separately: **the admin console is English-only.** Localising it is a larger job — every operator
   string, ~40 components — and worth scoping on its own once the guest side inherits properly.
 
-### N-21 · The migration email  ·  ~2h  ·  **blocked by N-17**
+### N-50 · The notification seam  ·  ~1 session  ·  **Phase 1, first**
+
+Supabase Auth sends registration and reset mail through Resend (N-17). **The application itself
+sends nothing** — no migration email, no delivery message, no warning — because there is no
+provider to send through. Build it the way `VideoProvider` was built: one interface
+(`NotificationProvider.send({ to, channel, template, params })`), a `fake` driver the suite runs
+against, a `resend` driver first, then `whatsapp` (Interakt, Gupshup or MSG91 — pick one now,
+template approval takes days) and `sms` (MSG91). Every template exists in English and Hindi, and
+`tests/unit/i18n.test.ts` should cover them like guest strings.
+
+- Channel preference lives on the couple's org: which channels they gave, which they opted out of.
+- A `notifications` table records every send — template, channel, address, provider id, result —
+  so "what did we send and when" is a query, not a guess. `PRICING.md` §2 requires it.
+- Never sent from a request handler in the guest path. Queue on a cron, like the transcode
+  reconcile.
+
+### N-21 · The migration email, and the warning schedule  ·  ~2h  ·  **blocked by N-50**
 
 A couple only learns they own their wedding if the partner remembers to tell them. That is the
 single biggest hole in the commercial model (`PRICING.md` §2): they pay a studio ₹20,000, then a
 year later a company they have never heard of asks them for money.
 
-At handover, email them: this is yours, here is your login, here is the renewal date, here is what
-happens if you do not. Then the expiry warnings — 30 / 14 / 7 / 1 days, and each day of grace.
+At handover, tell them on every channel they have: this is yours, here is your login, here is the
+renewal date, here is what happens if you do not — and that nothing is ever deleted. Then the
+warnings: **60 / 30 / 7 / 1 days before expiry, and 30 / 60 / 89 days into grace**, WhatsApp +
+email + SMS, to both partners. The studio's console shows a banner and, for Cinema catalogues, a
+"call them" prompt.
 
-### N-22 · Download everything, before deletion  ·  ~half a session
+### N-22 · Download everything, at any time  ·  ~half a session
 
-**Gates the 30-day deletion policy.** Deleting a wedding is not a recoverable mistake, and a couple
-who changed email address loses it permanently. An export offered through the grace period turns
-the worst moment in the product into a reasonable one — nobody lost anything, they were handed it.
+**Gates any lapse behaviour, archive included.** Available before expiry, during grace, and from
+archive: a per-film original (or highest rendition where the original was not kept) and a
+"download all" that hands the couple a manifest plus signed links, because a 40 GB zip built on a
+serverless function is not a thing. Nobody is ever held to ransom for their own wedding.
 
-Do not ship deletion without this.
+Do not ship the archive transition (N-24) without this.
 
 ### N-23 · Plan capacity in the console  ·  ~2h
 
@@ -79,17 +103,78 @@ The cap **is** enforced: `app/api/admin/uploads` runs `storageCheck` and refuses
 (this file previously claimed otherwise, which was wrong). What is missing is telling a partner
 what the plan holds *before* they fill it, and warning them on the way up.
 
-### N-24 · Lifecycle: renewal, lapse, deletion  ·  doc 15
+### N-24a · The encoding ladder  ·  ~1h  ·  operator task
 
-The state machine exists and `resolveAccess` honours it. Nothing writes it. Needs: a renewal path,
-the lapse transition, and the deletion job 30 days after — the only cost that compounds
-(`SCALE-PLAN.md` §4.1).
+Set the Bunny library to 360p–720p by default; confirm Keep Original Files and MP4 Fallback are
+off. Then upload one real 15-hour wedding and correct `PRICING.md` §1 with the measured GB.
+Without this nothing on the price list holds a wedding.
+
+### N-35 · Every save is legible  ·  ~2h
+
+The film list saves on blur and says nothing. Give it the same "Saved" status line Settings has.
+Cheap, and the first thing an operator notices.
+
+### N-36 · The delivery message  ·  ~half a session  ·  **blocked by N-50**
+
+One button on the overview, beside the public link: *Send to the couple*. Composes a WhatsApp
+message (and an email) with the poster, the couple's names, "now streaming" copy in the
+catalogue's locale, and the link; records that it was sent. This is the moment the product gets
+forwarded to two hundred people, and today the operator writes it themselves.
+
+### N-24 · Lifecycle: renewal, lapse, **archive**  ·  doc 15  ·  **Phase 2**
+
+> Rewritten 6 September 2026: **no automatic deletion.** `PRICING.md` §2 and `ROADMAP.md` §4.
+
+The state machine exists and `resolveAccess` honours it. Nothing writes it. Needs: the renewal
+path (N-20 writes it), the lapse transition at expiry, **90 days' grace** with the catalogue
+read-only for the couple and download offered, then the **archive transition**: streaming paused,
+a restore-on-payment screen for guests, files retained. Measure first whether moving renditions
+out of Stream into Edge Storage saves enough to be worth the code; at ₹0.95/GB/month it may not.
+`deleted` becomes reachable only from an explicit, recorded request by the couple. Twelve months
+of archive at our cost after grace, then the archive fee applies.
 
 ### N-25 · Delivery metering  ·  ~2h
 
 `getUsage` returns real stored bytes and `deliveredGb: 0`. Until it is real, allowances cannot be
 enforced and no catalogue's cost can be attributed. Fine at 60 weddings from the Bunny dashboard;
 impossible at 300.
+
+### N-36b · The credit that survives  ·  ~half a session  ·  **Phase 3**
+
+`presentedBy` is an editable field snapshotted at handover. Make it a promise: a "Filmed by"
+credit rendered from `origin_org_id`, not from branding, that the couple cannot edit, plus an
+enquiry link ("Get your wedding on Heirloom") routed to the originating studio, which the couple
+can hide but not redirect. Both survive every renewal. This is what the studio gets instead of a
+share of renewals (`PRICING.md` §2).
+
+### N-37 · Delivery tracking and the lapse dashboard  ·  ~1 session  ·  **Phase 3**
+
+Play events exist and nothing reads them per catalogue. Show the studio: opened (first profile
+gate pass), watch-time per film, "not opened in 7 days". Then a partner-level view of every
+catalogue they originated with its renewal date and status, and *renew on their behalf* (N-20).
+
+### N-38 · Family circles  ·  ~1 session  ·  **Phase 3**
+
+Scoped links per side (bride, groom, "just the highlights"), each a profile-gate group; "who
+watched" for the couple. `module_state` and the gate already hold per-guest identity.
+
+### N-39 · Anniversary moment  ·  ~2h  ·  **Phase 3, blocked by N-50**
+
+On the wedding date each year: a message with a deep link into the highlights film. It is the
+renewal nudge that does not read as one.
+
+### N-34 · Photograph sharing and captions  ·  ~2h  ·  **Phase 3**
+
+The lightbox has no actions and captions cannot be written. A PATCH route, a caption editor in
+the album module, and share / copy-link on a photograph with its own address.
+
+### Phase 4 and 5, one line each — sized when they are reached
+
+N-40 cast to TV (Chromecast / AirPlay) · N-41 subtitles, AI-generated and operator-corrected ·
+N-42 hand back to the studio · N-43 client premiere with countdown · N-44 custom domain served
+and verified automatically · N-48 DPDP consent and deletion-on-request · R8 the `store` module
+and commission · N-45 guest uploads and guestbook · N-46 studio portfolio page · N-47 draft
+feedback · N-49 API and webhooks.
 
 ### N-26 · Saved branding presets — the marketplace's honest first version  ·  doc: `PRODUCT.md` §6
 
@@ -108,10 +193,11 @@ plan or quota, suspend, and any view of users. Today all of it is SQL.
 
 Keep read-only as the default stance; add writes one at a time, with an audit trail.
 
-### N-20 · Razorpay  ·  doc 15 §4
+### N-20 · Razorpay  ·  doc 15 §4  ·  **Phase 2**
 
 Two flows that should not share a code path: partners buy catalogue credits in advance, couples
-pay renewal and storage after the included months. The subscription state machine already exists
+pay renewal, archive, long-term archive and storage after the included months. The `plans` rows
+for archive (₹499 / ₹999 / ₹1,499) and the Studio plan (`ROADMAP.md` §3, R3 and R7) land here. The subscription state machine already exists
 and `resolveAccess` honours it — what is missing is only the thing that *writes* it. Verify the
 webhook the way the Bunny one is verified, and assume it gets lost, because that lesson is
 already paid for.

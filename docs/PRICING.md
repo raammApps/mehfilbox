@@ -26,7 +26,11 @@ All prices **exclude 18% GST** (SAC 998314).
 | Extra storage | **₹25 / GB / month**, for the months left on the plan |
 | Extra 4K | **₹1,999** per 20 minutes |
 | Renewal | **₹1,000 · ₹2,500 · ₹4,000** per year |
+| Archive (storage only, restore on demand) — *proposed* | **₹499 · ₹999 · ₹1,499** per year; see §2 |
+| Studio plan — *proposed* | **₹4,999–9,999 / yr**: custom domain served, presets, team seats, lapse dashboard. First three catalogues on any plan are free |
 | Suggested retail | ₹6,000–8,000 · ₹18,000–25,000 · ₹30,000–40,000 |
+
+The full list of what is sold, who pays and what each line needs built is `ROADMAP.md` §3.
 
 ### What each one is for
 
@@ -85,45 +89,55 @@ relationship transfers *explicitly*, while they are still delighted.
 **Optionally, they can hand it back** — for a re-skin, an update, a new film. Good for the partner,
 good for you, and it keeps the studio in the couple's life without owing them anything.
 
-### The partner earns nothing on renewal
+### The partner earns nothing on renewal — but keeps the page
 
 Their work ended at handover, and they were paid for it. **This is cleaner than the 15% share I
 proposed earlier** — ₹375 a year was never going to buy anyone's attention, and a revenue share
 that small is just an accounting chore that also implies an obligation you do not want.
 
-### Thirty days, then it goes
+What the studio keeps instead, permanently and through every renewal: a **"Filmed by" credit**
+the couple cannot remove, and a **referral link** on the catalogue that routes new enquiries to
+them. Two hundred guests a year seeing their name is worth more than ₹375, and it gives them a
+reason to nudge the couple to renew. (`ROADMAP.md` §3, stream R9.)
 
-Renewal lapses → **30 days' grace** → the catalogue is deleted.
+### Nothing is deleted. It goes cold instead.
 
-**What it does for cost:**
+> **Revised 6 September 2026.** This section previously specified *lapse → 30 days' grace →
+> deleted*, on the argument that storage was the only compounding cost. Sandeep's decision is
+> **no hard delete**; the archive tier below is what stops the cost compounding instead.
+> `ROADMAP.md` §4 records the change.
 
-| Storage bill | 12-month grace | **30-day grace** |
-|---|---|---|
-| Year 1 | ₹69,677 | **₹45,725** |
-| Year 3 | ₹1,08,696 | **₹71,332** |
-| Year 5 | ₹1,14,939 | **₹75,429** |
+Renewal lapses → **90 days' grace** (everything still plays, read-only for the couple, download
+offered throughout) → **Archive**: streaming paused, every file retained, a one-click restore the
+moment a renewal or archive fee is paid. `deleted` exists in the state machine only for an
+explicit, recorded request from the couple.
 
-**About ₹40,000 a year saved by year five**, and — more importantly — the number stops climbing.
-Storage was the only cost that compounded; this is what stops it.
+**What it does for cost.** Bunny standard storage is about ₹0.95/GB/month, so a 40 GB Wedding
+catalogue kept in archive costs ₹458 a year, a Cinema catalogue ₹917, a Highlights ₹115. The
+archive tier is priced to cover that twice:
 
-### But 30 days is genuinely risky, and needs handling
+| | Highlights | Wedding | Cinema |
+|---|---|---|---|
+| **Archive** (storage only, restore on demand) | **₹499 / yr** | **₹999 / yr** | **₹1,499 / yr** |
+| **Long-term archive**, prepaid | ₹1,999 / 5 yrs | **₹3,999 / 5 yrs · ₹6,999 / 10 yrs** | ₹5,999 / 5 yrs |
 
-**Deleting a wedding is not a recoverable mistake.** A couple who changes email address, or is
-travelling, or simply does not read it, loses their wedding films permanently — and will tell
-people. That is the one failure this product cannot absorb.
+A lapsed catalogue that nobody pays for is archived at our cost for **twelve months after grace**,
+then reminded again; the fee only starts once a couple chooses archive over renewal. The storage
+bill still stops climbing — an archived catalogue is a fixed ₹115–917 a year, not a growing
+Stream library — but it stops climbing because couples are paying to keep their wedding, not
+because we removed it.
 
-Thirty days is defensible **only with all of this**:
+### The rules that make lapse safe
 
 - **Say it at handover**, in the migration email, in plain words. Not in terms of service.
-- **Warn at 30, 14, 7 and 1 days before expiry**, and again on each day of the grace period.
+- **Warn at 60, 30, 7 and 1 days before expiry**, and at 30, 60 and 89 days into grace — on
+  **WhatsApp, email and SMS**, to both partners. The studio's console prompts a phone call for
+  couples on Cinema.
 - **Show it in the console** — a banner the moment the catalogue lapses, not just an email.
-- **Offer a download before deletion.** *"Download everything"* in the last 30 days turns the worst
-  moment in the product into a reasonable one. It also removes the argument entirely: nobody lost
-  anything, they were given it.
-- **Never delete silently.** Log it, keep the record, be able to say exactly what was sent and when.
-
-**With the download offer, 30 days is fine. Without it, I would not ship it.** The saving is
-₹40,000 a year; one couple posting that you deleted their wedding costs more than that.
+- **Download everything, always** — before expiry, during grace, and from archive. Nobody is ever
+  held to ransom for their own wedding.
+- **Never archive silently.** Log it, keep the record, be able to say exactly what was sent and
+  when. Deletion happens only on request, and the request is kept.
 
 ---
 
@@ -243,12 +257,12 @@ registered**. An accountant, not me — but decide it before quoting.
 5. **Ask the studio owner the retail question** in §6.
 
 Then build, in order: the **migration email at handover**, the **expiry warnings and download
-offer**, **delivery metering**, the **deletion job**, and **billing**. All of it is N-20 in
-[`NEXT.md`](./NEXT.md); none of it exists yet.
+offer**, **delivery metering**, the **archive transition**, and **billing**. That is Phases 1 and
+2 of [`ROADMAP.md`](./ROADMAP.md); none of it exists yet.
 
 **Until it does, sell three-year terms and invoice manually.** Three years is also the version that
-needs the least software — no renewal flow, no lapse handling, no deletion drama for thirty-six
-months.
+needs the least software — no renewal flow, no lapse handling, no archive conversation for
+thirty-six months.
 
 ---
 
@@ -258,8 +272,8 @@ months.
 |---|---|---|
 | Plans | 5 | **3** |
 | Tiers that cannot hold a wedding | 2 | **1, named honestly** |
-| Grace before deletion | 12 months | **30 days + download** |
-| Partner renewal share | 15% | **None** |
+| Grace before deletion | 12 months | 30 days + download → **(Sept 2026) 90 days, then archive; no deletion** |
+| Partner renewal share | 15% | **None** — credit and referral link instead |
 | Couple learns they own it | Never | **Email at handover** |
 | Default term | 1 year | **3 years** |
 | GST | Ignored | **Stated, exclusive** |

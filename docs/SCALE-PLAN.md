@@ -129,6 +129,15 @@ enforced* anywhere.
 after lapse is generous and defensible; anything shorter needs to be very clearly communicated,
 because deleting a wedding is not a mistake you can undo.
 
+> **Revised 6 September 2026 — nothing is deleted.** The decision is an **archive tier** rather
+> than a deletion job (`PRICING.md` §2, `ROADMAP.md` §4). The curve above still applies to the
+> *unpaid* portion: a lapsed catalogue is archived at our cost for twelve months after grace, then
+> either the couple pays ₹499–1,499 a year to keep it or it stays archived at our cost. The
+> honest worst case is therefore the "never deleted" column with archive-priced revenue set
+> against it — at a 40% archive take-up on lapsed catalogues, the year-five storage bill is
+> covered roughly twice over. Measure the real take-up after the first renewal season and revisit
+> this section with the number.
+
 ### 4.2 Delivery is not metered per catalogue
 
 `getUsage` returns real stored bytes and **`deliveredGb: 0`**. The nightly usage job records a

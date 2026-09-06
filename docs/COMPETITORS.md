@@ -42,8 +42,16 @@ These platforms are not weak at video by accident. They are built for a photogra
 |---|---|---|---|
 | **OurStoria Pro** | $24.99/mo | 450 GB | 40 projects, **10 videos each** |
 | **OurStoria Studio** | $59.99/mo | 1.5 TB | 120 projects, **15 videos each** |
-| **VidFlow** | $15+/mo | scales | white-label galleries |
-| **MediaZilla** | — | — | markets on lifetime client access |
+| **VidFlow** | $15+/mo | scales | white-label galleries, Smart-TV apps, multi-year access |
+| **MediaZilla** | $21–61/mo | 50 / 100 / 600 GB **upload per year** | lifetime client access, interactive menus, paywall/upsell, no client account |
+| **Gallerio** (ex-EazyFlicks) | — | no duration caps | hybrid photo/video, TV casting, face search, client premieres, tips and product sales |
+
+*Added 6 September 2026 — the per-wedding sellers, which the August review missed:*
+
+| | Price | Video storage | Limits |
+|---|---|---|---|
+| **viddrop** | **$25 per wedding**; 5 for $100 | up to 300 GB per delivery, no compression, 4K | download-first gallery; **90–180-day expiry** with automatic reminders; no client account |
+| **WeddingFilmHub** | **$99 per wedding**, one-time | — | guest uploads and guestbook; full white-label; "$0 in the off-season" |
 
 OurStoria is the closest thing to a direct competitor: white-label on every tier, photo *and*
 video, guest uploads ("Live Moments"), a CRM, and a per-project archive add-on at **$12–19/year**
@@ -77,18 +85,30 @@ A studio doing **30 weddings a year**:
 | OurStoria Pro | ₹28,639 | **₹955** |
 | Pixieset Pro / Ultimate | ₹57,300 | **₹1,910** |
 | OurStoria Studio | ₹68,749 | **₹2,292** |
+| MediaZilla Starter–Pro | ₹24,066–69,906 | **₹802–2,330** |
 | | | |
+| viddrop | per wedding | **₹1,910–2,388** |
+| WeddingFilmHub | per wedding | **₹9,455** |
+| | | |
+| **Us — Highlights 10 GB** | — | **₹2,500** |
 | **Us — Wedding 40 GB** | — | **₹7,000** |
 | **Us — Cinema 80 GB** | — | **₹12,000** |
 
 ---
 
-## 3. The uncomfortable finding
+## 3. The uncomfortable finding — softened, not withdrawn
 
-**We are 3–18× more expensive per wedding than every competitor in this document.**
+**Against the subscription tools we are 3–18× more expensive per wedding.** That stands.
 
-That is not a rounding difference to be argued away. It is a different model, and the difference
-is worth being precise about:
+**Against the per-wedding sellers we are in the same band.** viddrop at ₹1,900–2,400 sits under
+Highlights; WeddingFilmHub at ₹9,455 sits between Wedding and Cinema. The September review found
+what August did not: a segment of the market already buys delivery *per wedding*, at prices a
+studio marks up inside a package — which is exactly the frame `PRICING.md` assumes. So the
+question is no longer whether that frame exists; it is whether Indian studios are in it. The two
+questions at the end of this section still settle that.
+
+The difference from the subscription tools is still a different model, and worth being precise
+about:
 
 | | Them | **Us** |
 |---|---|---|
@@ -188,7 +208,13 @@ a sentence no competitor can currently answer, and it is not a feature they can 
 ### Two things to watch
 
 **OurStoria's Safe Archive at $12–19/year is the model to beat on renewals**, not the monthly
-plan. It is cheap, permanent-feeling, and solves the same anxiety our renewal does.
+plan. It is cheap, permanent-feeling, and solves the same anxiety our renewal does. Our archive
+tier (`PRICING.md` §2, ₹499–1,499) is priced against it deliberately — and unlike Safe Archive it
+restores to a live site, not a download folder.
+
+**viddrop's expiry model is the one to be visibly better than.** They delete at 90–180 days and
+rely on reminders. "We never delete your wedding" is a sentence that only means something next to
+a competitor who does.
 
 **If a competitor ships a "long-form wedding" tier, the wedge closes.** The moat is not the
 technology — Bunny is available to everyone. It is that we designed for a fifteen-hour wedding
@@ -287,6 +313,8 @@ reason.
 - [Picflow: Pixieset vs ShootProof](https://picflow.com/compare/pixieset-vs-shootproof) — plan and storage figures
 - [OurStoria pricing](https://ourstoria.app/pricing) · [OurStoria's own platform comparison](https://ourstoria.app/blog/best-wedding-video-delivery-platforms) — **their blog, treat the framing as marketing**
 - [Uscreen on Vimeo pricing](https://www.uscreen.tv/blog/vimeo-pricing-guide/)
-- Internal: [`PRICING.md`](./PRICING.md) · [`SCALE-PLAN.md`](./SCALE-PLAN.md)
+- [MediaZilla pricing](https://www.mediazilla.com/pricing) · [viddrop](https://www.viddrop.app/) · [WeddingFilmHub comparison](https://weddingfilmhub.com/blog/wedding-video-delivery-platforms-compared) — **their blog** · [Bride&Groom.video round-up](https://bridengroom.video/blog/wedding-film-delivery-platforms/) for VidFlow and Gallerio
+- Internal: [`PRICING.md`](./PRICING.md) · [`SCALE-PLAN.md`](./SCALE-PLAN.md) · [`ROADMAP.md`](./ROADMAP.md) · `reference/competitor-and-feature-plan-2026-09.docx`
 
-**Reviewed 14 August 2026.** Competitor pricing moves; re-check before quoting anyone against it.
+**Reviewed 14 August 2026; per-wedding sellers added 6 September 2026.** Competitor pricing
+moves; re-check before quoting anyone against it.

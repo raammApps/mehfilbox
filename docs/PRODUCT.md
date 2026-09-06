@@ -14,6 +14,9 @@ missing here, and `PRICING.md` prices what is built.
 | **Missing** | Does not exist |
 
 Last reviewed: **14 August 2026** — full consistency audit against the code and the spec.
+**Extended 6 September 2026** — rows marked *(new)* come from the competitor and feature review
+merged in [`ROADMAP.md`](./ROADMAP.md), which also records three decisions that changed existing
+rows: no hard delete, multi-channel notifications, and the studio's credit surviving renewal.
 
 ## The name
 
@@ -48,7 +51,7 @@ The brand can present as **Heirloom** or **Heirloom Films**; the domain carries 
 
 | | Status | Where it stands |
 |---|---|---|
-| Tenant account creation | **Partial** | Tenants self-register at `/admin/register`. **We cannot create one for them** — and until SMTP exists (N-17) self-registration does not work either, so today this is a manual SQL insert. |
+| Tenant account creation | **Partial** | Tenants self-register at `/admin/register` (working since N-17). **We cannot create one for them** — that is N-27. |
 | Tenant management | **Partial** | `/admin/platform` lists every org with catalogue counts, and one org's catalogues **read-only**. No suspend, no edit, no plan assignment, no delete. |
 | User management | **Missing** | No view of operators or couples, no password reset on their behalf, no way to move a catalogue between orgs after handover. |
 | Plan and quota assignment | **Missing** | `entitlements` resolves grants correctly but **nothing writes one**. Assigning a partner a plan is a SQL insert. |
@@ -78,6 +81,11 @@ graph, so there is no privilege-escalation path to get wrong; what is missing is
 | See what a plan holds | **Missing** | Nothing shows "this plan holds about 9 hours" at purchase, or warns at 80% used. **Required by the pricing** — see `PRICING.md` §6. |
 | Limits match the plan | **Built** | Storage is the only limit and it is enforced at both upload paths against real bytes. The film and photograph count caps are gone (N-28). |
 | Included term matches what is sold | **Built** | Twelve months, matching `PRICING.md` (N-28). |
+| Delivery message *(new)* | **Missing** | One click on the overview sends the couple a WhatsApp/email launch — poster, names, "now streaming", the link. Today the operator copies the link and writes their own. N-36. |
+| Delivery tracking *(new)* | **Partial** | Play events are stored and never read per catalogue. No "opened", no watch-time per film, no "not opened in 7 days". N-37. |
+| Lapse dashboard *(new)* | **Missing** | Which couples are approaching or past renewal; renew on their behalf. N-37. |
+| Permanent credit and referral link *(new)* | **Partial** | `presentedBy` is snapshotted at handover, but it is an editable field, not a promise. Required: a "Filmed by" credit the couple cannot remove and an enquiry link that routes to the studio, both surviving every renewal. N-36b. |
+| Client premiere *(new)* | **Missing** | Scheduled reveal with a countdown page. N-43. |
 
 ### 1.3 User — the couple
 
@@ -94,7 +102,13 @@ graph, so there is no privilege-escalation path to get wrong; what is missing is
 | Passcode management | **Built** | Same settings screen the partner used. |
 | Buy and apply a theme | **Missing** | Branding only — accent, logo, font, "presented by". No purchasable themes. See §6. |
 | Hand back to the studio | **Missing** | Sandeep's idea, and a good one: let a couple return the catalogue for a re-skin or an update. No mechanism. |
-| Download before deletion | **Missing** | **Required by the 30-day deletion policy.** `PRICING.md` §2 — without it, that policy should not ship. |
+| Download everything | **Missing** | **Required before any lapse behaviour ships.** Available at any time — before expiry, in grace, and from archive. `PRICING.md` §2. |
+| Archive instead of deletion *(changed 6 Sept 2026)* | **Missing** | Lapse → 90 days' grace → archive (streaming paused, files kept, restore on payment). Automatic deletion is **removed from the product**; `deleted` is reachable only by a recorded request from the couple. N-24. |
+| Family circles *(new)* | **Missing** | Scoped links per side, "who watched". The profile gate already identifies a guest; nothing groups them. N-38. |
+| Anniversary moment *(new)* | **Missing** | A clip and a message on the date; the renewal nudge that does not read as one. N-39. |
+| Cast to TV *(new)* | **Missing** | Chromecast / AirPlay from the player. N-40. |
+| Subtitles *(new)* | **Missing** | AI-generated, operator-corrected, for speeches and rituals. N-41. |
+| Guest uploads and guestbook *(new)* | **Missing** | Phase 5. N-45. |
 
 ---
 
@@ -109,9 +123,12 @@ graph, so there is no privilege-escalation path to get wrong; what is missing is
 | Quota management | **Partial** | Storage resolves catalogue → org → default and **is enforced at both upload paths** against real stored bytes; the console shows GB used against the plan. **Nothing writes a grant yet** — that is the payment work. |
 | Renewal | **Missing** | The state machine exists and `resolveAccess` honours it. Nothing writes it, warns about it, or acts on lapse. |
 | Payment | **Missing** | No gateway, no invoices, no webhook. N-20. |
-| Deletion and retention | **Missing** | `subStatus` has `cold`; **no code acts on it.** The retention policy is stated in the product and enforced nowhere — the only cost that compounds (`SCALE-PLAN.md` §4.1). |
+| Archive and retention *(changed 6 Sept 2026)* | **Missing** | `subStatus` has `cold`; **no code acts on it.** The policy is now archive, never automatic deletion — the compounding cost is stopped by the archive fee, not by removal (`PRICING.md` §2). N-24. |
 | Delivery metering | **Missing** | `getUsage` returns real stored bytes and `deliveredGb: 0`. Allowances cannot be enforced and no catalogue's cost can be attributed. |
-| Email | **Missing** | No SMTP (N-17). Blocks registration, password reset, the migration email, and every expiry warning. **This one blocks the most.** |
+| Email — auth | **Built** | Supabase Auth sends registration confirmation and password reset through Resend from `hello@heirloomfilms.in` (N-17). |
+| Notifications *(new, 6 Sept 2026)* | **Missing** | The application itself sends nothing. Needed: a **notification seam** — email, WhatsApp Business API and SMS behind one interface with a fake driver for tests. Blocks the migration email, the delivery message, and every expiry warning. **This one blocks the most.** N-50. |
+| Payments for archive and long-term archive *(new)* | **Missing** | Rows in `plans`; written by N-20. |
+| In-catalogue upsell *(new)* | **Missing** | A `store` module the studio populates; commission to us. Phase 4. |
 
 ---
 
@@ -187,15 +204,17 @@ Sell that first. Build a marketplace when a third party asks to publish into it.
 
 Ordered by how much it unblocks:
 
-1. **SMTP** — blocks registration, password reset, the migration email, every expiry warning, and
-   therefore renewal. **Nothing else on this list matters as much.** (N-17)
-2. **Payment** — blocks plan selection at creation, add-on storage, renewal, and the marketplace.
-   (N-20)
+1. **Notifications** — blocks the migration email, the delivery message, every expiry warning,
+   and therefore renewal. **Nothing else on this list matters as much.** (N-50)
+2. **Payment** — blocks plan selection at creation, add-on storage, renewal, archive, and the
+   Studio plan. (N-20)
 3. **Delivery metering** — blocks allowance enforcement and any per-catalogue cost view.
-4. **Deletion job** — the only cost that compounds.
-5. **Download before deletion** — gates the 30-day policy ethically.
+4. **Archive transition** — what stops storage compounding now that deletion is gone.
+5. **Download everything** — gates any lapse behaviour ethically.
 6. **Plan capacity in the UI** — "holds about 9 hours", warn at 80%. Cheap, and the pricing
    depends on it.
+
+The phases that take these in order are in [`ROADMAP.md`](./ROADMAP.md) §5.
 
 ---
 

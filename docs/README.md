@@ -10,6 +10,7 @@ Everything written about this project, in one tree.
 | [`ARCHITECTURE.md`](./ARCHITECTURE.md) | How the system fits together, with diagrams. The best single entry point. |
 | [`PROGRESS.md`](./PROGRESS.md) | What has been built, and why it was built that way |
 | [`NEXT.md`](./NEXT.md) | What is left, in the order to take it up |
+| [`ROADMAP.md`](./ROADMAP.md) | **Where the product is going** — the proposed feature set against what exists, every revenue stream, and the phases that get there. Read once when planning. |
 | [`DEPLOYMENT.md`](./DEPLOYMENT.md) | Accounts, environment variables, DNS, and the settings that fail silently when wrong |
 | [`USAGE-GUIDE.md`](./USAGE-GUIDE.md) | Every workflow, end to end — registration, a wedding built and published, the handover, what a guest sees |
 | [`PRICING.md`](./PRICING.md) | **The plans and prices, on one page.** Start here for anything commercial. |
