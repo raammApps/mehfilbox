@@ -221,7 +221,7 @@ vercel login                  # once; interactive, needs a browser
 The script links the project, replaces every variable (idempotent — safe to re-run), deploys,
 and prints the verification steps.
 
-After the first deploy, connecting the GitHub repo (`raammApps/heirloomfilms`) to the project
+After the first deploy, connecting the GitHub repo (`raammApps/mehfilbox`) to the project
 means every push to `main` deploys.
 
 > Production runs `ROOT_DOMAIN=heirloomfilms.in`. If the real URL differs, update it and redeploy

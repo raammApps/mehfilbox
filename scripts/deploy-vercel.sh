@@ -52,7 +52,9 @@ vercel whoami >/dev/null 2>&1 || {
 # So: refuse to link to a project that is not already there. A missing project is a mistake in
 # the name or an incomplete rename, never something a deploy script should silently fix.
 echo "→ linking project '$PROJECT'"
-if ! vercel project ls 2>/dev/null | grep -qE "(^|[[:space:]])${PROJECT}([[:space:]]|$)"; then
+# `2>&1`, not `2>/dev/null`: the Vercel CLI prints the project list on **stderr**. Discarding it
+# made this check see an empty list and refuse every deploy — fail-closed, and still wrong.
+if ! vercel project ls 2>&1 | grep -qE "(^|[[:space:]])${PROJECT}([[:space:]]|$)"; then
   echo "No Vercel project named '$PROJECT'."
   echo "Refusing to link, because --yes would CREATE it and deploy into an empty project while"
   echo "production keeps serving the old one. Rename the project first, or set VERCEL_PROJECT."
