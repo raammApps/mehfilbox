@@ -326,7 +326,13 @@ time it silently kept serving the previous commit.
 
 ## 1. DNS — yours
 
-At the registrar holding `mehfilbox.com` and `mehfilbox.in`, on **each** domain:
+Both domains are at **Hostinger** (`*.dns-parking.com` nameservers), parked on `A 2.57.91.91` —
+the same starting state `heirloomfilms.in` had. **Neither carries MX records**, so the live-mail
+caution that dominated the first launch does not apply: there is no existing email to protect on
+these two.
+
+At **Hostinger → Domains → DNS / Nameservers**, on **each** domain, delete the parking
+`A @ 2.57.91.91` and add:
 
 | Type | Name | Value |
 |---|---|---|
