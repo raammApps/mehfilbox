@@ -52,12 +52,12 @@ export function middleware(request: NextRequest) {
     case 'catalogue': {
       if (url.pathname.startsWith('/api') || url.pathname.startsWith('/admin')) {
         const response = NextResponse.next()
-        response.headers.set('x-heirloomfilms-catalogue', resolution.slug)
+        response.headers.set('x-mehfilbox-catalogue', resolution.slug)
         return response
       }
       url.pathname = `/c/${resolution.slug}${url.pathname === '/' ? '' : url.pathname}`
       const response = NextResponse.rewrite(url)
-      response.headers.set('x-heirloomfilms-catalogue', resolution.slug)
+      response.headers.set('x-mehfilbox-catalogue', resolution.slug)
       return response
     }
 

@@ -99,7 +99,7 @@ describe('POST /api/qoe', () => {
   async function beacon(body: unknown): Promise<Response> {
     const { POST } = await import('@/app/api/qoe/route')
     return POST(
-      new Request('http://aanya-vikram.heirloomfilms.app/api/qoe', {
+      new Request('http://aanya-vikram.mehfilbox.app/api/qoe', {
         method: 'POST',
         headers: {
           'content-type': 'application/json',
@@ -173,7 +173,7 @@ describe('the usage rollup (doc 05 §2 cost guardrails)', () => {
     setVideoProvider(new FakeVideoProvider())
 
     const { GET } = await import('@/app/api/cron/usage/route')
-    const response = await GET(new Request('http://heirloomfilms.app/api/cron/usage'))
+    const response = await GET(new Request('http://mehfilbox.app/api/cron/usage'))
     expect(response.status).toBe(200)
 
     const body = (await response.json()) as { examined: number }

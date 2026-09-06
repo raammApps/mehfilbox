@@ -123,8 +123,8 @@ const schema = z
      */
     AUTH_DRIVER: z.enum(['local', 'supabase']).default('local'),
 
-    DEV_OPERATOR_EMAIL: z.string().email().default('operator@heirloomfilms.test'),
-    DEV_OPERATOR_PASSWORD: nonEmpty.default('heirloomfilms-dev'),
+    DEV_OPERATOR_EMAIL: z.string().email().default('operator@mehfilbox.test'),
+    DEV_OPERATOR_PASSWORD: nonEmpty.default('mehfilbox-dev'),
 
     PLAYBACK_TOKEN_TTL_S: z.coerce.number().int().positive().default(4 * 60 * 60),
 
@@ -207,7 +207,7 @@ const schema = z
        * survivable — but `ALLOW_EPHEMERAL_DATA=1` in production would seed an operator from it,
        * and the console is publicly reachable.
        */
-      if (env.DEV_OPERATOR_PASSWORD === 'heirloomfilms-dev') {
+      if (env.DEV_OPERATOR_PASSWORD === 'mehfilbox-dev') {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           path: ['DEV_OPERATOR_PASSWORD'],

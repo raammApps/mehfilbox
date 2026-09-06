@@ -51,7 +51,7 @@ export function useCatalogue(): CatalogueContextValue {
   return value
 }
 
-export const PROFILE_STORAGE_PREFIX = 'heirloomfilms.profile.'
+export const PROFILE_STORAGE_PREFIX = 'mehfilbox.profile.'
 
 type Props = {
   children: ReactNode

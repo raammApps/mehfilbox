@@ -34,7 +34,7 @@ export function LoginForm({ initialEmail = '' }: { initialEmail?: string }) {
 
   return (
     <main className="mx-auto flex min-h-svh max-w-[380px] flex-col justify-center px-6">
-      <h1 className="mb-1 text-2xl font-bold">Heirloom Films</h1>
+      <h1 className="mb-1 text-2xl font-bold">Mehfilbox</h1>
       <p className="mb-8 text-[14px] text-[var(--color-l-text-mid)]">Sign in to your catalogues.</p>
 
       <form onSubmit={submit} noValidate>

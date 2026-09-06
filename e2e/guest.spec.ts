@@ -26,7 +26,7 @@ async function openFresh(page: Page, query = ''): Promise<void> {
  */
 async function openBrowse(page: Page, query = ''): Promise<void> {
   await page.addInitScript((slug) => {
-    window.localStorage.setItem(`heirloomfilms.profile.${slug}`, 'skipped')
+    window.localStorage.setItem(`mehfilbox.profile.${slug}`, 'skipped')
   }, CATALOGUE)
   await page.goto(`/?__catalogue=${CATALOGUE}${query}`)
   await expect(page.getByTestId('profile-gate')).toHaveCount(0)
@@ -204,7 +204,7 @@ test.describe('sharing a photograph', () => {
     // What a recipient does: a cold arrival on the forwarded link, no prior visit to this page.
     const recipient = await page.context().newPage()
     await recipient.addInitScript((slug) => {
-      window.localStorage.setItem(`heirloomfilms.profile.${slug}`, 'skipped')
+      window.localStorage.setItem(`mehfilbox.profile.${slug}`, 'skipped')
     }, CATALOGUE)
     await recipient.goto(shared)
     await expect(recipient.getByRole('dialog')).toBeVisible()
@@ -270,7 +270,7 @@ test.describe('liking a photograph and a film', () => {
     const otherContext = await browser.newContext()
     const other = await otherContext.newPage()
     await other.addInitScript((slug) => {
-      window.localStorage.setItem(`heirloomfilms.profile.${slug}`, 'skipped')
+      window.localStorage.setItem(`mehfilbox.profile.${slug}`, 'skipped')
     }, CATALOGUE)
     await other.goto(shared)
 

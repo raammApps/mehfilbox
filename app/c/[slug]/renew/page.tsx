@@ -20,7 +20,7 @@ export default async function RenewPage({ params }: { params: Promise<{ slug: st
   const verdict = await resolveAccess(slug)
   if (verdict.kind === 'missing') notFound()
 
-  const locale = parseLocale((await cookies()).get('heirloom_locale')?.value)
+  const locale = parseLocale((await cookies()).get('mehfilbox_locale')?.value)
   const t = createTranslator(locale)
   const titles = await getRepository().listTitles(verdict.catalogue.id, { publishedOnly: true })
 

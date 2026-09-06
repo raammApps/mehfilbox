@@ -34,7 +34,7 @@ test.describe('the admin console', () => {
     await page.getByRole('button', { name: /^Account/ }).click()
 
     const menu = page.getByRole('menu')
-    await expect(menu).toContainText('operator@heirloomfilms.test')
+    await expect(menu).toContainText('operator@mehfilbox.test')
 
     await menu.getByRole('menuitem', { name: 'Sign out' }).click()
     await expect(page).toHaveURL(/\/admin\/login/)

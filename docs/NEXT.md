@@ -60,10 +60,30 @@ old one.
 2027-09-07. `heirloomfilms.in` is live, Resend-verified and serving, so it is *replaced* rather
 than abandoned — keep it resolving until the new domain is verified end to end, then redirect.
 
-**Decide which is canonical before starting.** `.in` matches the market and matches what is live
-now; `.com` is the one a studio will type from memory. Everything downstream — the Resend verified
-domain, `ROOT_DOMAIN`, the Bunny webhook, `hello@`, every link already in a guest's phone — hangs
-off that single choice, and changing it later is this ticket again.
+**Canonical is `mehfilbox.com`** (decided 7 September); `mehfilbox.in` redirects to it. Chosen
+because a studio types it from memory and it does not tie the brand to one country. Everything
+downstream hangs off it: the Resend verified domain, `ROOT_DOMAIN`, the Bunny webhook, `hello@`,
+and every link already in a guest's phone.
+
+**Done so far:** the code rename (56 files — package name, cookie and localStorage keys, the
+`x-mehfilbox-*` headers, every test hostname). `pnpm verify` and 108 E2E green.
+
+**Left, in this order** — the order matters because each step's verification depends on the one
+before:
+
+1. Rename the Vercel project. **Re-alias immediately afterwards and compare `/api/health` to
+   `HEAD`** — last time the rename left the stable alias serving the previous commit, and the
+   deploy reported success.
+2. Rename the GitHub repository.
+3. Add `mehfilbox.com` to Vercel; two A records at the registrar; add `mehfilbox.in` as a
+   redirect.
+4. Verify `mehfilbox.com` in Resend — three DNS records, and the `send` subdomain trap from
+   `GO-LIVE.md` §3 applies again.
+5. Switch `ROOT_DOMAIN` **and** the Bunny `WebhookUrl` in one sitting. Apart, transcodes stop
+   silently.
+6. The photo zone: new zone, copy, repoint, delete. `scripts/repoint-photo-cdn.ts` does it, and
+   `photos.url` stores absolute URLs so the rows need rewriting too.
+7. Keep `heirloomfilms.in` resolving and redirecting — it is in guests' phones.
 
 **The last rename is the specification for this one.** It went wrong three times (`PROGRESS.md`),
 and each failure is a check to run rather than a story to retell:

@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 
-export const metadata: Metadata = { title: 'Heirloom Films — admin', robots: { index: false, follow: false } }
+export const metadata: Metadata = { title: 'Mehfilbox — admin', robots: { index: false, follow: false } }
 
 /**
  * The admin runs on the light set (doc 04 §2) — an operator spends thirty minutes here in an

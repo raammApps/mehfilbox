@@ -23,7 +23,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 ENV_FILE=".env.vercel.local"
-PROJECT="${VERCEL_PROJECT:-heirloomfilms}"
+PROJECT="${VERCEL_PROJECT:-mehfilbox}"
 TARGET="${VERCEL_TARGET:-production}"
 
 command -v vercel >/dev/null 2>&1 || {
@@ -44,7 +44,20 @@ vercel whoami >/dev/null 2>&1 || {
   exit 1
 }
 
+# `vercel link --yes --project X` CREATES the project when X does not exist. That is how a
+# rename once produced a second, empty project: the script linked to the new name, deployed
+# there, and production carried on serving the old build from the old project. Nothing failed —
+# the deploy reported success, and only comparing /api/health to HEAD exposed it.
+#
+# So: refuse to link to a project that is not already there. A missing project is a mistake in
+# the name or an incomplete rename, never something a deploy script should silently fix.
 echo "→ linking project '$PROJECT'"
+if ! vercel project ls 2>/dev/null | grep -qE "(^|[[:space:]])${PROJECT}([[:space:]]|$)"; then
+  echo "No Vercel project named '$PROJECT'."
+  echo "Refusing to link, because --yes would CREATE it and deploy into an empty project while"
+  echo "production keeps serving the old one. Rename the project first, or set VERCEL_PROJECT."
+  exit 1
+fi
 vercel link --yes --project "$PROJECT" >/dev/null
 
 echo "→ pushing environment ($TARGET)"

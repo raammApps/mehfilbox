@@ -29,7 +29,7 @@ test.describe('the operator console', () => {
 
   test.beforeEach(async ({ page }) => {
     await page.goto('/admin/login')
-    await page.getByLabel('Email').fill('operator@heirloomfilms.test')
+    await page.getByLabel('Email').fill('operator@mehfilbox.test')
     await page.getByLabel('Password').fill('e2e-operator-password')
     await page.getByRole('button', { name: 'Sign in' }).click()
     await expect(page.getByRole('heading', { name: 'Catalogues' })).toBeVisible()

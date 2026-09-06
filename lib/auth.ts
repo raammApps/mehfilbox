@@ -47,7 +47,7 @@ export function decodeToken<T>(token: string | null | undefined): T | null {
   }
 }
 
-export const SESSION_COOKIE = 'heirloom_session'
+export const SESSION_COOKIE = 'mehfilbox_session'
 export const SESSION_TTL_S = 12 * 60 * 60
 
 export function createSession(operatorId: string, orgId: string): string {
@@ -78,7 +78,7 @@ export function cookieOptions(maxAgeS: number) {
 
 // ── Passcode gate (doc 05 §4) ─────────────────────────────────────────────────
 
-export const PASSCODE_COOKIE_PREFIX = 'heirloom_pc_'
+export const PASSCODE_COOKIE_PREFIX = 'mehfilbox_pc_'
 export const PASSCODE_TTL_S = 30 * 24 * 60 * 60
 
 export function passcodeCookieName(catalogueSlug: string): string {

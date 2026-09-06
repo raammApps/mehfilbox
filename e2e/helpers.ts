@@ -14,7 +14,7 @@ export const DEMO_CATALOGUE = 'aanya-vikram'
 
 export async function signIn(page: Page): Promise<void> {
   await page.goto('/admin/login')
-  await page.getByLabel('Email').fill('operator@heirloomfilms.test')
+  await page.getByLabel('Email').fill('operator@mehfilbox.test')
   await page.getByLabel('Password').fill('e2e-operator-password')
   await page.getByRole('button', { name: 'Sign in' }).click()
   await expect(page.getByRole('heading', { name: 'Catalogues' })).toBeVisible()
@@ -67,7 +67,7 @@ export async function openAsReturningGuest(
   query = '',
 ): Promise<void> {
   await page.addInitScript((catalogueSlug) => {
-    window.localStorage.setItem(`heirloomfilms.profile.${catalogueSlug}`, 'skipped')
+    window.localStorage.setItem(`mehfilbox.profile.${catalogueSlug}`, 'skipped')
   }, slug)
   await page.goto(`/?__catalogue=${slug}${query}`)
   await expect(page.getByTestId('profile-gate')).toHaveCount(0)

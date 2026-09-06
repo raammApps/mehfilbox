@@ -96,7 +96,7 @@ export function TopNav({ appName, logoUrl, locale, t }: Props) {
  */
 function LanguageToggle({ locale, t }: { locale: Locale; t: Translator }) {
   const switchTo = (next: Locale) => {
-    document.cookie = `heirloom_locale=${next}; path=/; max-age=${60 * 60 * 24 * 365}; samesite=lax`
+    document.cookie = `mehfilbox_locale=${next}; path=/; max-age=${60 * 60 * 24 * 365}; samesite=lax`
     window.location.reload()
   }
 

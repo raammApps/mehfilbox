@@ -5,7 +5,7 @@ import { useCallback, useEffect, useState } from 'react'
 import type { Translator } from '@/lib/i18n'
 import type { LikeSubject } from '@/lib/schema'
 
-const GUEST_KEY_STORAGE = 'heirloomfilms.guest'
+const GUEST_KEY_STORAGE = 'mehfilbox.guest'
 
 /**
  * The device's own key, minted on first use.

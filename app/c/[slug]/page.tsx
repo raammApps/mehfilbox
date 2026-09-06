@@ -28,10 +28,10 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params
   const verdict = await resolveAccess(slug)
-  if (verdict.kind === 'missing') return { title: 'Heirloom Films' }
+  if (verdict.kind === 'missing') return { title: 'Mehfilbox' }
 
   const { catalogue } = verdict
-  const locale = parseLocale((await cookies()).get('heirloom_locale')?.value)
+  const locale = parseLocale((await cookies()).get('mehfilbox_locale')?.value)
   const coupleName = resolveLocalised(catalogue.coupleName, locale)
   const description = resolveLocalised(catalogue.synopsis, locale) || `${coupleName} — the films.`
   const url = catalogueUrl(catalogue.slug, env.ROOT_DOMAIN, '/', env.TENANCY_MODE)
@@ -86,7 +86,7 @@ export default async function CataloguePage({
 
   const { catalogue } = verdict
   const bundle = await loadBundle(catalogue)
-  const locale = parseLocale((await cookies()).get('heirloom_locale')?.value)
+  const locale = parseLocale((await cookies()).get('mehfilbox_locale')?.value)
 
   // Resume positions are server-rendered when a profile is already known, so a returning guest
   // sees progress bars in the first paint rather than after a round trip.
@@ -116,7 +116,7 @@ export default async function CataloguePage({
 
 /** Draft catalogues get a neutral "not yet available" page, never a 404 (doc 02 §5). */
 async function NotAvailable({ slug: _slug, draft = false }: { slug: string; draft?: boolean }) {
-  const locale = parseLocale((await cookies()).get('heirloom_locale')?.value)
+  const locale = parseLocale((await cookies()).get('mehfilbox_locale')?.value)
   const t = createTranslator(locale)
   return (
     <main className="gutter-x flex min-h-svh flex-col items-center justify-center text-center">

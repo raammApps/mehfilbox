@@ -104,7 +104,7 @@ async function main(): Promise<void> {
 
     log('3. signing in…')
     await page.goto(`${BASE}/admin/login`)
-    await page.getByLabel('Email').fill(process.env.DEV_OPERATOR_EMAIL ?? 'operator@heirloomfilms.test')
+    await page.getByLabel('Email').fill(process.env.DEV_OPERATOR_EMAIL ?? 'operator@mehfilbox.test')
     await page.getByLabel('Password').fill(process.env.DEV_OPERATOR_PASSWORD ?? 'e2e-operator-password')
     await page.getByRole('button', { name: 'Sign in' }).click()
     await page.getByRole('heading', { name: 'Catalogues' }).waitFor()

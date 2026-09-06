@@ -22,7 +22,7 @@ async function pickProfile(page: Page): Promise<string> {
   await expect(page.getByTestId('profile-gate')).toHaveCount(0)
 
   const profileId = await page.evaluate(
-    (slug) => window.localStorage.getItem(`heirloomfilms.profile.${slug}`),
+    (slug) => window.localStorage.getItem(`mehfilbox.profile.${slug}`),
     CATALOGUE,
   )
   expect(profileId, 'the gate must create a profile server-side and store its id').toBeTruthy()

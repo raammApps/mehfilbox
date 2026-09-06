@@ -18,9 +18,9 @@ type Params = { slug: string; titleSlug: string }
 export async function generateMetadata({ params }: { params: Promise<Params> }): Promise<Metadata> {
   const { slug, titleSlug } = await params
   const verdict = await resolveAccess(slug)
-  if (verdict.kind !== 'ok') return { title: 'Heirloom Films' }
+  if (verdict.kind !== 'ok') return { title: 'Mehfilbox' }
   const title = await getRepository().getTitleBySlug(verdict.catalogue.id, titleSlug)
-  return { title: title ? title.name.en : 'Heirloom Films', robots: { index: false, follow: false } }
+  return { title: title ? title.name.en : 'Mehfilbox', robots: { index: false, follow: false } }
 }
 
 export default async function WatchPage({
@@ -43,7 +43,7 @@ export default async function WatchPage({
   const title = await getRepository().getTitleBySlug(verdict.catalogue.id, titleSlug)
   if (!title || !title.published) notFound()
 
-  const locale = parseLocale((await cookies()).get('heirloom_locale')?.value)
+  const locale = parseLocale((await cookies()).get('mehfilbox_locale')?.value)
   const name = resolveLocalised(title.name, locale)
   const startAt = timestamp ? Number.parseInt(timestamp, 10) : null
 

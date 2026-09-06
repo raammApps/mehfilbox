@@ -17,7 +17,7 @@ if (existsSync('.env.local')) {
 }
 
 process.env.SESSION_SECRET ??= 'test-session-secret-0123456789abcdefghijklmnop'
-process.env.ROOT_DOMAIN ??= 'heirloomfilms.app'
+process.env.ROOT_DOMAIN ??= 'mehfilbox.app'
 process.env.DATA_DRIVER ??= 'memory'
 process.env.VIDEO_DRIVER ??= 'fake'
 

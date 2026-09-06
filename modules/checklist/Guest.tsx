@@ -23,7 +23,7 @@ export default function Guest({ config, ctx }: GuestProps<ChecklistConfig>) {
     (item) => resolveLocalised(item.text, ctx.locale).trim().length > 0,
   )
 
-  const storageKey = `heirloomfilms.checklist.${ctx.instanceId}`
+  const storageKey = `mehfilbox.checklist.${ctx.instanceId}`
   const [ticked, setTicked] = useState<Record<string, boolean>>({})
   const [loaded, setLoaded] = useState(false)
 

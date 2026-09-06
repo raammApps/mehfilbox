@@ -64,7 +64,7 @@ export function resolveTenant(rawHost: string | null | undefined, rawRoot: strin
   if (host.endsWith(`.${root}`)) {
     const label = host.slice(0, -(root.length + 1))
 
-    // Only a single label is a catalogue. `a.b.heirloomfilms.app` is not a tenant, it is a mistake.
+    // Only a single label is a catalogue. `a.b.mehfilbox.app` is not a tenant, it is a mistake.
     if (label.includes('.')) return { kind: 'unknown', host }
 
     if (label === 'admin') return { kind: 'admin' }

@@ -11,7 +11,7 @@
  *   pnpm repoint:photos --write   # copy the objects and rewrite the rows
  *
  * Needs the destination zone to exist already — creating one is an account-API operation and this
- * repo deliberately holds only the Stream key. Create `heirloomfilms-photos` (with its pull zone)
+ * repo deliberately holds only the Stream key. Create `mehfilbox-photos` (with its pull zone)
  * in the dashboard first, then put its password in `BUNNY_STORAGE_PASSWORD_NEW`.
  *
  * `photos.url` stores an **absolute** URL — `put()` returns `urlFor(key)` and the route persists
@@ -43,7 +43,7 @@ const OLD_ZONE = process.env.BUNNY_STORAGE_ZONE
 const OLD_PASS = process.env.BUNNY_STORAGE_PASSWORD
 const OLD_HOST = process.env.BUNNY_PHOTO_CDN_HOSTNAME
 
-const NEW_ZONE = process.env.BUNNY_STORAGE_ZONE_NEW ?? 'heirloomfilms-photos'
+const NEW_ZONE = process.env.BUNNY_STORAGE_ZONE_NEW ?? 'mehfilbox-photos'
 const NEW_PASS = process.env.BUNNY_STORAGE_PASSWORD_NEW
 const NEW_HOST = process.env.BUNNY_PHOTO_CDN_HOSTNAME_NEW ?? `${NEW_ZONE}.b-cdn.net`
 

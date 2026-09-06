@@ -51,7 +51,7 @@ describe('resolveAccess', () => {
     const { resolveAccess } = await import('@/lib/catalogue-access')
     expect((await resolveAccess(catalogue.slug)).kind).toBe('locked')
 
-    cookieJar.set(`heirloom_pc_${catalogue.slug}`, createPasscodeGrant(catalogue.id))
+    cookieJar.set(`mehfilbox_pc_${catalogue.slug}`, createPasscodeGrant(catalogue.id))
     expect((await resolveAccess(catalogue.slug)).kind).toBe('ok')
   })
 
@@ -59,7 +59,7 @@ describe('resolveAccess', () => {
     const catalogue = makeCatalogue({ privacy: 'passcode', passcodeHash: hashSecret('varmala') })
     installRepository({ ...emptySnapshot(), catalogues: [catalogue] })
 
-    cookieJar.set(`heirloom_pc_${catalogue.slug}`, createPasscodeGrant('some-other-catalogue-id'))
+    cookieJar.set(`mehfilbox_pc_${catalogue.slug}`, createPasscodeGrant('some-other-catalogue-id'))
 
     const { resolveAccess } = await import('@/lib/catalogue-access')
     expect((await resolveAccess(catalogue.slug)).kind).toBe('locked')

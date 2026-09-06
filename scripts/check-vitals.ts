@@ -60,7 +60,7 @@ function startServer(): ChildProcess {
       DATA_DRIVER: 'memory',
       ALLOW_EPHEMERAL_DATA: '1',
       VIDEO_DRIVER: 'fake',
-      ROOT_DOMAIN: `heirloomfilms.localhost:${PORT}`,
+      ROOT_DOMAIN: `mehfilbox.localhost:${PORT}`,
       SESSION_SECRET: 'vitals-session-secret-0123456789abcdefghij',
       DEV_OPERATOR_PASSWORD: 'vitals-operator-password',
     },
@@ -94,7 +94,7 @@ async function measure(): Promise<Vitals> {
     // The profile gate is a full-screen overlay on a first visit. Measuring it would measure the
     // gate, not the catalogue — and a returning guest is the common case anyway.
     await context.addInitScript((slug) => {
-      window.localStorage.setItem(`heirloomfilms.profile.${slug}`, 'skipped')
+      window.localStorage.setItem(`mehfilbox.profile.${slug}`, 'skipped')
     }, CATALOGUE)
 
     const page = await context.newPage()

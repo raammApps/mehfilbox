@@ -43,7 +43,7 @@ export function AdminChrome({
         className="sticky top-0 hidden h-svh w-[228px] shrink-0 flex-col border-e border-[var(--color-l-line)] bg-[var(--color-l-surface-1)] px-4 py-5 md:flex"
       >
         <Link href="/admin" className="mb-7 block px-1">
-          <span className="block text-[19px] font-bold tracking-[-0.01em]">Heirloom Films</span>
+          <span className="block text-[19px] font-bold tracking-[-0.01em]">Mehfilbox</span>
           <span className="mt-0.5 block truncate text-[12px] text-[var(--color-l-text-mid)]">
             {orgName ?? 'Operator console'}
           </span>
@@ -71,7 +71,7 @@ export function AdminChrome({
       <div className="min-w-0 flex-1">
         <div className="sticky top-0 z-20 flex items-center gap-3 border-b border-[var(--color-l-line)] bg-[var(--color-l-surface-1)] px-4 py-2.5 md:px-5">
           <Link href="/admin" className="text-[17px] font-bold md:hidden">
-            Heirloom Films
+            Mehfilbox
           </Link>
 
           <div className="ms-auto flex items-center gap-2">

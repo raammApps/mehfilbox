@@ -5,7 +5,7 @@ import { parseLocale } from '@/lib/i18n'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'Heirloom Films',
+  title: 'Mehfilbox',
   description: 'A wedding, presented as a private streaming service.',
   // No catalogue is ever indexable (doc 01 US-5). Reinforced by a global header in next.config.
   robots: { index: false, follow: false, nocache: true },
@@ -21,7 +21,7 @@ export const viewport: Viewport = {
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const locale = parseLocale((await cookies()).get('heirloom_locale')?.value)
+  const locale = parseLocale((await cookies()).get('mehfilbox_locale')?.value)
 
   return (
     <html lang={locale} className={fontVariables}>

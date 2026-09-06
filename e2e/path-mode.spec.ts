@@ -20,7 +20,7 @@ const CATALOGUE = 'aanya-vikram'
 /** A returning guest, so the profile gate never races an assertion. */
 async function openBrowse(page: import('@playwright/test').Page, path = ''): Promise<void> {
   await page.addInitScript((slug) => {
-    window.localStorage.setItem(`heirloomfilms.profile.${slug}`, 'skipped')
+    window.localStorage.setItem(`mehfilbox.profile.${slug}`, 'skipped')
   }, CATALOGUE)
   await page.goto(`/c/${CATALOGUE}${path}`)
   await expect(page.getByTestId('profile-gate')).toHaveCount(0)
@@ -89,7 +89,7 @@ test.describe('path mode — the configuration production actually runs', () => 
     browser,
   }) => {
     await page.goto('/admin/login')
-    await page.getByLabel('Email').fill('operator@heirloomfilms.test')
+    await page.getByLabel('Email').fill('operator@mehfilbox.test')
     await page.getByLabel('Password').fill('e2e-operator-password')
     await page.getByRole('button', { name: 'Sign in' }).click()
     await expect(page.getByRole('heading', { name: 'Catalogues' })).toBeVisible()
@@ -117,7 +117,7 @@ test.describe('path mode — the configuration production actually runs', () => 
  * configuration rather than thoroughness — the same shape of gap this whole file exists for.
  *
  * That suite runs in subdomain mode, where the operator signs in on `localhost` and the claim is
- * served from `heirloomfilms.localhost`. Different hosts, so the session cookie is never sent and
+ * served from `mehfilbox.localhost`. Different hosts, so the session cookie is never sent and
  * the couple always arrives signed out. The bug needs one host to appear, which is precisely what
  * production runs.
  */
@@ -126,7 +126,7 @@ test.describe('path mode — the handover on a shared device', () => {
     page,
   }) => {
     await page.goto('/admin/login')
-    await page.getByLabel('Email').fill('operator@heirloomfilms.test')
+    await page.getByLabel('Email').fill('operator@mehfilbox.test')
     await page.getByLabel('Password').fill('e2e-operator-password')
     await page.getByRole('button', { name: 'Sign in' }).click()
     await expect(page.getByRole('heading', { name: 'Catalogues' })).toBeVisible()

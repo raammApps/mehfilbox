@@ -2,7 +2,7 @@
 /**
  * Generate a new operator password and the SQL that installs it.
  *
- * The dev default (`heirloomfilms-dev`) is committed to this repo and the admin console is publicly
+ * The dev default (`mehfilbox-dev`) is committed to this repo and the admin console is publicly
  * reachable, so anyone who reads the source can sign in and reach every catalogue. This exists
  * because rotating it by hand means getting scrypt's exact encoding right, and a wrong hash
  * locks the only operator out of a live system.
@@ -17,7 +17,7 @@ import { writeFileSync } from 'node:fs'
 import { randomBytes } from 'node:crypto'
 import { hashSecret } from '../lib/crypto'
 
-const email = process.argv[2] ?? 'operator@heirloomfilms.test'
+const email = process.argv[2] ?? 'operator@mehfilbox.test'
 
 /**
  * Four words from a wordless alphabet: long enough that scrypt's cost is irrelevant, and

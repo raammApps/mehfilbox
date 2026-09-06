@@ -15,7 +15,7 @@ vi.mock('next/headers', () => ({
 async function post(body: unknown): Promise<Response> {
   const { POST } = await import('@/app/api/playback/token/route')
   return POST(
-    new Request('http://aanya-vikram.heirloomfilms.app/api/playback/token', {
+    new Request('http://aanya-vikram.mehfilbox.app/api/playback/token', {
       method: 'POST',
       headers: { 'content-type': 'application/json', 'x-forwarded-for': `10.0.0.${Math.floor(Math.random() * 250)}` },
       body: JSON.stringify(body),

@@ -5,7 +5,7 @@ import { BunnyPhotoProvider } from './bunny'
 import { FakePhotoProvider } from './fake'
 import type { PhotoProvider } from './provider'
 
-const KEY = Symbol.for('heirloomfilms.photoProvider')
+const KEY = Symbol.for('mehfilbox.photoProvider')
 type Global = typeof globalThis & { [KEY]?: PhotoProvider }
 
 /** The one switch on photo storage in the codebase. */
@@ -52,7 +52,7 @@ export function photoKey(
  * RFC 4122 v5 shape, SHA-1 over a fixed namespace and the catalogue id.
  */
 export function defaultAlbumId(catalogueId: string): string {
-  const hash = createHash('sha1').update(`heirloomfilms.album.default:${catalogueId}`).digest()
+  const hash = createHash('sha1').update(`mehfilbox.album.default:${catalogueId}`).digest()
   const bytes = Buffer.from(hash.subarray(0, 16))
   bytes[6] = (bytes[6]! & 0x0f) | 0x50 // version 5
   bytes[8] = (bytes[8]! & 0x3f) | 0x80 // RFC 4122 variant

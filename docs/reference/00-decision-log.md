@@ -305,8 +305,9 @@ when it is decided; the identifiers move when they are actually changed.
 reads as an inconsistency and is instead the honest state, called out at the top of `PRODUCT.md`.
 It resolves when the rename ticket lands.
 
-**Unresolved and load-bearing:** `mehfilbox.in` is **not registered as far as this repo knows**.
-A brand without its domain is a decision that has not finished.
+**Resolved 7 September:** `mehfilbox.com` and `mehfilbox.in` are both registered. **`.com` is
+canonical**, `.in` redirects — a studio types `.com` from memory, and it does not tie the brand to
+one country. `heirloomfilms.in` keeps resolving and redirects; it is in guests' phones.
 
 ## D-24 · One deployable, with seams — not microservices (Sept 2026)
 

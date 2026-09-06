@@ -33,7 +33,7 @@ async function deliver(payload: object, signature?: string): Promise<Response> {
   const body = JSON.stringify(payload)
   const { POST } = await import('@/app/api/webhooks/bunny/route')
   return POST(
-    new Request('http://heirloomfilms.app/api/webhooks/bunny', {
+    new Request('http://mehfilbox.app/api/webhooks/bunny', {
       method: 'POST',
       headers: { 'x-bunny-signature': signature ?? sign(body) },
       body,

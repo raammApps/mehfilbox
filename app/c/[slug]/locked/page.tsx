@@ -20,7 +20,7 @@ export default async function LockedPage({ params }: { params: Promise<{ slug: s
   // in path mode '/' is the marketing page, not this catalogue.
   if (verdict.kind === 'ok') redirect(basePath || '/')
 
-  const locale = parseLocale((await cookies()).get('heirloom_locale')?.value)
+  const locale = parseLocale((await cookies()).get('mehfilbox_locale')?.value)
   const t = createTranslator(locale)
 
   return (

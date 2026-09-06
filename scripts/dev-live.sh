@@ -39,7 +39,7 @@ cat <<INFO
 
     Guest catalogue   http://${HOST_ADDR}:${PORT}/c/aanya-and-vikram
     Admin console     http://${HOST_ADDR}:${PORT}/admin
-    Sign in           ${DEV_OPERATOR_EMAIL:-operator@heirloomfilms.test} / whatever you set in Supabase
+    Sign in           ${DEV_OPERATOR_EMAIL:-operator@mehfilbox.test} / whatever you set in Supabase
 
 INFO
 

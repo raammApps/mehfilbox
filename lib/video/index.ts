@@ -3,7 +3,7 @@ import { BunnyProvider } from './bunny'
 import { FakeVideoProvider } from './fake'
 import type { VideoProvider } from './provider'
 
-const KEY = Symbol.for('heirloomfilms.videoProvider')
+const KEY = Symbol.for('mehfilbox.videoProvider')
 type Global = typeof globalThis & { [KEY]?: VideoProvider }
 
 /** The one switch on provider in the codebase (doc 05 §2). */

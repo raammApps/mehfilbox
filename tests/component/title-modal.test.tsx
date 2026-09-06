@@ -37,7 +37,7 @@ function renderModal(initialTitleSlug: string | null) {
         titles={titles}
         locale="en"
         t={t}
-        shareBaseUrl="https://test-wedding.heirloomfilms.app"
+        shareBaseUrl="https://test-wedding.mehfilbox.app"
       />
     </CatalogueProvider>,
   )

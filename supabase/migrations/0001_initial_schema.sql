@@ -1,5 +1,5 @@
 -- ═══════════════════════════════════════════════════════════════════════════════
--- Heirloom Films — initial schema (doc 06 §1 + doc 14 §6)
+-- Mehfilbox — initial schema (doc 06 §1 + doc 14 §6)
 --
 -- Isolation is enforced in two places and both matter: RLS here, and org-scoped queries in
 -- lib/admin/session.ts. Every data-layer change answers "what enforces isolation here?"

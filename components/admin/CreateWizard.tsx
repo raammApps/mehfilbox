@@ -20,7 +20,7 @@ const STEPS: { n: Step; label: string; hint: string }[] = [
   { n: 4, label: 'Titles', hint: 'Name them and choose what guests see' },
 ]
 
-const DRAFT_KEY = 'heirloomfilms.wizard.draft'
+const DRAFT_KEY = 'mehfilbox.wizard.draft'
 
 /**
  * The four-step create wizard (doc 02 §3).

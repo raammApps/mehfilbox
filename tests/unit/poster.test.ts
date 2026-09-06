@@ -75,7 +75,7 @@ describe('GET /api/poster/[titleId]', () => {
   async function get(titleId: string, file?: string): Promise<Response> {
     const { GET } = await import('@/app/api/poster/[titleId]/route')
     const query = file ? `?file=${encodeURIComponent(file)}` : ''
-    return GET(new Request(`http://aanya-vikram.heirloomfilms.app/api/poster/${titleId}${query}`), {
+    return GET(new Request(`http://aanya-vikram.mehfilbox.app/api/poster/${titleId}${query}`), {
       params: Promise.resolve({ titleId }),
     })
   }
@@ -182,7 +182,7 @@ describe('the webhook stores a durable poster URL', () => {
 
     const { POST } = await import('@/app/api/webhooks/bunny/route')
     await POST(
-      new Request('http://heirloomfilms.app/api/webhooks/bunny', {
+      new Request('http://mehfilbox.app/api/webhooks/bunny', {
         method: 'POST',
         headers: { 'x-bunny-signature': signature },
         body,

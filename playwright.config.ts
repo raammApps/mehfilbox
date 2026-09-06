@@ -23,7 +23,7 @@ const SHARED_ENV = {
   ALLOW_EPHEMERAL_DATA: '1',
   VIDEO_DRIVER: 'fake',
   SESSION_SECRET: 'e2e-session-secret-0123456789abcdefghijklmnop',
-  DEV_OPERATOR_EMAIL: 'operator@heirloomfilms.test',
+  DEV_OPERATOR_EMAIL: 'operator@mehfilbox.test',
   // Not the repo's published default: the production guard refuses that, and this suite
   // deliberately boots with NODE_ENV=production. Fixed rather than random so specs can
   // sign in without threading a secret through them.
@@ -114,7 +114,7 @@ export default defineConfig({
          * `baseURL`; the first test to follow a link the *app* generated found either a connection
          * refusal or, worse, whatever stray dev server happened to be on 3000 with its own store.
          */
-        ROOT_DOMAIN: `heirloomfilms.localhost:${PORT}`,
+        ROOT_DOMAIN: `mehfilbox.localhost:${PORT}`,
       },
     },
     {
