@@ -57,7 +57,7 @@ added there in the same commit as this file.
 | Share a photograph; photograph captions | **Built** (7 Sep) | — | — |
 | Likes on films and photographs | **Built** (N-31; migration 0008 applied, RLS on) | — | 1 |
 | Guest surface in Hindi, default chosen by the studio | **Partial** — toggle exists, no org-level default | N-29 | 1 |
-| Told they own it, with renewal date and terms | **Missing** | N-21 | 1 |
+| Told what they have and who manages it | **Missing** | N-21 | 1 |
 | Download everything, at any time | **Missing** | N-22 | 1 |
 | Renew, upgrade, add storage, self-service | **Missing** | N-20 | 2 |
 | Family circles *(new)* — scoped links per side, "who watched" | **Missing** | N-38 | 3 |
@@ -121,9 +121,9 @@ What is sold, who pays, what it needs built, and where it stands. Prices are the
 |---|---|---|---|---|---|
 | R1 | **Catalogue credits** — Deliver (90 days) / Keep (12 months) / Cinema | Studio (resold to the couple in their package) | ₹1,999 (5 for ₹7,999) / ₹6,000 / ₹12,000; three years for the price of two on Keep and Cinema | Manual invoice today; N-20 for self-service; a Deliver term needs N-24 | **Keep and Cinema sellable now, invoiced by hand; Deliver needs the 90-day lifecycle** |
 | R10 | **Deliver → Keep upgrade** *(new, Sept)* — offered to the studio at day 60 | Studio (marks up to the couple) | ₹2,500 base | N-24, N-50, N-20 | Missing |
-| R2 | **Couple renewal** (streaming) | Couple, directly, from year two | ₹2,500 / ₹4,000 per year | N-50, N-21, N-20, N-24 | Missing |
-| R3 | **Archive tier** *(new)* — storage only, streaming paused, one-click restore | Couple | ₹999 / ₹1,499 per year; free for 12 months after grace | N-24 (archive state), N-20 | Missing |
-| R4 | **Long-term prepaid archive** *(new)* — 5 or 10 years | Couple, or a relative as a gift | ₹3,999 / ₹6,999 (Keep); ₹5,999 / 5 yrs (Cinema) | N-24, N-20 | Missing |
+| R2 | **Renewal** (streaming) | **Studio** (marks up) | ₹2,500 / ₹4,000 per year | N-50, N-21, N-20, N-24 | Missing |
+| R3 | **Archive tier** *(new)* — storage only, streaming paused, one-click restore | **Studio** (marks up) | ₹999 / ₹1,499 per year; free for 12 months after grace | N-24 (archive state), N-20 | Missing |
+| R4 | **Long-term prepaid archive** *(new)* — 5 or 10 years | **Studio** (marks up) | ₹3,999 / ₹6,999 (Keep); ₹5,999 / 5 yrs (Cinema) | N-24, N-20 | Missing |
 | R5 | **Extra storage** | Studio or couple | ₹25 / GB / month for the months left | N-20, N-23 | Missing |
 | R6 | **Extra 4K** | Studio | ₹1,999 per 20 minutes | N-20; premium-encoding flag on the library | Missing |
 | R7 | **Studio plan** *(new)* — registration, branding, presets, team seats, custom domain served, lapse dashboard | Studio, yearly | ₹4,999 per year, **including three Deliver credits in year one** | N-26, N-27, N-37, N-44; N-20 to sell it | Missing — registration and branding exist, the fee does not |

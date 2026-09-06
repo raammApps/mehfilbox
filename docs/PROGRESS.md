@@ -920,3 +920,39 @@ product before:
 
 `heirloomfilms.in` keeps serving and is never dropped. Every link already in a guest's phone points
 at it.
+
+## The September model, settled: studio-only
+
+D-26 to D-30 close the five decisions the handoff left open, and the docs now agree with them
+rather than hedging.
+
+**The studio is the only customer.** Every rupee is invoiced to them at a base they mark up —
+delivery, the day-60 upgrade, renewal, archive, long-term archive, storage, 4K. One customer, one
+invoice shape, one payment flow, and no couple can find our ₹2,500 beside their studio's ₹8,000.
+
+**The escape hatch is what makes the model honest.** When a studio is gone — closed, plan unpaid
+past grace, or unresponsive 90 days after a lapse — the couple may pay us directly at list price.
+It is computed rather than stored and logged when it unlocks a purchase. Without it, a model whose
+renewals depend on studios is precisely what `COMPETITORS.md` §4 positions against, and the
+positioning line changed with it: not *"the couple owns it"* but **"the wedding survives the
+studio"**, which is true and which no competitor here can say.
+
+Four consequences, all now in the docs rather than in someone's head: **N-37 moves to Phase 2**,
+because under studio-only the lapse dashboard is not reporting, it is the collection channel.
+**N-20 is one flow**, with the escape hatch as the same checkout carrying `payer = couple`.
+**N-21 becomes the handover email** — *your studio manages the plan* — since billing never
+transfers. And **N-24 gains the `studio_gone` predicate**, which needs an audit trail rather than
+a boolean, being the only thing that lets a couple pay us at all.
+
+**Originals go to Edge Storage** (D-28), and the reason is worth keeping: D-15 already decided
+that originals are dropped *per catalogue* at archive, and Bunny Stream's "Keep Original Files" is
+a **library** setting that cannot express "this wedding's originals go, that one's stay". The
+cheaper option could not implement a policy that was already made. It also hands N-22 the
+per-file signed URL it needs.
+
+**Credits expire at 24 months** (D-27) and **the Studio plan is mandatory** (D-30) — the first
+because an unused credit is a liability that never clears, the second because D-18's whole
+reconciliation collapses if the plan is optional.
+
+**P-6 stays open on purpose.** Whether a studio will offer their couple Keep at day 60, and at
+what markup, is a fact to obtain from one studio owner — not a decision to reason toward.

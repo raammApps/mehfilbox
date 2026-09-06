@@ -26,7 +26,7 @@ fee. Sold to studios per wedding; the couple's keepsake is the product, the stud
 |---|---|---|
 | **Platform admin** (Mehfilbox) | Sandeep | Create/suspend studios, assign plans, see revenue and usage, audit every write; never impersonate without a trail |
 | **Studio** (operator; `orgs.kind = partner`) | Owner, editor, front desk | Register, brand once, set up a wedding in 30 minutes, deliver by one WhatsApp, know who watched, know who is due, buy credits |
-| **Couple** (`orgs.kind = couple` after handover) | Two people, two families | Watch, share, download everything, control the passcode, hand back for a re-edit; renew or archive [via studio — P-1] |
+| **Couple** (`orgs.kind = couple` after handover) | Two people, two families | Watch, share, download everything, control the passcode, hand back for a re-edit; renewal and archive **via their studio** (D-26) |
 | **Guest** | Up to ~300 per wedding | Open a link, pass a profile gate, watch in under 1.5 s on 4G, share a film |
 
 ## 3. Plans and billing
@@ -38,7 +38,7 @@ fee. Sold to studios per wedding; the couple's keepsake is the product, the stud
 | **Deliver** | 90 days; 180 for two credits | 100 GB | — | ₹1,999; 5 for ₹7,999 |
 | **Keep** | 12 months, renewable | 100 GB | 20 min | ₹6,000; 3 years ₹12,000 |
 | **Cinema** | 12 months, renewable | 200 GB | 90 min | ₹12,000; 3 years ₹24,000 |
-| **Studio plan** | 12 months | — | — | ₹4,999, includes 3 Deliver credits in year one [P-5: mandatory] |
+| **Studio plan** | 12 months | — | — | ₹4,999, includes 3 Deliver credits in year one mandatory from the first paid wedding (D-30) |
 
 Add-ons: Deliver → Keep upgrade ₹2,500 base (day 60, to the studio); renewal ₹2,500 / ₹4,000;
 archive ₹999 / ₹1,499; long-term archive ₹3,999 / 5 yrs, ₹6,999 / 10 yrs (Keep), ₹5,999 / 5 yrs
@@ -47,11 +47,12 @@ archive ₹999 / ₹1,499; long-term archive ₹3,999 / 5 yrs, ₹6,999 / 10 yrs
 ### 3.2 Billing rules
 
 - B-1 Every purchase in the first twelve months after delivery is the studio's (D-16).
-- B-2 **[P-1]** If studio-only is adopted: every purchase, forever, is the studio's; the couple
-  may pay directly only under the escape hatch (studio gone). Otherwise: renewals from year two
-  are the couple's, directly.
-- B-3 Studios buy prepaid credits; creating a catalogue spends one; credits **[P-2]** expire at
-  24 months / never.
+- B-2 **Every purchase, forever, is the studio's** (D-26). The couple may pay directly *only*
+  under the escape hatch — origin org closed or suspended, its Studio plan lapsed past grace, or
+  this catalogue lapsed ≥ 90 days with the last warning unanswered. Computed, logged when it
+  unlocks a purchase.
+- B-3 Studios buy prepaid credits; creating a catalogue spends one; credits **expire at 24
+  months** (D-27) — an unused credit is a liability that otherwise never clears.
 - B-4 Upgrades are the prorated difference, immediate. Downgrades at renewal only, and only if
   the content fits.
 - B-5 Every invoice carries GSTIN where the studio has one, the 18% split, the term start and end
@@ -82,7 +83,7 @@ Deliver-specific: at T-30 (day 60) the **studio** receives the Keep offer (R10).
 catalogue that reaches day 90 unconverted goes to `grace` → `archived` on the same schedule.
 
 Originals: retained through `included`/`active`/`grace`; at `archived` the archive job removes
-originals (4K films excepted) and keeps the best rendition [P-3 decides where they lived].
+originals (4K films excepted) and keeps the best rendition in Edge Storage (D-28).
 
 Every transition is written to a `lifecycle_events` table (catalogue, from, to, cause, actor,
 timestamp).
@@ -98,7 +99,7 @@ templates in English and Hindi, covered by the i18n test.
 | Catalogue published — delivery message | Couple (both partners) | WhatsApp, email | N-36 |
 | Handover | Couple | WhatsApp, email | N-21 |
 | Deliver day-60 Keep offer | Studio; couple copy "ask your studio" | WhatsApp, email | N-24 |
-| Expiry T-60/30/7/1; grace G+30/60/89 | Studio first; couple [P-1: copy says contact studio / direct] | WhatsApp, email, SMS; console banner; "call them" prompt for Cinema | N-21, N-24 |
+| Expiry T-60/30/7/1; grace G+30/60/89 | Studio first; couple copy says *contact your studio* | WhatsApp, email, SMS; console banner; "call them" prompt for Cinema | N-21, N-24 |
 | Archived; archive fee due; quarterly reminders | Studio and couple | WhatsApp, email | N-24 |
 | Anniversary | Couple (content); studio (nudge) | WhatsApp, email | N-39 |
 | Not opened in 7 days | Studio | Email | N-37 |
@@ -136,7 +137,7 @@ Status today from `PRODUCT.md`; phase from `ROADMAP.md` §5.
 - S-6 Delivery message, one click, recorded — N-36.
 - S-7 Delivery tracking: opened, watch-time per film, not-opened alert — N-37.
 - S-8 Lapse dashboard: every originated catalogue with state and end date; renew/upgrade/archive
-  on behalf; day-60 offers listed — N-37 [move to Phase 2 under P-1].
+  on behalf; day-60 offers listed — N-37, **Phase 2** (D-26: it is the renewal mechanism).
 - S-9 Permanent "Filmed by" credit and enquiry link, surviving handover and renewals — N-36b.
 - S-10 Branding presets, more templates — N-26. Custom domain served and verified — N-44. Team
   seats with invite — N-27.
@@ -145,8 +146,8 @@ Status today from `PRODUCT.md`; phase from `ROADMAP.md` §5.
 ### 6.3 Platform
 - P-1 Platform admin: create/suspend studio, assign plan/credits, revenue and usage view, audit
   trail on every write — N-27.
-- P-2 Razorpay: one flow (studio) [+ escape-hatch variant under P-1]; webhook verified and
-  reconciled by cron; invoices table — N-20.
+- P-2 Razorpay: **one flow** (studio); the escape hatch is the same flow with `payer = couple`,
+  gated by `studio_gone`. Webhook verified and reconciled by cron; invoices table — N-20.
 - P-3 Lifecycle driver per §4; archive job; `lifecycle_events` — N-24.
 - P-4 Delivery metering per catalogue — N-25.
 - P-5 Notification seam per §5 — N-50.
@@ -158,7 +159,7 @@ Price in the hero; With/Without Drive table; three template screenshots; FAQ ("a
 archives — nothing is deleted"); public demo one tap away; "originals always downloadable,
 streaming tuned for 4G" — never "no compression".
 
-## 7. Revenue streams (from `ROADMAP.md` §3, payer per [P-1])
+## 7. Revenue streams (from `ROADMAP.md` §3 — **the payer is the studio throughout**, D-26)
 
 R1 credits (Deliver/Keep/Cinema) · R10 Deliver → Keep upgrade · R2 renewals · R3 archive ·
 R4 long-term archive · R5 extra storage · R6 extra 4K · R7 Studio plan · R8 in-catalogue upsell
@@ -184,7 +185,7 @@ Unit economics (originals kept, Bunny ₹0.95/GB-month): Deliver cost ≈₹500 
 ## 9. Data model additions (for N-20, N-24, N-50)
 
 `plans` rows for Deliver, Keep, Cinema, Studio plan, archive, long-term archive, upgrade ·
-`credits` (org, plan, purchased_at, expires_at [P-2], consumed_by_catalogue) · `invoices` (org,
+`credits` (org, plan, purchased_at, expires_at = purchased_at + 24 months, consumed_by_catalogue) · `invoices` (org,
 gstin, amount_paise, gst_paise, tds_paise, term_start, term_end, razorpay ids) · `notifications`
 (recipient, channel, template, locale, provider_id, status, sent_at) · `lifecycle_events` ·
 `orgs.locale`, `orgs.status`, `orgs.plan_ends_at` · `catalogues.term_ends_at`,
@@ -202,6 +203,15 @@ gstin, amount_paise, gst_paise, tds_paise, term_start, term_end, razorpay ids) �
 
 ## 11. Open questions
 
-P-1 studio-only and the escape hatch · P-2 credit expiry · P-3 where originals live · P-4
-handover as control-only · P-5 Studio plan mandatory · P-6 the day-60 question to a studio owner
-· GST registration · trademark search · MSG91 WhatsApp Business approval (start now).
+**P-1 to P-5 are decided** — D-26 to D-30 in the decision log: studio-only with an escape hatch,
+credits expiring at 24 months, originals in Edge Storage, handover as control-only, and the Studio
+plan mandatory.
+
+What is genuinely still open is not a decision anyone can reason to:
+
+- **P-6, the day-60 question.** Will a studio offer their couple Keep at day 60, and at what
+  markup? One studio owner's answer gates the Phase 2 price rows.
+- **GST registration**, with the accountant.
+- **Trademark search** in classes 41 and 42, now for *Mehfilbox* — a coined word, so a clean class
+  is plausible, which is an argument for filing rather than assuming.
+- **MSG91 WhatsApp Business API** approval — days, not hours, so start it before N-50 needs it.

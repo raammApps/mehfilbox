@@ -101,9 +101,13 @@ now, it takes days. Every template exists in English and Hindi, and
 
 ### N-21 · The migration email, and the warning schedule  ·  ~2h  ·  **blocked by N-50**
 
-A couple only learns they own their wedding if the partner remembers to tell them. That is the
-single biggest hole in the commercial model (`PRICING.md` §2): they pay a studio ₹20,000, then a
-year later a company they have never heard of asks them for money.
+A couple only learns what they have if the studio remembers to tell them.
+
+> **Rewritten for studio-only (D-26/D-29).** This is the *handover* email, not a migration email:
+> *this is yours to watch, download and share; your studio manages the plan; here is the date it
+> runs to; nothing is ever deleted.* Billing never transfers, so it introduces the studio rather
+> than us. Expiry warnings go to the **studio first**, and the couple's copy says *contact your
+> studio* — except where the escape hatch is open, when it says we can take payment directly.
 
 At handover, tell them on every channel they have: this is yours, here is your login, here is the
 renewal date, here is what happens if you do not — and that nothing is ever deleted. Then the
@@ -156,6 +160,11 @@ downloadable, streaming tuned for 4G*, which is true and better here.
 ### N-24 · Lifecycle: renewal, lapse, **archive**  ·  doc 15  ·  **Phase 2**
 
 > Rewritten 6 September 2026: **no automatic deletion.** `PRICING.md` §2 and `ROADMAP.md` §4.
+>
+> Add the **`studio_gone` predicate** (D-26): origin org closed or suspended, **or** its Studio
+> plan lapsed past grace, **or** this catalogue lapsed ≥ 90 days with the studio's last warning
+> unanswered. Computed rather than stored, and logged when it unlocks a purchase — it is the only
+> thing that lets a couple pay us directly, so it needs an audit trail rather than a boolean.
 
 The state machine exists and `resolveAccess` honours it. Nothing writes it. Needs: the renewal
 path (N-20 writes it), the **90-day Deliver term** with the day-60 Keep offer sent to the studio
@@ -180,7 +189,12 @@ enquiry link ("Get your wedding on Mehfilbox") routed to the originating studio,
 can hide but not redirect. Both survive every renewal. This is what the studio gets instead of a
 share of renewals (`PRICING.md` §2).
 
-### N-37 · Delivery tracking and the lapse dashboard  ·  ~1 session  ·  **Phase 3**
+### N-37 · Delivery tracking and the lapse dashboard  ·  ~1 session  ·  **Phase 2** (moved)
+
+> **Moved from Phase 3 by D-26.** Under studio-only the studio *is* the renewal mechanism, so a
+> list of every catalogue they originated with its end date — and one-click renew on behalf — is
+> not reporting, it is the collection channel. Without it, renewals depend on a studio remembering
+> a date three years after a wedding.
 
 Play events exist and nothing reads them per catalogue. Show the studio: opened (first profile
 gate pass), watch-time per film, "not opened in 7 days". Then a partner-level view of every

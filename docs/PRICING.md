@@ -28,24 +28,36 @@ All prices **exclude 18% GST** (SAC 998314).
 |---|---|---|
 | Studio plan | Studio, yearly | **₹4,999** (₹5,899 incl.): registration, branding, presets, team seats, custom domain served, lapse dashboard. **Includes three Deliver credits in the first year**, so a studio that delivers three weddings has paid nothing for the platform. |
 | Deliver → Keep, inside year one | Studio (marks up to the couple) | **₹2,500** base |
-| Keep renewal / Cinema renewal | Couple, directly, from year two | **₹2,500 / ₹4,000** per year |
-| Archive (storage only, restore on demand) | Couple | **₹999 / ₹1,499** per year; free for the first 12 months after grace |
-| Long-term archive, prepaid | Couple or a relative | **₹3,999 / 5 yrs · ₹6,999 / 10 yrs** (Keep); ₹5,999 / 5 yrs (Cinema) |
-| Extra storage | Whoever holds the catalogue | **₹25 / GB / month**, for the months left on the plan |
+| Keep renewal / Cinema renewal | **Studio** (marks up) | **₹2,500 / ₹4,000** per year |
+| Archive (storage only, restore on demand) | **Studio** (marks up) | **₹999 / ₹1,499** per year; free for the first 12 months after grace |
+| Long-term archive, prepaid | **Studio** (marks up) | **₹3,999 / 5 yrs · ₹6,999 / 10 yrs** (Keep); ₹5,999 / 5 yrs (Cinema) |
+| Extra storage | **Studio** | **₹25 / GB / month**, for the months left on the plan |
 | Extra 4K | Studio | **₹1,999** per 20 minutes |
 | Suggested retail | — | Deliver ₹5,000–8,000 · Keep ₹15,000–20,000 · Cinema ₹30,000–40,000 |
 
 The full list of what is sold, who pays and what each line needs built is `ROADMAP.md` §3.
 
-### Who is billed when — the one rule
+### Who is billed — the one rule
 
-**For twelve months after delivery every rupee goes through the studio. After that, the couple
-deals with Mehfilbox directly.** A couple who paid their studio must never receive an invoice from a
-company they have not heard of inside that first year — it costs the studio their trust, and the
-studio is the channel. So a Deliver → Keep conversion at day 60 is a studio purchase at the ₹2,500
-base, which they quote to the couple as they like; the day-60 message goes to the studio, with a
-copy to the couple that says *"ask your studio"*. Direct billing begins at the first renewal, by
-which time the migration email (§2) has already introduced us.
+**The studio. Always.** (D-26.) Every rupee — delivery, the day-60 upgrade, renewal, archive,
+long-term archive, extra storage, extra 4K — is invoiced to the studio at a base price they mark
+up as they see fit. **The couple is never our billing customer**, and a couple who paid their
+studio never receives an invoice from a company they have not heard of.
+
+One customer, one invoice shape, one payment flow. The markup is the studio's revenue, is never
+recorded here, and is nobody's business but theirs.
+
+**The one exception — the escape hatch.** When a studio is *gone* — account closed, Studio plan
+unpaid past its own grace, or unresponsive 90 days after a catalogue lapsed — the couple may pay
+us directly, at list price, to renew or archive. It is not a channel and is expected to be rare.
+It is what makes **"your wedding survives your studio"** true, which is the one line no competitor
+here can say.
+
+> **The weakness, stated plainly:** renewals now depend on studios doing them, and studios are bad
+> at collecting ₹2,500 three years after a wedding. Four things contain it — three years sold up
+> front (§4), long-term archive quoted at delivery, the lapse dashboard (N-37) that turns renewals
+> into a list they work through, and the fact that **nothing is ever deleted** (§2), so the worst
+> case is a paused catalogue rather than a lost one.
 
 ### What each one is for
 
@@ -96,14 +108,16 @@ fits nothing on the list.
 This is the part your three changes rewrote, and they rewrote it well. (September 2026 revised
 the ending again: archive, not deletion.)
 
-### At handover, the couple is told they own it
+### At handover, the couple is told what they have and who manages it
 
-When a partner hands the catalogue over, **the couple gets an email that says so**: this is yours
-now, here is your login, here is the date it renews, here is what happens if you do not.
+When a studio hands the catalogue over, **the couple gets an email that says so** (N-21): this is
+yours to watch, download and share; here is your login; here is the date it runs to; **your studio
+manages the plan**, and nothing is ever deleted.
 
-That one email fixes the biggest weakness in the old model. Previously a couple who had paid their
-studio ₹20,000 would get an invoice a year later from a company they had never heard of. Now the
-relationship transfers *explicitly*, while they are still delighted.
+Under studio-only (D-26) handover is a transfer of **control, not billing** — the passcode, the
+family links, the downloads and their own login. The invoice stays with the studio for life, which
+is why the email introduces the studio rather than us. A couple who paid their studio ₹20,000
+never gets an invoice from a company they have not heard of, in year one or year five.
 
 **Optionally, they can hand it back** — for a re-skin, an update, a new film. Good for the partner,
 good for you, and it keeps the studio in the couple's life without owing them anything.
@@ -350,7 +364,7 @@ thirty-six months.
 | Tiers that cannot hold a wedding | 2 | **1, named honestly** |
 | Grace before deletion | 12 months | 30 days + download → **(Sept 2026) 90 days, then archive; no deletion** |
 | Partner renewal share | 15% | **None** — credit and referral link instead |
-| Couple learns they own it | Never | **Email at handover** |
+| Couple learns what they have | Never | **Email at handover**, naming the studio as who manages it |
 | Default term | 1 year | **3 years** |
 | GST | Ignored | **Stated, exclusive** |
 | Storage bill, year 5 | ₹1,14,939 | **₹75,429** |

@@ -156,11 +156,20 @@ that starts in under a second and a half on 4G, resume-where-you-left-off, and a
 account, no login, two hundred guests from a WhatsApp link. That is a materially different thing
 to be sent, and it is the reason a couple forwards it.
 
-**The couple owns it.** Every competitor ties the gallery to the studio's subscription: stop
-paying and it goes dark. Handover moves the wedding into the couple's own account, and they renew
-directly. Only OurStoria's Safe Archive (**$12–19/year**, ₹1,146–1,814) does anything comparable —
-and it is cold storage for downloading, not a live site. **Our renewal at ₹2,499 is roughly
-priced against it**, which is worth knowing.
+**The wedding survives the studio.** Every competitor ties the gallery to the studio's
+subscription: stop paying and it goes dark. Here, **control** transfers to the couple at handover
+— their own login, the passcode, the family links, downloads — while **billing stays with the
+studio** (D-26), which is what keeps the studio selling it.
+
+The claim is only true because of two things behind it. **Nothing is ever deleted**: a lapse
+becomes 90 days' grace and then an archive that restores on payment, so the worst case is paused
+rather than lost. And **the escape hatch**: if the studio is gone — closed, unpaid, or
+unresponsive 90 days after a lapse — the couple can pay us directly at list price. That single
+provision is the difference between our sentence and every competitor's, and it costs almost
+nothing because it is expected to be rare.
+
+Only OurStoria's Safe Archive (**$12–19/year**, ₹1,146–1,814) does anything comparable — and it is
+cold storage for downloading, not a live site. **Our archive at ₹999 is priced against it.**
 
 **Built for the market.** English and Hindi throughout, Mumbai region, sub-1.5s playback on
 mid-range Android over 4G, and pricing in rupees. Every platform above is a US product with an

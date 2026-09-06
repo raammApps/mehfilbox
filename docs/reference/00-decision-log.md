@@ -387,46 +387,71 @@ That is served by the rename (N-52) and by the seams already in place — not by
 are where it would show, and replacing one driver is a contained change. That is the insurance a
 rewrite would be buying, and it is already paid for.
 
+## D-26 · Studio-only, with an escape hatch (Sept 2026) — was P-1
+
+**Decided:** Mehfilbox invoices **studios only**. Every rupee — delivery, upgrade, renewal,
+archive, long-term archive, storage, 4K — is billed to the studio at a base price they mark up.
+The couple is never Mehfilbox's billing customer.
+
+**The escape hatch exists.** When a studio is *gone* — account closed, Studio plan unpaid past its
+own grace, or unresponsive 90 days after a catalogue lapsed — the couple may pay directly, at list
+price, to renew or archive. Computed, never stored; logged when it unlocks a purchase.
+
+**Why:** one customer, one invoice shape, one payment flow, and no couple can find our ₹2,500 next
+to their studio's ₹8,000. The escape hatch is what keeps *"your wedding survives your studio"*
+true, which is the one line no competitor can say. Without it the model's weakness — studios are
+bad at collecting a renewal three years after a wedding — becomes the thing `COMPETITORS.md` §4
+positions against.
+
+**Cost:** renewals depend on studios doing them. Contained by selling three years up front, the
+lapse dashboard (N-37, now Phase 2 because it *is* the renewal mechanism), long-term archive sold
+at delivery, and D-11/D-20 — nothing is ever deleted, so the worst case is a paused catalogue.
+
+## D-27 · Credits expire at 24 months (Sept 2026) — was P-2
+
+**Decided:** prepaid credits expire **24 months** after purchase.
+
+**Why:** an unused credit is a liability on the books that otherwise never clears, and revenue
+recognition needs a horizon. viddrop says never; either is defensible commercially, and the
+accounting is the tiebreaker. Two years is long enough that no working studio loses one.
+
+## D-28 · Originals live in Edge Storage, not Bunny Stream (Sept 2026) — was P-3
+
+**Decided:** originals are copied to **Bunny Edge Storage** with signed download URLs, rather than
+enabling Stream's "Keep Original Files".
+
+**Why, and it is the lifecycle that decides it:** D-15 drops originals **per catalogue** when it
+archives, keeping 4K. "Keep Original Files" is a *library* setting — it cannot express "this
+wedding's originals go, that one's stay", so the cheaper option cannot implement the policy that
+was already decided. Edge Storage also gives N-22 exactly what it needs: a per-file signed URL,
+which is how "download everything" works without a server-built zip.
+
+**Cost:** a second write path and the bytes stored twice during upload. Both are known; a policy
+the storage layer cannot express is not.
+
+## D-29 · Handover transfers control, not billing (Sept 2026) — was P-4
+
+**Decided:** handover moves the passcode, family links, downloads and the couple's own login. It
+does **not** move billing, which stays with the origin studio for life (D-26).
+
+**Why:** it is simpler than what is built, and it is what the studio-only model implies. The
+couple's org holds no billing method unless the escape hatch is open for that catalogue.
+
+## D-30 · The Studio plan is mandatory (Sept 2026) — was P-5
+
+**Decided:** the ₹4,999/yr Studio plan is how a studio registers — mandatory from the first paid
+wedding. Its three included Deliver credits in year one are the free trial.
+
+**Why:** D-18's reconciliation only holds if the plan is the entry point. Optional means most
+studios skip it and the fee earns nothing, which leaves the argument for charging a registration
+fee unsupported. Three included credits mean it pays for itself before a studio is out of pocket.
+
 ---
 
-# Open — proposed, argued, **not decided**
-
-These are not decisions and must not be read as any. Each is written up so the argument does not
-have to be rebuilt, and each has a recommendation, but **nothing in the repo is built against
-them** until Sandeep answers. P-1 in particular changes `PRICING.md`, `ROADMAP.md`, `PRODUCT.md`
-and four tickets — the full change list is in
-[`studio-only-proposal.md`](./studio-only-proposal.md) §5.
-
-## P-1 · Studio-only: no direct sale to couples, ever?
-
-Proposed by Sandeep at the end of the session; argued for in `02-studio-only-model.md`. The
-question inside it: **does the escape hatch exist** — may a couple pay Mehfilbox directly *only*
-when their studio is gone (account closed, plan unpaid, or unresponsive 90 days after lapse), at
-list price? Recommendation: yes. Without it the product loses the one line every competitor
-cannot say — "your wedding survives your studio".
-
-## P-2 · Do credits expire?
-
-viddrop says never. Recommendation: **24 months**, because unused credits are a liability on
-the books that otherwise never clears. Either answer is fine commercially; pick one before N-20.
-
-## P-3 · Where originals live
-
-Bunny Stream's "Keep Original Files" (zero code, beside the renditions) or a copy in Edge Storage
-with a signed download URL (cleaner to delete at archive time). Decide in N-24a.
-
-## P-4 · Handover after studio-only
-
-If P-1 is adopted: handover remains a *control* transfer (passcode, family links, download, the
-couple's own login) and stops being a *billing* transfer. Confirm that is what Sandeep wants —
-it is simpler than what is built.
-
-## P-5 · Studio plan mandatory or optional?
-
-Sandeep said "with studio fee". D-18 makes the plan the way a studio registers, i.e. mandatory
-from the first paid wedding, with the free trial being the three included credits. Confirm.
+# Open — a question to ask, not a decision to make
 
 ## P-6 · The day-60 question
 
-Not a decision but a fact to obtain: will a studio offer their couple Keep at day 60, and at what
-markup? Ask one studio owner. It gates the Phase 2 price rows.
+Not a decision but a fact to obtain: **will a studio offer their couple Keep at day 60, and at
+what markup?** Ask one studio owner. It gates the Phase 2 price rows, and no amount of reasoning
+here substitutes for one person's answer.
