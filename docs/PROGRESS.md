@@ -882,3 +882,41 @@ Between the two, the same bug is now caught at the map (`pnpm verify`, offline, 
 row (`pnpm test:integration`, real Postgres). The first is fast enough to run always; the second
 is the one that would have caught it even if the map had been generated correctly and Postgres
 had rejected the value.
+
+## N-52 · Mehfilbox, all the way down
+
+`mehfilbox.com` is canonical and serving; `mehfilbox.in` and `heirloomfilms.in` both resolve. The
+code rename, the Vercel project, the GitHub repository, both new domains, `ROOT_DOMAIN`, the Bunny
+library and webhook, the photo zone, Supabase's Site URL and the SMTP sender — done in a day,
+against a live product with real catalogues on it.
+
+**The last rename's three failures were the specification, and one of them was live.**
+
+The two-word-brand-inside-a-hostname bug could not recur — Mehfilbox is one word. The mixed-case
+fixture that was missed last time, `Aanya-Vikram.Heirloomfilms.App`, was renamed this time because
+the survey was case-insensitive rather than a lowercase regex.
+
+The third was **armed at the moment of the rename**: `scripts/deploy-vercel.sh` read `mehfilbox`
+while the Vercel project was still `heirloomfilms`, and `vercel link --yes --project` *creates on
+miss*. Running it would have deployed into a new empty project while production served the old
+one, reporting success throughout. The script now refuses to link to a project that does not exist
+— the class, not the instance.
+
+**And the guard written to prevent that was itself wrong**, which is the more useful half. `vercel
+project ls` prints on **stderr**, so discarding stderr made it see an empty list and refuse *every*
+deploy. It failed closed, so nothing would have broken — but the first person to run it would have
+been told a project sitting in front of them did not exist. Found by testing the guard against
+reality a minute after writing it, rather than trusting that it did what it read as.
+
+**Two silent-failure modes were checked rather than assumed**, both of which have bitten this
+product before:
+
+- The **Bunny webhook** moved in the same sitting as `ROOT_DOMAIN`. Left behind it keeps answering
+  from the old host — uploads succeed, transcoding finishes, titles never leave `processing`.
+- The **Supabase Site URL** was verified by registering a throwaway partner and *reading the
+  delivered message* through Resend's API: `redirect_to: https://mehfilbox.com`, followed to a
+  `303`, confirmed 22 seconds after the send. A wrong Site URL serves `200` and looks healthy from
+  every other angle, which is how it went unnoticed on the first domain.
+
+`heirloomfilms.in` keeps serving and is never dropped. Every link already in a guest's phone points
+at it.

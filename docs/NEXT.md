@@ -50,64 +50,6 @@ and resumable upload — have all now run against the real services.
 
 ## Tier 2 — before a planner sees it
 
-### N-52 · Rename the code and infrastructure to Mehfilbox  ·  ~1 session  ·  **D-23**
-
-Documents carry the new name; nothing else does. The domain, Vercel project, Bunny zones, package
-name, repository, `hello@heirloomfilms.in` and every `heirloomfilms.*` browser key still read the
-old one.
-
-**Unblocked, 7 September:** `mehfilbox.com` and `mehfilbox.in` are both registered and active to
-2027-09-07. `heirloomfilms.in` is live, Resend-verified and serving, so it is *replaced* rather
-than abandoned — keep it resolving until the new domain is verified end to end, then redirect.
-
-**Canonical is `mehfilbox.com`** (decided 7 September); `mehfilbox.in` redirects to it. Chosen
-because a studio types it from memory and it does not tie the brand to one country. Everything
-downstream hangs off it: the Resend verified domain, `ROOT_DOMAIN`, the Bunny webhook, `hello@`,
-and every link already in a guest's phone.
-
-**Done so far:** the code rename (56 files — package name, cookie and localStorage keys, the
-`x-mehfilbox-*` headers, every test hostname). `pnpm verify` and 108 E2E green.
-
-**Left, in this order** — the order matters because each step's verification depends on the one
-before:
-
-1. Rename the Vercel project. **Re-alias immediately afterwards and compare `/api/health` to
-   `HEAD`** — last time the rename left the stable alias serving the previous commit, and the
-   deploy reported success.
-2. Rename the GitHub repository.
-3. Add `mehfilbox.com` to Vercel; two A records at the registrar; add `mehfilbox.in` as a
-   redirect.
-4. Verify `mehfilbox.com` in Resend — three DNS records, and the `send` subdomain trap from
-   `GO-LIVE.md` §3 applies again.
-5. Switch `ROOT_DOMAIN` **and** the Bunny `WebhookUrl` in one sitting. Apart, transcodes stop
-   silently.
-6. The photo zone: new zone, copy, repoint, delete. `scripts/repoint-photo-cdn.ts` does it, and
-   `photos.url` stores absolute URLs so the rows need rewriting too.
-7. Keep `heirloomfilms.in` resolving and redirecting — it is in guests' phones.
-
-**The last rename is the specification for this one.** It went wrong three times (`PROGRESS.md`),
-and each failure is a check to run rather than a story to retell:
-
-1. **A blanket replace produced `heirloom films.app` — a hostname with a space in it** — because
-   the two-word brand was substituted everywhere, including inside domains. `tests/unit/tenant.test.ts`
-   caught it. **Mehfilbox is one word, so this specific failure cannot recur** — which is a reason
-   to be *more* careful about the others, not less.
-2. **A mixed-case occurrence was missed** (`Aanya-Vikram.Heirloom.App`) because the regex was
-   lowercase-only. It existed deliberately, to prove `resolveTenant` lowercases.
-3. **`scripts/deploy-vercel.sh` created a duplicate Vercel project.** It hardcoded the project
-   name and ran `vercel link --yes --project`, which *creates on miss* — so after the server-side
-   rename it made a new empty project, relinked, and deployed there while production kept serving
-   the old build. Only comparing the health hash to `HEAD` exposed it.
-
-Order, learned from doing it wrong: **domain first**, then Vercel, then the repository, then the
-package and the code, then the Bunny zones (storage zones cannot be renamed — new zone, copy,
-repoint, delete, and `photos.url` stores absolute URLs so the rows need rewriting too;
-`scripts/repoint-photo-cdn.ts` does exactly this and can be reused). Rotate nothing during it: the
-Bunny account key is needed throughout.
-
-Guest-visible keys (`heirloomfilms.profile.*`, `heirloomfilms.guest`) can move straight across —
-the two live catalogues are trial data and a returning guest simply picks a profile again.
-
 ### N-53 · Observability — see the failures that are silent  ·  ~half a session  ·  **D-24**
 
 Every serious fault this product has had was **silent**: a transcode webhook pointed at a dead URL
