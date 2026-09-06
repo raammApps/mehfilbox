@@ -1,6 +1,6 @@
 # Deployment
 
-Everything needed to put Heirloom Films in front of a real planner, in order, with the values and the
+Everything needed to put Mehfilbox in front of a real planner, in order, with the values and the
 traps. Follow it top to bottom the first time; after that, only §9 matters.
 
 Two rules worth internalising before you start:
@@ -36,8 +36,10 @@ behaviour is knowable without deploying.
 | Bunny.net | Stream library | **Requires a balance.** A zero-balance account refuses to create zones with `user.insufficient_balance`, which reads like a permissions error and is not one. |
 | A domain | `heirloomfilms.app` or yours | Needs wildcard DNS, so the registrar must support a `*` CNAME |
 
-> Doc 12 §3: run a trademark search on the Indian registry (classes 42 and 45) before printing
-> "Heirloom Films" on planner collateral. It is a common word; expect crowding.
+> Doc 12 §3: run a trademark search on the Indian registry (classes 41 and 42) before printing
+> **"Mehfilbox"** on planner collateral. Unlike "Heirloom", it is a coined word — crowding is
+> unlikely and a clean class is plausible, which is an argument for searching and filing rather
+> than assuming.
 
 ## 3. Bunny Stream
 

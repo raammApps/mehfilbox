@@ -287,6 +287,27 @@ reasons to sell (N-26, N-36b, N-37, N-38, N-39, N-34); Phase 4 the catalogue ear
 N-44, N-48, store module); Phase 5 on demand. Marketplace, photo proofing/CRM, native TV apps and
 a renewal revenue share are deliberately off the roadmap.
 
+## D-23 · The platform is renamed to Mehfilbox (Sept 2026)
+
+**Was:** **Heirloom Films**, chosen 14 August 2026 over Trove, Cinea, Aveya and others, with
+`heirloomfilms.in` registered, live, Resend-verified and serving. Before that, **Mehfil**.
+
+**Decided:** the platform is **Mehfilbox**. Documents are renamed now; **code and infrastructure
+are not** — the domain, the Vercel project, the Bunny zones, the package, the repository and the
+sending address all still read `heirloomfilms`.
+
+**Why the split:** the previous rename is the argument. Renaming documents to match a name the
+infrastructure does not have produces documents that describe a system nobody can reach, and this
+repo has spent a session already on docs that claimed things that were not true. The brand moves
+when it is decided; the identifiers move when they are actually changed.
+
+**Cost:** every document now says Mehfilbox while every URL in it says `heirloomfilms.in`. That
+reads as an inconsistency and is instead the honest state, called out at the top of `PRODUCT.md`.
+It resolves when the rename ticket lands.
+
+**Unresolved and load-bearing:** `mehfilbox.in` is **not registered as far as this repo knows**.
+A brand without its domain is a decision that has not finished.
+
 ---
 
 # Open — proposed, argued, **not decided**
@@ -300,7 +321,7 @@ and four tickets — the full change list is in
 ## P-1 · Studio-only: no direct sale to couples, ever?
 
 Proposed by Sandeep at the end of the session; argued for in `02-studio-only-model.md`. The
-question inside it: **does the escape hatch exist** — may a couple pay Heirloom directly *only*
+question inside it: **does the escape hatch exist** — may a couple pay Mehfilbox directly *only*
 when their studio is gone (account closed, plan unpaid, or unresponsive 90 days after lapse), at
 list price? Recommendation: yes. Without it the product loses the one line every competitor
 cannot say — "your wedding survives your studio".

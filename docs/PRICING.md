@@ -40,7 +40,7 @@ The full list of what is sold, who pays and what each line needs built is `ROADM
 ### Who is billed when — the one rule
 
 **For twelve months after delivery every rupee goes through the studio. After that, the couple
-deals with Heirloom directly.** A couple who paid their studio must never receive an invoice from a
+deals with Mehfilbox directly.** A couple who paid their studio must never receive an invoice from a
 company they have not heard of inside that first year — it costs the studio their trust, and the
 studio is the channel. So a Deliver → Keep conversion at day 60 is a studio purchase at the ₹2,500
 base, which they quote to the couple as they like; the day-60 message goes to the studio, with a

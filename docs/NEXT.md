@@ -50,6 +50,39 @@ and resumable upload — have all now run against the real services.
 
 ## Tier 2 — before a planner sees it
 
+### N-52 · Rename the code and infrastructure to Mehfilbox  ·  ~1 session  ·  **D-23**
+
+Documents carry the new name; nothing else does. The domain, Vercel project, Bunny zones, package
+name, repository, `hello@heirloomfilms.in` and every `heirloomfilms.*` browser key still read the
+old one.
+
+**Blocked on a domain.** `mehfilbox.in` is not registered as far as this repo knows, and the
+rename is not worth starting without it — `heirloomfilms.in` is live, Resend-verified and serving,
+so it is replaced rather than abandoned.
+
+**The last rename is the specification for this one.** It went wrong three times (`PROGRESS.md`),
+and each failure is a check to run rather than a story to retell:
+
+1. **A blanket replace produced `heirloom films.app` — a hostname with a space in it** — because
+   the two-word brand was substituted everywhere, including inside domains. `tests/unit/tenant.test.ts`
+   caught it. **Mehfilbox is one word, so this specific failure cannot recur** — which is a reason
+   to be *more* careful about the others, not less.
+2. **A mixed-case occurrence was missed** (`Aanya-Vikram.Heirloom.App`) because the regex was
+   lowercase-only. It existed deliberately, to prove `resolveTenant` lowercases.
+3. **`scripts/deploy-vercel.sh` created a duplicate Vercel project.** It hardcoded the project
+   name and ran `vercel link --yes --project`, which *creates on miss* — so after the server-side
+   rename it made a new empty project, relinked, and deployed there while production kept serving
+   the old build. Only comparing the health hash to `HEAD` exposed it.
+
+Order, learned from doing it wrong: **domain first**, then Vercel, then the repository, then the
+package and the code, then the Bunny zones (storage zones cannot be renamed — new zone, copy,
+repoint, delete, and `photos.url` stores absolute URLs so the rows need rewriting too;
+`scripts/repoint-photo-cdn.ts` does exactly this and can be reused). Rotate nothing during it: the
+Bunny account key is needed throughout.
+
+Guest-visible keys (`heirloomfilms.profile.*`, `heirloomfilms.guest`) can move straight across —
+the two live catalogues are trial data and a returning guest simply picks a profile again.
+
 ### N-29 · Language chosen at account creation  ·  ~half a session
 
 **New requirement.** A tenant should pick their language when their account is created, and new
@@ -157,7 +190,7 @@ impossible at 300.
 
 `presentedBy` is an editable field snapshotted at handover. Make it a promise: a "Filmed by"
 credit rendered from `origin_org_id`, not from branding, that the couple cannot edit, plus an
-enquiry link ("Get your wedding on Heirloom") routed to the originating studio, which the couple
+enquiry link ("Get your wedding on Mehfilbox") routed to the originating studio, which the couple
 can hide but not redirect. Both survive every renewal. This is what the studio gets instead of a
 share of renewals (`PRICING.md` §2).
 

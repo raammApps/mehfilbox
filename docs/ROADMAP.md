@@ -1,6 +1,6 @@
 # ROADMAP — from what is built to what is proposed
 
-**The bridge between `PRODUCT.md` (what exists today) and the product Heirloom Films is meant to
+**The bridge between `PRODUCT.md` (what exists today) and the product Mehfilbox is meant to
 become.** Written 6 September 2026 from three inputs: the codebase and its documents as they
 stand, the competitor and feature review of the same date (`reference/competitor-and-feature-plan-2026-09.docx`),
 and Sandeep's decisions on lifecycle and branding recorded in §4.
@@ -31,7 +31,7 @@ dependency order; it is unchanged by this document, only extended.
 A studio in any Indian city films a wedding, uploads every function from both sides in an
 afternoon, publishes a catalogue with their own brand on it, and sends the couple one WhatsApp
 message. Two hundred guests open it without an account. After twelve months the couple renews
-directly with Heirloom at a price that is an impulse, the studio's name stays on the page, and
+directly with Mehfilbox at a price that is an impulse, the studio's name stays on the page, and
 nothing is ever deleted — a lapsed catalogue goes cold, not away. The studio sees which couples
 are due, which films were watched, and gets a lead from every catalogue that carries their credit.
 
@@ -128,7 +128,7 @@ What is sold, who pays, what it needs built, and where it stands. Prices are the
 | R6 | **Extra 4K** | Studio | ₹1,999 per 20 minutes | N-20; premium-encoding flag on the library | Missing |
 | R7 | **Studio plan** *(new)* — registration, branding, presets, team seats, custom domain served, lapse dashboard | Studio, yearly | ₹4,999 per year, **including three Deliver credits in year one** | N-26, N-27, N-37, N-44; N-20 to sell it | Missing — registration and branding exist, the fee does not |
 | R8 | **In-catalogue upsell** *(new)* — studio offers extended cut, raw download, album, USB; we take a commission | Couple, via the studio | *proposed* 10% of the item | N-20, a `store` module | Missing — Phase 4 |
-| R9 | **Referral lead** *(new)* — "Get your wedding on Heirloom" on every catalogue, routed to the delivering studio | Nobody, directly | Free; it is the studio's reason to promote renewals | N-36 | Missing — Phase 3 |
+| R9 | **Referral lead** *(new)* — "Get your wedding on Mehfilbox" on every catalogue, routed to the delivering studio | Nobody, directly | Free; it is the studio's reason to promote renewals | N-36 | Missing — Phase 3 |
 
 Three notes on the table.
 
@@ -222,7 +222,7 @@ console, and the couple receives it on WhatsApp and email with a working link. I
 | R3, R4 | Archive and long-term archive as purchasable plans (rows in `plans`) |
 
 **Exit test:** a couple whose year has ended renews on their phone with UPI without anyone at
-Heirloom touching a database; a couple who does not renew is archived, not deleted, and can
+Mehfilbox touching a database; a couple who does not renew is archived, not deleted, and can
 restore.
 
 ### Phase 3 — The studio's reasons to sell it  *(brand, leads, and knowing what is happening)*

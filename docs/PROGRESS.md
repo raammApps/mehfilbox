@@ -813,3 +813,39 @@ is answered would be the expensive kind of guess.
 
 `REQUIREMENTS.md` is the target product and is meant to disagree with `PRODUCT.md`, which is what
 exists. Three of its status lines were corrected on the way in for the same reason as N-34/N-35.
+
+## Renamed to Mehfilbox — the documents only, deliberately
+
+D-23. The brand moves; the identifiers do not. The domain, Vercel project, Bunny zones, package,
+repository and `hello@heirloomfilms.in` all still read `heirloomfilms`, and every document now says
+Mehfilbox while every URL in it says `heirloomfilms.in`.
+
+That reads as an inconsistency and is the honest state. Renaming the docs to match a name the
+infrastructure does not have would produce documents describing a system nobody can reach — which
+is the failure this repo spent a session correcting. `PRODUCT.md` says so at the top rather than
+leaving a reader to notice.
+
+**The split is what made this cheap.** Three categories, and only one was touched:
+
+| | |
+|---|---|
+| Brand prose | Renamed — `PRODUCT`, `ROADMAP`, `REQUIREMENTS`, `PRICING`, `NEXT`, `DEPLOYMENT`, `README`, the studio-only proposal |
+| Live identifiers | **Untouched** — `heirloomfilms.in`, `.test`, `.localhost`, the Vercel project, the photo zone |
+| History | **Untouched** — the PROGRESS entries recording the *previous* rename say what happened, and rewriting them would be a lie about the past |
+
+**A blanket replace would have been wrong in both directions**, which the last rename already
+proved: it produced `heirloom films.app` — a hostname with a space — by substituting a two-word
+brand inside domains. Mehfilbox is one word so that exact failure cannot recur, and the discipline
+still holds, because the other two failures were a missed mixed-case occurrence and a deploy script
+that silently created a second Vercel project.
+
+**It also uncovered damage left by that rename.** `PRODUCT.md`'s naming section had been mangled
+into "an heirloomfilms is *a thing a family passes down*" and "chosen over Heirloom Films" — chosen
+over itself. Rewritten rather than patched: it now records what the name replaces, keeps the
+criteria that still apply (a coined word is registrable; the register decides, not a search
+engine), and states the two things outstanding.
+
+**N-52 carries the code rename**, with the three failures from last time written as checks rather
+than as a story, and the order that worked: domain, Vercel, repository, package, then the Bunny
+zones. It is blocked on `mehfilbox.in`, which as far as this repo knows is not registered — a brand
+without its domain is a decision that has not finished.

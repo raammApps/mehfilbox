@@ -20,28 +20,37 @@ rows: no hard delete, multi-channel notifications, and the studio's credit survi
 
 ## The name
 
-**Heirloom Films** — `heirloomfilms.in`, registered 14 August 2026.
+**Mehfilbox** — decided 7 September 2026. **The domain is still `heirloomfilms.in`**, and so is
+every identifier: the Vercel project, the Bunny zones, the package, the repository, the sending
+address `hello@heirloomfilms.in`. Only the documents carry the new name today; the code and
+infrastructure rename is a separate job (see `NEXT.md`).
 
-Chosen over Heirloom Films, Trove, Cinea, Aveya and several others. The reasoning is worth keeping,
-because it is also the positioning:
+That gap is deliberate and worth stating rather than tidying away: a document that renames the
+live domain describes infrastructure that does not exist, and this repo has already paid for that
+kind of tidiness once.
 
-- **"Heirloom" is arbitrary for a video platform**, which is what makes it distinctive and
-  registrable. A trove is a collection and a stream is a stream; an heirloomfilms is *a thing a family
-  passes down*, which is the argument against Google Drive compressed into one word.
-- **It is honest about permanence** in a way "Now and Forever" was not. An heirloomfilms is something
-  you keep and hand on — it does not promise a server runs indefinitely, so it does not fight the
-  30-day deletion policy.
-- **Trove and Cinea died on trademarks**, not domains: Trove is occupied in both class 41 and 42
-  and its `.com` belongs to an operating platform; Cinea is a registered mark of a **Dolby
-  Laboratories subsidiary** in video technology. Free domains are not the signal — free domains
-  *plus no trademark holder* is.
+### What it replaces, and what was learned
 
-The brand can present as **Heirloom** or **Heirloom Films**; the domain carries both.
+The name before this was **Heirloom Films** (`heirloomfilms.in`, registered 14 August 2026), and
+before that **Mehfil**. The August reasoning is kept below because the *criteria* still apply even
+though the answer changed — a coined word is distinctive and registrable, and the trademark
+register rather than a search engine is what decides whether a name is free:
 
-> **Still outstanding: a trademark search in classes 41 and 42.** A search engine finds brands, not
-> registry records — Cinea is exactly the case that proves the difference. Budget ₹3,000–8,000 with
-> an agent, and ask specifically about "Heirloom Digital Productions", a small US wedding
-> videography business.
+- **An arbitrary word beats a descriptive one.** A trove is a collection and a stream is a stream;
+  a coined name has no prior meaning to fight, which is what makes it registrable.
+- **Trove and Cinea died on trademarks, not domains.** Trove is occupied in classes 41 and 42;
+  Cinea is a registered mark of a Dolby Laboratories subsidiary in video technology. A free domain
+  is not the signal — a free domain *plus no trademark holder* is.
+- **"Mehfilbox" is a coined compound**, which puts it in the same distinctive category, and it
+  reaches back to the original Mehfil rather than away from it.
+
+> **Two things outstanding before this name is committed to anywhere expensive:**
+>
+> 1. **`mehfilbox.in` (and `.com`) — check availability and register.** Everything currently
+>    resolves to `heirloomfilms.in`; that domain is live, verified with Resend, and serving.
+> 2. **A trademark search in classes 41 and 42**, which was outstanding for the previous name and
+>    still is. A search engine finds brands, not registry records — Cinea is the case that proves
+>    the difference. Budget ₹3,000–8,000 with an agent.
 
 ---
 

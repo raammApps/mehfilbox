@@ -1,4 +1,4 @@
-# Heirloom Films — target product requirements (draft, 6 September 2026)
+# Mehfilbox — target product requirements (draft, 6 September 2026)
 
 Consolidates the September decisions (D-11 to D-22) with the built product. **This is the target,
 not the built product** — `PRODUCT.md` is what exists today, surface by surface, and disagrees with
@@ -24,7 +24,7 @@ fee. Sold to studios per wedding; the couple's keepsake is the product, the stud
 
 | | Who | What they need |
 |---|---|---|
-| **Platform admin** (Heirloom) | Sandeep | Create/suspend studios, assign plans, see revenue and usage, audit every write; never impersonate without a trail |
+| **Platform admin** (Mehfilbox) | Sandeep | Create/suspend studios, assign plans, see revenue and usage, audit every write; never impersonate without a trail |
 | **Studio** (operator; `orgs.kind = partner`) | Owner, editor, front desk | Register, brand once, set up a wedding in 30 minutes, deliver by one WhatsApp, know who watched, know who is due, buy credits |
 | **Couple** (`orgs.kind = couple` after handover) | Two people, two families | Watch, share, download everything, control the passcode, hand back for a re-edit; renew or archive [via studio — P-1] |
 | **Guest** | Up to ~300 per wedding | Open a link, pass a profile gate, watch in under 1.5 s on 4G, share a film |

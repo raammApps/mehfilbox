@@ -5,13 +5,13 @@ If adopted, §5 is the list of document and code changes.
 
 ## 1. The rule
 
-**Heirloom Films sells to studios only.** Every rupee — first delivery, upgrade, renewal,
+**Mehfilbox sells to studios only.** Every rupee — first delivery, upgrade, renewal,
 archive, long-term archive, storage, 4K — is invoiced to the studio at a base price, which the
-studio marks up to the couple as they see fit. The couple is never Heirloom's billing customer.
+studio marks up to the couple as they see fit. The couple is never Mehfilbox's billing customer.
 
 The one exception (P-1, recommended): **the escape hatch.** When a studio is *gone* — account
 closed, Studio plan unpaid past its own grace, or no response 90 days after a catalogue lapsed —
-the couple may pay Heirloom directly, at list price, to renew or archive. It is not a channel; it
+the couple may pay Mehfilbox directly, at list price, to renew or archive. It is not a channel; it
 is what makes "your wedding survives your studio" true.
 
 ## 2. Why it is the better model
@@ -20,10 +20,10 @@ is what makes "your wedding survives your studio" true.
   (the studio claims input credit), Razorpay collapses from two flows to one. No consumer
   billing: no UPI failure handling, refunds, chargebacks, consumer complaints.
 - **No online price comparison.** A couple cannot find "₹2,500" next to their studio's ₹8,000.
-  The studio's markup is invisible to Heirloom and to the couple, which is how every other
+  The studio's markup is invisible to Mehfilbox and to the couple, which is how every other
   wedding vendor already works.
-- **Accounting is honest and simple.** Heirloom's revenue is exactly what studios pay. The markup
-  is the studio's revenue and never touches Heirloom's books; there is no agency, commission or
+- **Accounting is honest and simple.** Mehfilbox's revenue is exactly what studios pay. The markup
+  is the studio's revenue and never touches Mehfilbox's books; there is no agency, commission or
   pass-through arithmetic to explain.
 - **The studio stays the relationship owner** for the life of the catalogue, which is what makes
   them sell it (spec doc 15 §7 already assumed this).
@@ -31,7 +31,7 @@ is what makes "your wedding survives your studio" true.
 ## 3. The weakness, and how it is contained
 
 **Renewals become the studio's job, and studios are bad at collecting ₹2,500 three years after
-a wedding.** Some close, change hands, or stop caring. Left alone, this makes Heirloom exactly
+a wedding.** Some close, change hands, or stop caring. Left alone, this makes Mehfilbox exactly
 what its own `COMPETITORS.md` §4 positioned against: a gallery that goes dark when the studio
 stops paying.
 
@@ -53,7 +53,7 @@ Containment, in order of effect:
 
 - **Invoices:** to the studio, ex-GST with 18% shown (SAC 998314), studio GSTIN on the invoice
   where they have one. Unregistered small studios pay the inclusive figure.
-- **TDS:** some studios will deduct TDS on payments to Heirloom; keep 26AS reconciliation in the
+- **TDS:** some studios will deduct TDS on payments to Mehfilbox; keep 26AS reconciliation in the
   bookkeeping from the first invoice.
 - **Revenue recognition:** a Deliver (90 days), Keep (12 months) or 3-year purchase is earned over
   its term — deferred revenue, released monthly. **Prepaid credit packs are a liability until each
@@ -63,7 +63,7 @@ Containment, in order of effect:
 - **Records per catalogue:** payer org (`origin_org_id`), plan, term start/end, every invoice and
   payment, every state transition, every notification sent. The `notifications` table (N-50) and
   the lifecycle log (N-24) already require most of this; add an `invoices` table in N-20.
-- **Markup:** never recorded. Heirloom does not know and does not need to know what the couple
+- **Markup:** never recorded. Mehfilbox does not know and does not need to know what the couple
   paid the studio.
 
 ## 5. What changes if adopted
