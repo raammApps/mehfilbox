@@ -311,3 +311,61 @@ the link, and the register screen currently does not say so. Worth pairing with 
 | **N-24** | Renewal, which needs expiry warnings, which need email |
 
 `PRODUCT.md` §7 lists SMTP as blocking more than anything else on the list. This is that.
+
+---
+
+# The Mehfilbox switch (N-52)
+
+`mehfilbox.com` is canonical, `mehfilbox.in` redirects, and `heirloomfilms.in` keeps resolving —
+it is in guests' phones and gets redirected, never dropped.
+
+**Done:** the code rename, the Vercel project (`mehfilbox`), the GitHub repository
+(`raammApps/mehfilbox`), and both new domains attached to the project. Push-to-deploy verified
+after both renames, and the stable alias checked immediately after the project rename because last
+time it silently kept serving the previous commit.
+
+## 1. DNS — yours
+
+At the registrar holding `mehfilbox.com` and `mehfilbox.in`, on **each** domain:
+
+| Type | Name | Value |
+|---|---|---|
+| A | `@` | `216.198.79.1` |
+| A | `@` | `64.29.17.1` |
+
+These are the records currently serving `heirloomfilms.in`, so they are proven rather than
+guessed — `vercel domains inspect` still offers its older single apex IP, which also works but is
+not what is live here.
+
+**Do not delegate nameservers to Vercel.** `path` mode needs these two records and nothing else,
+and delegation would move any mail on the domain. Same reasoning as the first launch.
+
+## 2. Resend — yours
+
+`mehfilbox.com` needs verifying as a sending domain before `hello@mehfilbox.com` can send. Three
+records, and **the `send` subdomain trap in §3 applies again**: Hostinger-style panels append the
+domain to the Name field, so enter `send`, never `send.mehfilbox.com`.
+
+Until it is verified, leave Supabase's SMTP sender as `hello@heirloomfilms.in` — that domain is
+verified and sending. Switching the sender before the new domain verifies means registration mail
+stops.
+
+## 3. Then tell me, and I will do the rest
+
+**In one sitting, because apart they fail silently:**
+
+1. `ROOT_DOMAIN` → `mehfilbox.com`, redeploy.
+2. The Bunny library's `WebhookUrl` → `https://mehfilbox.com/api/webhooks/bunny`. Left behind, it
+   keeps answering from the old host: uploads succeed, transcoding finishes, titles never leave
+   `processing`.
+3. Supabase **Site URL** → `https://mehfilbox.com`, and the redirect allow-list. Verified by
+   reading the delivered message, not by trusting the dashboard — that is how the last wrong Site
+   URL was found.
+4. The photo zone: `mehfilbox-photos`, copy, repoint, delete. `scripts/repoint-photo-cdn.ts` does
+   it; `photos.url` holds absolute URLs, so the rows are rewritten too.
+
+## 4. What proves it worked
+
+The same four as the first launch, plus one: **`heirloomfilms.in` must still resolve and redirect
+to `mehfilbox.com`.** Every link already sent to a guest points at it, and a wedding page that
+404s because the company changed its name is the one failure this product cannot explain away.
