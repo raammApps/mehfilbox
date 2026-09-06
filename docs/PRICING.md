@@ -251,6 +251,45 @@ gross margin** with originals kept, against 83% in the August model without them
 
 ---
 
+### The cost that can move, and what protects us from it
+
+Storage is the only input that both **compounds** and is **outside our control**. Bunny is
+₹0.95/GB-month today; nothing stops it being ₹1.30 in two years. Every other cost is per-delivery
+and reprices itself.
+
+The exposure is not spread evenly — it sits almost entirely in the **prepaid, long-dated** rows,
+because those fix a price against a cost we pay for years afterwards:
+
+| Product | Revenue / yr | Cost / yr | Margin | Storage price at which it breaks even |
+|---|---|---|---|---|
+| Archive, Keep | ₹999 | ₹340 | 66% | **2.9×** |
+| Long-term Keep, 5 yr | ₹800 | ₹340 | 57% | **2.4×** |
+| Long-term Keep, 10 yr | ₹700 | ₹340 | 51% | **2.1×** |
+| Archive, Cinema | ₹1,499 | ₹1,000 | 33% | **1.5×** |
+| **Long-term Cinema, 5 yr** | **₹1,200** | **₹1,000** | **17%** | **1.2×** |
+
+**The last row is the problem.** ₹5,999 prepaid for five years of a catalogue that costs ₹1,000 a
+year leaves 17% — a **20% rise in storage erases it**, and because it is prepaid there is no
+moment at which it can be repriced. It is also the row most likely to be bought, because a Cinema
+customer is the one who values permanence.
+
+Four safeguards, in order of how much they actually protect:
+
+1. **Reprice long-term Cinema to ₹8,999 / 5 yrs** (₹1,800/yr, 44% margin, breaks even at 1.8×).
+   Below about ₹8,000 that product is a bet on Bunny's price list, not a margin.
+2. **Do not sell a fixed price beyond five years.** Withdraw the 10-year row, or price it at
+   ₹11,999. Ten years is longer than this company has existed and longer than any storage price
+   list has held.
+3. **State the adjustment right on annual archive.** Yearly archive can be repriced at renewal
+   with notice; prepaid terms cannot. Say so in the terms, and the annual rows stop being exposure
+   at all.
+4. **Keep D-15.** Dropping originals at archive is what makes an archived catalogue ₹340 rather
+   than ₹2,000 a year. It is doing more work than any pricing clause here.
+
+**The trigger to review this page:** Bunny's rate crossing **₹1.20/GB-month**, or measured storage
+per wedding exceeding **35 GB** after N-24a. Either invalidates the table above; neither is
+visible without N-25, which is the argument for building it before the first renewal season.
+
 ## 6. What is still unresolved
 
 **Two things, and neither is arithmetic.**

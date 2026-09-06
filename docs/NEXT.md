@@ -56,9 +56,14 @@ Documents carry the new name; nothing else does. The domain, Vercel project, Bun
 name, repository, `hello@heirloomfilms.in` and every `heirloomfilms.*` browser key still read the
 old one.
 
-**Blocked on a domain.** `mehfilbox.in` is not registered as far as this repo knows, and the
-rename is not worth starting without it — `heirloomfilms.in` is live, Resend-verified and serving,
-so it is replaced rather than abandoned.
+**Unblocked, 7 September:** `mehfilbox.com` and `mehfilbox.in` are both registered and active to
+2027-09-07. `heirloomfilms.in` is live, Resend-verified and serving, so it is *replaced* rather
+than abandoned — keep it resolving until the new domain is verified end to end, then redirect.
+
+**Decide which is canonical before starting.** `.in` matches the market and matches what is live
+now; `.com` is the one a studio will type from memory. Everything downstream — the Resend verified
+domain, `ROOT_DOMAIN`, the Bunny webhook, `hello@`, every link already in a guest's phone — hangs
+off that single choice, and changing it later is this ticket again.
 
 **The last rename is the specification for this one.** It went wrong three times (`PROGRESS.md`),
 and each failure is a check to run rather than a story to retell:
@@ -82,6 +87,25 @@ Bunny account key is needed throughout.
 
 Guest-visible keys (`heirloomfilms.profile.*`, `heirloomfilms.guest`) can move straight across —
 the two live catalogues are trial data and a returning guest simply picks a profile again.
+
+### N-53 · Observability — see the failures that are silent  ·  ~half a session  ·  **D-24**
+
+Every serious fault this product has had was **silent**: a transcode webhook pointed at a dead URL
+while uploads still succeeded; a storage column the driver never wrote, so the cap never refused
+anything; an SMTP credential that authenticated but could not send. Each was found by a person
+looking at production, and none of them would have raised an alert.
+
+Not a new architecture — instrumentation on the one we have (D-24):
+
+- **Error tracking** with a release marker, so a failure is attributable to a deploy.
+- **Structured logs that survive the invocation.** `lib/log.ts` writes to stdout; on Vercel that is
+  retained briefly and is not queryable when it matters.
+- **An alert when a webhook stops arriving.** The reconcile cron already knows which titles are
+  stranded — it is the natural place to notice that *none* have arrived in an hour.
+- **A synthetic check on the guest path**, because `/api/health` proves the app boots, not that a
+  guest can play a film.
+
+Cheap, and it is what turns "a partner told us" into "we knew first".
 
 ### N-29 · Language chosen at account creation  ·  ~half a session
 

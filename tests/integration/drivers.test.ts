@@ -213,32 +213,49 @@ describe.skipIf(!hasSupabase)('Supabase Postgres, for real', () => {
     const catalogueId = createdCatalogues[0]
     expect(catalogueId, 'the catalogue test must run first').toBeTruthy()
 
-    const title = await repository.createTitle({
+    const input = {
       id: randomUUID(),
       catalogueId: catalogueId!,
       slug: 'itest-film',
       sizeBytes: 1024,
       name: { en: 'Integration Film', hi: 'परीक्षण' },
-      category: 'highlights',
+      category: 'highlights' as const,
       credits: [{ role: 'Cinematography', name: 'Nobody' }],
       provider: 'bunny',
       providerId: null,
       durationS: null,
       posterUrl: null,
       posterCandidates: [],
-      posterSource: 'generated',
+      posterSource: 'generated' as const,
       thumbnailsUrl: null,
       trailerUrl: null,
       captions: [],
-      status: 'uploading',
+      status: 'uploading' as const,
       errorMessage: null,
       published: false,
       sortOrder: 0,
-    })
+    }
 
-    expect(title.name.hi).toBe('परीक्षण')
-    expect(title.credits).toHaveLength(1)
-    expect(title.durationS).toBeNull()
+    const title = await repository.createTitle(input)
+
+    /**
+     * **Every field that was sent, not a chosen few.**
+     *
+     * This test used to assert `name.hi`, `credits` and `durationS` — and passed `sizeBytes:
+     * 1024` without ever checking it came back. The Supabase driver's column map had no entry for
+     * `size_bytes`, so the value was dropped on write, every catalogue in production reported 0 GB
+     * and the storage cap never refused an upload. A round-trip test that picks its assertions by
+     * hand drifts from the schema exactly the way the column map did.
+     *
+     * Comparing the whole input means a column added to `titleSchema` has to survive Postgres, or
+     * this fails — which is the only way this class of bug gets caught at the row level rather
+     * than at the map.
+     */
+    for (const [field, sent] of Object.entries(input)) {
+      expect(title[field as keyof typeof title], `${field} did not survive the round trip`).toEqual(
+        sent,
+      )
+    }
 
     const updated = await repository.updateTitle(title.id, { status: 'ready', durationS: 244 })
     expect(updated.status).toBe('ready')

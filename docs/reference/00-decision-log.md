@@ -308,6 +308,48 @@ It resolves when the rename ticket lands.
 **Unresolved and load-bearing:** `mehfilbox.in` is **not registered as far as this repo knows**.
 A brand without its domain is a decision that has not finished.
 
+## D-24 · One deployable, with seams — not microservices (Sept 2026)
+
+**Asked:** should the product be rebuilt as microservices with micro-frontends, a service mesh and
+observability baked in?
+
+**Decided: no to the first three, yes to the fourth**, and the fourth is instrumentation rather
+than architecture.
+
+**Why:** microservices solve *organisational* problems — independent teams shipping on independent
+cadences without coordinating a release. There is one developer here. Every cost of that
+architecture (network calls where function calls were, distributed transactions, a mesh to make
+service-to-service traffic safe, eventual consistency in place of a foreign key) is paid in full,
+and the benefit it buys does not exist.
+
+The numbers say the same thing. **19,700 lines across 180 files**, and `SCALE-PLAN.md` puts the
+break at ~333 weddings a month against a plan of 60 in six months — **33× headroom on the
+monolith**. The app is a control plane: guest bytes never pass through it, Bunny serves video and
+photographs directly, so it handles small JSON and will not become CPU-bound at any volume this
+business plans for.
+
+Micro-frontends would actively break the product. The customizer renders **the real guest
+components** so the preview cannot drift from the page (CLAUDE.md, deviation 1). Splitting the
+guest surface from the admin means two implementations of the module tree, and the one that drifts
+is the one nobody is looking at.
+
+**What was right in the question is modularity, and it is already here.** `Repository`,
+`VideoProvider`, `PhotoProvider`, `AuthProvider` and the module registry are seams with real
+alternative implementations behind them — which is why the suite runs offline, why the demo works
+without a database, and why swapping Postgres for an in-memory store is an environment variable.
+`NotificationProvider` (N-50) is the next one, and it is the same pattern rather than a new
+service.
+
+**Observability is the genuinely missing piece**, and it is missing as *instrumentation*, not as
+topology: error tracking, structured logs that survive a serverless invocation, and an alert when
+a webhook stops arriving. This product's failures are silent ones — a transcode webhook pointed at
+a dead URL, a storage column nothing wrote, an SMTP credential that authenticates but cannot send.
+None of those are visible in a dashboard today, and none of them would have been made visible by
+splitting the app into services.
+
+**Revisit when:** a second team exists, or one part of the system needs to scale or deploy on a
+genuinely different cadence. Not before.
+
 ---
 
 # Open — proposed, argued, **not decided**

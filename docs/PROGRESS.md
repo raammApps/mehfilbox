@@ -849,3 +849,36 @@ engine), and states the two things outstanding.
 than as a story, and the order that worked: domain, Vercel, repository, package, then the Bunny
 zones. It is blocked on `mehfilbox.in`, which as far as this repo knows is not registered — a brand
 without its domain is a decision that has not finished.
+
+## The audit before the next phase: mostly clean, one real gap
+
+Asked to clean up, refactor and modularise before starting new work. The honest finding is that
+there is very little to do, and saying so is more useful than churn:
+
+| | |
+|---|---|
+| Dead code | none — `knip` is already in `pnpm verify` |
+| `TODO` / `FIXME` | zero |
+| Size | 19,700 lines, 180 files |
+| Seams | `Repository`, `VideoProvider`, `PhotoProvider`, `AuthProvider`, the module registry — each with real alternative implementations |
+
+**The one refactor that looked worthwhile was rejected.** `lib/db/supabase-repository.ts` is 1,040
+lines with nine clear section boundaries, and splitting it is exactly the kind of change that
+feels like progress. It is also **the least-covered file in the repo** — which is precisely why
+the `size_bytes` bug lived there for a month — so a broad mechanical edit buys a shorter file and
+pays in risk against production Postgres. Length is not the defect; the defect was a hand-
+maintained list drifting from the schema, and that is now covered in two places.
+
+**The second place is what this session added.** `tests/integration/drivers.test.ts` already
+round-tripped a title against the real database — and it **passed `sizeBytes: 1024` without ever
+asserting it came back**, checking three hand-picked fields instead. The same failure shape as the
+column map, one layer down: a hand-written list that drifts. It now compares **every field it
+sent**, so a column added to `titleSchema` has to survive Postgres or the test fails.
+
+Proved by removing the mapping again and running against the real database:
+`sizeBytes did not survive the round trip: expected null to deeply equal 1024`.
+
+Between the two, the same bug is now caught at the map (`pnpm verify`, offline, free) and at the
+row (`pnpm test:integration`, real Postgres). The first is fast enough to run always; the second
+is the one that would have caught it even if the map had been generated correctly and Postgres
+had rejected the value.
