@@ -351,6 +351,42 @@ splitting the app into services.
 **Revisit when:** a second team exists, or one part of the system needs to scale or deploy on a
 genuinely different cadence. Not before.
 
+## D-25 · Do not restart the repository — carry it (Sept 2026)
+
+**Asked:** start afresh on the configs and the git project, keeping only the learnings, and
+architect the product and the repository properly from scratch.
+
+**Decided: no.** Rename in place and continue.
+
+**Why, from the audit rather than from principle:**
+
+- **Two-thirds of the test suite is a paid-for lesson.** 23 of 35 test files encode a *specific*
+  past failure: the webhook that answered from a stale build, the column the driver never wrote,
+  the router cache that said "No weddings here yet", the passcode gate, token auth, the suite
+  contention. Those are learnings in executable form, and **they are the ones that cannot be
+  carried to a blank repository** — a lesson you can restate in a document is one you will
+  restate again after re-breaking it. A test that goes red is the only kind that stops you.
+- **Nothing is architecturally wrong.** D-24 established the shape three commits ago: one
+  deployable with driver seams, which is right for 19,700 lines and one developer. A rewrite would
+  arrive at the same architecture with fewer tests.
+- **The code is clean by measurement, not by opinion.** `knip` finds no dead code, there are zero
+  `TODO`s, TypeScript is strict with no `any`, and the config surface is twelve standard files.
+  There is no mess to escape.
+- **The live infrastructure is not in the repository.** Eight migrations with RLS, two Bunny zones,
+  a verified Resend domain, three domains on Vercel, a webhook that took two attempts to point
+  correctly. A new repository does not reset any of it, and re-pointing it all is the risk without
+  the benefit.
+
+**What would have justified it:** a wrong domain model, an architecture that fought the product,
+or an untested codebase. None of the three holds, and each was checked rather than assumed.
+
+**What the impulse was right about:** the repository should feel deliberate rather than accreted.
+That is served by the rename (N-52) and by the seams already in place — not by starting again.
+
+**Cost of being wrong:** if the architecture does turn out to fight the product later, the seams
+are where it would show, and replacing one driver is a contained change. That is the insurance a
+rewrite would be buying, and it is already paid for.
+
 ---
 
 # Open — proposed, argued, **not decided**
