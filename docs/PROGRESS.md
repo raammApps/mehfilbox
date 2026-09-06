@@ -786,3 +786,30 @@ org slug — `branding.presentedBy` is an operator-editable field in the customi
 business name at registration, so it shows whatever was typed. Recorded in NEXT as a non-bug
 alongside the duration badge and the letter sign-off, because the cost of re-investigating these
 is paid by whoever comes next.
+
+## The September planning merged, with its stale halves corrected
+
+The 6 September session's output — a roadmap, a new price ladder, a no-hard-delete lifecycle,
+multi-channel notifications, and the rule that all year-one money goes through the studio — is now
+in the repo. Two commits from the handoff patch, then one reconciliation, because **the plan was
+written the day before and part of it had already been built.**
+
+What the patch would have resurrected as open tickets:
+
+- **N-35, "every save is legible"** — shipped as N-30. Its description ("the film list saves on
+  blur and says nothing") had stopped being true.
+- **N-34, "photograph sharing and captions"** — shipped as N-30 and N-31.
+
+Both were removed and their status rows flipped in `PRODUCT.md` and `ROADMAP.md`. `NEXT.md`'s
+standing paragraph also still claimed 308 tests, 81 E2E and `marquee-film-pub.vercel.app`; it now
+reads 387 / 108 and the real domain, and names the two findings that would otherwise mislead
+whoever reads it next — the storage column the driver never wrote, and the suite contention.
+
+**The pending decisions were kept out of the decision log deliberately.** D-11 to D-22 are
+appended as decisions because they were made; P-1 to P-6 sit below them under a heading that says
+they are not, with the argument preserved so it does not have to be rebuilt. P-1 alone would
+change `PRICING.md`, `ROADMAP.md`, `PRODUCT.md` and four tickets, so building against it before it
+is answered would be the expensive kind of guess.
+
+`REQUIREMENTS.md` is the target product and is meant to disagree with `PRODUCT.md`, which is what
+exists. Three of its status lines were corrected on the way in for the same reason as N-34/N-35.

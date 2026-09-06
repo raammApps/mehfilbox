@@ -9,7 +9,9 @@ then debt. Within a tier, cheapest first.
 
 **6 September 2026:** [`ROADMAP.md`](./ROADMAP.md) groups this backlog into phases and adds
 N-34 to N-50 from the competitor and feature review. Phase 1 is Tier 2 below, in this order:
-held items → N-50 → N-21 → N-22 → N-23 → N-29 → N-35 → N-36 → N-24a → real footage → N-51.
+held items → N-50 → N-21 → N-22 → N-23 → N-29 → N-36 → N-24a → real footage → N-51.
+**N-34 and N-35 were already built** on 6–7 September, before this patch was applied — photograph
+sharing, captions, likes and one save indicator across the console. See PROGRESS.
 
 Update this file as items land — move them out, do not leave them ticked.
 
@@ -19,15 +21,20 @@ Update this file as items land — move them out, do not leave them ticked.
 
 Phase 0 is built and deployed: guest catalogue, player, admin console, customizer, the module
 registry, and the partner/handover model. All six doc 10 §2 journeys run, plus an OG size budget,
-a first-load JS budget and a zero-axe-violations gate. **308 unit and component tests, 81 E2E,
+a first-load JS budget and a zero-axe-violations gate. **387 unit and component tests, 108 E2E,
 all green.**
 
-**Both external services are live and verified end to end**: production runs on
-`DATA_DRIVER=supabase` + `VIDEO_DRIVER=bunny` at `https://marquee-film-pub.vercel.app`, an
-operator signs in against real Postgres, and create → publish → guest page works.
-`pnpm test:integration` is 10/10, and `pnpm verify:upload` proves a real TUS upload survives a
-network drop. Local development stays on `file` + `bunny` so the demo catalogue is available.
-Branch is `main`.
+**Live on `https://heirloomfilms.in`** with `DATA_DRIVER=supabase` + `VIDEO_DRIVER=bunny`: an
+operator signs in against real Postgres, and create → publish → guest page works. Registration
+sends a confirmation through Resend and the link resolves back to the domain — verified by reading
+the delivered message, not by trusting the dashboards. `pnpm verify:upload` proves a real TUS
+upload survives a network drop. Local development stays on `file` + `bunny` so the demo catalogue
+is available. Branch is `main`.
+
+Two things worth knowing before trusting any status here, both found by looking at production
+rather than at tests: the Supabase driver **never wrote `size_bytes`**, so every catalogue reported
+0 GB and the storage cap had never refused an upload; and the E2E suite's intermittent failures
+were three parallel projects sharing one store, not the code they pointed at. Both fixed.
 
 Run `pnpm preflight` first in any new session: it reports the real state of both services in a
 few seconds and is more trustworthy than this paragraph.
@@ -110,11 +117,6 @@ Set the Bunny library to 360p–720p by default; confirm Keep Original Files and
 off. Then upload one real 15-hour wedding and correct `PRICING.md` §1 with the measured GB.
 Without this nothing on the price list holds a wedding.
 
-### N-35 · Every save is legible  ·  ~2h
-
-The film list saves on blur and says nothing. Give it the same "Saved" status line Settings has.
-Cheap, and the first thing an operator notices.
-
 ### N-36 · The delivery message  ·  ~half a session  ·  **blocked by N-50**
 
 One button on the overview, beside the public link: *Send to the couple*. Composes a WhatsApp
@@ -174,11 +176,6 @@ watched" for the couple. `module_state` and the gate already hold per-guest iden
 
 On the wedding date each year: a message with a deep link into the highlights film. It is the
 renewal nudge that does not read as one.
-
-### N-34 · Photograph sharing and captions  ·  ~2h  ·  **Phase 3**
-
-The lightbox has no actions and captions cannot be written. A PATCH route, a caption editor in
-the album module, and share / copy-link on a photograph with its own address.
 
 ### Phase 4 and 5, one line each — sized when they are reached
 
@@ -285,10 +282,11 @@ insert into platform_admins (id, email, name)
 values ('<your auth.users id>', 'you@example.com', 'Sandeep');
 ```
 
-**Run `supabase/migrations/0008_likes.sql`.** Likes shipped in N-31 and the table does not exist
-in production — `/api/likes` 500s until it is applied, on every film and photograph. This is the
-one migration currently outstanding; `0006_entitlements.sql` is already applied (verified against
-the live database, not assumed).
+**No migration is outstanding.** `0008_likes.sql` was applied on 7 September with RLS enabled, and
+verified end to end against production: a like round-trips, a second guest key sees the count and
+not as their own, and the anon key is refused both read and write. `0006_entitlements.sql` was
+already applied — checked against the live database rather than assumed, because this file had
+claimed otherwise.
 
 <!-- Historic, kept because the reasoning still applies to any unapplied migration: -->
 **`0006_entitlements.sql`** creates `plans` and `entitlements`. Until it
@@ -306,9 +304,13 @@ so it is the most valuable credential here. Supabase dashboard → Settings → 
 `service_role` / secret key, then update `.env.local`, `.env.vercel.local` and
 `./scripts/deploy-vercel.sh`.
 
-**Rotate the Bunny account API key.** Also went through a transcript. Lower urgency than the
-above: nothing deployed uses it — only `pnpm preflight` — so the exposure is local. It can still
-create and delete zones on the account. Bunny dashboard → Account Settings → API.
+~~**Rotate the Bunny account API key.**~~ **Done, 7 September** — and verified rather than
+assumed: the new key answers the account API and the old one returns `401`. Bunny lets you
+regenerate without invalidating, so the revocation is the half worth checking.
+
+**The Supabase secret key is still the one that matters**, and is still unrotated. It bypasses
+RLS entirely, which the `likes` table's RLS is a reminder of: every other boundary in the product
+assumes that key never leaves the server.
 
 **Real footage** (N-14), which is the one thing no agent can do for this product.
 

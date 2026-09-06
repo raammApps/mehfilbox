@@ -54,8 +54,8 @@ added there in the same commit as this file.
 | Multi-event structure (a row per function, both sides) | **Built** — rows are modules; nothing forces a "season" model | — | 0 |
 | Adaptive playback tuned for 4G; 360p–720p ladder as default | **Partial** — ladder not yet set on the library | N-24a | 1 |
 | Share a film to WhatsApp with poster preview | **Built** (`ShareButton`, OG image) | — | 0 |
-| Share a photograph; photograph captions | **Missing** | N-34 | 3 |
-| Likes on films and photographs | **Built** (N-31; migration 0008 pending on production) | held by Sandeep | 1 |
+| Share a photograph; photograph captions | **Built** (7 Sep) | — | — |
+| Likes on films and photographs | **Built** (N-31; migration 0008 applied, RLS on) | — | 1 |
 | Guest surface in Hindi, default chosen by the studio | **Partial** — toggle exists, no org-level default | N-29 | 1 |
 | Told they own it, with renewal date and terms | **Missing** | N-21 | 1 |
 | Download everything, at any time | **Missing** | N-22 | 1 |
@@ -74,7 +74,7 @@ added there in the same commit as this file.
 | Wizard, customizer, templates, branding, publish checklist | **Built** | — | 0 |
 | Resumable upload proven against a network drop | **Built** | — | 0 |
 | Plan capacity shown before and during upload ("holds ~9 hrs", warn at 80%) | **Missing** | N-23 | 1 |
-| Every save legible (film list saves silently today) | **Partial** | N-35 | 1 |
+| Every save legible | **Built** (7 Sep) | — | — |
 | Saved branding presets, more templates | **Missing** | N-26 | 3 |
 | Delivery message *(new)* — one-click WhatsApp/email launch to the couple from the overview | **Missing** | N-36 | 1 |
 | Delivery tracking *(new)* — opened, watched, watch-time; "not opened in 7 days" | **Partial** — play events are stored, nothing reads them per catalogue | N-37 | 3 |
@@ -202,12 +202,11 @@ demo is real.
 | N-22 | Download everything | Gates any lapse behaviour, archive included |
 | N-23 | Plan capacity in the console | Pricing depends on it; two hours |
 | N-29 | Locale at account creation | A Hindi-first studio should not operate in English |
-| N-35 | Legible saves everywhere | Embarrassing in front of a planner |
 | N-36 | Delivery message — one-click launch to the couple with poster, names and "now streaming" | The moment the product gets forwarded |
 | N-51 | Landing page in viddrop's shape — price in the hero, With/Without Drive table, three template previews, FAQ, public demo | The pitch, once the demo has real frames; last in the phase |
 | N-24a | Encoding ladder set to 360p–720p; Keep Original and MP4 Fallback confirmed off | Nothing on the price list holds a wedding otherwise |
 | N-6 / N-14 | Real footage in the demo; publish `swarit-and-smriti-2026` as the public demo | The pitch. Sandeep, not an agent |
-| held | Migration 0008, `platform_admins` row, three key rotations | Listed in `NEXT.md`; do them first |
+| held | `platform_admins` row; **rotate the Supabase secret key** | Migration 0008 and the Bunny account key are done (7 Sep) |
 
 **Exit test:** a studio uploads a real wedding, publishes, sends the delivery message from the
 console, and the couple receives it on WhatsApp and email with a working link. Invoice by hand.
@@ -235,7 +234,6 @@ restore.
 | N-37 | Delivery tracking and the lapse dashboard; renew on the couple's behalf |
 | N-38 | Family circles — scoped links per side, "who watched" |
 | N-39 | Anniversary moment |
-| N-34 | Photograph sharing and captions |
 | R7 | Studio plan as a purchasable entitlement |
 
 **Exit test:** a studio owner can say, from their console, which of last season's couples are due,

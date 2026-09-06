@@ -162,3 +162,171 @@ Carried in `docs/01 §8` — whether planners will accept us holding guest data;
 season pricing; whether a streaming aesthetic reads as premium or irreverent to older
 families; which regional language ships after Hindi; whether the profile gate helps or costs
 conversion.
+
+## D-11 · No hard delete — archive instead (Sept 2026)
+
+**Was:** `PRICING.md` §2, August: renewal lapses → 30 days' grace → the catalogue is deleted,
+justified as the only way to stop storage compounding (`SCALE-PLAN.md` §4.1).
+
+**Decided:** lapse → **90 days' grace** (plays read-only for the couple, download offered) →
+**archive**: streaming paused, files retained, restore on payment. Automatic deletion is removed
+from the product; `deleted` is reachable only by an explicit, recorded request.
+
+**Why:** "we deleted your wedding" is the one review the product cannot absorb, and the ₹40,000 a
+year deletion saved is smaller than what the archive fee earns. The compounding cost is stopped by
+charging for archive (₹999 / ₹1,499 a year), free for the first twelve months after grace, and by
+holding only the best rendition once the paid term ends (D-15).
+
+**Cost:** storage for lapsed catalogues that nobody ever pays for — bounded at ≈₹340–1,000 a year
+each once originals are gone. Measure the archive take-up after the first renewal season.
+
+## D-12 · Notifications on every channel, behind one seam (Sept 2026)
+
+**Was:** email only; "SMTP" (N-17) as the blocker. N-17 shipped Resend through Supabase Auth for
+registration and reset; the application itself still sends nothing.
+
+**Decided:** a `NotificationProvider` seam like `VideoProvider` — `fake` driver for the suite,
+`resend` for email, **MSG91** for WhatsApp and SMS. Every lifecycle message goes on every channel
+the recipient has. A `notifications` table records every send. Ticket N-50, first in Phase 1.
+
+**Why:** Indian families live on WhatsApp; an email-only expiry warning is a warning nobody
+reads. MSG91 covers three channels on one rupee-billed account.
+
+## D-13 · The studio's credit survives every renewal; no revenue share (Sept 2026)
+
+**Was:** `presentedBy` snapshotted at handover — an editable field. No renewal share (August).
+
+**Decided:** a permanent **"Filmed by"** credit rendered from `origin_org_id`, which the couple
+cannot edit, plus an enquiry link routed to the studio, which the couple may hide but not
+redirect. Both survive every renewal. Still no revenue share.
+
+**Why:** a studio with no stake in renewals will not nudge them; two hundred guests a year seeing
+their name is the stake. It is the "distribution, not delivery" argument (`COMPETITORS.md` §7)
+extended to every year after the first.
+
+## D-14 · Deliver replaces Highlights (Sept 2026)
+
+**Was:** Highlights — 10 GB, ₹2,500, 12 months — which `PRICING.md` admitted could not hold a
+wedding.
+
+**Decided:** **Deliver** — 100 GB, **90 days** (180 for two credits), originals downloadable,
+studio-branded, ₹1,999 or five for ₹7,999. At day 60 the studio is offered Keep for the couple.
+At day 90 the catalogue archives; nothing is deleted.
+
+**Why:** viddrop sells exactly this at $25 and is the price a studio will compare against. Our
+cost for it is ≈₹500 (75% margin) and we keep what viddrop gave up — adaptive playback on 4G,
+Hindi, a catalogue rather than a grid. Their deletion at day 90 becomes our upgrade offer.
+
+## D-15 · Originals kept for the paid term, best rendition after (Sept 2026)
+
+**Was:** Keep Original Files off; renditions only (August, to keep storage at ₹458 a year).
+
+**Decided:** originals are stored and downloadable for the whole paid term. From the first renewal
+the archive holds the best rendition only; 4K films keep their originals. The 100 GB cap counts
+originals plus renditions.
+
+**Why:** "original quality download" is the claim the per-wedding competitors lead with and the
+thing a studio judges delivery by. Keeping originals forever would push renewal to ₹2,999 and
+archive to ₹1,499 with thin margins; keeping them for the term the couple has already had a year
+of *download everything* in is the honest middle. Cost: Keep year-one margin falls from 84% to
+≈65%.
+
+## D-16 · All year-one money goes through the studio (Sept 2026)
+
+**Was:** couple pays renewal and storage directly after the included months (doc 15 §4).
+
+**Decided:** for twelve months after delivery, every purchase — including the day-60 Deliver →
+Keep upgrade at a ₹2,500 base — is the studio's, at a base they mark up. Direct billing, if it
+exists at all (P-1), begins no earlier than the first renewal.
+
+**Why:** a couple who paid their studio must never get an invoice from a company they have not
+heard of inside the first year; it costs the studio their trust, and the studio is the channel.
+
+## D-17 · The ladder: Deliver ₹1,999 · Keep ₹6,000 · Cinema ₹12,000 (Sept 2026)
+
+Keep at ₹6,000 (was Wedding ₹7,000) — three times Deliver, a clean step; 3 years ₹12,000. Cinema
+unchanged at ₹12,000 / ₹24,000 but 200 GB now that originals count. Renewal ₹2,500 / ₹4,000.
+Archive ₹999 / ₹1,499; long-term ₹3,999 / 5 yrs, ₹6,999 / 10 yrs (Keep), ₹5,999 / 5 yrs (Cinema).
+Extra storage ₹25/GB/month; extra 4K ₹1,999 per 20 min.
+
+## D-18 · Studios buy credits; the Studio plan includes three (Sept 2026)
+
+**Was:** partner credit packs (doc 15 §4); an integration fee mentioned in conversation.
+
+**Decided:** prepaid credit packs, plus a **₹4,999/yr Studio plan** (registration, branding,
+presets, team seats, custom domain served, lapse dashboard) that **includes three Deliver credits
+in its first year**. Renewal of the plan carries no credits.
+
+**Why:** Sandeep wants a studio fee, because a studio registers and manages branding and that is
+worth something; charging before a studio has delivered a wedding is also the thing most likely
+to lose them. A fee that pays for itself with three deliveries reconciles the two.
+
+## D-19 · Prices shown GST-inclusive first, with the split (Sept 2026)
+
+Studios think in inclusive numbers; invoices need the split. `PRICING.md` lists ex-GST with the
+inclusive figure beside it; anything a studio reads shows inclusive first. Registration itself is
+the accountant's call and is not yet made.
+
+## D-20 · Archive free for twelve months after grace, then the fee (Sept 2026)
+
+A wedding never disappears within about two years of being filmed. Cost ≈₹340–1,000 per lapsed
+wedding per year, bounded by D-15.
+
+## D-21 · The landing page comes after real footage (Sept 2026)
+
+Rebuild `heirloomfilms.in` in viddrop's shape — price in the hero, With/Without Drive table, three
+template screenshots, one-sentence FAQ on "what happens after 90 days", public demo — as the last
+item of Phase 1 (N-51), after N-6/N-14 put real frames in the demo. Never claim "no compression";
+say *originals always downloadable, streaming tuned for 4G*.
+
+## D-22 · The roadmap has five phases, each sellable (Sept 2026)
+
+`docs/ROADMAP.md`. Phase 1 deliverable-and-honest (N-50, N-21, N-22, N-23, N-29, N-35, N-36,
+N-24a, footage, N-51); Phase 2 money and time (N-20, N-24, N-25, N-27); Phase 3 the studio's
+reasons to sell (N-26, N-36b, N-37, N-38, N-39, N-34); Phase 4 the catalogue earns more (N-40 to
+N-44, N-48, store module); Phase 5 on demand. Marketplace, photo proofing/CRM, native TV apps and
+a renewal revenue share are deliberately off the roadmap.
+
+---
+
+# Open — proposed, argued, **not decided**
+
+These are not decisions and must not be read as any. Each is written up so the argument does not
+have to be rebuilt, and each has a recommendation, but **nothing in the repo is built against
+them** until Sandeep answers. P-1 in particular changes `PRICING.md`, `ROADMAP.md`, `PRODUCT.md`
+and four tickets — the full change list is in
+[`studio-only-proposal.md`](./studio-only-proposal.md) §5.
+
+## P-1 · Studio-only: no direct sale to couples, ever?
+
+Proposed by Sandeep at the end of the session; argued for in `02-studio-only-model.md`. The
+question inside it: **does the escape hatch exist** — may a couple pay Heirloom directly *only*
+when their studio is gone (account closed, plan unpaid, or unresponsive 90 days after lapse), at
+list price? Recommendation: yes. Without it the product loses the one line every competitor
+cannot say — "your wedding survives your studio".
+
+## P-2 · Do credits expire?
+
+viddrop says never. Recommendation: **24 months**, because unused credits are a liability on
+the books that otherwise never clears. Either answer is fine commercially; pick one before N-20.
+
+## P-3 · Where originals live
+
+Bunny Stream's "Keep Original Files" (zero code, beside the renditions) or a copy in Edge Storage
+with a signed download URL (cleaner to delete at archive time). Decide in N-24a.
+
+## P-4 · Handover after studio-only
+
+If P-1 is adopted: handover remains a *control* transfer (passcode, family links, download, the
+couple's own login) and stops being a *billing* transfer. Confirm that is what Sandeep wants —
+it is simpler than what is built.
+
+## P-5 · Studio plan mandatory or optional?
+
+Sandeep said "with studio fee". D-18 makes the plan the way a studio registers, i.e. mandatory
+from the first paid wedding, with the free trial being the three included credits. Confirm.
+
+## P-6 · The day-60 question
+
+Not a decision but a fact to obtain: will a studio offer their couple Keep at day 60, and at what
+markup? Ask one studio owner. It gates the Phase 2 price rows.

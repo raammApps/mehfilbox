@@ -11,6 +11,7 @@ Everything written about this project, in one tree.
 | [`PROGRESS.md`](./PROGRESS.md) | What has been built, and why it was built that way |
 | [`NEXT.md`](./NEXT.md) | What is left, in the order to take it up |
 | [`ROADMAP.md`](./ROADMAP.md) | **Where the product is going** — the proposed feature set against what exists, every revenue stream, and the phases that get there. Read once when planning. |
+| [`REQUIREMENTS.md`](./REQUIREMENTS.md) | **The target product**, consolidated: personas, the lifecycle state machine, billing rules, the notification matrix. Deliberately disagrees with `PRODUCT.md`, which is what exists today. |
 | [`DEPLOYMENT.md`](./DEPLOYMENT.md) | Accounts, environment variables, DNS, and the settings that fail silently when wrong |
 | [`USAGE-GUIDE.md`](./USAGE-GUIDE.md) | Every workflow, end to end — registration, a wedding built and published, the handover, what a guest sees |
 | [`PRICING.md`](./PRICING.md) | **The plans and prices, on one page.** Start here for anything commercial. |
@@ -23,7 +24,7 @@ Everything written about this project, in one tree.
 | | |
 |---|---|
 | [`spec/`](./spec/) | The original specification, docs 01–15. **What the product is meant to be**, written before the code existed. |
-| [`reference/`](./reference/) | The decision log, the business case, and the reference reel the design is measured against |
+| [`reference/`](./reference/) | The decision log — including the September entries D-11 to D-22 and, kept separate, the decisions **not** yet made — plus the studio-only proposal, the business case and the reference reel. |
 | [`wireframes/`](./wireframes/) | SVG wireframes. `spec/03-wireframes.md` carries the same content as text — read that instead; the SVGs are for humans. |
 | [`archive/`](./archive/) | Superseded invite-site work. Kept for provenance, never a source of truth. |
 
