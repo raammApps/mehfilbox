@@ -66,19 +66,6 @@ Three things noticed while using it as a studio owner would, after the publish-s
 Not urgent: none of them can lose work or mislead anyone, which is what the publish-state work was
 about.
 
-### N-57b · Settings wait for Publish too  ·  ~half a session
-
-Films and photographs landed on 8 September. What still writes straight to the live catalogue is
-the settings page: **couple name, app name, city, synopsis and featured film**. Those are
-presentation, they are what a guest reads, and they should follow branding into `draft_*`.
-
-**Three fields must stay immediate, and this is the argument.** `passcode`, `privacy` and
-`customDomain` are access controls, not presentation. A studio revoking a leaked link has to be
-able to do it now — "your change will go out when you publish" is the wrong answer to "this link
-got shared with the wrong family". `includedUntil` is a plan date rather than page content and
-belongs with billing. Ask Sandeep to confirm the carve-out before building, because "everything
-waits" was the instruction and this is a deliberate exception to it.
-
 ### N-53b · The observability that needs an account  ·  ~2h  ·  **D-24**
 
 Two of N-53's four parts landed on 8 September: an alert when the transcode webhook stops arriving,

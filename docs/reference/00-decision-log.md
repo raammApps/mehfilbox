@@ -505,3 +505,32 @@ fee unsupported. Three included credits mean it pays for itself before a studio 
 Not a decision but a fact to obtain: **will a studio offer their couple Keep at day 60, and at
 what markup?** Ask one studio owner. It gates the Phase 2 price rows, and no amount of reasoning
 here substitutes for one person's answer.
+
+## D-31 · What waits for Publish, and what does not (8 Sept 2026)
+
+**Decided:** the guest-facing *page* waits for Publish — layout, style and content. Everything on
+the settings screen takes effect immediately.
+
+| Waits | Immediate |
+|---|---|
+| Sections and their order (`draft_modules`) | Passcode, privacy, custom domain |
+| Branding — colour, logo, typeface, "Presented by" (`draft_branding`, N-56) | Web address (slug) |
+| Films and photographs (`live_at`, N-57) | Included-until date |
+| | City |
+
+**Why:** the rule is "style and the content a studio arranges for a couple", not "every write".
+Before this the same wedding page had three answers to *when does the couple see this*: sections
+waited, branding did not, and a film went live the instant a checkbox was ticked.
+
+The exclusions are not an oversight and are worth stating. **Passcode, privacy and custom domain
+are access controls**, and *"your change goes out when you publish"* is the wrong answer to *"that
+link reached the wrong family"* — a studio revoking a leaked link has to be able to do it now.
+**`includedUntil`** is a plan date and belongs with billing rather than with the page.
+
+`coupleName`, `appName` and `synopsis` need no gate at all: they are set in the create wizard and
+are not editable from the console afterwards. If that ever changes they belong in the left column,
+because they are what a guest reads.
+
+**Consequence:** the console must always say what is waiting. A film held back with no explanation
+is the failure this design risks, so the customizer names the count — *"3 films and 40 photographs
+will go live when you publish"* — rather than leaving an operator to wonder.
