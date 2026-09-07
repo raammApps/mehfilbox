@@ -89,6 +89,13 @@ const schema = z
      * subscription against roughly a hundred messages (D-12) and so is deferred until a real
      * wedding needs it rather than paid for during a build.
      */
+    /**
+     * The catalogue the landing page offers as "open a demo wedding". Defaults to the seed
+     * fixture, because the memory and file drivers are what dev and CI run — production sets it
+     * to the slug that actually exists there. Hardcoding one of the two guarantees a 404 in the
+     * other, which is how a marketing CTA quietly stops working.
+     */
+    DEMO_CATALOGUE_SLUG: nonEmpty.default('aanya-vikram'),
     NOTIFY_DRIVER: z.enum(['fake', 'resend']).default('fake'),
     RESEND_API_KEY: z.string().optional(),
     /** Overrides the default sender. A couple replies to this, so it must be a real mailbox. */

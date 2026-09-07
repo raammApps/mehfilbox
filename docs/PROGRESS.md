@@ -1000,3 +1000,47 @@ the edit.
 
 **`0009_notifications.sql` needs applying to production.** Until it is, the cron drains against a
 table that does not exist.
+
+## N-51 · The landing page — 7 September 2026
+
+The root domain was a five-line signpost with an "Operator sign in" button. It is now the page
+that sells Mehfilbox to a studio, plus `/privacy` and `/terms`.
+
+**It sells to studios, not to couples, and that is a correction.** N-51 was written before D-26
+settled studio-only and described a viddrop-shaped page pricing a wedding at ₹1,999 *to the
+couple*. Under studio-only every rupee is invoiced to the studio at a base they mark up, so a
+couple-facing price on the front page would sit next to their studio's ₹8,000 and undercut the
+partner the whole model depends on. The prices shown are partner prices, labelled as such, beside
+the retail they exist to support — which is information a studio needs to buy and a couple has no
+reason to read.
+
+**Two claims are deliberately weaker than the competition's.** Not "no compression" — renditions
+are transcoded, and the honest, better line is that originals stay downloadable untouched. Not
+"yours forever" — it archives, and the FAQ says so in one sentence instead of burying it.
+
+**`/privacy` did not exist.** Every wedding page's footer has linked it since Phase 0, so every
+guest has had a 404 one tap away. It is written from what the code actually stores: a guest
+profile is a display name and an avatar seed, with no account and no email, which is worth stating
+plainly because it is unusual and true.
+
+Three things the gates caught that review would not have:
+
+**`accent-hi` is a surface-0 colour only.** `check:contrast` verifies it against surface-0 at
+4.9:1 and nothing else, so using it on a raised surface is unguarded — axe found it twice, once on
+surface-2 and once on surface-1. The second failed on desktop while passing on mobile, because the
+column was clipped out of the scroll region on the narrow viewport. A violation that hides at one
+width is the argument for running the gate at both.
+
+**A horizontally scrollable table needs keyboard access.** Two `overflow-x-auto` wrappers were
+reachable by dragging only.
+
+**The demo link was correct in exactly one environment.** It was hardcoded as
+`/c/aanya-and-vikram`, which is production's slug, while dev and CI seed `aanya-vikram`. It is
+`DEMO_CATALOGUE_SLUG` now.
+
+The last of those produced the more useful lesson. The test written to catch it —
+`expect(response.status()).toBeLessThan(400)` — passed against a deliberately wrong slug, because
+a missing catalogue renders a "not available" page with **HTTP 200**: the guest surface's only
+real 404 is drawn, not returned. The test now asserts the profile gate is visible, and that does
+fail when the slug is wrong. A test proved by breaking it is the only kind worth having, and this
+one needed breaking twice to become true.

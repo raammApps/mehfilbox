@@ -76,6 +76,25 @@ function describeViolations(results: Awaited<ReturnType<typeof audit>>): string 
 }
 
 test.describe('doc 10 §4 — accessibility, zero violations', () => {
+  /**
+   * The marketing pages are the only ones a search engine or a studio owner reaches cold, and
+   * they were built after this gate existed — so they are held to it rather than exempted.
+   * `/privacy` in particular was linked from every wedding page's footer while being a 404.
+   */
+  for (const [name, path] of [
+    ['the landing page', '/'],
+    ['the privacy page', '/privacy'],
+    ['the terms page', '/terms'],
+  ] as const) {
+    test(name, async ({ page }) => {
+      await page.goto(path)
+      await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
+
+      const results = await audit(page)
+      expect(describeViolations(results)).toBe('')
+    })
+  }
+
   test('the profile gate', async ({ page }) => {
     await page.goto(`/?__catalogue=${DEMO_CATALOGUE}`)
     await expect(page.getByTestId('profile-gate')).toBeVisible()

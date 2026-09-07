@@ -82,7 +82,7 @@ Hindi-first studio in Jaipur sets up every wedding in English and hopes guests f
 - Separately: **the admin console is English-only.** Localising it is a larger job — every operator
   string, ~40 components — and worth scoping on its own once the guest side inherits properly.
 
-### N-54 · Claim a notification row before sending it  ·  ~1h
+### N-54 · Claim a notification row before sending it  ·  ~1h  ·  **paused, 7 September**
 
 `drain` reads, sends, then marks, so two overlapping runs would both see the same `queued` rows and
 send twice. Sequential repeats are already safe, and the GitHub Actions schedule serialises itself
@@ -147,16 +147,6 @@ One button on the overview, beside the public link: *Send to the couple*. Compos
 message (and an email) with the poster, the couple's names, "now streaming" copy in the
 catalogue's locale, and the link; records that it was sent. This is the moment the product gets
 forwarded to two hundred people, and today the operator writes it themselves.
-
-### N-51 · The landing page  ·  ~1 session  ·  **Phase 1, last — after real footage**
-
-`heirloomfilms.in` is an operator sign-in. Rebuild it in the shape viddrop's page has, which is the
-shape that sold Sandeep on their pricing: the price in the hero sentence ("₹1,999 per wedding, no
-subscription"), a With/Without table against Google Drive (request-access wall, compression, dead
-links, a folder instead of a running order), the three templates as real screenshots, an FAQ that
-answers "what happens after 90 days" in one sentence ("it archives — nothing is deleted"), and the
-public demo catalogue one tap away. Do **not** claim "no compression": say *originals always
-downloadable, streaming tuned for 4G*, which is true and better here.
 
 ### N-24 · Lifecycle: renewal, lapse, **archive**  ·  doc 15  ·  **Phase 2**
 
