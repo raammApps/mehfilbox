@@ -12,6 +12,8 @@ import type {
   Catalogue,
   ModuleState,
   Operator,
+  OrgStatus,
+  PlatformAudit,
   Org,
   PlatformAdmin,
   PlaybackProgress,
@@ -139,7 +141,23 @@ export class SupabaseRepository implements Repository {
       name: r.name,
       slug: r.slug,
       kind: r.kind ?? 'partner',
+      // Defaulted rather than required: 0010 adds the column, and a row read by an older
+      // deployment mid-rollout has no `status` to report.
+      status: r.status ?? 'active',
       branding: r.branding ?? {},
+      createdAt: r.created_at,
+    }
+  }
+
+  private static toPlatformAudit(r: Row): PlatformAudit {
+    return {
+      id: r.id,
+      actorId: r.actor_id,
+      actorEmail: r.actor_email,
+      action: r.action,
+      orgId: r.org_id ?? null,
+      orgSlug: r.org_slug ?? null,
+      detail: r.detail ?? {},
       createdAt: r.created_at,
     }
   }
@@ -426,6 +444,74 @@ export class SupabaseRepository implements Repository {
   async getOperator(id: string): Promise<Operator | null> {
     const { data } = await this.db.from('operators').select('*').eq('id', id).maybeSingle()
     return data ? SupabaseRepository.toOperator(data) : null
+  }
+
+  async listOperators(orgId: string): Promise<Operator[]> {
+    const { data, error } = await this.db
+      .from('operators')
+      .select('*')
+      .eq('org_id', orgId)
+      .order('email')
+    if (error) throw new ApiError('INTERNAL', error.message)
+    return (data ?? []).map(SupabaseRepository.toOperator)
+  }
+
+  async setOrgStatus(orgId: string, status: OrgStatus): Promise<Org> {
+    const data = SupabaseRepository.unwrap<Row>(
+      await this.db.from('orgs').update({ status }).eq('id', orgId).select('*').maybeSingle(),
+    )
+    return SupabaseRepository.toOrg(data)
+  }
+
+  async getOperatorWithOrgStatus(
+    id: string,
+  ): Promise<{ operator: Operator; orgStatus: OrgStatus } | null> {
+    // One round trip, not two. PostgREST embeds the parent row through the foreign key, which is
+    // what makes checking suspension on every authenticated request affordable.
+    const { data } = await this.db
+      .from('operators')
+      .select('*, orgs!inner(status)')
+      .eq('id', id)
+      .maybeSingle()
+    if (!data) return null
+    const org = data.orgs as { status?: string } | null
+    return {
+      operator: SupabaseRepository.toOperator(data),
+      orgStatus: org?.status === 'suspended' ? 'suspended' : 'active',
+    }
+  }
+
+  // ── Platform audit (N-27) ───────────────────────────────────────────────────
+  async recordPlatformAudit(entry: PlatformAudit): Promise<PlatformAudit> {
+    const data = SupabaseRepository.unwrap<Row>(
+      await this.db
+        .from('platform_audit')
+        .insert({
+          id: entry.id,
+          actor_id: entry.actorId,
+          actor_email: entry.actorEmail,
+          action: entry.action,
+          org_id: entry.orgId,
+          org_slug: entry.orgSlug,
+          detail: entry.detail,
+          created_at: entry.createdAt,
+        })
+        .select('*')
+        .single(),
+    )
+    return SupabaseRepository.toPlatformAudit(data)
+  }
+
+  async listPlatformAudit(options?: { orgId?: string; limit?: number }): Promise<PlatformAudit[]> {
+    let query = this.db
+      .from('platform_audit')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(options?.limit ?? 50)
+    if (options?.orgId) query = query.eq('org_id', options.orgId)
+    const { data, error } = await query
+    if (error) throw new ApiError('INTERNAL', error.message)
+    return (data ?? []).map(SupabaseRepository.toPlatformAudit)
   }
 
   // ── Catalogues ──────────────────────────────────────────────────────────────

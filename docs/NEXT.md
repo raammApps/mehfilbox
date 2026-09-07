@@ -219,12 +219,18 @@ most of the value ("all my weddings look like my studio").
 `PRODUCT.md` §6 lists the five product questions that have to be answered before a real
 marketplace is scoped. Build a marketplace when a third party asks to publish into one.
 
-### N-27 · Platform admin, beyond read-only  ·  doc 15 §1
+### N-27b · Platform admin: plans and quotas  ·  doc 15 §1  ·  ~half a session
 
-The console lists orgs and one org's catalogues, read-only. Missing: create a tenant, assign a
-plan or quota, suspend, and any view of users. Today all of it is SQL.
+Suspension, the user list and the audit trail landed on 7 September. What is left of N-27 is the
+other write: **assign a plan or a quota to an org**, which is still SQL.
 
-Keep read-only as the default stance; add writes one at a time, with an audit trail.
+The machinery exists — `plans` and `entitlements` from 0006, and `entitlements` already resolves
+catalogue-over-org per field in `lib/entitlements.ts`. What is missing is a write path and the
+console form, and the same audit row every platform write now leaves.
+
+Creating a tenant stays out on purpose: `/admin/register` already does it, correctly, with a
+verified email and a real Supabase Auth user behind `operators.id`. A second creation path in the
+platform console would be a second set of rules for the same object.
 
 ### N-20 · Razorpay  ·  doc 15 §4  ·  **Phase 2**
 

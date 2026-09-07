@@ -11,6 +11,8 @@ import type {
   Operator,
   Org,
   PlatformAdmin,
+  OrgStatus,
+  PlatformAudit,
   PlaybackProgress,
   PlayEvent,
   Photo,
@@ -40,6 +42,7 @@ export type Snapshot = {
   moduleStates: ModuleState[]
   likes: { catalogueId: string; guestKey: string; subject: LikeSubject; subjectId: string }[]
   notifications: Notification[]
+  platformAudit: PlatformAudit[]
   playEvents: PlayEvent[]
   usage: { catalogueId: string; month: string; storedGb: number; deliveredGb: number }[]
 }
@@ -60,6 +63,7 @@ export function emptySnapshot(): Snapshot {
     moduleStates: [],
     likes: [],
     notifications: [],
+    platformAudit: [],
     playEvents: [],
     usage: [],
   }
@@ -131,6 +135,49 @@ export class MemoryRepository implements Repository {
     this.data.operators.push(this.clone(operator))
     this.touched()
     return this.clone(operator)
+  }
+
+  async listOperators(orgId: string): Promise<Operator[]> {
+    return this.clone(
+      this.data.operators
+        .filter((o) => o.orgId === orgId)
+        .sort((a, b) => a.email.localeCompare(b.email)),
+    )
+  }
+
+  async setOrgStatus(orgId: string, status: OrgStatus): Promise<Org> {
+    const org = this.data.orgs.find((o) => o.id === orgId)
+    if (!org) throw new ApiError('NOT_FOUND', 'Org not found')
+    org.status = status
+    this.touched()
+    return this.clone(org)
+  }
+
+  async getOperatorWithOrgStatus(
+    id: string,
+  ): Promise<{ operator: Operator; orgStatus: OrgStatus } | null> {
+    const operator = this.data.operators.find((o) => o.id === id)
+    if (!operator) return null
+    const org = this.data.orgs.find((o) => o.id === operator.orgId)
+    // An operator whose org has vanished is not a session. Defaulting to 'active' here would
+    // hand the widest possible access to the least explicable state.
+    if (!org) return null
+    return { operator: this.clone(operator), orgStatus: org.status }
+  }
+
+  async recordPlatformAudit(entry: PlatformAudit): Promise<PlatformAudit> {
+    this.data.platformAudit.push(this.clone(entry))
+    this.touched()
+    return this.clone(entry)
+  }
+
+  async listPlatformAudit(options?: { orgId?: string; limit?: number }): Promise<PlatformAudit[]> {
+    return this.clone(
+      this.data.platformAudit
+        .filter((e) => !options?.orgId || e.orgId === options.orgId)
+        .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+        .slice(0, options?.limit ?? 50),
+    )
   }
 
   // ── Platform admin ──────────────────────────────────────────────────────────

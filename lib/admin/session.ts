@@ -2,7 +2,7 @@ import 'server-only'
 import { getRepository } from '@/lib/db'
 import { ApiError } from '@/lib/http/errors'
 import { getAuthProvider } from './auth'
-import type { Catalogue, Operator, Org } from '@/lib/schema'
+import type { Catalogue, Operator, Org, OrgStatus } from '@/lib/schema'
 
 /**
  * Operator identity, and the single place `org_id` enters a query.
@@ -12,7 +12,7 @@ import type { Catalogue, Operator, Org } from '@/lib/schema'
  * does not call one of these functions is visibly unscoped.
  */
 
-export type OperatorSession = { operator: Operator; orgId: string }
+export type OperatorSession = { operator: Operator; orgId: string; orgStatus: OrgStatus }
 
 export async function getOperatorSession(): Promise<OperatorSession | null> {
   // *Who* comes from the auth driver; *what they may see* comes from the operators row, always.
@@ -21,13 +21,20 @@ export async function getOperatorSession(): Promise<OperatorSession | null> {
   const user = await getAuthProvider().currentUser()
   if (!user) return null
 
-  const operator = await getRepository().getOperator(user.id)
+  const context = await getRepository().getOperatorWithOrgStatus(user.id)
   // An authenticated user with no operator row is a real state under Supabase Auth — somebody
   // signed up, or was invited, and has not been granted access to an org. It is not an error,
   // and it must not be treated as a session.
-  if (!operator) return null
+  if (!context) return null
 
-  return { operator, orgId: operator.orgId }
+  /**
+   * A suspended org still gets a session, and that is deliberate (N-27).
+   *
+   * Returning null here would bounce them to the login page, where they would sign in
+   * successfully and bounce again — a loop that says nothing. They keep an identity, every write
+   * is refused by `requireOperator`, and the console tells them why.
+   */
+  return { operator: context.operator, orgId: context.operator.orgId, orgStatus: context.orgStatus }
 }
 
 /**
@@ -46,6 +53,15 @@ export async function getSessionOrg(session: OperatorSession): Promise<Org | nul
 export async function requireOperator(): Promise<OperatorSession> {
   const session = await getOperatorSession()
   if (!session) throw new ApiError('UNAUTHORIZED', 'Sign in to continue')
+  /**
+   * Suspension is enforced here, at the same choke point as org scoping, so a route that forgot
+   * about it is a route that was already unscoped. It refuses reads as well as writes: a
+   * suspended studio's console is not a read-only mode anyone asked for, and half a console is
+   * more confusing than a clear refusal.
+   */
+  if (session.orgStatus === 'suspended') {
+    throw new ApiError('FORBIDDEN', 'This studio account is suspended. Contact support.')
+  }
   return session
 }
 

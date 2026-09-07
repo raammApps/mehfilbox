@@ -1044,3 +1044,40 @@ a missing catalogue renders a "not available" page with **HTTP 200**: the guest 
 real 404 is drawn, not returned. The test now asserts the profile gate is visible, and that does
 fail when the slug is wrong. A test proved by breaking it is the only kind worth having, and this
 one needed breaking twice to become true.
+
+## N-27 · The platform console's first write — 7 September 2026
+
+The platform console listed orgs and one org's catalogues, read-only, and doc 15 §1 said to add
+writes one at a time with an audit trail. This is the first: **suspend and restore a studio**,
+plus the user list and the trail itself.
+
+**Suspension is an org state and never a catalogue one, and that is the whole design.** A billing
+dispute between us and a studio must never take a wedding off the air — the couple is not party to
+it. `status` sits on `orgs`, the suspend path touches no catalogue, and a test asserts the
+catalogue list is byte-identical before and after. If that column ever migrates onto `catalogues`,
+that test is what should stop it.
+
+**A suspended studio keeps its session.** Returning null from `getOperatorSession` would bounce
+them to a login they can still pass, which would bounce them back — a loop that explains nothing.
+Instead the session carries `orgStatus`, `requireOperator` refuses every route at the same choke
+point that enforces org scoping, and the console renders a screen that says what happened and who
+to email. A route that forgot about suspension is a route that was already unscoped, which is why
+that is the right place for it.
+
+**The status rides along with the operator lookup rather than costing a second query.**
+`getSessionOrg` exists precisely so a write does not pay to read an org row nobody displays, and
+suspension has to be checked on every authenticated request. `getOperatorWithOrgStatus` embeds the
+parent row through the foreign key — one round trip in PostgREST, a lookup in memory.
+
+**An operator whose org has vanished gets no session at all.** Defaulting to `active` there would
+hand out the widest access at the moment least is known.
+
+The user list turned out to be the most useful part, and not for the reason it was built.
+`kalyanam` has **no operators at all** — its auth users were deleted, `on delete cascade` took the
+`operators` rows, and its catalogues are intact and unreachable. Every other surface shows a
+healthy org with catalogues against it. The org page now says so in as many words, and a test
+holds that state.
+
+Knip caught its own stale suppression a second time, on `setAuthProvider`, for the same reason as
+`setRepository` a day earlier: a new test imports it, so the tag no longer suppressed anything.
+Two for two — it is the most reliable signal in the suite for "this comment stopped being true".

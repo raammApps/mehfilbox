@@ -8,6 +8,8 @@ import type {
   ModuleInstance,
   ModuleState,
   Operator,
+  OrgStatus,
+  PlatformAudit,
   Org,
   PlatformAdmin,
   Transfer,
@@ -66,6 +68,33 @@ export interface Repository {
   /** Every org on the platform. Platform-admin only — no route may call this org-scoped. */
   listOrgs(kind?: Org['kind']): Promise<Org[]>
   createOperator(operator: Operator): Promise<Operator>
+
+  /** Everyone who can sign in to an org. Platform-console only — an operator sees their own org
+   *  through the console's own scoped queries, never through this. */
+  listOperators(orgId: string): Promise<Operator[]>
+
+  /**
+   * Suspend or restore an org (N-27).
+   *
+   * Org-level, and never touches a catalogue: suspending a studio must not expire the weddings it
+   * has already delivered.
+   */
+  setOrgStatus(orgId: string, status: OrgStatus): Promise<Org>
+
+  /**
+   * The operator row plus the org's status, in one read.
+   *
+   * Deliberately not `getOperator` + `getOrg`. `getSessionOrg` is separate precisely so that a
+   * write does not pay for an org row nobody displays, and suspension has to be checked on every
+   * authenticated request — so the status rides along with the lookup that already happens.
+   */
+  getOperatorWithOrgStatus(id: string): Promise<{ operator: Operator; orgStatus: OrgStatus } | null>
+
+  // ── Platform audit (N-27) ───────────────────────────────────────────────────
+  /** Record a platform-admin action. An unaudited platform write is indistinguishable from an
+   *  intrusion after the fact, so every write path calls this. */
+  recordPlatformAudit(entry: PlatformAudit): Promise<PlatformAudit>
+  listPlatformAudit(options?: { orgId?: string; limit?: number }): Promise<PlatformAudit[]>
   /** Compensation for a half-finished registration. Not a user-facing delete. */
   deleteOrg(id: string): Promise<void>
 

@@ -14,7 +14,8 @@ export function getAuthProvider(): AuthProvider {
   return g[KEY]
 }
 
-/** @knipignore Injection seam for tests, matching `setVideoProvider`, which three test files use. */
+/** Injection seam for tests, matching `setVideoProvider`. Its ignore tag is gone: N-27's suspension
+ *  tests sign in as an operator through this, so the export is used and the suppression was stale. */
 export function setAuthProvider(provider: AuthProvider): void {
   ;(globalThis as Global)[KEY] = provider
 }

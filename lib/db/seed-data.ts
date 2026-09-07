@@ -320,6 +320,7 @@ export function demoSnapshot(
         name: 'Kalyanam Weddings',
         slug: 'kalyanam',
         kind: 'partner' as const,
+        status: 'active' as const,
         branding: { accent: '#d11a2a', presentedBy: 'Kalyanam Weddings' },
         createdAt: CREATED_AT,
       },

@@ -1,5 +1,8 @@
 import 'server-only'
+import { randomUUID } from 'node:crypto'
 import { getRepository } from '@/lib/db'
+import { ApiError } from '@/lib/http/errors'
+import { platformAuditSchema } from '@/lib/schema'
 import { getAuthProvider } from './auth'
 import type { PlatformAdmin } from '@/lib/schema'
 
@@ -16,9 +19,10 @@ import type { PlatformAdmin } from '@/lib/schema'
  * admin.** `getOperatorSession` reads the `operators` row; this reads `platform_admins`. Nothing
  * converts between them, in either direction.
  *
- * There is no `requirePlatformAdmin` throwing counterpart yet, because no API route is
- * platform-scoped — the two pages call this and answer `notFound()`. A 404 rather than a refusal
- * is deliberate: an operator poking at `/admin/platform` should not learn the surface exists.
+ * The pages call `getPlatformAdmin` and answer `notFound()`. A 404 rather than a refusal is
+ * deliberate: an operator poking at `/admin/platform` should not learn the surface exists.
+ * `requirePlatformAdmin` is the API counterpart, added with the first platform write (N-27), and
+ * it answers `NOT_FOUND` for the same reason.
  */
 
 export async function getPlatformAdmin(): Promise<PlatformAdmin | null> {
@@ -27,4 +31,44 @@ export async function getPlatformAdmin(): Promise<PlatformAdmin | null> {
   const user = await getAuthProvider().currentUser()
   if (!user) return null
   return getRepository().getPlatformAdmin(user.id)
+}
+
+/**
+ * The guard every platform write route calls. Answers NOT_FOUND rather than FORBIDDEN, so probing
+ * the endpoint teaches nothing that probing the page does not.
+ */
+export async function requirePlatformAdmin(): Promise<PlatformAdmin> {
+  const admin = await getPlatformAdmin()
+  if (!admin) throw new ApiError('NOT_FOUND', 'Not found')
+  return admin
+}
+
+/**
+ * Record a platform-admin action (N-27).
+ *
+ * Called by the write, not around it, and **after** the write succeeds — an audit trail that also
+ * lists attempts that failed is a different artefact, and conflating them means neither question
+ * can be answered cleanly. What matters here is "what changed, and who changed it".
+ *
+ * The org's slug is copied in rather than joined later, so the row still reads after the org is
+ * deleted — which is when someone is most likely to be reading it.
+ */
+export async function recordPlatformAction(input: {
+  admin: PlatformAdmin
+  action: string
+  org?: { id: string; slug: string } | null
+  detail?: Record<string, unknown>
+}): Promise<void> {
+  await getRepository().recordPlatformAudit(
+    platformAuditSchema.parse({
+      id: randomUUID(),
+      actorId: input.admin.id,
+      actorEmail: input.admin.email,
+      action: input.action,
+      orgId: input.org?.id ?? null,
+      orgSlug: input.org?.slug ?? null,
+      detail: input.detail ?? {},
+      createdAt: new Date().toISOString(),
+    }),
+  )
 }

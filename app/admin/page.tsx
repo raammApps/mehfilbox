@@ -23,6 +23,28 @@ export default async function CatalogueListPage() {
     redirect('/admin/login')
   }
 
+  /**
+   * A suspended studio keeps its session — bouncing it to login would loop, since the credentials
+   * are still valid — so this is where it learns why nothing works. Every API route it could call
+   * is already refused by `requireOperator`; without this screen that refusal is an unexplained
+   * error toast on a console that looks fine.
+   */
+  if (session.orgStatus === 'suspended') {
+    return (
+      <div className="mx-auto flex min-h-svh w-full max-w-[560px] flex-col justify-center p-6">
+        <h1 className="mb-2 text-[24px] font-bold tracking-[-0.01em]">This account is suspended</h1>
+        <p className="mb-4 text-[15px] text-[var(--color-l-text-mid)]">
+          You cannot sign in to manage weddings until it is restored. The weddings you have
+          already delivered are unaffected — couples can still open them and everything still
+          plays.
+        </p>
+        <p className="text-[14px] text-[var(--color-l-text-mid)]">
+          Email <a className="underline underline-offset-4" href={`mailto:${env.SUPPORT_EMAIL}`}>{env.SUPPORT_EMAIL}</a> to sort it out.
+        </p>
+      </div>
+    )
+  }
+
   const repository = getRepository()
 
   // Counts come from one method rather than `listTitles` per row: a partner with thirty weddings

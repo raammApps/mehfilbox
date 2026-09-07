@@ -158,14 +158,41 @@ export type ModuleInstance = z.infer<typeof moduleInstanceSchema>
 export const orgKindSchema = z.enum(['partner', 'couple'])
 export type OrgKind = z.infer<typeof orgKindSchema>
 
+/**
+ * Suspension is an org state and never a catalogue one (N-27). A catalogue lapses on the schedule
+ * `PRICING.md` §2 sets; an org is suspended for non-payment or abuse. Conflating them would expire
+ * weddings a studio has already delivered, which is the one thing this product promises not to do.
+ */
+export const orgStatusSchema = z.enum(['active', 'suspended'])
+export type OrgStatus = z.infer<typeof orgStatusSchema>
+
 export const orgSchema = z.object({
   id: z.string().uuid(),
   name: z.string().min(1),
   slug: slugSchema,
   kind: orgKindSchema.default('partner'),
+  status: orgStatusSchema.default('active'),
   branding: brandingSchema.default({}),
   createdAt: z.string(),
 })
+
+/**
+ * One recorded platform-admin action (N-27).
+ *
+ * `actorEmail` and `orgSlug` are denormalised on purpose: an audit row has to stay readable after
+ * the admin's account or the org is deleted, which is precisely when someone is reading it.
+ */
+export const platformAuditSchema = z.object({
+  id: z.string().uuid(),
+  actorId: z.string().uuid(),
+  actorEmail: z.string(),
+  action: z.string().min(1),
+  orgId: z.string().uuid().nullable().default(null),
+  orgSlug: z.string().nullable().default(null),
+  detail: z.record(z.string(), z.unknown()).default({}),
+  createdAt: z.string(),
+})
+export type PlatformAudit = z.infer<typeof platformAuditSchema>
 
 /**
  * A catalogue mid-handover.

@@ -36,7 +36,7 @@ export default async function PlatformPage() {
         <div>
           <h1 className="text-[24px] font-bold tracking-[-0.01em]">Platform</h1>
           <p className="mt-0.5 text-[14px] text-[var(--color-l-text-mid)]">
-            Signed in as {admin.name}. Everything here is read-only.
+            Signed in as {admin.name}. Read-only, apart from suspending a studio.
           </p>
         </div>
         <Link href="/admin" className="text-[13px] underline underline-offset-4">
@@ -62,6 +62,7 @@ export default async function PlatformPage() {
               <tr className="border-b border-[var(--color-l-line)] text-start">
                 <Th>Name</Th>
                 <Th>Kind</Th>
+                <Th>Access</Th>
                 <Th>Address</Th>
                 <Th>Catalogues</Th>
               </tr>
@@ -78,6 +79,13 @@ export default async function PlatformPage() {
                     </Link>
                   </td>
                   <td className="px-3 py-2.5 text-[var(--color-l-text-mid)]">{org.kind}</td>
+                  <td className="px-3 py-2.5">
+                    {org.status === 'suspended' ? (
+                      <span className="font-medium text-[var(--color-error)]">Suspended</span>
+                    ) : (
+                      <span className="text-[var(--color-l-text-mid)]">Active</span>
+                    )}
+                  </td>
                   <td className="px-3 py-2.5">
                     <code className="text-[12px] text-[var(--color-l-text-mid)]">{org.slug}</code>
                   </td>

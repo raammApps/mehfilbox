@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { StatusPill } from '@/components/admin/AdminChrome'
+import { OrgStatusControl } from '@/components/admin/OrgStatusControl'
 import { getPlatformAdmin } from '@/lib/admin/platform'
 import { getRepository } from '@/lib/db'
 import { env } from '@/lib/env'
@@ -12,10 +13,14 @@ export const dynamic = 'force-dynamic'
 /**
  * One org's catalogues, for when a partner writes in asking why something looks wrong (N-16).
  *
- * **Read-only, and no deeper than this.** It lists what exists and links to the guest page a
- * guest would see. There is no route from here into the customizer, the films tab or any write
- * endpoint — support means being able to describe what the partner is describing, not being able
- * to change it. Anything more should be a thing the partner does while you watch.
+ * **Almost read-only, and no deeper than this.** It lists what exists and links to the guest page
+ * a guest would see. There is still no route from here into the customizer, the films tab or any
+ * catalogue write — support means being able to describe what the partner is describing, not
+ * being able to change it.
+ *
+ * The one exception is suspension (N-27), which is a platform decision rather than a support
+ * action and cannot be delegated to the studio for obvious reasons. It is recorded, and the trail
+ * is shown on this page rather than somewhere only a database client can reach.
  */
 export default async function PlatformOrgPage({ params }: { params: Promise<{ id: string }> }) {
   const admin = await getPlatformAdmin()
@@ -29,7 +34,11 @@ export default async function PlatformOrgPage({ params }: { params: Promise<{ id
   // The one place an org id from the URL is trusted — and it is safe precisely because the
   // caller has already been proven to be a platform admin, who by design belongs to no org and
   // therefore cannot be "escalating" into one.
-  const catalogues = await repository.listCatalogues({ orgId: org.id })
+  const [catalogues, operators, audit] = await Promise.all([
+    repository.listCatalogues({ orgId: org.id }),
+    repository.listOperators(org.id),
+    repository.listPlatformAudit({ orgId: org.id, limit: 20 }),
+  ])
 
   return (
     <div className="mx-auto min-h-svh w-full max-w-[1100px] p-6">
@@ -43,9 +52,38 @@ export default async function PlatformOrgPage({ params }: { params: Promise<{ id
       <header className="mb-5">
         <h1 className="text-[24px] font-bold tracking-[-0.01em]">{org.name}</h1>
         <p className="mt-0.5 text-[14px] text-[var(--color-l-text-mid)]">
-          {org.kind} · <code className="text-[12px]">{org.slug}</code> · read-only
+          {org.kind} · <code className="text-[12px]">{org.slug}</code>
+          {org.status === 'suspended' ? ' · suspended' : null}
         </p>
       </header>
+
+      <div className="mb-6 grid gap-4 sm:grid-cols-2">
+        <OrgStatusControl orgId={org.id} orgName={org.name} status={org.status} />
+
+        <div className="rounded-[var(--radius-card)] border border-[var(--color-l-line)] bg-white p-4">
+          <p className="mb-2 text-[15px] font-semibold">
+            Who can sign in {operators.length > 0 ? `(${operators.length})` : ''}
+          </p>
+          {operators.length === 0 ? (
+            /* Not a cosmetic empty state. An org with no operators cannot be signed into at all,
+               and it is invisible from every other surface — `kalyanam` reached exactly this state
+               when auth users were deleted and `on delete cascade` took the operators with them. */
+            <p className="text-[13px] text-[var(--color-error)]">
+              Nobody. This org cannot be signed into — its catalogues are intact, but an operator
+              row has to be created before anyone can reach them.
+            </p>
+          ) : (
+            <ul className="flex flex-col gap-1.5">
+              {operators.map((operator) => (
+                <li key={operator.id} className="text-[13px]">
+                  <span className="font-medium">{operator.email}</span>
+                  <span className="text-[var(--color-l-text-mid)]"> · {operator.role}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </div>
 
       {catalogues.length === 0 ? (
         <p className="rounded-[var(--radius-card)] border border-dashed border-[var(--color-l-line)] px-4 py-10 text-center text-[14px] text-[var(--color-l-text-mid)]">
@@ -77,6 +115,29 @@ export default async function PlatformOrgPage({ params }: { params: Promise<{ id
                   /{catalogue.slug}
                 </a>
               </p>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <h2 className="mt-8 mb-2 text-[15px] font-semibold">What has been done to this org</h2>
+      {audit.length === 0 ? (
+        <p className="text-[13px] text-[var(--color-l-text-mid)]">Nothing yet.</p>
+      ) : (
+        <ul className="flex flex-col gap-2">
+          {audit.map((entry) => (
+            <li
+              key={entry.id}
+              className="rounded-[var(--radius-card)] border border-[var(--color-l-line)] bg-white px-4 py-3 text-[13px]"
+            >
+              <span className="font-medium">{entry.action}</span>
+              <span className="text-[var(--color-l-text-mid)]">
+                {' '}
+                by {entry.actorEmail} · {new Date(entry.createdAt).toLocaleString('en-IN')}
+              </span>
+              {typeof entry.detail.reason === 'string' ? (
+                <p className="mt-1 text-[var(--color-l-text-mid)]">{entry.detail.reason}</p>
+              ) : null}
             </li>
           ))}
         </ul>
