@@ -239,6 +239,21 @@ const schema = z
           message: 'The committed dev password must not be used in production',
         })
       }
+      /**
+       * The fake provider does not fail — it records a send and returns success, so a production
+       * deployment on `fake` would fill `notifications` with rows marked `sent` that nobody
+       * received. A queue that lies about delivery is worse than one that does not drain: the
+       * second is visible, the first is discovered by a couple who never got their film.
+       *
+       * N-50 shipped without this variable set, and production defaulted to `fake` for a day.
+       */
+      if (env.NOTIFY_DRIVER === 'fake') {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['NOTIFY_DRIVER'],
+          message: 'Production must not run the fake notification driver; it records sends that never happened',
+        })
+      }
       if (env.DATA_DRIVER !== 'supabase' && env.ALLOW_EPHEMERAL_DATA !== '1') {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
@@ -248,6 +263,10 @@ const schema = z
       }
     }
   })
+
+/** Exported so the production guards can be asserted directly, rather than by re-importing this
+ *  module with a stubbed `process.env` and hoping the module cache cooperates. */
+export const envSchema = schema
 
 export type Env = z.infer<typeof schema>
 

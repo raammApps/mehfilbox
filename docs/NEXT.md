@@ -82,28 +82,23 @@ Hindi-first studio in Jaipur sets up every wedding in English and hopes guests f
 - Separately: **the admin console is English-only.** Localising it is a larger job — every operator
   string, ~40 components — and worth scoping on its own once the guest side inherits properly.
 
-### N-54 · Schedule the notification drain, and claim rows before sending  ·  ~1h
+### N-54 · Claim a notification row before sending it  ·  ~1h
 
-Two loose ends from N-50, found by a deploy that failed rather than by a test.
+`drain` reads, sends, then marks, so two overlapping runs would both see the same `queued` rows and
+send twice. Sequential repeats are already safe, and the GitHub Actions schedule serialises itself
+with a `concurrency` group — so the remaining exposure is a second *caller*: a `workflow_dispatch`
+fired by hand while a scheduled run is in flight, or the Vercel cron restored on Pro alongside a
+workflow nobody deleted.
 
-**The cron is not scheduled.** Vercel's Hobby plan allows two cron jobs at one run a day each, and
-`reconcile` and `usage` hold both slots — a third entry fails the deploy outright, at deploy time.
-`/api/cron/notify` therefore has no entry in `vercel.json` and nothing currently calls it. Daily
-was not an acceptable substitute: a delivery message arriving up to 24 hours after the studio
-publishes is not a delivery message. Pick one:
+The fix is a `sending` status written before the provider call, so a concurrent drain's
+`listQueuedNotifications` does not see the row. It needs a migration — 0009's constraint is
+`check (status in ('queued','sent','failed'))` — plus a way back for rows stranded in `sending` by
+a crash, which is what makes this an hour rather than ten minutes: a row stuck mid-send is a
+message nobody will ever receive, and that is the failure this must not introduce while fixing a
+rarer one.
 
-- **Vercel Pro**, $20/month — one line back in `vercel.json` and the problem is gone. Worth it when
-  there is revenue; hard to justify against zero weddings.
-- **A GitHub Actions schedule** — free, the repo is public, `*/15` in a workflow that curls the
-  route with `CRON_SECRET`. GitHub delays scheduled runs under load, often 5–20 minutes, which is
-  fine for email and would not be for anything interactive.
-- **cron-job.org or similar** — free, punctual, one more account to hold.
-
-**Nothing claims a row before sending.** `drain` reads, sends, then marks, so two overlapping runs
-would both see the same `queued` rows and send twice. Sequential repeats are already safe. The fix
-is a `sending` status set before the provider call, which needs a migration — the 0009 CHECK
-constraint is `('queued','sent','failed')`. Do this whichever scheduler wins; an external one can
-be triggered twice in a way Vercel's own cron cannot.
+**Do it before the Vercel Pro move**, when the cron entry returns to `vercel.json` and two
+schedulers exist for however long it takes to delete the workflow.
 
 ### N-21 · The migration email, and the warning schedule  ·  ~2h  ·  **Phase 1, first**
 

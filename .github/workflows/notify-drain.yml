@@ -1,0 +1,69 @@
+# Drive `/api/cron/notify` from GitHub rather than from Vercel (N-54).
+#
+# Vercel's Hobby plan allows two cron jobs at one run a day, and `reconcile` and `usage` hold both
+# slots — a third entry fails the deploy outright. Daily is not a schedule for a delivery message.
+# GitHub Actions is free and unmetered on public repositories, so this costs nothing while there
+# are no customers. When the account moves to Vercel Pro, delete this file and put the entry back
+# in `vercel.json`; the route itself does not change either way.
+#
+# Two things to know about GitHub's scheduler, both of which are fine for email and would not be
+# for anything interactive:
+#
+#   - Runs are delayed under load, commonly 5–20 minutes, and a run can be dropped entirely.
+#     `drain` sends whatever is queued, so a skipped run costs latency, never a message.
+#   - **A public repository's schedules are disabled after 60 days with no commits.** GitHub emails
+#     first. Re-enable from the Actions tab; the workflow is unchanged.
+name: Drain the notification queue
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+
+# Queue rather than overlap. `drain` reads, sends, then marks, so two concurrent runs would both
+# see the same queued rows and send twice; serialising here removes that for this scheduler. It
+# does not make the endpoint safe against a second caller — that needs the `sending` status in
+# N-54, which is why that item stays open.
+concurrency:
+  group: notify-drain
+  cancel-in-progress: false
+
+permissions: {}
+
+jobs:
+  drain:
+    name: POST /api/cron/notify
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Drain
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          TARGET: ${{ vars.DRAIN_URL || 'https://mehfilbox.com' }}
+        run: |
+          set -uo pipefail
+
+          # Skip rather than fail when the secret is absent. A fork, or this repository before the
+          # secret is set, would otherwise show a red run every fifteen minutes forever — noise
+          # that trains everyone to ignore the one failure that matters.
+          if [ -z "${CRON_SECRET}" ]; then
+            echo "::notice::CRON_SECRET is not set — skipping. Set it in Settings → Secrets → Actions."
+            exit 0
+          fi
+
+          code=$(curl -sS -m 60 -o body.json -w '%{http_code}' \
+            -H "Authorization: Bearer ${CRON_SECRET}" \
+            "${TARGET}/api/cron/notify") || { echo "::error::request failed"; exit 1; }
+
+          echo "HTTP ${code}"
+          cat body.json; echo
+
+          # 401 is the interesting failure: the endpoint is up and the secret is wrong, which means
+          # the queue silently stops draining. Say so rather than letting it read as a blip.
+          if [ "${code}" = "401" ]; then
+            echo "::error::401 — CRON_SECRET here does not match Vercel's. The queue is not draining."
+            exit 1
+          fi
+          [ "${code}" = "200" ] || { echo "::error::unexpected ${code}"; exit 1; }
+
+          echo "### Drain $(jq -c . body.json 2>/dev/null || cat body.json)" >> "$GITHUB_STEP_SUMMARY"
