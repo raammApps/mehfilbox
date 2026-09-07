@@ -333,18 +333,21 @@ means no upgrade can take effect.
 editor, sign in, then delete the file. Production now refuses to boot on the repo's published
 default, so this cannot quietly stay unrotated.
 
-**Rotate the Supabase secret key.** It went through a chat transcript. It bypasses RLS entirely,
-so it is the most valuable credential here. Supabase dashboard → Settings → API → roll the
-`service_role` / secret key, then update `.env.local`, `.env.vercel.local` and
-`./scripts/deploy-vercel.sh`.
+~~**Rotate the Supabase secret key.**~~ **Done, 7 September.** The new-format `sb_secret_…` keys
+can exist side by side, so it was a rolling swap with no downtime: create, move `.env.local` and
+`.env.vercel.local` over, deploy, verify, then revoke. Verified in that order rather than assumed
+— the old key now returns `401`, the new one reads every table, and a guest catalogue still
+renders its title out of Postgres, which is what proves the *deployment* uses it and not just the
+shell.
+
+The step that must not be skipped is the deploy: Vercel bakes environment variables into a
+deployment, so pushing a variable without deploying leaves production on the old value. That
+happened here — the first attempt pushed 25 variables and then died on an unrelated cron error,
+leaving the rotation half-applied for several minutes.
 
 ~~**Rotate the Bunny account API key.**~~ **Done, 7 September** — and verified rather than
 assumed: the new key answers the account API and the old one returns `401`. Bunny lets you
 regenerate without invalidating, so the revocation is the half worth checking.
-
-**The Supabase secret key is still the one that matters**, and is still unrotated. It bypasses
-RLS entirely, which the `likes` table's RLS is a reminder of: every other boundary in the product
-assumes that key never leaves the server.
 
 **Real footage** (N-14), which is the one thing no agent can do for this product.
 
@@ -352,10 +355,24 @@ assumes that key never leaves the server.
 
 - **Credentials** live in `.env.local` (gitignored, verified). Both services are fully
   configured; `pnpm preflight` is all green.
-- **Supabase**: schema applied, org `kalyanam`, operator `operator@heirloomfilms.test`. The app
-  verifies its own scrypt hash, so the Supabase Auth password on that account is random and
-  unused — it exists only to satisfy `operators.id → auth.users.id`. The app login is
-  `operator@heirloomfilms.test` / `heirloomfilms-dev`.
+- **Supabase**: schema applied through `0009_notifications.sql`. Five orgs exist, and the operator
+  rows are, read from the database on 7 September rather than remembered:
+
+  | org | operator |
+  |---|---|
+  | `smtp-test-studio` | `hello@heirloomfilms.in` — an address on the retired domain |
+  | `teststudio` | `sandeep.bh5+1@gmail.com` |
+  | `swarit-and-smriti` | `sandeep.bh5+2@gmail.com` |
+  | `san-test-studio` | `sandeep.bh5@gmail.com` |
+  | `kalyanam` | **none — the org cannot be signed into** |
+
+  `kalyanam` lost its operators when three auth users were deleted carelessly; `on delete cascade`
+  took the `operators` rows with them. Its catalogues and films are intact, so recovering it means
+  creating an auth user and inserting an `operators` row pointing at it — not restoring content.
+  This document previously claimed the login was `operator@heirloomfilms.test` /
+  `heirloomfilms-dev`, which was wrong in both halves: that row has never existed in the real
+  database, and those are the *dev seed* defaults, which are now `operator@mehfilbox.test` /
+  `mehfilbox-dev` and only ever seed the memory and file drivers.
 - **The real database has no demo catalogue.** The nine-title fixture only exists in the
   `memory`/`file` drivers. Seeding a real one properly is N-6 (it needs real footage).
 - **Bunny**: library `heirloomfilms` id `724076`, pull zone `6300168`, CDN `vz-98fb153e-d39.b-cdn.net`.
