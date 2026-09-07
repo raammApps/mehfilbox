@@ -1216,3 +1216,24 @@ its first day is worse than no alarm.
 
 What is left is N-53b, and both halves want a paid account: log retention, and error grouping
 behind the `setErrorSink` seam.
+
+**The synthetic check found a real fault on its first production run**, which is the best argument
+for it that could have been made. Three things, none of which any existing signal would have
+reported:
+
+`DEMO_CATALOGUE_SLUG` had never been pushed to Vercel — it was added to `.env.vercel.local` during
+N-51 and the deploy script was not re-run — so production fell back to the seed fixture's slug.
+That meant **the landing page's "Open a demo wedding" button pointed at a catalogue that does not
+exist in production**, and it returned **200**, because a missing catalogue renders the "not
+available" page rather than a 404. No test caught it: in E2E the seed slug is the correct one. No
+status code, no log and no error would have shown it either.
+
+`SUPPORT_EMAIL` was still `operator@mehfil.test` — a domain retired two renames ago. Every alert
+N-53 raises was addressed there, and it is also the address a suspended studio is told to write to.
+It is `support@mehfilbox.com` now, which has MX at Hostinger and can actually receive; a `.test`
+address cannot, and an alerting system that posts into a void is worse than none because it is
+believed.
+
+Worth recording precisely: draining that first stale alert reported `sent: 1`. **`sent` means the
+provider accepted the message, not that anybody received it.** The address was undeliverable and
+Resend took it anyway.

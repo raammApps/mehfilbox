@@ -172,7 +172,10 @@ Set these on the Vercel project (Production, and Preview if you want previews to
 | `VIDEO_DRIVER` | `bunny` | |
 | `ROOT_DOMAIN` | e.g. `marquee.raammcorp.in` — no protocol, no port | |
 | `TENANCY_MODE` | `path` or `subdomain` — see §5 | |
-| `SUPPORT_EMAIL` | Shown on the renewal screen | |
+| `SUPPORT_EMAIL` | Shown on the renewal screen, told to a suspended studio (N-27), **and where every operational alert is sent** (N-53). It must be an address that can *receive* — a `.test` domain here means the alerting built in N-53 goes nowhere, which is how it sat for a day. | |
+| `NOTIFY_DRIVER` | `resend` in production. The default is `fake`, which records a send and returns success without sending; `lib/env.ts` refuses to boot on `fake` against the supabase driver for exactly that reason. | |
+| `NOTIFY_FROM` | `Mehfilbox <hello@mehfilbox.com>` — a verified Resend sender | |
+| `DEMO_CATALOGUE_SLUG` | The catalogue the landing page offers as "open a demo wedding", and the one the synthetic check walks. **Production's slug differs from the seed fixture's**, so leaving this unset points the marketing CTA at a catalogue that does not exist — and it returns 200, because a missing catalogue renders "not available" rather than a 404. | |
 | `SESSION_SECRET` | `openssl rand -hex 32`. **Generate a new one; do not reuse the dev value.** Signs operator sessions and passcode grants. | ● |
 | `CRON_SECRET` | `openssl rand -hex 32`. See the warning below. | ● |
 | `NEXT_PUBLIC_SUPABASE_URL` | `https://<ref>.supabase.co` | |
