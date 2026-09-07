@@ -35,7 +35,7 @@ Then open:
 | What | Where |
 |---|---|
 | Demo catalogue | http://localhost:3000/?__catalogue=aanya-vikram |
-| Admin console | http://localhost:3000/admin — `operator@heirloomfilms.test` / `heirloomfilms-dev` |
+| Admin console | http://localhost:3000/admin — `operator@mehfilbox.test` / `mehfilbox-dev` |
 | Health probe | http://localhost:3000/api/health |
 
 No Supabase project and no Bunny account are needed. The default drivers are in-process and
@@ -163,15 +163,20 @@ and what to alert on. The summary below is orientation; that document is the pro
 
 ### Vercel (primary)
 
-Wildcard `*.heirloomfilms.app` plus `admin.heirloomfilms.app` pointed at the project. `vercel.json` pins the
-Mumbai region — the audience is in India and the CDN edge matters more than anything else in the
-config. The nightly reconciliation cron is declared there too.
+`mehfilbox.com` is canonical and `mehfilbox.in` redirects to it. Production runs `TENANCY_MODE=path`,
+so a catalogue is `/c/<slug>` and no wildcard DNS is required; subdomain mode still works and is
+what the wildcard would be for. `vercel.json` pins the Mumbai region — the audience is in India and
+the CDN edge matters more than anything else in the config.
+
+Two crons are declared there, `reconcile` and `usage`, and that is the plan's limit: Hobby allows
+two, each running once a day. `/api/cron/notify` needs a quarter-hour cadence, so it is driven from
+`.github/workflows/notify-drain.yml` instead and has no entry — see N-54.
 
 ### Container (portable)
 
 ```bash
-docker build -t heirloomfilms .
-docker run -p 3000:3000 --env-file .env.production heirloomfilms
+docker build -t mehfilbox .
+docker run -p 3000:3000 --env-file .env.production mehfilbox
 ```
 
 Standalone output, non-root user, health check on `/api/health`. No secret is baked into the

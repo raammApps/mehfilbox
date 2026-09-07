@@ -14,7 +14,7 @@ env:
   # pipeline hermetic: no Supabase project, no Bunny key, no flake from someone else's uptime.
   DATA_DRIVER: memory
   VIDEO_DRIVER: fake
-  ROOT_DOMAIN: heirloomfilms.localhost:3000
+  ROOT_DOMAIN: mehfilbox.localhost:3000
   SESSION_SECRET: ci-session-secret-0123456789abcdefghijklmnopqrst
 
 jobs:
@@ -45,16 +45,36 @@ jobs:
       - name: Unit and component tests
         run: pnpm test:ci
 
-      # Renders pass/fail as a table in the run summary and inline on the diff, so a red build
-      # says which assertion failed without anyone opening the log.
+      # Names the failing assertion in the run summary, so a red build says what broke without
+      # anyone opening the log.
+      #
+      # This was `dorny/test-reporter@v1`, which rejected `reporter: vitest-json` — not a value it
+      # accepts. That is an *input* error, so `fail-on-error: false` did not soften it, and because
+      # the step sits above them, knip, the contrast gate, the build, the bundle budget and the
+      # vitals gate were skipped on every run for days. A decorative step was gating five real
+      # ones. Reading `reports/vitest.json` here needs no third-party action and can be tested
+      # before it ships.
       - name: Test report
         if: always()
-        uses: dorny/test-reporter@v1
-        with:
-          name: Unit and component tests
-          path: reports/vitest.json
-          reporter: vitest-json
-          fail-on-error: false
+        run: |
+          [ -f reports/vitest.json ] || exit 0
+          node -e "
+            const r = require(process.cwd() + '/reports/vitest.json');
+            const out = [];
+            const fail = [];
+            for (const f of r.testResults ?? [])
+              for (const a of f.assertionResults ?? [])
+                if (a.status === 'failed')
+                  fail.push({ file: f.name.replace(process.cwd() + '/', ''), name: a.fullName, why: (a.failureMessages ?? [])[0] ?? '' });
+            out.push(\`**\${r.numPassedTests}/\${r.numTotalTests} passed**, \${r.numFailedTests} failed, \${(r.testResults ?? []).length} files\`, '');
+            if (fail.length) {
+              out.push('| test | file |', '|---|---|');
+              for (const f of fail.slice(0, 30)) out.push(\`| \${f.name} | \\\`\${f.file}\\\` |\`);
+              out.push('');
+              for (const f of fail.slice(0, 10)) out.push('\`\`\`', f.name, f.why.split('\n').slice(0, 6).join('\n'), '\`\`\`');
+            }
+            console.log(out.join('\n'));
+          " >> "$GITHUB_STEP_SUMMARY"
 
       - name: Coverage summary
         if: always()
