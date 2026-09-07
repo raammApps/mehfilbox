@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect } from 'react'
 import { SiteFooter } from '@/components/chrome/SiteFooter'
 import { TopNav } from '@/components/chrome/TopNav'
 import { createTranslator, resolveLocalised } from '@/lib/i18n'
@@ -45,6 +46,21 @@ export function CatalogueShell({
   preview = false,
 }: Props) {
   const { catalogue, titles, albums, photos } = bundle
+  /**
+   * Keep `<html lang>` honest (N-29).
+   *
+   * The root layout sets it from the locale cookie, because it is the only place `<html>` exists
+   * and it has no catalogue in scope. That was right while the cookie was the only input; now a
+   * catalogue carries its own default, so a Hindi wedding opened by a guest who has never touched
+   * the toggle rendered Hindi text inside `lang="en"` — which is what a screen reader acts on.
+   *
+   * Corrected here rather than by teaching the layout to resolve a tenant, which would put a
+   * database read in front of every guest request to fix an attribute.
+   */
+  useEffect(() => {
+    document.documentElement.lang = locale
+  }, [locale])
+
   const t = createTranslator(locale)
   const appName = resolveLocalised(catalogue.appName, locale)
   const presentedBy = catalogue.branding.presentedBy ?? null

@@ -1,10 +1,10 @@
-import { cookies } from 'next/headers'
 import { notFound } from 'next/navigation'
 import { ThemeStyle } from '@/components/chrome/ThemeStyle'
 import { resolveAccess } from '@/lib/catalogue-access'
 import { getRepository } from '@/lib/db'
 import { env } from '@/lib/env'
-import { createTranslator, parseLocale, resolveLocalised } from '@/lib/i18n'
+import {createTranslator, resolveLocalised} from '@/lib/i18n'
+import { guestLocale } from '@/lib/guest-locale'
 
 export const dynamic = 'force-dynamic'
 
@@ -20,7 +20,7 @@ export default async function RenewPage({ params }: { params: Promise<{ slug: st
   const verdict = await resolveAccess(slug)
   if (verdict.kind === 'missing') notFound()
 
-  const locale = parseLocale((await cookies()).get('mehfilbox_locale')?.value)
+  const locale = await guestLocale(verdict.catalogue)
   const t = createTranslator(locale)
   const titles = await getRepository().listTitles(verdict.catalogue.id, { publishedOnly: true })
 

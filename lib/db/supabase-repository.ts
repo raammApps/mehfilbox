@@ -146,6 +146,7 @@ export class SupabaseRepository implements Repository {
       // Defaulted rather than required: 0010 adds the column, and a row read by an older
       // deployment mid-rollout has no `status` to report.
       status: r.status ?? 'active',
+      locale: r.locale ?? 'en',
       branding: r.branding ?? {},
       createdAt: r.created_at,
     }
@@ -195,6 +196,8 @@ export class SupabaseRepository implements Repository {
       draftModules: r.draft_modules,
       // Defaulted: 0011 adds the column, and a row read mid-rollout has no value for it.
       draftBranding: r.draft_branding ?? null,
+      // Defaulted: 0013 adds the column, and a row read mid-rollout has no value for it.
+      locale: r.locale ?? 'en',
       template: r.template,
       status: r.status,
       privacy: r.privacy,
@@ -227,6 +230,7 @@ export class SupabaseRepository implements Repository {
       modules: 'modules',
       draftModules: 'draft_modules',
       draftBranding: 'draft_branding',
+      locale: 'locale',
       template: 'template',
       status: 'status',
       privacy: 'privacy',

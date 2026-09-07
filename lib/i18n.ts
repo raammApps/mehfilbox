@@ -329,9 +329,20 @@ export function resolveLocalised(
 
 /** Narrow anything (a cookie, a query param, an Accept-Language header) to a supported locale. */
 export function parseLocale(input: string | null | undefined): Locale {
-  if (!input) return DEFAULT_LOCALE
+  return parseLocaleOrNull(input) ?? DEFAULT_LOCALE
+}
+
+/**
+ * The same narrowing, but `null` when there is nothing to narrow (N-29).
+ *
+ * The distinction matters: "the guest has chosen English" and "the guest has chosen nothing" were
+ * the same value, so a catalogue could not have a default of its own. `parseLocale` folds them
+ * together and is still right everywhere no catalogue is in scope.
+ */
+export function parseLocaleOrNull(input: string | null | undefined): Locale | null {
+  if (!input) return null
   const head = input.toLowerCase().split(',')[0]?.split('-')[0]?.trim()
-  return (LOCALES as readonly string[]).includes(head ?? '') ? (head as Locale) : DEFAULT_LOCALE
+  return (LOCALES as readonly string[]).includes(head ?? '') ? (head as Locale) : null
 }
 
 export const LOCALE_LABELS: Record<Locale, string> = { en: 'EN', hi: 'हिं' }

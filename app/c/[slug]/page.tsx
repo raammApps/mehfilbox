@@ -7,6 +7,7 @@ import { loadBundle, resolveAccess } from '@/lib/catalogue-access'
 import { getRepository } from '@/lib/db'
 import { env } from '@/lib/env'
 import { createTranslator, parseLocale, resolveLocalised } from '@/lib/i18n'
+import { guestLocale } from '@/lib/guest-locale'
 import { cataloguePath, catalogueUrl } from '@/lib/tenant'
 import { effectiveModules } from '@/lib/db/repository'
 import type { PlaybackProgress } from '@/lib/schema'
@@ -31,7 +32,7 @@ export async function generateMetadata({
   if (verdict.kind === 'missing') return { title: 'Mehfilbox' }
 
   const { catalogue } = verdict
-  const locale = parseLocale((await cookies()).get('mehfilbox_locale')?.value)
+  const locale = await guestLocale(catalogue)
   const coupleName = resolveLocalised(catalogue.coupleName, locale)
   const description = resolveLocalised(catalogue.synopsis, locale) || `${coupleName} — the films.`
   const url = catalogueUrl(catalogue.slug, env.ROOT_DOMAIN, '/', env.TENANCY_MODE)
@@ -86,7 +87,7 @@ export default async function CataloguePage({
 
   const { catalogue } = verdict
   const bundle = await loadBundle(catalogue)
-  const locale = parseLocale((await cookies()).get('mehfilbox_locale')?.value)
+  const locale = await guestLocale(catalogue)
 
   // Resume positions are server-rendered when a profile is already known, so a returning guest
   // sees progress bars in the first paint rather than after a round trip.

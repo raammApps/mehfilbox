@@ -1,9 +1,9 @@
-import { cookies } from 'next/headers'
 import { notFound, redirect } from 'next/navigation'
 import { PasscodeGate } from '@/components/streaming/PasscodeGate'
 import { ThemeStyle } from '@/components/chrome/ThemeStyle'
 import { resolveAccess } from '@/lib/catalogue-access'
-import { createTranslator, parseLocale, resolveLocalised } from '@/lib/i18n'
+import {createTranslator, resolveLocalised} from '@/lib/i18n'
+import { guestLocale } from '@/lib/guest-locale'
 import { cataloguePath } from '@/lib/tenant'
 import { env } from '@/lib/env'
 
@@ -20,7 +20,7 @@ export default async function LockedPage({ params }: { params: Promise<{ slug: s
   // in path mode '/' is the marketing page, not this catalogue.
   if (verdict.kind === 'ok') redirect(basePath || '/')
 
-  const locale = parseLocale((await cookies()).get('mehfilbox_locale')?.value)
+  const locale = await guestLocale(verdict.catalogue)
   const t = createTranslator(locale)
 
   return (

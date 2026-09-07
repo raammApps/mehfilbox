@@ -1271,3 +1271,33 @@ did exactly that once the distinction existed.
 Settings are N-57b, with one argument attached: `passcode`, `privacy` and `customDomain` should
 **not** wait. They are access controls, and "your change goes out when you publish" is the wrong
 answer to "that link reached the wrong family".
+
+## N-29 · A studio picks its language once — 8 September 2026
+
+`DEFAULT_LOCALE` was English for everyone and the only route to Hindi was a toggle in the corner of
+the guest page. A Hindi-first studio in Jaipur therefore set up every wedding in English and hoped
+the family found the switch, which is the wrong way round for the market this product is for.
+
+**The whole feature rests on one distinction:** "the guest chose English" and "the guest chose
+nothing" were the same value. `parseLocale` folded them together, so no catalogue could have a
+default of its own. `parseLocaleOrNull` separates them; everything else is plumbing. `parseLocale`
+is unchanged and still right for `app/layout.tsx`, which has no catalogue in scope.
+
+**The catalogue carries a copy rather than reading through the org.** A studio that switches its
+own default next year must not silently change the language of a wedding delivered last year — the
+couple has that link, and the page is theirs.
+
+**One helper, not seven edits.** Seven guest pages called `parseLocale(cookie)`; the fallback is a
+rule about the product, and seven copies of a rule is seven chances for one to be the old rule.
+
+The E2E test found something the unit tests could not: **the content rendered in Hindi inside
+`<html lang="en">`.** The root layout sets that attribute from the cookie, because it is the only
+place `<html>` exists and it cannot see a catalogue — which was right while the cookie was the only
+input. A screen reader acts on that attribute, so the guest shell now corrects it from the locale it
+actually rendered. The alternative was teaching the layout to resolve a tenant, which puts a
+database read in front of every guest request to fix an attribute.
+
+Proven by removing the inheritance: the Hindi studio's wedding opened in English.
+
+The console is still English-only, and that is N-29b — every operator string across ~40 components,
+none of which go through the dictionary. It is the half a Hindi-first studio spends its day in.

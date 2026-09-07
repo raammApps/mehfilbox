@@ -82,18 +82,12 @@ faults we have actually had. Two parts remain, and both want a third-party servi
 Take this when there is revenue, or when a fault costs more than the subscription. Until then the
 alerts land in a mailbox, and that is the difference between "a partner told us" and "we knew".
 
-### N-29 · Language chosen at account creation  ·  ~half a session
+### N-29b · Localise the admin console  ·  ~1 session
 
-**New requirement.** A tenant should pick their language when their account is created, and new
-catalogues should inherit it.
-
-Today `orgSchema` has no locale, `DEFAULT_LOCALE` is always English, and the guest toggles. So a
-Hindi-first studio in Jaipur sets up every wedding in English and hopes guests find the switch.
-
-- `orgSchema.locale`, set at registration, inherited by catalogues at creation.
-- The catalogue's default locale drives what a guest sees **before** they touch the toggle.
-- Separately: **the admin console is English-only.** Localising it is a larger job — every operator
-  string, ~40 components — and worth scoping on its own once the guest side inherits properly.
+The guest side inherits a studio's language now (N-29, 8 September). **The console is still
+English-only** — every operator string across ~40 components, and none of them go through the
+dictionary. It is a bigger job than the guest side was and worth scoping on its own, but it is the
+half a Hindi-first studio actually spends its day in.
 
 ### N-54 · Claim a notification row before sending it  ·  ~1h  ·  **paused, 7 September**
 

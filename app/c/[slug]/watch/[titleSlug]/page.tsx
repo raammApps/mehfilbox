@@ -1,5 +1,4 @@
 import type { Metadata } from 'next'
-import { cookies } from 'next/headers'
 import { notFound, redirect } from 'next/navigation'
 import { ThemeStyle } from '@/components/chrome/ThemeStyle'
 import { WatchScreen } from '@/components/streaming/WatchScreen'
@@ -7,7 +6,8 @@ import { resolveAccess } from '@/lib/catalogue-access'
 import { getRepository } from '@/lib/db'
 import { env } from '@/lib/env'
 import { cataloguePath } from '@/lib/tenant'
-import { parseLocale, resolveLocalised } from '@/lib/i18n'
+import {resolveLocalised} from '@/lib/i18n'
+import { guestLocale } from '@/lib/guest-locale'
 import { posterDataUri } from '@/lib/poster'
 
 /** Dynamic — every visit needs a fresh playback token (doc 05 §6). */
@@ -43,7 +43,7 @@ export default async function WatchPage({
   const title = await getRepository().getTitleBySlug(verdict.catalogue.id, titleSlug)
   if (!title || !title.published) notFound()
 
-  const locale = parseLocale((await cookies()).get('mehfilbox_locale')?.value)
+  const locale = await guestLocale(verdict.catalogue)
   const name = resolveLocalised(title.name, locale)
   const startAt = timestamp ? Number.parseInt(timestamp, 10) : null
 

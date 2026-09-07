@@ -92,6 +92,8 @@ export async function POST(request: Request) {
       name: body.businessName,
       slug: await availableSlug(body.businessName),
       kind: 'partner',
+      // The studio's language, chosen here and inherited by every wedding it creates (N-29).
+      locale: body.locale,
       branding: { presentedBy: body.businessName },
       createdAt: new Date().toISOString(),
     })

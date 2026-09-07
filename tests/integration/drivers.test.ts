@@ -180,6 +180,7 @@ describe.skipIf(!hasSupabase)('Supabase Postgres, for real', () => {
         modules: [],
         draftModules: null,
         draftBranding: null,
+        locale: 'en',
         template: 'films-only',
         status: 'draft',
         privacy: 'unlisted',

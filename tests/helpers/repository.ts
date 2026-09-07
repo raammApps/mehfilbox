@@ -42,6 +42,7 @@ export function makeCatalogue(overrides: Partial<Catalogue> = {}): Catalogue {
     modules: [],
     draftModules: null,
     draftBranding: null,
+    locale: 'en',
     template: null,
     status: 'published',
     privacy: 'unlisted',

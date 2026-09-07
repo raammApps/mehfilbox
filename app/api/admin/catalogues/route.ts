@@ -75,6 +75,11 @@ export async function POST(request: Request) {
       occasion: body.occasion,
       // Org defaults are inherited, then overridden — most operators skip the branding step.
       branding: { ...(org?.branding ?? {}), ...body.branding },
+      /**
+       * Copied from the studio rather than read through it (N-29), so a studio changing its own
+       * default later does not silently change the language of weddings already delivered.
+       */
+      locale: org?.locale ?? 'en',
       featuredTitleId: null,
       modules: [],
       draftModules: null,

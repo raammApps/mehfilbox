@@ -172,6 +172,8 @@ export const orgSchema = z.object({
   slug: slugSchema,
   kind: orgKindSchema.default('partner'),
   status: orgStatusSchema.default('active'),
+  /** The studio's own language, chosen at registration and inherited by its catalogues (N-29). */
+  locale: localeSchema.default('en'),
   branding: brandingSchema.default({}),
   createdAt: z.string(),
 })
@@ -226,6 +228,12 @@ export const partnerRegistrationSchema = z.object({
   contactName: z.string().trim().min(2).max(80),
   email: z.string().email(),
   password: z.string().min(12, 'Use at least 12 characters').max(200),
+  /**
+   * Defaulted rather than required, so an existing client that does not send it still registers —
+   * and so the choice can be a radio pair rather than a blocking step in a form whose whole job is
+   * to be short.
+   */
+  locale: localeSchema.default('en'),
 })
 export type PartnerRegistration = z.infer<typeof partnerRegistrationSchema>
 export type Org = z.infer<typeof orgSchema>
@@ -371,6 +379,12 @@ export const catalogueSchema = z.object({
    * screen with two save models, and no gate on the more visible half.
    */
   draftBranding: brandingSchema.nullable().default(null),
+  /**
+   * What a guest sees **before** they touch the toggle (N-29). Copied from the org at creation
+   * rather than read through it, so a studio changing its own default later does not silently
+   * change the language of weddings already delivered.
+   */
+  locale: localeSchema.default('en'),
   template: z.string().nullable().default(null),
 
   status: catalogueStatusSchema.default('draft'),

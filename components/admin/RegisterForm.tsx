@@ -33,6 +33,7 @@ export function RegisterForm() {
         contactName: form.get('contactName'),
         email: form.get('email'),
         password: form.get('password'),
+        locale: form.get('locale') ?? 'en',
       }),
     })
 
@@ -96,6 +97,38 @@ export function RegisterForm() {
         error={fields.password}
         autoComplete="new-password"
       />
+
+      {/*
+        A radio pair rather than a select, and placed before the button rather than behind a
+        "more options" disclosure. It is one decision, it is made once, and every wedding this
+        studio creates inherits it — a Hindi-first studio that misses this sets up every wedding
+        in English and hopes the family finds the toggle (N-29).
+      */}
+      <fieldset className="mb-4">
+        <legend className="mb-1 block text-[13px] font-semibold">
+          What language do your couples read?
+        </legend>
+        <p className="mb-2 text-[13px] text-[var(--color-l-text-mid)]">
+          The language a wedding page opens in. Guests can still switch, and you can change it per
+          wedding.
+        </p>
+        <div className="flex gap-2">
+          {(
+            [
+              ['en', 'English'],
+              ['hi', 'हिंदी'],
+            ] as const
+          ).map(([value, label], index) => (
+            <label
+              key={value}
+              className="flex flex-1 cursor-pointer items-center gap-2 rounded-[var(--radius-input)] border border-[var(--color-l-line)] px-3 py-2 text-[15px] has-[:checked]:border-[var(--color-l-text-hi)] has-[:checked]:font-semibold"
+            >
+              <input type="radio" name="locale" value={value} defaultChecked={index === 0} />
+              {label}
+            </label>
+          ))}
+        </div>
+      </fieldset>
 
       <button
         type="submit"
