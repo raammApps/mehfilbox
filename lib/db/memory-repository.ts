@@ -4,6 +4,7 @@ import type {
   Album,
   LikeCounts,
   LikeSubject,
+  Notification,
   Transfer,
   Catalogue,
   ModuleState,
@@ -38,6 +39,7 @@ export type Snapshot = {
   progress: PlaybackProgress[]
   moduleStates: ModuleState[]
   likes: { catalogueId: string; guestKey: string; subject: LikeSubject; subjectId: string }[]
+  notifications: Notification[]
   playEvents: PlayEvent[]
   usage: { catalogueId: string; month: string; storedGb: number; deliveredGb: number }[]
 }
@@ -57,6 +59,7 @@ export function emptySnapshot(): Snapshot {
     progress: [],
     moduleStates: [],
     likes: [],
+    notifications: [],
     playEvents: [],
     usage: [],
   }
@@ -420,6 +423,35 @@ export class MemoryRepository implements Repository {
       if (guestKey && row.guestKey === guestKey) mine.push(key)
     }
     return { counts, mine }
+  }
+
+  async enqueueNotification(notification: Notification): Promise<Notification> {
+    this.data.notifications.push(this.clone(notification))
+    this.touched()
+    return this.clone(notification)
+  }
+
+  async listQueuedNotifications(limit: number): Promise<Notification[]> {
+    return this.clone(
+      this.data.notifications
+        .filter((n) => n.status === 'queued')
+        .sort((a, b) => a.createdAt.localeCompare(b.createdAt))
+        .slice(0, limit),
+    )
+  }
+
+  async markNotification(
+    id: string,
+    patch: Pick<Notification, 'status' | 'provider' | 'providerId' | 'error'> & { attempts: number },
+  ): Promise<void> {
+    const index = this.data.notifications.findIndex((n) => n.id === id)
+    if (index === -1) return
+    this.data.notifications[index] = {
+      ...this.data.notifications[index]!,
+      ...patch,
+      sentAt: patch.status === 'sent' ? new Date().toISOString() : null,
+    }
+    this.touched()
   }
 
   async updatePhoto(id: string, patch: Pick<Photo, 'caption'>): Promise<Photo> {

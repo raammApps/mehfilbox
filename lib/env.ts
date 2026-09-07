@@ -80,6 +80,20 @@ const schema = z
      * with different failure modes, and a deploy may reasonably run real video against fake
      * photographs (or the reverse) while one of them is being wired up.
      */
+    /**
+     * Who sends the application's own messages (N-50). Separate from the auth mailer Supabase
+     * uses: that one is configured in Supabase's dashboard and sends registration and reset,
+     * while this sends handover, delivery and expiry.
+     *
+     * `resend` covers email only. WhatsApp and SMS wait for MSG91, which is a ₹500/month
+     * subscription against roughly a hundred messages (D-12) and so is deferred until a real
+     * wedding needs it rather than paid for during a build.
+     */
+    NOTIFY_DRIVER: z.enum(['fake', 'resend']).default('fake'),
+    RESEND_API_KEY: z.string().optional(),
+    /** Overrides the default sender. A couple replies to this, so it must be a real mailbox. */
+    NOTIFY_FROM: z.string().optional(),
+
     PHOTO_DRIVER: z.enum(['bunny', 'fake']).default('fake'),
     BUNNY_STORAGE_ZONE: z.string().optional(),
     /**
@@ -173,6 +187,17 @@ const schema = z
           })
         }
       }
+    }
+
+    if (env.NOTIFY_DRIVER === 'resend' && !env.RESEND_API_KEY) {
+      // Fails at boot rather than at the first expiry warning. A notification driver that cannot
+      // authenticate does not throw when it is constructed — it throws months later, at the one
+      // moment the message mattered.
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['RESEND_API_KEY'],
+        message: 'RESEND_API_KEY is required when NOTIFY_DRIVER=resend',
+      })
     }
 
     if (env.PHOTO_DRIVER === 'bunny') {

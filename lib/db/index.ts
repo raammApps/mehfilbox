@@ -47,8 +47,13 @@ export function getRepository(): Repository {
   return g[KEY]
 }
 
-/** Tests swap in a purpose-built store rather than mutating the shared one. */
-/** @knipignore Injection seam for tests, matching `setVideoProvider`, which three test files use. */
+/**
+ * Tests swap in a purpose-built store rather than mutating the shared one.
+ *
+ * This used to carry a knip-ignore tag. `tests/unit/notify.test.ts` imports it now, so the export
+ * is genuinely used and the tag had become a lie — knip reports a suppression that no longer
+ * suppresses anything, which is how the stale one was caught.
+ */
 export function setRepository(repository: Repository): void {
   ;(globalThis as Global)[KEY] = repository
 }

@@ -956,3 +956,47 @@ reconciliation collapses if the plan is optional.
 
 **P-6 stays open on purpose.** Whether a studio will offer their couple Keep at day 60, and at
 what markup, is a fact to obtain from one studio owner — not a decision to reason toward.
+
+## N-50 · The notification seam — 7 September 2026
+
+The application could not send anything. Supabase Auth mailed registration and reset through
+Resend, but that is Supabase's mailer, not ours: no delivery message, no expiry warning, no
+handover. `NotificationProvider` is now the fifth driver seam, built the way `VideoProvider` was —
+one interface, a `fake` the whole suite runs against, a `resend` driver that is already the auth
+mailer, and one switch on `NOTIFY_DRIVER` in `lib/notify/index.ts`.
+
+**Queue and record are the same table.** `0009_notifications.sql` holds template, channel,
+address, provider, provider id, result and attempt count, with a partial index on
+`status = 'queued'` so the drain scans the queue rather than the history. `PRICING.md` §2 wants
+"what did we send and when" to be a query; it is one row per send, never deleted.
+
+**`enqueue` does not send, and a test enforces that.** Nothing in a guest request path may wait on
+Resend. `app/api/cron/notify/route.ts` drains every fifteen minutes behind the same bearer guard as
+`cron/reconcile`. Making `enqueue` send immediately turned three tests red, including the one named
+for it.
+
+**An uncarryable channel is skipped, not burned.** `provider.channels` is declared on the
+interface rather than discovered at send time, so `drain` steps over a WhatsApp row and leaves it
+`queued` for the day the `msg91` driver exists. Marking it `failed` instead is what a naive
+implementation does, and it silently loses the message; the test asserts `failed: 0`, and it goes
+red when the skip is removed.
+
+**Templates are i18n entries, so they inherit a gate that already exists.** `render()` reads
+`notify.<name>.{subject,text,html}` from the dictionary, which means the fifteen English and
+fifteen Hindi entries are covered by `i18n.test.ts` without that file knowing notifications exist.
+Deleting one Hindi subject fails in two suites at once.
+
+**Shipped with `fake` and `resend` only.** WhatsApp is ₹500/month against ~100 messages (D-12), so
+the `msg91` driver waits for the first real wedding that needs a delivery message — the fee should
+start against revenue, not against a build. Meta's template approval is still worth starting now;
+it takes days and costs nothing.
+
+What went wrong, worth keeping: knip reported *"Unused tag in lib/db/index.ts"* once
+`notify.test.ts` imported `setRepository`, because a suppression that no longer suppresses anything
+is itself a defect. Two attempts to remove it failed silently — the first because the search string
+was short by three characters, the second because I wrote the tag's literal name in the replacement
+prose and knip read it as a tag. Both were caught by re-running the gate rather than by trusting
+the edit.
+
+**`0009_notifications.sql` needs applying to production.** Until it is, the cron drains against a
+table that does not exist.

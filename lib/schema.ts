@@ -365,6 +365,28 @@ export type LikeSubject = z.infer<typeof likeSubjectSchema>
 /** `subjectId` keyed by type, so one map carries both films and photographs. */
 export type LikeCounts = Record<string, number>
 
+/** A queued or recorded notification (N-50). */
+export const notificationSchema = z.object({
+  id: z.string().uuid(),
+  template: z.string().min(1),
+  channel: z.enum(['email', 'whatsapp', 'sms']),
+  address: z.string().min(1),
+  locale: z.enum(['en', 'hi']).default('en'),
+  subject: z.string(),
+  bodyText: z.string(),
+  bodyHtml: z.string().nullable().default(null),
+  orgId: z.string().uuid().nullable().default(null),
+  catalogueId: z.string().uuid().nullable().default(null),
+  status: z.enum(['queued', 'sent', 'failed']).default('queued'),
+  provider: z.string().nullable().default(null),
+  providerId: z.string().nullable().default(null),
+  error: z.string().nullable().default(null),
+  attempts: z.number().int().nonnegative().default(0),
+  createdAt: z.string(),
+  sentAt: z.string().nullable().default(null),
+})
+export type Notification = z.infer<typeof notificationSchema>
+
 export const moduleStateSchema = z.object({
   profileId: z.string().uuid(),
   moduleId: z.string(),

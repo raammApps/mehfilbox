@@ -7,6 +7,7 @@ import type {
   Album,
   LikeCounts,
   LikeSubject,
+  Notification,
   Transfer,
   Catalogue,
   ModuleState,
@@ -91,6 +92,27 @@ export const PHOTO_COLUMNS: Record<string, string> = {
   height: 'height',
   sizeBytes: 'size_bytes',
   sortOrder: 'sort_order',
+}
+
+/** `Notification` field → column, held to the schema by `tests/unit/supabase-mapping.test.ts`. */
+export const NOTIFICATION_COLUMNS: Record<string, string> = {
+  id: 'id',
+  template: 'template',
+  channel: 'channel',
+  address: 'address',
+  locale: 'locale',
+  subject: 'subject',
+  bodyText: 'body_text',
+  bodyHtml: 'body_html',
+  orgId: 'org_id',
+  catalogueId: 'catalogue_id',
+  status: 'status',
+  provider: 'provider',
+  providerId: 'provider_id',
+  error: 'error',
+  attempts: 'attempts',
+  createdAt: 'created_at',
+  sentAt: 'sent_at',
 }
 
 export class SupabaseRepository implements Repository {
@@ -748,6 +770,65 @@ export class SupabaseRepository implements Repository {
       if (guestKey && row.guest_key === guestKey) mine.push(key)
     }
     return { counts, mine }
+  }
+
+  private static toNotification(r: Row): Notification {
+    return {
+      id: r.id,
+      template: r.template,
+      channel: r.channel,
+      address: r.address,
+      locale: r.locale ?? 'en',
+      subject: r.subject,
+      bodyText: r.body_text,
+      bodyHtml: r.body_html ?? null,
+      orgId: r.org_id ?? null,
+      catalogueId: r.catalogue_id ?? null,
+      status: r.status,
+      provider: r.provider ?? null,
+      providerId: r.provider_id ?? null,
+      error: r.error ?? null,
+      attempts: r.attempts ?? 0,
+      createdAt: r.created_at,
+      sentAt: r.sent_at ?? null,
+    }
+  }
+
+  async enqueueNotification(notification: Notification): Promise<Notification> {
+    const result = await this.db
+      .from('notifications')
+      .insert(SupabaseRepository.project(notification as Row, NOTIFICATION_COLUMNS))
+      .select()
+      .single()
+    return SupabaseRepository.toNotification(SupabaseRepository.unwrap(result))
+  }
+
+  async listQueuedNotifications(limit: number): Promise<Notification[]> {
+    const { data } = await this.db
+      .from('notifications')
+      .select('*')
+      .eq('status', 'queued')
+      .order('created_at', { ascending: true })
+      .limit(limit)
+    return ((data ?? []) as Row[]).map(SupabaseRepository.toNotification)
+  }
+
+  async markNotification(
+    id: string,
+    patch: Pick<Notification, 'status' | 'provider' | 'providerId' | 'error'> & { attempts: number },
+  ): Promise<void> {
+    const { error } = await this.db
+      .from('notifications')
+      .update({
+        status: patch.status,
+        provider: patch.provider,
+        provider_id: patch.providerId,
+        error: patch.error,
+        attempts: patch.attempts,
+        sent_at: patch.status === 'sent' ? new Date().toISOString() : null,
+      })
+      .eq('id', id)
+    if (error) throw new ApiError('INTERNAL', error.message)
   }
 
   async updatePhoto(id: string, patch: Pick<Photo, 'caption'>): Promise<Photo> {

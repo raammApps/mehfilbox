@@ -4,6 +4,7 @@ import type {
   Catalogue,
   LikeCounts,
   LikeSubject,
+  Notification,
   ModuleInstance,
   ModuleState,
   Operator,
@@ -144,6 +145,15 @@ export interface Repository {
   updateTitle(id: string, patch: Partial<Omit<Title, 'id' | 'catalogueId'>>): Promise<Title>
   /** Captions only, today — the rest of a photograph is decided by the upload (N-30). */
   updatePhoto(id: string, patch: Pick<Photo, 'caption'>): Promise<Photo>
+
+  /** Queue a message. Never sends — `/api/cron/notify` drains (N-50). */
+  enqueueNotification(notification: Notification): Promise<Notification>
+  /** Oldest queued first, so a backlog drains in the order it was created. */
+  listQueuedNotifications(limit: number): Promise<Notification[]>
+  markNotification(
+    id: string,
+    patch: Pick<Notification, 'status' | 'provider' | 'providerId' | 'error'> & { attempts: number },
+  ): Promise<void>
 
   /**
    * Toggle one guest's like and report the new total (N-31).

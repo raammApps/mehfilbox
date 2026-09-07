@@ -9,7 +9,7 @@ then debt. Within a tier, cheapest first.
 
 **6 September 2026:** [`ROADMAP.md`](./ROADMAP.md) groups this backlog into phases and adds
 N-34 to N-50 from the competitor and feature review. Phase 1 is Tier 2 below, in this order:
-held items → N-50 → N-21 → N-22 → N-23 → N-29 → N-36 → N-24a → real footage → N-51.
+held items → N-21 → N-22 → N-23 → N-29 → N-36 → N-24a → real footage → N-51.
 **N-34 and N-35 were already built** on 6–7 September, before this patch was applied — photograph
 sharing, captions, likes and one save indicator across the console. See PROGRESS.
 
@@ -82,30 +82,7 @@ Hindi-first studio in Jaipur sets up every wedding in English and hopes guests f
 - Separately: **the admin console is English-only.** Localising it is a larger job — every operator
   string, ~40 components — and worth scoping on its own once the guest side inherits properly.
 
-### N-50 · The notification seam  ·  ~1 session  ·  **Phase 1, first**
-
-Supabase Auth sends registration and reset mail through Resend (N-17). **The application itself
-sends nothing** — no migration email, no delivery message, no warning — because there is no
-provider to send through. Build it the way `VideoProvider` was built: one interface
-(`NotificationProvider.send({ to, channel, template, params })`), a `fake` driver the suite runs
-against, a `resend` driver first (it is already the auth mailer), then `msg91` for WhatsApp and
-SMS — **decided 6 September**; start the WhatsApp Business API application and template approval
-now, it takes days. Every template exists in English and Hindi, and
-`tests/unit/i18n.test.ts` should cover them like guest strings.
-
-**Ship it with `fake` and `resend` only.** WhatsApp costs **₹500/month** (MSG91 Titan, two months
-free) against ~100 messages a month at 60 weddings — a subscription 44× the traffic it carries
-(D-12). Email already works and is free. Add the `msg91` driver when the first real wedding needs
-a delivery message, so the fee starts against revenue rather than against a build. **Start Meta's
-template approval now anyway** — it takes days, it is free, and no seam defers it.
-
-- Channel preference lives on the couple's org: which channels they gave, which they opted out of.
-- A `notifications` table records every send — template, channel, address, provider id, result —
-  so "what did we send and when" is a query, not a guess. `PRICING.md` §2 requires it.
-- Never sent from a request handler in the guest path. Queue on a cron, like the transcode
-  reconcile.
-
-### N-21 · The migration email, and the warning schedule  ·  ~2h  ·  **blocked by N-50**
+### N-21 · The migration email, and the warning schedule  ·  ~2h  ·  **Phase 1, first**
 
 A couple only learns what they have if the studio remembers to tell them.
 
@@ -146,7 +123,7 @@ Set the Bunny library to 360p–720p by default; confirm Keep Original Files and
 off. Then upload one real 15-hour wedding and correct `PRICING.md` §1 with the measured GB.
 Without this nothing on the price list holds a wedding.
 
-### N-36 · The delivery message  ·  ~half a session  ·  **blocked by N-50**
+### N-36 · The delivery message  ·  ~half a session  ·  **Phase 1**
 
 One button on the overview, beside the public link: *Send to the couple*. Composes a WhatsApp
 message (and an email) with the poster, the couple's names, "now streaming" copy in the
@@ -211,7 +188,7 @@ catalogue they originated with its renewal date and status, and *renew on their 
 Scoped links per side (bride, groom, "just the highlights"), each a profile-gate group; "who
 watched" for the couple. `module_state` and the gate already hold per-guest identity.
 
-### N-39 · Anniversary moment  ·  ~2h  ·  **Phase 3, blocked by N-50**
+### N-39 · Anniversary moment  ·  ~2h  ·  **Phase 3**
 
 On the wedding date each year: a message with a deep link into the highlights film. It is the
 renewal nudge that does not read as one.

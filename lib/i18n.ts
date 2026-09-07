@@ -101,6 +101,42 @@ export const dictionary = {
     'common.loading': 'Loading',
     'common.retry': 'Retry',
     'common.dismiss': 'Dismiss',
+
+    /**
+     * Notification templates (N-50). Here rather than in `lib/notify/` so the i18n gate covers
+     * them: an expiry warning that silently falls back to English is the failure D-12 exists to
+     * prevent.
+     */
+    'notify.handover.subject': '{coupleName} is yours',
+    'notify.handover.text':
+      '{coupleName} is now yours to watch, download and share.\n\nSign in: {url}\n\n{studioName} still manages the plan, and it runs to {date}. Nothing is ever deleted.',
+    'notify.handover.html':
+      '<p><strong>{coupleName}</strong> is now yours to watch, download and share.</p><p><a href="{url}">Sign in</a></p><p>{studioName} still manages the plan, and it runs to {date}. Nothing is ever deleted.</p>',
+
+    'notify.delivery.subject': '{coupleName} — now streaming',
+    'notify.delivery.text':
+      'Your wedding films and photographs are ready to watch.\n\n{url}\n\nShare it with anyone you like — no account needed.\n\nFilmed by {studioName}.',
+    'notify.delivery.html':
+      '<p>Your wedding films and photographs are ready to watch.</p><p><a href="{url}">Open {coupleName}</a></p><p>Share it with anyone you like — no account needed.</p><p>Filmed by {studioName}.</p>',
+
+    'notify.expiry.subject': '{coupleName} runs to {date}',
+    'notify.expiry.text':
+      '{coupleName} is included until {date} — {days} days from now.\n\nAfter that it pauses for 90 days, and everything stays downloadable throughout. Nothing is ever deleted.\n\nTo keep it streaming, contact {studioName}.',
+    'notify.expiry.html':
+      '<p><strong>{coupleName}</strong> is included until {date} — {days} days from now.</p><p>After that it pauses for 90 days, and everything stays downloadable throughout. Nothing is ever deleted.</p><p>To keep it streaming, contact {studioName}.</p>',
+
+    'notify.grace.subject': '{coupleName} is paused',
+    'notify.grace.text':
+      'Streaming for {coupleName} is paused, but nothing has been deleted and everything is still downloadable.\n\nDownload: {url}\n\nTo start it again, contact {studioName}.',
+    'notify.grace.html':
+      '<p>Streaming for <strong>{coupleName}</strong> is paused, but nothing has been deleted and everything is still downloadable.</p><p><a href="{url}">Download everything</a></p><p>To start it again, contact {studioName}.</p>',
+
+    'notify.archived.subject': '{coupleName} is archived',
+    'notify.archived.text':
+      '{coupleName} is archived. Your films and photographs are kept safe and can be restored at any time.\n\n{url}\n\nFilmed by {studioName}.',
+    'notify.archived.html':
+      '<p><strong>{coupleName}</strong> is archived. Your films and photographs are kept safe and can be restored at any time.</p><p><a href="{url}">Restore or download</a></p><p>Filmed by {studioName}.</p>',
+
   },
 
   hi: {
@@ -195,6 +231,37 @@ export const dictionary = {
     'common.loading': 'लोड हो रहा है',
     'common.retry': 'फिर कोशिश करें',
     'common.dismiss': 'हटाएँ',
+
+    'notify.handover.subject': '{coupleName} अब आपका है',
+    'notify.handover.text':
+      '{coupleName} अब आपका है — देखिए, डाउनलोड कीजिए और साझा कीजिए।\n\nसाइन इन: {url}\n\nप्लान {studioName} संभालते हैं, और यह {date} तक चलेगा। कुछ भी कभी नहीं मिटाया जाता।',
+    'notify.handover.html':
+      '<p><strong>{coupleName}</strong> अब आपका है — देखिए, डाउनलोड कीजिए और साझा कीजिए।</p><p><a href="{url}">साइन इन करें</a></p><p>प्लान {studioName} संभालते हैं, और यह {date} तक चलेगा। कुछ भी कभी नहीं मिटाया जाता।</p>',
+
+    'notify.delivery.subject': '{coupleName} — अब देखने के लिए तैयार',
+    'notify.delivery.text':
+      'आपकी शादी की फ़िल्में और तस्वीरें अब देखने के लिए तैयार हैं।\n\n{url}\n\nजिसे चाहें भेजिए — किसी खाते की ज़रूरत नहीं।\n\nफ़िल्मांकन: {studioName}।',
+    'notify.delivery.html':
+      '<p>आपकी शादी की फ़िल्में और तस्वीरें अब देखने के लिए तैयार हैं।</p><p><a href="{url}">{coupleName} खोलें</a></p><p>जिसे चाहें भेजिए — किसी खाते की ज़रूरत नहीं।</p><p>फ़िल्मांकन: {studioName}।</p>',
+
+    'notify.expiry.subject': '{coupleName} {date} तक',
+    'notify.expiry.text':
+      '{coupleName} {date} तक शामिल है — अब से {days} दिन।\n\nउसके बाद यह 90 दिन के लिए रुक जाएगा, और तब भी सब कुछ डाउनलोड किया जा सकेगा। कुछ भी कभी नहीं मिटाया जाता।\n\nजारी रखने के लिए {studioName} से संपर्क करें।',
+    'notify.expiry.html':
+      '<p><strong>{coupleName}</strong> {date} तक शामिल है — अब से {days} दिन।</p><p>उसके बाद यह 90 दिन के लिए रुक जाएगा, और तब भी सब कुछ डाउनलोड किया जा सकेगा। कुछ भी कभी नहीं मिटाया जाता।</p><p>जारी रखने के लिए {studioName} से संपर्क करें।</p>',
+
+    'notify.grace.subject': '{coupleName} रुका हुआ है',
+    'notify.grace.text':
+      '{coupleName} की स्ट्रीमिंग रुकी हुई है, पर कुछ भी मिटाया नहीं गया और सब कुछ अब भी डाउनलोड किया जा सकता है।\n\nडाउनलोड: {url}\n\nदोबारा शुरू करने के लिए {studioName} से संपर्क करें।',
+    'notify.grace.html':
+      '<p><strong>{coupleName}</strong> की स्ट्रीमिंग रुकी हुई है, पर कुछ भी मिटाया नहीं गया और सब कुछ अब भी डाउनलोड किया जा सकता है।</p><p><a href="{url}">सब कुछ डाउनलोड करें</a></p><p>दोबारा शुरू करने के लिए {studioName} से संपर्क करें।</p>',
+
+    'notify.archived.subject': '{coupleName} संग्रहीत है',
+    'notify.archived.text':
+      '{coupleName} संग्रहीत कर दिया गया है। आपकी फ़िल्में और तस्वीरें सुरक्षित हैं और कभी भी वापस लाई जा सकती हैं।\n\n{url}\n\nफ़िल्मांकन: {studioName}।',
+    'notify.archived.html':
+      '<p><strong>{coupleName}</strong> संग्रहीत कर दिया गया है। आपकी फ़िल्में और तस्वीरें सुरक्षित हैं और कभी भी वापस लाई जा सकती हैं।</p><p><a href="{url}">वापस लाएँ या डाउनलोड करें</a></p><p>फ़िल्मांकन: {studioName}।</p>',
+
   },
 } as const
 
