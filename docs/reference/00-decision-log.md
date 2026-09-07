@@ -192,6 +192,31 @@ the recipient has. A `notifications` table records every send. Ticket N-50, firs
 **Why:** Indian families live on WhatsApp; an email-only expiry warning is a warning nobody
 reads. MSG91 covers three channels on one rupee-billed account.
 
+**Re-examined 7 September against Gupshup, and MSG91 stands — but not for the reason a feature
+table would give.** The deciding number is our own volume. From §5's matrix, an active wedding
+sends roughly **20 WhatsApp messages in its first year** (delivery ×2, handover ×2, four expiry
+warnings ×3, anniversary ×3). At 60 weddings that is **~100 messages a month**, which at Meta's
+utility rate is **under ₹20**.
+
+Per-message markup is therefore irrelevant, and **any fixed platform or subscription fee dominates
+the entire bill** — a ₹2,000/month platform fee would be a hundred times the message cost. Gupshup
+is the larger BSP and its economics are built for enterprise volume with a platform layer and a
+sales-led contract; MSG91 is self-serve and developer-first. At a hundred messages a month that
+difference decides it on its own.
+
+Two things make this a low-stakes decision rather than a bet:
+
+- **The BSP does not set the price of the thing being bought.** Meta charges per conversation;
+  the BSP adds a markup or a fee. The floor is the same whoever we use.
+- **N-50 puts every provider behind `NotificationProvider` with a `fake` driver**, exactly as
+  `VideoProvider` is. Changing BSP is a driver, not a migration — which is the argument for not
+  over-researching this before there is any volume to research with.
+
+**What actually gates the choice is neither vendor**: WhatsApp Business API **template approval is
+Meta's process** and takes days. Whichever BSP is used, start that queue first. Verify MSG91 has no
+monthly minimum before committing — that is the one number that would change this answer, and it
+is not reliably documented anywhere but their own terms.
+
 ## D-13 · The studio's credit survives every renewal; no revenue share (Sept 2026)
 
 **Was:** `presentedBy` snapshotted at handover — an editable field. No renewal share (August).
