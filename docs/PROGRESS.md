@@ -1123,3 +1123,53 @@ Also fixed on the way: a store written before 0010 has no `status` field at all,
 driver spreads stored JSON over `emptySnapshot()` and never parses it, so Zod's default never runs.
 The local demo store was exactly that. A present org with no status now reads as active; a missing
 org still gets no session.
+
+## N-56 · Nothing reaches the couple before Publish — 8 September 2026
+
+Sandeep's requirement, stated plainly: changes are saved but not shown, and they club together until
+the next Publish. Sections already worked that way. **Branding did not.**
+
+Colour, logo, typeface and "Presented by" were PATCHed straight onto the live catalogue row, which
+is the row the guest page reads — so a studio trying a colour repainted the couple's page while
+they were still choosing. The code knew: `ThemePicker` carried the comment *"Publish copies draft
+sections and never touches branding."* That was written as an explanation and it was really a
+defect.
+
+`draft_branding` now mirrors `draft_modules` exactly — null means nothing pending, Publish promotes
+and clears — and the PATCH route **no longer accepts the live `branding` field at all**, so the
+console cannot write it even by mistake. `/api/claim` still sets it through the repository, which
+is right: that is the system stamping "Presented by" at handover, not an operator editing.
+
+Three bugs came out of building it, and all three were mine, made while fixing the first:
+
+**An inline arrow as a prop.** `onPreview={setBranding}` was a stable setState reference; I replaced
+it with an inline lambda so it could also mark the page unpublished. `ThemePicker`'s autosave effect
+lists `onPreview` in its dependencies, so the effect re-fired on every render.
+
+**An effect depending on a prop that Publish changes.** The same effect read `catalogue.branding`,
+which is exactly what promotion updates — so publishing re-ran the effect, which rewrote the draft
+milliseconds after it was promoted, and the console announced "guests are still seeing the last
+published version" immediately after a successful publish. Publish appeared to do nothing. The
+fields this panel does not edit are captured once now.
+
+**Publish flushed the sections but not the branding.** `publish()` had always flushed the modules
+autosave first — *"so Publish can never ship a stale draft"* — while branding's 700ms debounce had
+no such flush. Publishing inside that window promoted a draft without the operator's change, and
+the debounced write then landed after the promotion. Branding is flushed too now.
+
+`ThemePicker` also stopped hand-rolling its own status text. It said "Saved", which was a fourth
+copy of what `SaveState` exists to centralise (N-30) and stopped being true the moment branding
+became a draft.
+
+**The E2E lesson is the more valuable one.** These tests hide sections and publish, and rename
+"Presented by" and publish — against the shared demo catalogue. That is a destructive edit to the
+fixture every other spec reads: `guest.spec.ts` began failing on content this file had hidden, and
+because the local dev server is reused between runs, the damage outlived the run that caused it and
+looked like an unrelated flake. Each test now creates its own catalogue. **A spec that publishes
+must own what it publishes.**
+
+Still live-on-write, and deliberately out of scope until asked: films, photographs and settings.
+A curated row set to `auto` picks up a newly published film without a Publish, and the settings
+page writes couple name and passcode directly. Extending the rule there is a larger question —
+a film that uploads but stays invisible until Publish is a different product decision, not a bug —
+and it is N-57.

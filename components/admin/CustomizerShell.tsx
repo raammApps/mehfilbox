@@ -63,7 +63,8 @@ export function CustomizerShell({
   const [saveState, setSaveState] = useState<SaveStatus>('idle')
   const router = useRouter()
   const [publishing, setPublishing] = useState(false)
-  const [branding, setBranding] = useState(catalogue.branding)
+  // The preview shows the draft; the guest page shows `catalogue.branding` until Publish (N-56).
+  const [branding, setBranding] = useState(catalogue.draftBranding ?? catalogue.branding)
   const [dirty, setDirty] = useState(false)
   /**
    * Whether guests are seeing something older than this preview (N-55).
@@ -73,7 +74,9 @@ export function CustomizerShell({
    * which answers "did my typing survive", not "can the couple see it", and those are different
    * questions with the same reassuring answer.
    */
-  const [unpublished, setUnpublished] = useState((catalogue.draftModules ?? null) !== null)
+  const [unpublished, setUnpublished] = useState(
+    (catalogue.draftModules ?? null) !== null || (catalogue.draftBranding ?? null) !== null,
+  )
   const [published, setPublished] = useState(catalogue.status === 'published')
   const [publishError, setPublishError] = useState<string | null>(null)
   const undoStack = useRef<ModuleInstance[][]>([])
@@ -194,6 +197,24 @@ export function CustomizerShell({
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ modules }),
       })
+
+      /**
+       * Branding needs the same flush, and did not have it (N-56).
+       *
+       * The theme panel autosaves on a 700ms debounce. Publishing inside that window promoted a
+       * draft that did not yet contain the operator's change, and the debounced write then landed
+       * *after* the promotion — recreating the draft, so the console flipped straight back to
+       * "guests are still seeing the last published version" and the change never shipped. It
+       * looked like Publish had done nothing.
+       *
+       * `branding` here is the value the preview is rendering, kept current by `onBrandingPreview`
+       * on every keystroke, so this ships exactly what the operator is looking at.
+       */
+      const brandingSaved = await fetch(`/api/admin/catalogues/${catalogue.id}`, {
+        method: 'PATCH',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ draftBranding: branding }),
+      })
       /**
        * Both responses are checked, and neither was before (N-55).
        *
@@ -203,7 +224,7 @@ export function CustomizerShell({
        * fixed on the film list, surviving on the one control where it costs most. A suspended
        * studio (N-27) now makes it reachable rather than hypothetical: that publish returns 403.
        */
-      if (!saved.ok) {
+      if (!saved.ok || !brandingSaved.ok) {
         setSaveState('error')
         setPublishError('Your changes could not be saved, so nothing was published.')
         return
@@ -236,6 +257,22 @@ export function CustomizerShell({
       setPublishing(false)
     }
   }
+
+  /**
+   * Stable by necessity, not by style.
+   *
+   * `ThemePicker`'s autosave effect lists this in its dependencies, so an inline arrow gets a new
+   * identity on every render and the effect re-fires on every render — re-PATCHing the draft and
+   * re-marking the page unpublished immediately after each publish. The symptom was a publish
+   * that appeared to do nothing, and it only showed up once enough other tests were running to
+   * change the render timing.
+   */
+  const onBrandingPreview = useCallback((next: Catalogue['branding']) => {
+    setBranding(next)
+    // A colour change is an unpublished change like any other, and the Publish control has to
+    // offer itself again — otherwise branding saves to a draft nothing can ship.
+    setUnpublished(true)
+  }, [])
 
   const editing = modules.find((m) => m.id === editingId) ?? null
 
@@ -395,7 +432,7 @@ export function CustomizerShell({
           Editing
         </h2>
         {editingId === BRANDING_SELECTION ? (
-          <ThemePicker catalogue={catalogue} onPreview={setBranding} />
+          <ThemePicker catalogue={catalogue} onPreview={onBrandingPreview} />
         ) : (
         <SectionInspector
           instance={editing ?? null}

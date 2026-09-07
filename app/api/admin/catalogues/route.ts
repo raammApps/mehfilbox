@@ -78,6 +78,7 @@ export async function POST(request: Request) {
       featuredTitleId: null,
       modules: [],
       draftModules: null,
+      draftBranding: null,
       template: body.template,
       status: 'draft',
       privacy: 'unlisted',

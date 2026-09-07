@@ -350,6 +350,14 @@ export const catalogueSchema = z.object({
 
   modules: z.array(moduleInstanceSchema).default([]),
   draftModules: z.array(moduleInstanceSchema).nullable().default(null),
+  /**
+   * Branding the operator is still working on (N-56). Null means nothing pending.
+   *
+   * Mirrors `draftModules` deliberately. Branding used to write straight to the live row, so a
+   * studio trying a colour repainted the couple's page while they were still choosing — one
+   * screen with two save models, and no gate on the more visible half.
+   */
+  draftBranding: brandingSchema.nullable().default(null),
   template: z.string().nullable().default(null),
 
   status: catalogueStatusSchema.default('draft'),

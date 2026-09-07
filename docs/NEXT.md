@@ -66,6 +66,24 @@ Three things noticed while using it as a studio owner would, after the publish-s
 Not urgent: none of them can lose work or mislead anyone, which is what the publish-state work was
 about.
 
+### N-57 · Should films and photographs wait for Publish too?  ·  decision first, then ~half a session
+
+N-56 made branding draft-until-published, so sections and branding now both club together until
+Publish. Three things still reach the couple the moment they are saved:
+
+- **A newly published film** appears in any curated row set to `auto`, which is most of them.
+- **A photograph** added to an album the guest page already renders.
+- **Settings** — couple name, city, synopsis, passcode — which the settings page PATCHes live.
+
+Whether that is wrong is a product question, not a bug. Holding a film back until Publish means a
+studio can upload all afternoon and the couple sees nothing until they say so, which is the rule
+Sandeep stated. It also means an uploaded film sits invisible with no obvious reason, and "why is
+my film not showing" becomes the most common support question.
+
+**Decide before building.** If films should wait, the mechanism is a published-title snapshot taken
+at Publish rather than a live `auto` query, and the console has to show plainly which films are
+live and which are pending.
+
 ### N-53 · Observability — see the failures that are silent  ·  ~half a session  ·  **D-24**
 
 Every serious fault this product has had was **silent**: a transcode webhook pointed at a dead URL

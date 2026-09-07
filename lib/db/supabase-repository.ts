@@ -191,6 +191,8 @@ export class SupabaseRepository implements Repository {
       featuredTitleId: r.featured_title_id,
       modules: r.modules ?? [],
       draftModules: r.draft_modules,
+      // Defaulted: 0011 adds the column, and a row read mid-rollout has no value for it.
+      draftBranding: r.draft_branding ?? null,
       template: r.template,
       status: r.status,
       privacy: r.privacy,
@@ -222,6 +224,7 @@ export class SupabaseRepository implements Repository {
       featuredTitleId: 'featured_title_id',
       modules: 'modules',
       draftModules: 'draft_modules',
+      draftBranding: 'draft_branding',
       template: 'template',
       status: 'status',
       privacy: 'privacy',

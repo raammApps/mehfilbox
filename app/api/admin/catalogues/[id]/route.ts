@@ -26,7 +26,15 @@ const patchSchema = z.object({
   synopsis: localisedStringSchema.optional(),
   weddingDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
   slug: slugSchema.optional(),
-  branding: brandingSchema.optional(),
+  /**
+   * Draft only (N-56). The live `branding` field is deliberately **not** accepted here: the
+   * console's only branding writer was this route, and accepting the live field is what let a
+   * studio repaint a couple's page while still choosing a colour. Publish promotes it.
+   *
+   * `/api/claim` still sets live branding through the repository, which is correct — that is the
+   * system stamping "Presented by" at handover, not an operator editing.
+   */
+  draftBranding: brandingSchema.nullable().optional(),
   featuredTitleId: z.string().uuid().nullable().optional(),
   privacy: privacySchema.optional(),
   /**

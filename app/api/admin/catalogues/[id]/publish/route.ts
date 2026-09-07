@@ -24,6 +24,14 @@ export async function POST(_request: Request, { params }: { params: Promise<{ id
 
     const published = await getRepository().updateCatalogue(id, session.orgId, {
       modules,
+      /**
+       * Branding is promoted here too (N-56), and this is the line that makes "nothing reaches
+       * the couple before Publish" true rather than nearly true. Sections were always held back;
+       * branding was written live, so colour, logo and "Presented by" reached the couple the
+       * moment they were typed.
+       */
+      branding: catalogue.draftBranding ?? catalogue.branding,
+      draftBranding: null,
       // The draft is cleared so "unpublished changes" means something afterwards.
       draftModules: null,
       status: 'published',

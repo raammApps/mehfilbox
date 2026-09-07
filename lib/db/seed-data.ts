@@ -282,6 +282,7 @@ function buildCatalogue(): Catalogue {
     featuredTitleId: titleId(1),
     modules: buildModules(),
     draftModules: null,
+    draftBranding: null,
     template: 'keepsake',
     status: 'published',
     privacy: 'unlisted',
