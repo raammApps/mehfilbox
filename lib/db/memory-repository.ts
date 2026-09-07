@@ -162,7 +162,16 @@ export class MemoryRepository implements Repository {
     // An operator whose org has vanished is not a session. Defaulting to 'active' here would
     // hand the widest possible access to the least explicable state.
     if (!org) return null
-    return { operator: this.clone(operator), orgStatus: org.status }
+    /**
+     * `?? 'active'` because the file driver spreads stored JSON over `emptySnapshot()` without
+     * parsing it through the schema, so a store written before 0010 has no `status` at all — the
+     * local demo store, written in August, is exactly that. Zod's default only applies on parse,
+     * which never happens on this path.
+     *
+     * Defaulting a *present* org to active is safe; defaulting a *missing* one would not be, which
+     * is why the line above returns null instead.
+     */
+    return { operator: this.clone(operator), orgStatus: org.status ?? 'active' }
   }
 
   async recordPlatformAudit(entry: PlatformAudit): Promise<PlatformAudit> {

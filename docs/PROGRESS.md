@@ -1081,3 +1081,45 @@ holds that state.
 Knip caught its own stale suppression a second time, on `setAuthProvider`, for the same reason as
 `setRepository` a day earlier: a new test imports it, so the tag no longer suppressed anything.
 Two for two — it is the most reliable signal in the suite for "this comment stopped being true".
+
+## N-55 · The customizer says whether guests can see the page — 7 September 2026
+
+Built by using the customizer as a studio owner would, rather than by reading it. Most of it is
+good — bilingual heading fields, real help text, drag and keyboard reorder, autosave. Two things
+were not, and one of them was a defect rather than friction.
+
+**Publish never checked either response.** It fired the draft save and the publish request, read
+neither, then set "Saved" and refreshed. A refused publish and a successful one were
+indistinguishable, so an operator could walk away certain a couple could open a page the couple
+could not. This is exactly the defect N-30 fixed on the film list — *"a refused save and a
+successful one looked identical"* — surviving on the one control in the product where it costs
+most. N-27 made it reachable rather than theoretical: a suspended studio's publish now returns 403.
+
+**"Saved as draft" was answering the wrong question.** It says the operator's typing survived. The
+question an operator actually has is whether the couple can see it, and those had the same
+reassuring answer. The fact was already in the row — `draft_modules` is non-null exactly when the
+live page is behind the preview, written by autosave and cleared by publish — and nothing displayed
+it. Now the panel says one of three things: not published at all, guests are behind, or guests are
+seeing exactly this; the button reads Publish, Publish changes, or a disabled Published; and a link
+opens the live page so the sentence can be checked rather than trusted.
+
+The E2E work taught more than the feature did. Three separate cross-test assumptions had to go,
+each found by a green test failing in a larger run:
+
+- **"Move up" is not a reliable mutation.** At the top of the list the handler returns early
+  without committing, so a file whose tests each moved the same section up eventually had nothing
+  to publish.
+- **A section's name is not this spec's to rely on.** `operator.spec.ts` renames them, and one
+  server and one store are shared with `workers: 1`, so a locator naming "The films" passed alone
+  and timed out in the suite.
+- **The catalogue list has one "Customizer" link per row** — seven by the time this file runs —
+  so clicking it without first waiting for the detail page is a strict-mode violation rather than
+  a navigation.
+
+All three are the same lesson: with a shared store and a single worker, a spec may only depend on
+what it created or on what its own role and position guarantee.
+
+Also fixed on the way: a store written before 0010 has no `status` field at all, because the file
+driver spreads stored JSON over `emptySnapshot()` and never parses it, so Zod's default never runs.
+The local demo store was exactly that. A present org with no status now reads as active; a missing
+org still gets no session.

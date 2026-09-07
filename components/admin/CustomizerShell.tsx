@@ -39,6 +39,8 @@ type Props = {
   albums: Album[]
   photos: Photo[]
   initialModules: ModuleInstance[]
+  /** The address a guest would open. Built on the server, where ROOT_DOMAIN and TENANCY_MODE live. */
+  publicUrl: string
 }
 
 /**
@@ -48,7 +50,14 @@ type Props = {
  * weekend. Drag **and** keyboard reorder, visibility without deleting config, autosave to
  * `draft_modules`, an explicit Publish, and an undo stack of twenty.
  */
-export function CustomizerShell({ catalogue, titles, albums, photos, initialModules }: Props) {
+export function CustomizerShell({
+  catalogue,
+  titles,
+  albums,
+  photos,
+  initialModules,
+  publicUrl,
+}: Props) {
   const [modules, setModules] = useState<ModuleInstance[]>(initialModules)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [saveState, setSaveState] = useState<SaveStatus>('idle')
@@ -56,6 +65,17 @@ export function CustomizerShell({ catalogue, titles, albums, photos, initialModu
   const [publishing, setPublishing] = useState(false)
   const [branding, setBranding] = useState(catalogue.branding)
   const [dirty, setDirty] = useState(false)
+  /**
+   * Whether guests are seeing something older than this preview (N-55).
+   *
+   * `draft_modules` is exactly that fact and it was already in the row: autosave writes it, and
+   * publish clears it. Nothing displayed it, so the operator's only signal was "Saved as draft" —
+   * which answers "did my typing survive", not "can the couple see it", and those are different
+   * questions with the same reassuring answer.
+   */
+  const [unpublished, setUnpublished] = useState((catalogue.draftModules ?? null) !== null)
+  const [published, setPublished] = useState(catalogue.status === 'published')
+  const [publishError, setPublishError] = useState<string | null>(null)
   const undoStack = useRef<ModuleInstance[][]>([])
 
   /** Every mutation goes through here so undo and autosave cannot be bypassed. */
@@ -65,6 +85,7 @@ export function CustomizerShell({ catalogue, titles, albums, photos, initialModu
       return next.map((instance, index) => ({ ...instance, order: index }))
     })
     setDirty(true)
+    setUnpublished(true)
   }, [])
 
   const undo = useCallback(() => {
@@ -165,15 +186,44 @@ export function CustomizerShell({ catalogue, titles, albums, photos, initialModu
 
   const publish = async () => {
     setPublishing(true)
+    setPublishError(null)
     try {
       // Flush any in-flight autosave first, so Publish can never ship a stale draft.
-      await fetch(`/api/admin/catalogues/${catalogue.id}/modules`, {
+      const saved = await fetch(`/api/admin/catalogues/${catalogue.id}/modules`, {
         method: 'PUT',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ modules }),
       })
-      await fetch(`/api/admin/catalogues/${catalogue.id}/publish`, { method: 'POST' })
+      /**
+       * Both responses are checked, and neither was before (N-55).
+       *
+       * This button fired two requests and read neither, then set 'saved' and refreshed — so a
+       * refused publish and a successful one were indistinguishable, and the operator walked away
+       * believing the couple could see a page the couple could not. It is the same defect N-30
+       * fixed on the film list, surviving on the one control where it costs most. A suspended
+       * studio (N-27) now makes it reachable rather than hypothetical: that publish returns 403.
+       */
+      if (!saved.ok) {
+        setSaveState('error')
+        setPublishError('Your changes could not be saved, so nothing was published.')
+        return
+      }
+
+      const response = await fetch(`/api/admin/catalogues/${catalogue.id}/publish`, {
+        method: 'POST',
+      })
+      if (!response.ok) {
+        const body = (await response.json().catch(() => null)) as {
+          error?: { message?: string }
+        } | null
+        setPublishError(body?.error?.message ?? 'Publishing failed. Nothing has changed for guests.')
+        return
+      }
+
       setSaveState('saved')
+      setDirty(false)
+      setUnpublished(false)
+      setPublished(true)
 
       /**
        * Publishing flips the catalogue draft → live, and the list renders that as a badge and two
@@ -272,17 +322,59 @@ export function CustomizerShell({ catalogue, titles, albums, photos, initialModu
 
       <section aria-label="Preview" className="min-w-0">
         <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-          <SaveState status={saveState} savedLabel="Saved as draft" />
+          <div className="min-w-0">
+            <SaveState status={saveState} savedLabel="Saved as draft" />
+            {/*
+              "Saved as draft" answers "did my typing survive". This answers the question the
+              operator actually has, which is whether the couple can see it. They had the same
+              reassuring answer before, and only one of them was being asked.
+            */}
+            <p className="text-[13px] text-[var(--color-l-text-mid)]">
+              {!published
+                ? 'Not published yet — nobody can open this page.'
+                : unpublished
+                  ? 'Guests are still seeing the last published version.'
+                  : 'Guests are seeing exactly this.'}
+            </p>
+            {/* The preview renders the draft. This opens what a guest actually gets, which is the
+                only way to check the sentence above rather than trust it. */}
+            {published ? (
+              <a
+                href={publicUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="text-[13px] underline underline-offset-4"
+              >
+                Open the live page
+              </a>
+            ) : null}
+          </div>
 
           <button
             type="button"
             onClick={() => void publish()}
-            disabled={publishing}
+            disabled={publishing || (published && !unpublished)}
             className="inline-flex h-11 items-center rounded-[var(--radius-pill)] bg-accent px-5 font-semibold text-accent-ink disabled:opacity-60"
           >
-            {publishing ? 'Publishing…' : 'Publish'}
+            {publishing
+              ? 'Publishing…'
+              : !published
+                ? 'Publish'
+                : unpublished
+                  ? 'Publish changes'
+                  : 'Published'}
           </button>
         </div>
+
+        {publishError ? (
+          <p
+            role="alert"
+            data-testid="publish-error"
+            className="mb-3 rounded-[var(--radius-card)] border border-[var(--color-error)] px-3 py-2 text-[13px] text-[var(--color-error)]"
+          >
+            {publishError}
+          </p>
+        ) : null}
 
         <PreviewPane
           branding={branding}

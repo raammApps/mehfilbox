@@ -113,6 +113,38 @@ describe('N-27 — suspending a studio', () => {
     ).rejects.toThrow()
   })
 
+  /**
+   * A store written before 0010 has no `status` field at all: the file driver spreads stored JSON
+   * over `emptySnapshot()` and never parses it, so Zod's default does not run. The local demo
+   * store is exactly this, and it is what a self-hosted deployment would carry across the upgrade.
+   */
+  it('treats an org saved before the column existed as active', async () => {
+    const snapshot = emptySnapshot()
+    // Deliberately not through `orgSchema.parse` — that is the whole point.
+    snapshot.orgs.push({
+      id: ORG,
+      name: 'Kalyanam Weddings',
+      slug: 'kalyanam',
+      kind: 'partner',
+      branding: {},
+      createdAt: AT,
+    } as (typeof snapshot.orgs)[number])
+    snapshot.operators.push(
+      operatorSchema.parse({
+        id: OPERATOR,
+        orgId: ORG,
+        email: 'operator@mehfilbox.test',
+        name: 'Operator',
+        role: 'admin',
+        passwordHash: '',
+        createdAt: AT,
+      }),
+    )
+    const legacy = new MemoryRepository(snapshot)
+
+    expect((await legacy.getOperatorWithOrgStatus(OPERATOR))?.orgStatus).toBe('active')
+  })
+
   it('has no session for an operator whose org is gone', async () => {
     // Defaulting to 'active' for an unexplainable state would hand out the widest access at the
     // moment least is known. `kalyanam` reached a version of this when its auth users were
