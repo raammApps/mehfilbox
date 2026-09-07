@@ -174,6 +174,11 @@ export class MemoryRepository implements Repository {
     return { operator: this.clone(operator), orgStatus: org.status ?? 'active' }
   }
 
+  async countNotificationsSince(template: string, sinceIso: string): Promise<number> {
+    return this.data.notifications.filter((n) => n.template === template && n.createdAt >= sinceIso)
+      .length
+  }
+
   async recordPlatformAudit(entry: PlatformAudit): Promise<PlatformAudit> {
     this.data.platformAudit.push(this.clone(entry))
     this.touched()

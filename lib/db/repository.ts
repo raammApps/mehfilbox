@@ -93,6 +93,13 @@ export interface Repository {
   // ── Platform audit (N-27) ───────────────────────────────────────────────────
   /** Record a platform-admin action. An unaudited platform write is indistinguishable from an
    *  intrusion after the fact, so every write path calls this. */
+  /**
+   * How many of one template were created since a moment — the de-duplication an alert needs
+   * (N-53). A cron that notices a dead webhook every fifteen minutes must not send ninety-six
+   * emails a day about it; an alert nobody can bear to read is an alert nobody reads.
+   */
+  countNotificationsSince(template: string, sinceIso: string): Promise<number>
+
   recordPlatformAudit(entry: PlatformAudit): Promise<PlatformAudit>
   listPlatformAudit(options?: { orgId?: string; limit?: number }): Promise<PlatformAudit[]>
   /** Compensation for a half-finished registration. Not a user-facing delete. */

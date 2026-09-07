@@ -107,6 +107,20 @@ export const dictionary = {
      * them: an expiry warning that silently falls back to English is the failure D-12 exists to
      * prevent.
      */
+    /**
+     * The one template addressed to us rather than to a couple (N-53).
+     *
+     * Every serious fault this product has had was silent — a webhook pointed at a dead URL, a
+     * storage column nothing wrote, an SMTP credential that authenticated but could not send —
+     * and each was found by a person looking at production. This is the message that arrives
+     * first instead.
+     */
+    'notify.ops-alert.subject': 'Mehfilbox: {kind}',
+    'notify.ops-alert.text':
+      '{kind}\n\n{detail}\n\nDeploy: {version}\nSeen at: {at}',
+    'notify.ops-alert.html':
+      '<p><strong>{kind}</strong></p><p>{detail}</p><p>Deploy <code>{version}</code>, seen at {at}.</p>',
+
     'notify.handover.subject': '{coupleName} is yours',
     'notify.handover.text':
       '{coupleName} is now yours to watch, download and share.\n\nSign in: {url}\n\n{studioName} still manages the plan, and it runs to {date}. Nothing is ever deleted.',
@@ -231,6 +245,14 @@ export const dictionary = {
     'common.loading': 'लोड हो रहा है',
     'common.retry': 'फिर कोशिश करें',
     'common.dismiss': 'हटाएँ',
+
+    /* Addressed to us, not to a couple — but the i18n gate is what keeps every template
+       honest, and exempting one is how the exemptions start. */
+    'notify.ops-alert.subject': 'Mehfilbox: {kind}',
+    'notify.ops-alert.text':
+      '{kind}\n\n{detail}\n\nडिप्लॉय: {version}\nसमय: {at}',
+    'notify.ops-alert.html':
+      '<p><strong>{kind}</strong></p><p>{detail}</p><p>डिप्लॉय <code>{version}</code>, समय {at}।</p>',
 
     'notify.handover.subject': '{coupleName} अब आपका है',
     'notify.handover.text':

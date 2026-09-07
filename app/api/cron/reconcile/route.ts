@@ -4,6 +4,7 @@ import { revalidateCatalogue } from '@/lib/catalogue-cache'
 import { env } from '@/lib/env'
 import { route } from '@/lib/http/handler'
 import { log } from '@/lib/log'
+import { alertOps } from '@/lib/notify/alert'
 import { getVideoProvider, posterRoute } from '@/lib/video'
 
 export const runtime = 'nodejs'
@@ -91,6 +92,27 @@ export async function GET(request: Request) {
     }
 
     log.info('reconcile: complete', { examined: stalled.length, settled, failed })
+
+    /**
+     * A settled title is evidence the webhook is not arriving (N-53).
+     *
+     * This job exists as a safety net, and when it catches something the net has done its work —
+     * but the *reason* it had to is that Bunny told us nothing. That is precisely the fault that
+     * ran undetected for weeks: the webhook pointed at a dead URL, uploads kept succeeding, and
+     * films quietly took an hour to appear instead of a minute. A healthy webhook means this
+     * number is zero, so any other number is worth an email.
+     *
+     * Deliberately not alerting on `failed`: a film the provider could not encode is the
+     * operator's problem and already shows in their console. This is about our plumbing.
+     */
+    if (settled > 0) {
+      await alertOps(
+        'transcode webhook is not arriving',
+        `Reconcile had to settle ${settled} title${settled === 1 ? '' : 's'} the webhook should ` +
+          `have. Check the Bunny library's webhook URL against ${env.ROOT_DOMAIN}.`,
+      )
+    }
+
     return NextResponse.json(
       { examined: stalled.length, settled, failed },
       { headers: { 'cache-control': 'no-store' } },

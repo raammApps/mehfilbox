@@ -13,7 +13,15 @@ import type { Locale } from '@/lib/schema'
  * A template is three keys — `notify.<name>.subject`, `.text`, `.html` — so a channel takes what
  * it can carry. WhatsApp and SMS use `text`; email uses `html` with `text` as the fallback part.
  */
-export const TEMPLATES = ['handover', 'delivery', 'expiry', 'grace', 'archived'] as const
+export const TEMPLATES = [
+  'handover',
+  'delivery',
+  'expiry',
+  'grace',
+  'archived',
+  /** Addressed to us, not to a couple (N-53). */
+  'ops-alert',
+] as const
 export type TemplateName = (typeof TEMPLATES)[number]
 
 export type Rendered = { subject: string; text: string; html: string }

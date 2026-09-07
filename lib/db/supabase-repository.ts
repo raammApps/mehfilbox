@@ -484,6 +484,17 @@ export class SupabaseRepository implements Repository {
     }
   }
 
+  async countNotificationsSince(template: string, sinceIso: string): Promise<number> {
+    // `head: true` asks Postgres for the count and none of the rows.
+    const { count, error } = await this.db
+      .from('notifications')
+      .select('id', { count: 'exact', head: true })
+      .eq('template', template)
+      .gte('created_at', sinceIso)
+    if (error) throw new ApiError('INTERNAL', error.message)
+    return count ?? 0
+  }
+
   // ── Platform audit (N-27) ───────────────────────────────────────────────────
   async recordPlatformAudit(entry: PlatformAudit): Promise<PlatformAudit> {
     const data = SupabaseRepository.unwrap<Row>(

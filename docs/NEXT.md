@@ -84,24 +84,21 @@ my film not showing" becomes the most common support question.
 at Publish rather than a live `auto` query, and the console has to show plainly which films are
 live and which are pending.
 
-### N-53 · Observability — see the failures that are silent  ·  ~half a session  ·  **D-24**
+### N-53b · The observability that needs an account  ·  ~2h  ·  **D-24**
 
-Every serious fault this product has had was **silent**: a transcode webhook pointed at a dead URL
-while uploads still succeeded; a storage column the driver never wrote, so the cap never refused
-anything; an SMTP credential that authenticated but could not send. Each was found by a person
-looking at production, and none of them would have raised an alert.
+Two of N-53's four parts landed on 8 September: an alert when the transcode webhook stops arriving,
+and a synthetic check that walks a guest's path to a playable film. Both are free and both catch
+faults we have actually had. Two parts remain, and both want a third-party service:
 
-Not a new architecture — instrumentation on the one we have (D-24):
+- **Logs that survive the invocation.** `lib/log.ts` writes structured JSON to stdout, which Vercel
+  keeps briefly and does not make queryable when it matters. A drain — Axiom, Better Stack, Datadog
+  — is the fix, and all of them cost money or a free tier with a retention cliff.
+- **Error tracking with a release marker.** `lib/observability.ts` is already a seam
+  (`setErrorSink`), built so a vendor is one file. The alert email carries the deploy SHA today,
+  which answers the first question of an investigation but does not group or count anything.
 
-- **Error tracking** with a release marker, so a failure is attributable to a deploy.
-- **Structured logs that survive the invocation.** `lib/log.ts` writes to stdout; on Vercel that is
-  retained briefly and is not queryable when it matters.
-- **An alert when a webhook stops arriving.** The reconcile cron already knows which titles are
-  stranded — it is the natural place to notice that *none* have arrived in an hour.
-- **A synthetic check on the guest path**, because `/api/health` proves the app boots, not that a
-  guest can play a film.
-
-Cheap, and it is what turns "a partner told us" into "we knew first".
+Take this when there is revenue, or when a fault costs more than the subscription. Until then the
+alerts land in a mailbox, and that is the difference between "a partner told us" and "we knew".
 
 ### N-29 · Language chosen at account creation  ·  ~half a session
 

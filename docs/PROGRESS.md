@@ -1173,3 +1173,46 @@ A curated row set to `auto` picks up a newly published film without a Publish, a
 page writes couple name and passcode directly. Extending the rule there is a larger question —
 a film that uploads but stays invisible until Publish is a different product decision, not a bug —
 and it is N-57.
+
+## N-53 · Two alerts that would have caught the faults we had — 8 September 2026
+
+Every serious fault in this product was **silent**: a transcode webhook pointed at a dead URL while
+uploads kept succeeding, a storage column the driver never wrote so the cap never refused anything,
+an SMTP credential that authenticated but could not send. Each was found by a person looking at
+production. `/api/health` was green through all of them, because it reports which drivers are
+configured — not whether anyone can watch a film.
+
+**The webhook alert reads a signal that was already there.** The reconcile cron exists as a safety
+net for lost webhooks, and when it settles a title it has just done the webhook's job. A healthy
+webhook means `settled` is zero, so any other number is worth an email — and that is exactly the
+signature of the fault that ran for weeks. It deliberately does not alert on `failed`: a film the
+provider could not encode is the operator's problem and already visible in their console.
+
+**The synthetic check walks the four steps a guest walks** — resolve the catalogue, load the
+bundle, find a ready film, mint a playback token — and names the step that broke, because
+"resolve" and "playback" send someone to completely different places. It stops short of fetching
+the manifest from the CDN: that would make a Bunny edge hiccup page us about our own app.
+
+**Alerts go through the notification queue rather than around it**, which buys three things at
+once: the send happens on the cron instead of inside the request that noticed, `notifications`
+becomes the record of what we were told and when, and an alert cannot take down the thing it is
+reporting on. There is a test for the case that matters most — the provider failing while an alert
+about the product is queued.
+
+**De-duplication is the property that decides whether any of this gets read.** A dead webhook stays
+dead, and the cron runs on a schedule, so without a window one fault becomes ninety-six emails a
+day and the mailbox becomes noise. One alert per six hours, counted against the `notifications`
+table so it survives a restart rather than living in a process's memory.
+
+A test lesson worth keeping: the first version of "alerts again once the window has passed" passed
+`withinHours: 0` and proved nothing — a zero-length window starts at *now*, and the row written a
+millisecond earlier is still inside it. It went green for a reason unrelated to the behaviour it
+claimed to check. It moves the clock now.
+
+Both are scheduled from GitHub Actions, hourly for the synthetic check, for the same reason as the
+drain: Hobby allows two daily crons and `reconcile` and `usage` hold both. Production was checked
+first — the demo catalogue has ready films with provider ids — because an alarm that cries wolf on
+its first day is worse than no alarm.
+
+What is left is N-53b, and both halves want a paid account: log retention, and error grouping
+behind the `setErrorSink` seam.

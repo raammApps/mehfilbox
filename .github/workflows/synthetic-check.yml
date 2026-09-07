@@ -1,0 +1,53 @@
+# Ask production, once an hour, whether a guest could actually watch something (N-53).
+#
+# `/api/health` answers "did the app boot and which drivers are configured", and it stayed green
+# through every real fault this product has had. This endpoint walks a guest's path instead —
+# resolve the catalogue, load the bundle, find a ready film, mint a playback token — and emails us
+# when a step fails. Scheduled here rather than in vercel.json for the same reason as the drain:
+# Hobby allows two daily crons and both slots are taken (N-54).
+name: Synthetic guest check
+
+on:
+  schedule:
+    - cron: '17 * * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: synthetic-check
+  cancel-in-progress: false
+
+permissions: {}
+
+jobs:
+  check:
+    name: GET /api/cron/synthetic
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          TARGET: ${{ vars.DRAIN_URL || 'https://mehfilbox.com' }}
+        run: |
+          set -uo pipefail
+
+          if [ -z "${CRON_SECRET}" ]; then
+            echo "::notice::CRON_SECRET is not set — skipping."
+            exit 0
+          fi
+
+          code=$(curl -sS -m 60 -o body.json -w '%{http_code}' \
+            -H "Authorization: Bearer ${CRON_SECRET}" \
+            "${TARGET}/api/cron/synthetic") || { echo "::error::request failed"; exit 1; }
+
+          echo "HTTP ${code}"
+          cat body.json; echo
+          echo "### Synthetic $(jq -c . body.json 2>/dev/null || cat body.json)" >> "$GITHUB_STEP_SUMMARY"
+
+          # 503 is the endpoint working correctly and reporting that the product is not. The run
+          # goes red because that is the point — and the endpoint has already emailed.
+          if [ "${code}" = "503" ]; then
+            echo "::error::a guest cannot play a film — see the step summary"
+            exit 1
+          fi
+          [ "${code}" = "200" ] || { echo "::error::unexpected ${code}"; exit 1; }
