@@ -103,6 +103,8 @@ export async function POST(request: Request) {
       status: 'uploading',
       errorMessage: null,
       published: false,
+      // A new film is not live until a Publish carries it (N-57), whatever the operator ticks.
+      liveAt: null,
       // The declared size, so the next upload's pre-flight has something to add up. Corrected
       // from the provider once encoding finishes — see the webhook.
       sizeBytes: body.sizeBytes,

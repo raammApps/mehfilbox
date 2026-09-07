@@ -172,6 +172,7 @@ function buildTitles(): Title[] {
     status: 'ready',
     errorMessage: null,
     published: true,
+    liveAt: CREATED_AT,
     sortOrder: seed.n,
     publishedAt: CREATED_AT,
     createdAt: CREATED_AT,
@@ -193,6 +194,7 @@ function buildPhotos(): Photo[] {
     sizeBytes: 3 * 1024 * 1024,
     height: 1200,
     sortOrder: index,
+    liveAt: CREATED_AT,
   }))
 }
 

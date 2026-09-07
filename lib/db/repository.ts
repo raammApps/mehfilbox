@@ -98,6 +98,18 @@ export interface Repository {
    * (N-53). A cron that notices a dead webhook every fifteen minutes must not send ninety-six
    * emails a day about it; an alert nobody can bear to read is an alert nobody reads.
    */
+  /**
+   * Carry this catalogue's content live (N-57).
+   *
+   * Films the operator has ticked and photographs that have finished uploading get a `liveAt`;
+   * films the operator has *un*ticked lose theirs, so hiding a film also waits for Publish and
+   * arrives with everything else. Returns what moved, so the console can say so.
+   */
+  publishCatalogueContent(catalogueId: string): Promise<{ published: number; withdrawn: number }>
+
+  /** How much content is waiting for the next Publish — the number the console shows. */
+  countPendingContent(catalogueId: string): Promise<{ titles: number; photos: number }>
+
   countNotificationsSince(template: string, sinceIso: string): Promise<number>
 
   recordPlatformAudit(entry: PlatformAudit): Promise<PlatformAudit>
@@ -215,7 +227,12 @@ export interface Repository {
   // ── Albums & photos ─────────────────────────────────────────────────────────
   listAlbums(catalogueId: string): Promise<Album[]>
   listPhotos(albumId: string): Promise<Photo[]>
-  listPhotosForCatalogue(catalogueId: string): Promise<Photo[]>
+  /**
+   * `liveOnly` is the guest's view (N-57): photographs a catalogue Publish has carried live. The
+   * console passes nothing and sees everything, which is what makes "will go live when you
+   * publish" showable rather than invisible.
+   */
+  listPhotosForCatalogue(catalogueId: string, options?: { liveOnly?: boolean }): Promise<Photo[]>
   getAlbum(id: string): Promise<Album | null>
   /** Removes the catalogue and everything the database cascades from it. */
   deleteCatalogue(id: string, orgId: string): Promise<void>

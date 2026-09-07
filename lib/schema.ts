@@ -296,6 +296,17 @@ export const titleSchema = z.object({
   sizeBytes: z.number().int().nonnegative().nullable().default(null),
 
   published: z.boolean().default(false),
+
+  /**
+   * When a catalogue Publish last carried this film live (N-57). Null means the couple cannot see
+   * it, whatever `published` says.
+   *
+   * `published` is the operator's intent — "this one is ready to go out". `liveAt` is whether it
+   * has actually gone out. They were the same thing until Publish became the only way anything
+   * reaches a couple, and keeping them separate is what lets the console say "three films will go
+   * live when you publish" instead of silently doing it.
+   */
+  liveAt: z.string().nullable().default(null),
   sortOrder: z.number().int().default(0),
   publishedAt: z.string().nullable().default(null),
   createdAt: z.string(),
@@ -316,6 +327,8 @@ export const photoSchema = z.object({
   /** Every rendition together — photographs are resized to three widths before upload. */
   sizeBytes: z.number().int().nonnegative().nullable().default(null),
   sortOrder: z.number().int().default(0),
+  /** As on a film (N-57): null means the couple cannot see this photograph yet. */
+  liveAt: z.string().nullable().default(null),
 })
 export type Photo = z.infer<typeof photoSchema>
 

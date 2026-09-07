@@ -75,6 +75,7 @@ export const TITLE_COLUMNS: Record<string, string> = {
   status: 'status',
   errorMessage: 'error_message',
   published: 'published',
+  liveAt: 'live_at',
   sizeBytes: 'size_bytes',
   sortOrder: 'sort_order',
   publishedAt: 'published_at',
@@ -94,6 +95,7 @@ export const PHOTO_COLUMNS: Record<string, string> = {
   height: 'height',
   sizeBytes: 'size_bytes',
   sortOrder: 'sort_order',
+  liveAt: 'live_at',
 }
 
 /** `Notification` field → column, held to the schema by `tests/unit/supabase-mapping.test.ts`. */
@@ -247,6 +249,8 @@ export class SupabaseRepository implements Repository {
     return {
       id: r.id,
       sizeBytes: r.size_bytes ?? null,
+      // Defaulted: 0012 adds the column, and a row read mid-rollout has no value for it.
+      liveAt: r.live_at ?? null,
       catalogueId: r.catalogue_id,
       slug: r.slug,
       name: r.name,
@@ -296,6 +300,7 @@ export class SupabaseRepository implements Repository {
     return {
       id: r.id,
       sizeBytes: r.size_bytes ?? null,
+      liveAt: r.live_at ?? null,
       albumId: r.album_id,
       url: r.url,
       lqip: r.lqip,
@@ -482,6 +487,96 @@ export class SupabaseRepository implements Repository {
       operator: SupabaseRepository.toOperator(data),
       orgStatus: org?.status === 'suspended' ? 'suspended' : 'active',
     }
+  }
+
+  async publishCatalogueContent(
+    catalogueId: string,
+  ): Promise<{ published: number; withdrawn: number }> {
+    const at = new Date().toISOString()
+
+    // Films the operator has ticked, that have finished encoding, and are not live yet.
+    const { data: promoted, error: promoteError } = await this.db
+      .from('titles')
+      .update({ live_at: at })
+      .eq('catalogue_id', catalogueId)
+      .eq('published', true)
+      .eq('status', 'ready')
+      .is('live_at', null)
+      .select('id')
+    if (promoteError) throw new ApiError('INTERNAL', promoteError.message)
+
+    /**
+     * And the reverse: a film the operator has un-ticked, or one that has stopped being `ready`,
+     * loses its place at the next Publish. Withdrawal waits too — a takedown that arrives with
+     * everything else is the rule; anything urgent unpublishes the catalogue.
+     */
+    const { data: withdrawnTitles, error: withdrawError } = await this.db
+      .from('titles')
+      .update({ live_at: null })
+      .eq('catalogue_id', catalogueId)
+      .not('live_at', 'is', null)
+      .or('published.eq.false,status.neq.ready')
+      .select('id')
+    if (withdrawError) throw new ApiError('INTERNAL', withdrawError.message)
+
+    const albumIds = await this.albumIdsFor(catalogueId)
+    let photos: { id: string }[] = []
+    if (albumIds.length > 0) {
+      const { data, error } = await this.db
+        .from('photos')
+        .update({ live_at: at })
+        .in('album_id', albumIds)
+        .is('live_at', null)
+        .select('id')
+      if (error) throw new ApiError('INTERNAL', error.message)
+      photos = data ?? []
+    }
+
+    return {
+      published: (promoted?.length ?? 0) + photos.length,
+      withdrawn: withdrawnTitles?.length ?? 0,
+    }
+  }
+
+  async countPendingContent(catalogueId: string): Promise<{ titles: number; photos: number }> {
+    // Two shapes of pending film: ready-and-ticked but not live, and live but no longer either.
+    const [waiting, leaving] = await Promise.all([
+      this.db
+        .from('titles')
+        .select('id', { count: 'exact', head: true })
+        .eq('catalogue_id', catalogueId)
+        .eq('published', true)
+        .eq('status', 'ready')
+        .is('live_at', null),
+      this.db
+        .from('titles')
+        .select('id', { count: 'exact', head: true })
+        .eq('catalogue_id', catalogueId)
+        .not('live_at', 'is', null)
+        .or('published.eq.false,status.neq.ready'),
+    ])
+
+    const albumIds = await this.albumIdsFor(catalogueId)
+    let photos = 0
+    if (albumIds.length > 0) {
+      const { count } = await this.db
+        .from('photos')
+        .select('id', { count: 'exact', head: true })
+        .in('album_id', albumIds)
+        .is('live_at', null)
+      photos = count ?? 0
+    }
+
+    return { titles: (waiting.count ?? 0) + (leaving.count ?? 0), photos }
+  }
+
+  private async albumIdsFor(catalogueId: string): Promise<string[]> {
+    const { data, error } = await this.db
+      .from('albums')
+      .select('id')
+      .eq('catalogue_id', catalogueId)
+    if (error) throw new ApiError('INTERNAL', error.message)
+    return (data ?? []).map((a) => a.id as string)
   }
 
   async countNotificationsSince(template: string, sinceIso: string): Promise<number> {

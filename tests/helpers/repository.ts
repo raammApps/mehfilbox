@@ -78,6 +78,12 @@ export function makeTitle(catalogueId: string, overrides: Partial<Title> = {}): 
     status: 'ready',
     errorMessage: null,
     published: true,
+    /**
+     * Live by default, matching `published: true` beside it: the helper describes a film on a
+     * catalogue that has been published, which is what almost every test means by "a film".
+     * A test about content *waiting* for Publish sets this to null explicitly (N-57).
+     */
+    liveAt: '2026-07-01T00:00:00.000Z',
     sortOrder: 0,
     publishedAt: '2026-07-01T00:00:00.000Z',
     createdAt: '2026-07-01T00:00:00.000Z',

@@ -28,6 +28,9 @@ export default async function CustomizerPage({ params }: { params: Promise<{ id:
   // A catalogue that has never been through the customizer starts from its template rather
   // than from an empty list — an operator composing a page from nothing takes an hour.
   const existing = effectiveModules(catalogue, true)
+  // Films and photographs wait for Publish too (N-57), and a film sitting invisible with no
+  // explanation is the failure mode that decision has to avoid.
+  const pending = await repository.countPendingContent(catalogue.id)
   const modules = existing.length > 0 ? existing : seedModules(catalogue.template, catalogue, titles, albums)
 
   return (
@@ -47,6 +50,7 @@ export default async function CustomizerPage({ params }: { params: Promise<{ id:
         photos={photos}
         initialModules={modules}
         publicUrl={catalogueUrl(catalogue.slug, env.ROOT_DOMAIN, '/', env.TENANCY_MODE)}
+        pendingContent={pending}
       />
     </AdminChrome>
   )

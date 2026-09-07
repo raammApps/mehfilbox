@@ -41,6 +41,8 @@ type Props = {
   initialModules: ModuleInstance[]
   /** The address a guest would open. Built on the server, where ROOT_DOMAIN and TENANCY_MODE live. */
   publicUrl: string
+  /** Films and photographs waiting for the next Publish (N-57). */
+  pendingContent: { titles: number; photos: number }
 }
 
 /**
@@ -57,6 +59,7 @@ export function CustomizerShell({
   photos,
   initialModules,
   publicUrl,
+  pendingContent,
 }: Props) {
   const [modules, setModules] = useState<ModuleInstance[]>(initialModules)
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -74,8 +77,11 @@ export function CustomizerShell({
    * which answers "did my typing survive", not "can the couple see it", and those are different
    * questions with the same reassuring answer.
    */
+  const pendingCount = pendingContent.titles + pendingContent.photos
   const [unpublished, setUnpublished] = useState(
-    (catalogue.draftModules ?? null) !== null || (catalogue.draftBranding ?? null) !== null,
+    (catalogue.draftModules ?? null) !== null ||
+      (catalogue.draftBranding ?? null) !== null ||
+      pendingCount > 0,
   )
   const [published, setPublished] = useState(catalogue.status === 'published')
   const [publishError, setPublishError] = useState<string | null>(null)
@@ -375,6 +381,27 @@ export function CustomizerShell({
             </p>
             {/* The preview renders the draft. This opens what a guest actually gets, which is the
                 only way to check the sentence above rather than trust it. */}
+            {/*
+              Naming the content specifically, because "unpublished changes" does not tell an
+              operator that the four films they ticked this morning are still invisible. A film
+              waiting with no explanation is the support question this whole change risks
+              creating, so the console answers it before it is asked.
+            */}
+            {pendingCount > 0 ? (
+              <p className="text-[13px] text-[var(--color-l-text-mid)]">
+                {[
+                  pendingContent.titles > 0
+                    ? `${pendingContent.titles} film${pendingContent.titles === 1 ? '' : 's'}`
+                    : null,
+                  pendingContent.photos > 0
+                    ? `${pendingContent.photos} photograph${pendingContent.photos === 1 ? '' : 's'}`
+                    : null,
+                ]
+                  .filter(Boolean)
+                  .join(' and ')}{' '}
+                will go live when you publish.
+              </p>
+            ) : null}
             {published ? (
               <a
                 href={publicUrl}

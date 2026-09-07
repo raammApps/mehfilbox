@@ -1237,3 +1237,37 @@ believed.
 Worth recording precisely: draining that first stale alert reported `sent: 1`. **`sent` means the
 provider accepted the message, not that anybody received it.** The address was undeliverable and
 Resend took it anyway.
+
+## N-57 · Films and photographs wait for Publish — 8 September 2026
+
+Sandeep's answer to the open question was "everything should wait on Publish". This is the content
+half: sections waited in `draft_modules`, branding waited in `draft_branding` (N-56), and films went
+live the instant an operator ticked a checkbox while a photograph appeared the moment it finished
+uploading. One wedding page had three different answers to "when does the couple see this".
+
+**`published` is intent; `liveAt` is whether a Publish carried it out.** Keeping them separate is
+the whole design, and it is what lets the console say *"three films and forty photographs will go
+live when you publish"* rather than silently hiding them. A film sitting invisible with no
+explanation was the risk in this decision, so the console answers it before it is asked.
+
+**Withdrawal waits too.** Un-ticking a film hides it at the next Publish, not instantly, so a
+takedown arrives with everything else. The first implementation got this wrong in an instructive
+way: the guest filter checked `published && liveAt`, so un-ticking hid the film immediately — the
+exact instant-effect the change exists to remove. The gate is `liveAt` alone now. `status` stays in
+and is deliberately **not** symmetric: a film that has gone back to encoding would render a broken
+player, and that is a fault rather than a change.
+
+**The migration's backfill is its whole risk.** Without it every wedding already delivered goes
+dark on deploy — every film and photograph would have a null `liveAt` and vanish from a page
+somebody has already been given. What is live today is exactly `published = true` for films and
+every photograph, so that is what 0012 marks, using `created_at` rather than `now()` so the column
+reads as history instead of claiming every wedding was published the day it ran.
+
+`tests/helpers/repository.ts` now defaults a film to live, matching the `published: true` beside
+it — the helper describes a film on a published catalogue, which is what nearly every test means
+by "a film". Tests about content *waiting* set `liveAt: null` explicitly, and two existing fixtures
+did exactly that once the distinction existed.
+
+Settings are N-57b, with one argument attached: `passcode`, `privacy` and `customDomain` should
+**not** wait. They are access controls, and "your change goes out when you publish" is the wrong
+answer to "that link reached the wrong family".

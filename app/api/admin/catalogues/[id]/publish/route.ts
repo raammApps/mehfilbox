@@ -38,6 +38,19 @@ export async function POST(_request: Request, { params }: { params: Promise<{ id
       publishedAt: catalogue.publishedAt ?? now,
     })
 
+    /**
+     * Content moves with everything else (N-57).
+     *
+     * Sections wait in `draft_modules`, branding waits in `draft_branding`, and films and
+     * photographs waited for nothing at all — ticking a film published it instantly and a
+     * photograph appeared the moment it uploaded. One wedding page had three different answers to
+     * "when does the couple see this". This is the third.
+     */
+    const content = await getRepository().publishCatalogueContent(id)
+    if (content.published > 0 || content.withdrawn > 0) {
+      log.info('catalogue content published', { catalogueId: id, ...content })
+    }
+
     // The tag, not the path: this route renders per request for cookies, so there is no route
     // cache — the cached reads are what a guest would otherwise see stale.
     revalidateCatalogue(published.slug)

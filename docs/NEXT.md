@@ -66,23 +66,18 @@ Three things noticed while using it as a studio owner would, after the publish-s
 Not urgent: none of them can lose work or mislead anyone, which is what the publish-state work was
 about.
 
-### N-57 · Should films and photographs wait for Publish too?  ·  decision first, then ~half a session
+### N-57b · Settings wait for Publish too  ·  ~half a session
 
-N-56 made branding draft-until-published, so sections and branding now both club together until
-Publish. Three things still reach the couple the moment they are saved:
+Films and photographs landed on 8 September. What still writes straight to the live catalogue is
+the settings page: **couple name, app name, city, synopsis and featured film**. Those are
+presentation, they are what a guest reads, and they should follow branding into `draft_*`.
 
-- **A newly published film** appears in any curated row set to `auto`, which is most of them.
-- **A photograph** added to an album the guest page already renders.
-- **Settings** — couple name, city, synopsis, passcode — which the settings page PATCHes live.
-
-Whether that is wrong is a product question, not a bug. Holding a film back until Publish means a
-studio can upload all afternoon and the couple sees nothing until they say so, which is the rule
-Sandeep stated. It also means an uploaded film sits invisible with no obvious reason, and "why is
-my film not showing" becomes the most common support question.
-
-**Decide before building.** If films should wait, the mechanism is a published-title snapshot taken
-at Publish rather than a live `auto` query, and the console has to show plainly which films are
-live and which are pending.
+**Three fields must stay immediate, and this is the argument.** `passcode`, `privacy` and
+`customDomain` are access controls, not presentation. A studio revoking a leaked link has to be
+able to do it now — "your change will go out when you publish" is the wrong answer to "this link
+got shared with the wrong family". `includedUntil` is a plan date rather than page content and
+belongs with billing. Ask Sandeep to confirm the carve-out before building, because "everything
+waits" was the instruction and this is a deliberate exception to it.
 
 ### N-53b · The observability that needs an account  ·  ~2h  ·  **D-24**
 

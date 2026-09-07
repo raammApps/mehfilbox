@@ -86,14 +86,19 @@ describe('resolveAccess', () => {
 })
 
 describe('loadBundle', () => {
-  it('returns only published, ready titles — never a processing or failed one', async () => {
+  it('returns only films a Publish has carried live, and never a processing or failed one', async () => {
     const catalogue = makeCatalogue()
     const repository = installRepository({
       ...emptySnapshot(),
       catalogues: [catalogue],
       titles: [
         makeTitle(catalogue.id, { slug: 'live', published: true, status: 'ready' }),
-        makeTitle(catalogue.id, { slug: 'staged', published: false, status: 'ready' }),
+        /**
+         * Never carried live, which is what "staged" means now (N-57). `published: false` alone no
+         * longer hides a film that a Publish has already sent out — a withdrawal waits for the
+         * next Publish like every other change.
+         */
+        makeTitle(catalogue.id, { slug: 'staged', published: false, status: 'ready', liveAt: null }),
         makeTitle(catalogue.id, { slug: 'encoding', published: true, status: 'processing' }),
         makeTitle(catalogue.id, { slug: 'broken', published: true, status: 'failed' }),
       ],

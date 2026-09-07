@@ -401,7 +401,19 @@ export class MemoryRepository implements Repository {
     return this.clone(
       this.data.titles
         .filter((t) => t.catalogueId === catalogueId)
-        .filter((t) => !options?.publishedOnly || (t.published && t.status === 'ready'))
+        /**
+         * `liveAt`, **not** `published` (N-57).
+         *
+         * `published` is the operator's intent and `liveAt` is whether a Publish has carried it
+         * out, so the guest gate is the second alone. Checking both was the first attempt and it
+         * broke withdrawal: un-ticking a film hid it from the couple immediately, which is exactly
+         * the instant-effect this change exists to remove. A withdrawal waits for Publish like
+         * everything else.
+         *
+         * `status` stays in, and is deliberately not symmetric: a film that has gone back to
+         * encoding would render a broken player, and that is a fault rather than a change.
+         */
+        .filter((t) => !options?.publishedOnly || (t.status === 'ready' && t.liveAt !== null))
         .sort((a, b) => a.sortOrder - b.sortOrder || a.createdAt.localeCompare(b.createdAt)),
     )
   }
@@ -549,15 +561,67 @@ export class MemoryRepository implements Repository {
     )
   }
 
-  async listPhotosForCatalogue(catalogueId: string): Promise<Photo[]> {
+  async listPhotosForCatalogue(
+    catalogueId: string,
+    options?: { liveOnly?: boolean },
+  ): Promise<Photo[]> {
     const albumIds = new Set(
       this.data.albums.filter((a) => a.catalogueId === catalogueId).map((a) => a.id),
     )
     return this.clone(
       this.data.photos
         .filter((p) => albumIds.has(p.albumId))
+        .filter((p) => !options?.liveOnly || p.liveAt !== null)
         .sort((a, b) => a.sortOrder - b.sortOrder),
     )
+  }
+
+  private albumIdsFor(catalogueId: string): Set<string> {
+    return new Set(this.data.albums.filter((a) => a.catalogueId === catalogueId).map((a) => a.id))
+  }
+
+  async publishCatalogueContent(
+    catalogueId: string,
+  ): Promise<{ published: number; withdrawn: number }> {
+    const at = new Date().toISOString()
+    let published = 0
+    let withdrawn = 0
+
+    for (const title of this.data.titles) {
+      if (title.catalogueId !== catalogueId) continue
+      const shouldBeLive = title.published && title.status === 'ready'
+      if (shouldBeLive && title.liveAt === null) {
+        title.liveAt = at
+        published += 1
+      } else if (!shouldBeLive && title.liveAt !== null) {
+        // Un-ticking a film hides it at the next Publish rather than instantly, so a takedown
+        // arrives with everything else. Anything urgent is unpublishing the catalogue.
+        title.liveAt = null
+        withdrawn += 1
+      }
+    }
+
+    const albumIds = this.albumIdsFor(catalogueId)
+    for (const photo of this.data.photos) {
+      if (!albumIds.has(photo.albumId) || photo.liveAt !== null) continue
+      photo.liveAt = at
+      published += 1
+    }
+
+    this.touched()
+    return { published, withdrawn }
+  }
+
+  async countPendingContent(catalogueId: string): Promise<{ titles: number; photos: number }> {
+    const albumIds = this.albumIdsFor(catalogueId)
+    return {
+      titles: this.data.titles.filter(
+        (t) =>
+          t.catalogueId === catalogueId &&
+          (t.published && t.status === 'ready' ? t.liveAt === null : t.liveAt !== null),
+      ).length,
+      photos: this.data.photos.filter((p) => albumIds.has(p.albumId) && p.liveAt === null).length,
+    }
   }
 
   async getAlbum(id: string): Promise<Album | null> {

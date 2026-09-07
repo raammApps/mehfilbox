@@ -48,7 +48,9 @@ export const getCachedBundle = (catalogue: Catalogue): Promise<CatalogueBundle> 
       const [titles, albums, photos] = await Promise.all([
         repository.listTitles(catalogue.id, { publishedOnly: true }),
         repository.listAlbums(catalogue.id),
-        repository.listPhotosForCatalogue(catalogue.id),
+        // `liveOnly` (N-57): a photograph reaches the couple when a Publish carries it, not when
+        // it finishes uploading.
+        repository.listPhotosForCatalogue(catalogue.id, { liveOnly: true }),
       ])
       // The catalogue itself is not cached in here: it arrives from the caller, which has
       // already read it fresh enough to have made an access decision against it.

@@ -234,6 +234,7 @@ describe.skipIf(!hasSupabase)('Supabase Postgres, for real', () => {
       status: 'uploading' as const,
       errorMessage: null,
       published: false,
+      liveAt: null,
       sortOrder: 0,
     }
 
