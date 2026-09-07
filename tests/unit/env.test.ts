@@ -31,7 +31,7 @@ function issuesFor(env: Record<string, string>, field: string): string[] {
 }
 
 describe('the production environment guards', () => {
-  it('refuses the fake notification driver in production', () => {
+  it('refuses the fake notification driver against the real database', () => {
     // The fake provider returns success without sending, so `notifications` would fill with rows
     // marked `sent` that nobody received. N-50 shipped without NOTIFY_DRIVER set and production
     // took the default for a day; this is that day, encoded.
@@ -42,9 +42,34 @@ describe('the production environment guards', () => {
     expect(issuesFor(production, 'NOTIFY_DRIVER')).toHaveLength(0)
   })
 
-  it('leaves the fake driver alone outside production, which is what the suite runs on', () => {
-    const dev = { ...production, NODE_ENV: 'development', NOTIFY_DRIVER: 'fake' }
-    expect(issuesFor(dev, 'NOTIFY_DRIVER')).toHaveLength(0)
+  /**
+   * The first version of this guard keyed on NODE_ENV and broke CI: `next start` is production
+   * too, and the vitals gate and Playwright both build and boot the app on the memory driver,
+   * where `fake` is the correct notifier. The built app could not start at all.
+   */
+  it('lets a production build boot on the memory driver, which is what CI does', () => {
+    const ci = {
+      NODE_ENV: 'production',
+      DATA_DRIVER: 'memory',
+      VIDEO_DRIVER: 'fake',
+      PHOTO_DRIVER: 'fake',
+      AUTH_DRIVER: 'local',
+      ROOT_DOMAIN: 'mehfilbox.localhost:3000',
+      SESSION_SECRET: 'ci-session-secret-0123456789abcdefghijklmnopqrst',
+      DEV_OPERATOR_PASSWORD: 'not-the-committed-one',
+      ALLOW_EPHEMERAL_DATA: '1',
+      NOTIFY_DRIVER: 'fake',
+    }
+    expect(issuesFor(ci, 'NOTIFY_DRIVER')).toHaveLength(0)
+    // And the whole environment parses, or the built app does not come up — which is the actual
+    // failure this test stands in for.
+    expect(envSchema.safeParse(ci).success).toBe(true)
+  })
+
+  it('catches a local session pointed at the real database with a fake notifier', () => {
+    // NODE_ENV would have missed this one entirely, and it writes to the same durable table.
+    const local = { ...production, NODE_ENV: 'development', NOTIFY_DRIVER: 'fake' }
+    expect(issuesFor(local, 'NOTIFY_DRIVER')).toHaveLength(1)
   })
 
   it('still requires a Resend key when the driver is resend, in production or not', () => {

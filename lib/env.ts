@@ -189,6 +189,29 @@ const schema = z
       }
     }
 
+    /**
+     * A real database and a fake notifier is the combination that lies. The fake provider does
+     * not fail — it records a send and returns success — so `notifications` fills with rows
+     * marked `sent` that nobody received, permanently. A queue that does not drain is visible;
+     * one that lies about delivery is discovered by a couple who never got their film.
+     *
+     * Keyed on `DATA_DRIVER` rather than on `NODE_ENV`, and that distinction cost a CI run:
+     * `next start` is production too, and CI builds and boots the app on the memory driver where
+     * `fake` is exactly what should run. Guarding on NODE_ENV stopped the built app from booting
+     * at all. The harm was never "production" — it is a durable table.
+     *
+     * N-50 shipped without NOTIFY_DRIVER set and production defaulted to `fake` for a day, which
+     * is what this exists to prevent recurring.
+     */
+    if (env.DATA_DRIVER === 'supabase' && env.NOTIFY_DRIVER === 'fake') {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['NOTIFY_DRIVER'],
+        message:
+          'The fake notification driver must not run against the supabase database; it records sends that never happened',
+      })
+    }
+
     if (env.NOTIFY_DRIVER === 'resend' && !env.RESEND_API_KEY) {
       // Fails at boot rather than at the first expiry warning. A notification driver that cannot
       // authenticate does not throw when it is constructed — it throws months later, at the one
@@ -237,21 +260,6 @@ const schema = z
           code: z.ZodIssueCode.custom,
           path: ['DEV_OPERATOR_PASSWORD'],
           message: 'The committed dev password must not be used in production',
-        })
-      }
-      /**
-       * The fake provider does not fail — it records a send and returns success, so a production
-       * deployment on `fake` would fill `notifications` with rows marked `sent` that nobody
-       * received. A queue that lies about delivery is worse than one that does not drain: the
-       * second is visible, the first is discovered by a couple who never got their film.
-       *
-       * N-50 shipped without this variable set, and production defaulted to `fake` for a day.
-       */
-      if (env.NOTIFY_DRIVER === 'fake') {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ['NOTIFY_DRIVER'],
-          message: 'Production must not run the fake notification driver; it records sends that never happened',
         })
       }
       if (env.DATA_DRIVER !== 'supabase' && env.ALLOW_EPHEMERAL_DATA !== '1') {
