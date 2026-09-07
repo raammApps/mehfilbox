@@ -213,9 +213,34 @@ Two things make this a low-stakes decision rather than a bet:
   over-researching this before there is any volume to research with.
 
 **What actually gates the choice is neither vendor**: WhatsApp Business API **template approval is
-Meta's process** and takes days. Whichever BSP is used, start that queue first. Verify MSG91 has no
-monthly minimum before committing — that is the one number that would change this answer, and it
-is not reliably documented anywhere but their own terms.
+Meta's process** and takes days. Whichever BSP is used, start that queue first.
+
+**The number that was unknown is now known, and it is a fee.** MSG91's WhatsApp plan is **₹500 a
+month** (Titan, first two months free), plus Meta's own rates passed through at cost — utility and
+authentication **₹0.115**, marketing **₹0.8631**, all ex-GST.
+
+The per-message half is exactly as negligible as predicted, and the fee is exactly as dominant:
+
+| | Messages/month | Message cost | Platform | Fee vs traffic |
+|---|---|---|---|---|
+| 10 weddings | 17 | ₹1.92 | ₹500 | **261×** |
+| **60 weddings** | 100 | ₹11.50 | ₹500 | **44×** |
+| 200 weddings | 333 | ₹38 | ₹500 | 13× |
+| 600 weddings | 1,000 | ₹115 | ₹500 | 4× |
+
+The fee only stops dominating at roughly **2,600 weddings a month**, which is not a number this
+business will see soon. So ₹500/month is not a per-message decision at all — it is a **₹6,000/year
+subscription for the right to send about a hundred messages**.
+
+**That is still the right answer, and the seam is why.** MSG91 passes Meta's rates at cost, so
+once volume exists the economics are the best available; a BSP that marks messages up would be
+worse at scale even if it were free today. What changes is the *timing*: N-50 ships with `fake`
+and `resend`, which costs nothing and unblocks N-21 and N-36. The `msg91` driver is added when the
+first real wedding needs a delivery message — the fee then starts against revenue rather than
+against a build. The two free months cover the build itself.
+
+Start Meta's template approval **now** regardless: it is free, it is the long pole, and it is the
+one part no seam defers.
 
 ## D-13 · The studio's credit survives every renewal; no revenue share (Sept 2026)
 

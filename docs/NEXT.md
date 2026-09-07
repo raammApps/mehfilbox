@@ -93,6 +93,12 @@ SMS — **decided 6 September**; start the WhatsApp Business API application and
 now, it takes days. Every template exists in English and Hindi, and
 `tests/unit/i18n.test.ts` should cover them like guest strings.
 
+**Ship it with `fake` and `resend` only.** WhatsApp costs **₹500/month** (MSG91 Titan, two months
+free) against ~100 messages a month at 60 weddings — a subscription 44× the traffic it carries
+(D-12). Email already works and is free. Add the `msg91` driver when the first real wedding needs
+a delivery message, so the fee starts against revenue rather than against a build. **Start Meta's
+template approval now anyway** — it takes days, it is free, and no seam defers it.
+
 - Channel preference lives on the couple's org: which channels they gave, which they opted out of.
 - A `notifications` table records every send — template, channel, address, provider id, result —
   so "what did we send and when" is a query, not a guess. `PRICING.md` §2 requires it.
