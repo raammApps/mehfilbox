@@ -114,6 +114,10 @@ export class FakeVideoProvider implements VideoProvider {
     return `/api/poster/frame?asset=${encodeURIComponent(providerId)}&n=${encodeURIComponent(file)}`
   }
 
+  async getDownloadUrl({ providerId }: { providerId: string; ttlS: number }) {
+    return { url: `/media/sample.webm?download=${providerId}`, label: 'original' }
+  }
+
   async deleteAsset(providerId: string): Promise<void> {
     this.assets.delete(providerId)
   }

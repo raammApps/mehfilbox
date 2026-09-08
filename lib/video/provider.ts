@@ -80,6 +80,19 @@ export interface VideoProvider {
    */
   getAssetUrl(input: { providerId: string; file: string; ttlS: number }): Promise<string>
 
+  /**
+   * A signed URL for the best downloadable copy of this film, or null if there is not one (N-22).
+   *
+   * "Best" means the **original** where the provider still holds it, and the highest rendition
+   * otherwise — which is the difference between `originals downloadable untouched` on the landing
+   * page being true and being marketing. The label says which was handed over, so a couple
+   * downloading a 720p fallback is told that is what it is.
+   */
+  getDownloadUrl(input: {
+    providerId: string
+    ttlS: number
+  }): Promise<{ url: string; label: string } | null>
+
   deleteAsset(providerId: string): Promise<void>
 
   getUsage(providerId: string): Promise<Usage>

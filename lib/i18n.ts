@@ -91,6 +91,22 @@ export const dictionary = {
     'locked.wrong': 'That passcode did not work.',
     'locked.lockedOut': 'Too many attempts. Try again in 15 minutes.',
 
+    /**
+     * Downloads (N-22). The wording is load-bearing: "nothing is ever deleted" appears in the
+     * handover email and the pricing page, and this is the screen where a couple finds out
+     * whether it was true.
+     */
+    'download.heading': 'Download everything',
+    'download.body':
+      'Every film and photograph, at the quality it was delivered. Links last a few hours — come back for fresh ones whenever you like.',
+    'download.films': 'Films',
+    'download.photographs': 'Photographs',
+    'download.get': 'Download',
+    'download.empty': 'There is nothing here to download yet.',
+    'download.unavailable':
+      '{count} could not be prepared just now. Everything is still stored — try again in a few minutes.',
+    'download.all': 'Download everything',
+
     'renew.heading': 'Your catalogue is waiting',
     'renew.body':
       'The subscription has lapsed, so playback is paused. Nothing has been deleted — renew and everything is back.',
@@ -234,6 +250,17 @@ export const dictionary = {
     'locked.submit': 'आगे बढ़ें',
     'locked.wrong': 'यह पासकोड सही नहीं है।',
     'locked.lockedOut': 'बहुत बार कोशिश हुई। 15 मिनट बाद फिर देखें।',
+
+    'download.heading': 'सब कुछ डाउनलोड करें',
+    'download.body':
+      'हर फ़िल्म और तस्वीर, उसी गुणवत्ता में जिसमें दी गई थी। लिंक कुछ घंटों तक चलते हैं — नए लिंक के लिए कभी भी लौट आइए।',
+    'download.films': 'फ़िल्में',
+    'download.photographs': 'तस्वीरें',
+    'download.get': 'डाउनलोड',
+    'download.empty': 'अभी यहाँ डाउनलोड करने को कुछ नहीं है।',
+    'download.unavailable':
+      '{count} अभी तैयार नहीं हो सकीं। सब कुछ सुरक्षित है — कुछ मिनट बाद फिर कोशिश कीजिए।',
+    'download.all': 'सब कुछ डाउनलोड करें',
 
     'renew.heading': 'आपका कैटलॉग सुरक्षित है',
     'renew.body':

@@ -111,14 +111,15 @@ The emails go out (N-21, 8 September). What doc 15 also asks for and does not ex
 - **WhatsApp and SMS**, which the ladder is designed for and which `drain` already skips cleanly
   (D-12) — it needs the `msg91` driver, not new scheduling.
 
-### N-22 · Download everything, at any time  ·  ~half a session
+### N-22b · A per-film download from the title modal  ·  ~1h
 
-**Gates any lapse behaviour, archive included.** Available before expiry, during grace, and from
-archive: a per-film original (or highest rendition where the original was not kept) and a
-"download all" that hands the couple a manifest plus signed links, because a 40 GB zip built on a
-serverless function is not a thing. Nobody is ever held to ransom for their own wedding.
+`/c/<slug>/download` lists everything (N-22, 8 September). What is missing is the small case: a
+guest watching one film who wants that one film, without a trip to a page listing forty
+photographs. `getDownloadUrl` already exists on the provider — this is a control in the title modal
+and a route that signs one asset.
 
-Do not ship the archive transition (N-24) without this.
+Worth doing when there is real footage to try it against: the interesting part is what a 6 GB file
+does on a phone, and that cannot be learned from a 750 KB sample.
 
 ### N-23 · Plan capacity in the console  ·  ~2h
 

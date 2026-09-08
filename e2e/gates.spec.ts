@@ -81,6 +81,14 @@ test.describe('doc 10 §4 — accessibility, zero violations', () => {
    * they were built after this gate existed — so they are held to it rather than exempted.
    * `/privacy` in particular was linked from every wedding page's footer while being a 404.
    */
+  test('the download page, which a couple reaches when things have gone wrong', async ({ page }) => {
+    await page.goto(`/c/${DEMO_CATALOGUE}/download`)
+    await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
+
+    const results = await audit(page)
+    expect(describeViolations(results)).toBe('')
+  })
+
   for (const [name, path] of [
     ['the landing page', '/'],
     ['the privacy page', '/privacy'],

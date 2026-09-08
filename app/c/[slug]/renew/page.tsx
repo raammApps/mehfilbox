@@ -42,12 +42,25 @@ export default async function RenewPage({ params }: { params: Promise<{ slug: st
           ))}
         </ul>
 
-        <a
-          href={`mailto:${env.SUPPORT_EMAIL}`}
-          className="inline-flex h-12 w-fit items-center rounded-[var(--radius-pill)] bg-accent px-6 font-semibold text-accent-ink"
-        >
-          {t('renew.cta')}
-        </a>
+        <div className="flex flex-wrap items-center gap-4">
+          <a
+            href={`mailto:${env.SUPPORT_EMAIL}`}
+            className="inline-flex h-12 w-fit items-center rounded-[var(--radius-pill)] bg-accent px-6 font-semibold text-accent-ink"
+          >
+            {t('renew.cta')}
+          </a>
+          {/*
+            The most important link on this screen (N-22). A couple arrives here because their
+            wedding stopped playing, and the grace email told them everything is still
+            downloadable. If that is true anywhere, it has to be true here.
+          */}
+          <a
+            href={`/c/${verdict.catalogue.slug}/download`}
+            className="inline-flex h-12 w-fit items-center rounded-[var(--radius-pill)] border border-surface-3 px-6 font-semibold text-text-hi"
+          >
+            {t('download.all')}
+          </a>
+        </div>
       </main>
     </>
   )

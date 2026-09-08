@@ -193,6 +193,39 @@ export class BunnyProvider implements VideoProvider {
     }
   }
 
+  async getDownloadUrl({ providerId, ttlS }: { providerId: string; ttlS: number }) {
+    /**
+     * The library keeps originals and has MP4 fallback on, both checked against the account API
+     * rather than assumed — so `original` is really there, and this is not a claim the marketing
+     * page makes and the product cannot honour.
+     *
+     * `availableResolutions` is asked for anyway, because "keep originals" is a library setting a
+     * future operator could turn off, and the honest fallback is the highest rendition with a
+     * label that says so. Silence would be worse: a couple would download a 480p file believing it
+     * was their wedding as shot.
+     */
+    const video = await this.call<{ availableResolutions?: string; hasMP4Fallback?: boolean }>(
+      `/videos/${providerId}`,
+    )
+
+    const url = async (file: string) => this.getAssetUrl({ providerId, file, ttlS })
+
+    // Bunny serves the untouched upload at `/original` when the library keeps it.
+    const original = await url('original')
+    const head = await fetch(original, { method: 'HEAD' }).catch(() => null)
+    if (head?.ok) return { url: original, label: 'original' }
+
+    const ladder = (video.availableResolutions ?? '')
+      .split(',')
+      .map((r) => r.trim())
+      .filter(Boolean)
+      .sort((a, b) => parseInt(b, 10) - parseInt(a, 10))
+    const best = ladder[0]
+    if (!best) return null
+
+    return { url: await url(`play_${best}.mp4`), label: best }
+  }
+
   async deleteAsset(providerId: string): Promise<void> {
     await this.call(`/videos/${providerId}`, { method: 'DELETE' })
   }

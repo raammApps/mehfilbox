@@ -1355,3 +1355,42 @@ counted in days must not shift with the hour the cron happens to run.
 still be done, and on day 90 it is a notice of a thing that has already happened.
 
 Proven by removing the de-duplication: the same milestone queued twice.
+
+## N-22 · Download everything, at any time — 8 September 2026
+
+*"Nothing is ever deleted"* appears in the handover email, the FAQ and the pricing page. It was
+worth nothing until now, because there was no way for a couple to get their films out. There is
+one: `/c/<slug>/download`, reachable from every page of a wedding and from the renewal screen.
+
+**It survives expiry, grace and archive**, which is the entire point. A lapse is a billing state
+between us and a studio; the wedding is not ours to withhold. The gate is `publishedAt` rather than
+`status` — an archived catalogue is not `published` any more, and its couple is exactly who this
+exists for.
+
+**The near-miss worth recording.** The obvious implementation reuses `resolveAccess` and accepts
+`lapsed` alongside `ok`. That would have been a leak: `resolveAccess` returns `lapsed` **before**
+it checks the passcode, which is right for a page whose lapsed state is a renewal screen with
+nothing behind it — and would have handed a passcode-protected wedding to anyone with the link the
+moment it expired. `resolveDownloadAccess` checks the passcode independently, and a test asserts
+the lapsed-plus-passcode case specifically.
+
+**A manifest of signed links, never a zip.** A 40 GB archive assembled inside a serverless function
+is not a thing that works, and it would fail at precisely the moment a couple needed it.
+
+**The landing page's claim was checked before relying on it.** `originals downloadable untouched`
+is only true if Bunny keeps them, so the library was queried through the account API rather than
+assumed: `KeepOriginalFiles: true`, `EnableMP4Fallback: true`. The provider still asks for the
+resolution ladder and falls back to the highest rendition with a **label saying which** — a couple
+handed a 720p file is told that is what it is, and a future operator turning that setting off
+degrades the promise visibly rather than silently.
+
+**Server-rendered with no client JavaScript.** A couple reaching this page is usually there because
+something went wrong, which is the worst moment for a page that must boot before it can help.
+
+One film failing does not empty the list: the manifest reports a count of what it could not reach
+and hands over the rest. A test forced the provider to throw to prove it.
+
+The test taught something too. `tests/setup.ts` loads `.env.local` so the integration suite finds
+real credentials, and that file carries `VIDEO_DRIVER=bunny` — so a unit test that does not inject
+a provider reaches Bunny over the network and reports every film unavailable. That is the correct
+behaviour under a broken provider, which is exactly why it made a confusing failure.

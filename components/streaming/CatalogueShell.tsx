@@ -101,7 +101,11 @@ export function CatalogueShell({
         )}
       </main>
 
-      <SiteFooter presentedBy={presentedBy} t={t} />
+      <SiteFooter
+        presentedBy={presentedBy}
+        t={t}
+        downloadHref={`/c/${catalogue.slug}/download`}
+      />
 
       <TitleModal
         catalogue={catalogue}
