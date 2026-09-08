@@ -21,7 +21,12 @@ export async function enqueue(input: {
   params?: Record<string, string | number>
   orgId?: string | null
   catalogueId?: string | null
-}): Promise<Notification> {
+  /**
+   * Makes a scheduled message send once (N-21). `null` when an action sends it — a handover
+   * happens when a person claims a catalogue, and that only happens once by itself.
+   */
+  dedupeKey?: string | null
+}): Promise<Notification | null> {
   const rendered = render(input.template, input.locale, input.params ?? {})
 
   const notification = notificationSchema.parse({
@@ -36,6 +41,7 @@ export async function enqueue(input: {
     orgId: input.orgId ?? null,
     catalogueId: input.catalogueId ?? null,
     status: 'queued',
+    dedupeKey: input.dedupeKey ?? null,
     createdAt: new Date().toISOString(),
   })
 

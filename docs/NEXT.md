@@ -100,21 +100,16 @@ rarer one.
 **Do it before the Vercel Pro move**, when the cron entry returns to `vercel.json` and two
 schedulers exist for however long it takes to delete the workflow.
 
-### N-21 · The migration email, and the warning schedule  ·  ~2h  ·  **Phase 1, first**
+### N-21b · The console side of the warning ladder  ·  ~2h
 
-A couple only learns what they have if the studio remembers to tell them.
+The emails go out (N-21, 8 September). What doc 15 also asks for and does not exist:
 
-> **Rewritten for studio-only (D-26/D-29).** This is the *handover* email, not a migration email:
-> *this is yours to watch, download and share; your studio manages the plan; here is the date it
-> runs to; nothing is ever deleted.* Billing never transfers, so it introduces the studio rather
-> than us. Expiry warnings go to the **studio first**, and the couple's copy says *contact your
-> studio* — except where the escape hatch is open, when it says we can take payment directly.
-
-At handover, tell them on every channel they have: this is yours, here is your login, here is the
-renewal date, here is what happens if you do not — and that nothing is ever deleted. Then the
-warnings: **60 / 30 / 7 / 1 days before expiry, and 30 / 60 / 89 days into grace**, WhatsApp +
-email + SMS, to both partners. The studio's console shows a banner and, for Cinema catalogues, a
-"call them" prompt.
+- **A banner in the studio's console** when one of their weddings is inside 60 days. The email is a
+  push; a studio working through their list should see it without one.
+- **A "call them" prompt for Cinema catalogues**, where the renewal is ₹4,000 and an email is not
+  the right instrument.
+- **WhatsApp and SMS**, which the ladder is designed for and which `drain` already skips cleanly
+  (D-12) — it needs the `msg91` driver, not new scheduling.
 
 ### N-22 · Download everything, at any time  ·  ~half a session
 

@@ -498,7 +498,15 @@ export class MemoryRepository implements Repository {
     return { counts, mine }
   }
 
-  async enqueueNotification(notification: Notification): Promise<Notification> {
+  async enqueueNotification(notification: Notification): Promise<Notification | null> {
+    // Mirrors the unique index 0014 puts on `dedupe_key`. Postgres is the one that can actually
+    // promise this under two overlapping cron runs; this keeps the drivers behaving alike.
+    if (
+      notification.dedupeKey !== null &&
+      this.data.notifications.some((n) => n.dedupeKey === notification.dedupeKey)
+    ) {
+      return null
+    }
     this.data.notifications.push(this.clone(notification))
     this.touched()
     return this.clone(notification)

@@ -7,7 +7,12 @@ import { getRepository } from '@/lib/db'
 import { ApiError } from '@/lib/http/errors'
 import { readJson, route } from '@/lib/http/handler'
 import { clientIp, consume } from '@/lib/http/rate-limit'
+import { env } from '@/lib/env'
+import { formatWeddingDate } from '@/lib/format'
+import { resolveLocalised } from '@/lib/i18n'
 import { log } from '@/lib/log'
+import { enqueue } from '@/lib/notify/send'
+import { catalogueUrl } from '@/lib/tenant'
 import { suggestOrgSlug } from '@/lib/format'
 import { claimSchema, orgSchema } from '@/lib/schema'
 
@@ -122,6 +127,42 @@ export async function POST(request: Request) {
       fromOrgId: transfer.fromOrgId,
       toOrgId: org.id,
     })
+
+    /**
+     * The handover email (N-21).
+     *
+     * A couple only learns what they have if somebody tells them, and until now that was the
+     * studio remembering to. It says the four things `D-29` requires and nothing else: it is
+     * yours, here is where, **your studio manages the plan**, and nothing is ever deleted.
+     *
+     * It introduces the studio rather than us because billing never transfers under studio-only
+     * (D-26) — a couple who writes to us about a renewal has been sent to the wrong place by
+     * their own delivery email.
+     *
+     * Queued rather than sent, and failure is swallowed: a mailer being down must not turn a
+     * successful claim into an error for someone who has just typed their name into a form.
+     */
+    try {
+      await enqueue({
+        template: 'handover',
+        channel: 'email',
+        address: transfer.toEmail,
+        locale: catalogue.locale,
+        orgId: org.id,
+        catalogueId: catalogue.id,
+        params: {
+          coupleName: resolveLocalised(catalogue.coupleName, catalogue.locale),
+          studioName: partner?.name ?? 'your studio',
+          url: catalogueUrl(catalogue.slug, env.ROOT_DOMAIN, '/', env.TENANCY_MODE),
+          date: formatWeddingDate(catalogue.includedUntil, catalogue.locale),
+        },
+      })
+    } catch (error) {
+      log.error('claim: handover email could not be queued', {
+        catalogueId: catalogue.id,
+        reason: (error as Error).message,
+      })
+    }
 
     // No session: signing in is deliberate, and under Supabase Auth the address may still need
     // confirming, which this route cannot know.

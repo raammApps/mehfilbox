@@ -1323,3 +1323,35 @@ rather than deferred — different audiences with different economics. A console
 of professionals who chose this tool; a wedding page is opened by two hundred relatives who did not.
 
 Proven by removing the per-wedding override: both weddings came back Hindi.
+
+## N-21 · Nobody is surprised by a wedding that stopped streaming — 8 September 2026
+
+The handover email fires when a couple claims a catalogue, and a daily job queues the warning
+ladder: **60 / 30 / 7 / 1 days before expiry, then 30 / 60 / 89 into grace.**
+
+**The de-duplication is the feature, not a detail.** A cron re-derives the same milestone on every
+run until the day passes, so without it a couple gets the thirty-day warning thirty times and
+learns to ignore all of them — including the last one, which is the only one that could still be
+acted on. Every message carries a key of `<template>:<catalogue>:<day>:<role>`, and 0014 puts a
+**unique index** on it. That is deliberate: two overlapping runs both pass a read-then-write, and
+the database is the only party here that can actually promise once. A 23505 comes back as "already
+handled" rather than an error.
+
+**The studio and the couple hear different things, and both hear.** Under studio-only (D-26)
+billing never transfers, so the renewal is a decision only the studio can make — they are told
+before handover and after it, because a studio that hears nothing about a wedding lapsing cannot
+sell the renewal. The couple's copy says *contact your studio*; a couple who writes to us has been
+sent to the wrong place by their own delivery email.
+
+**Queueing and sending are separate jobs** because they fail for different reasons and at different
+rates: deciding what is due reads the database, sending talks to a third party. A mailer outage
+should delay delivery, not skip a milestone that never comes round again.
+
+The ladder's arithmetic is exported and tested on its own — `milestoneFor(date, now)` — rather than
+proved through a cron, a repository and a queue. It is also tested at 23:59, because a ladder
+counted in days must not shift with the hour the cron happens to run.
+
+89 rather than 90 into grace, deliberately: the last warning has to arrive while something can
+still be done, and on day 90 it is a notice of a thing that has already happened.
+
+Proven by removing the de-duplication: the same milestone queued twice.

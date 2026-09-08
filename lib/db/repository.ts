@@ -195,7 +195,12 @@ export interface Repository {
   updatePhoto(id: string, patch: Pick<Photo, 'caption'>): Promise<Photo>
 
   /** Queue a message. Never sends — `/api/cron/notify` drains (N-50). */
-  enqueueNotification(notification: Notification): Promise<Notification>
+  /**
+   * Queue a message. Returns `null` when `dedupeKey` is already present (N-21) — the row is not a
+   * second copy, it is the same milestone arriving again, and the caller wants to know it was
+   * already handled rather than to see an error.
+   */
+  enqueueNotification(notification: Notification): Promise<Notification | null>
   /** Oldest queued first, so a backlog drains in the order it was created. */
   listQueuedNotifications(limit: number): Promise<Notification[]>
   markNotification(

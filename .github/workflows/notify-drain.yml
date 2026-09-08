@@ -17,7 +17,10 @@ name: Drain the notification queue
 
 on:
   schedule:
+    # Drain every quarter hour; queue the day's warnings once, early, at 03:40 UTC — a little
+    # after 09:00 in India, which is when a studio would want to read one (N-21).
     - cron: '*/15 * * * *'
+    - cron: '40 3 * * *'
   workflow_dispatch:
 
 # Queue rather than overlap. `drain` reads, sends, then marks, so two concurrent runs would both
@@ -36,6 +39,28 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
+      # Queueing is separate from sending because they fail for different reasons: deciding what
+      # is due reads the database, sending talks to a third party. It runs before the drain in the
+      # same job so a day's warnings are queued and delivered in one pass, and it is safe on every
+      # run — 0014's unique index means a replayed day queues nothing new.
+      - name: Queue any warnings due today
+        if: github.event.schedule == '40 3 * * *' || github.event_name == 'workflow_dispatch'
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          TARGET: ${{ vars.DRAIN_URL || 'https://mehfilbox.com' }}
+        run: |
+          set -uo pipefail
+          [ -z "${CRON_SECRET}" ] && { echo "::notice::CRON_SECRET is not set — skipping."; exit 0; }
+
+          code=$(curl -sS -m 60 -o warnings.json -w '%{http_code}' \
+            -H "Authorization: Bearer ${CRON_SECRET}" \
+            "${TARGET}/api/cron/warnings") || { echo "::error::request failed"; exit 1; }
+
+          echo "HTTP ${code}"
+          cat warnings.json; echo
+          echo "### Warnings $(jq -c . warnings.json 2>/dev/null || cat warnings.json)" >> "$GITHUB_STEP_SUMMARY"
+          [ "${code}" = "200" ] || { echo "::error::unexpected ${code}"; exit 1; }
+
       - name: Drain
         env:
           CRON_SECRET: ${{ secrets.CRON_SECRET }}

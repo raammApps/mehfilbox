@@ -115,6 +115,7 @@ export const NOTIFICATION_COLUMNS: Record<string, string> = {
   providerId: 'provider_id',
   error: 'error',
   attempts: 'attempts',
+  dedupeKey: 'dedupe_key',
   createdAt: 'created_at',
   sentAt: 'sent_at',
 }
@@ -988,17 +989,25 @@ export class SupabaseRepository implements Repository {
       providerId: r.provider_id ?? null,
       error: r.error ?? null,
       attempts: r.attempts ?? 0,
+      dedupeKey: r.dedupe_key ?? null,
       createdAt: r.created_at,
       sentAt: r.sent_at ?? null,
     }
   }
 
-  async enqueueNotification(notification: Notification): Promise<Notification> {
+  async enqueueNotification(notification: Notification): Promise<Notification | null> {
     const result = await this.db
       .from('notifications')
       .insert(SupabaseRepository.project(notification as Row, NOTIFICATION_COLUMNS))
       .select()
       .single()
+    /**
+     * 23505 is the unique index on `dedupe_key` (0014) doing its job, not a failure. Two cron runs
+     * overlapping is the case this exists for, and the loser should be told "already handled"
+     * rather than made to throw — which is why the constraint is in the database and not a
+     * read-then-write here that both of them would pass.
+     */
+    if (result.error?.code === '23505') return null
     return SupabaseRepository.toNotification(SupabaseRepository.unwrap(result))
   }
 

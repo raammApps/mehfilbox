@@ -444,6 +444,15 @@ export const notificationSchema = z.object({
   providerId: z.string().nullable().default(null),
   error: z.string().nullable().default(null),
   attempts: z.number().int().nonnegative().default(0),
+  /**
+   * What makes a scheduled message send once (N-21).
+   *
+   * `<template>:<catalogueId>:<milestone>` — e.g. `expiry:5f3…:30`. The warning cron re-derives
+   * the same milestone every run until the day passes, so without this a couple gets the 30-day
+   * warning thirty times and learns to ignore all of them. Null for anything sent once by an
+   * action rather than by a schedule.
+   */
+  dedupeKey: z.string().nullable().default(null),
   createdAt: z.string(),
   sentAt: z.string().nullable().default(null),
 })
