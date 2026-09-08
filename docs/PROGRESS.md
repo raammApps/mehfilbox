@@ -1301,3 +1301,25 @@ Proven by removing the inheritance: the Hindi studio's wedding opened in English
 
 The console is still English-only, and that is N-29b — every operator string across ~40 components,
 none of which go through the dictionary. It is the half a Hindi-first studio spends its day in.
+
+## N-29c · The studio picks the language per couple — 8 September 2026
+
+N-29 gave a studio one language for its whole business. That was too coarse, and Sandeep named why:
+the partner sells the product to the couple, so the partner is the one who knows which family reads
+Hindi. A studio in Jaipur serves both in the same month.
+
+The org's choice is now a **default a wedding starts from**, not a rule. The create wizard asks,
+seeded from the studio; a wedding's settings can change it afterwards; and neither touches any
+other wedding.
+
+**In settings rather than in the customizer's branding panel**, which was the tempting home — it is
+where a studio shapes the page, and language is presentation. But everything in that panel waits
+for Publish, and putting one immediate control among them recreates exactly the confusion N-56
+removed: *two save models in one screen means neither is learnable*. Settings are uniformly
+immediate, so it goes there (D-31).
+
+The console stays English-only, and that is now D-32 rather than a backlog item. N-29b is dropped
+rather than deferred — different audiences with different economics. A console is used by a handful
+of professionals who chose this tool; a wedding page is opened by two hundred relatives who did not.
+
+Proven by removing the per-wedding override: both weddings came back Hindi.

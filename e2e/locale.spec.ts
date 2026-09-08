@@ -65,4 +65,69 @@ test.describe('N-29 — the studio’s language reaches the guest', () => {
     await expect(guest.locator('html')).toHaveAttribute('lang', 'hi')
     await fresh.close()
   })
+
+  /**
+   * The point of N-29c: a studio serves a Hindi family and an English family in the same month,
+   * so the studio's language is the *default a wedding starts from*, never a rule it is stuck
+   * with. Two weddings under one Hindi studio, one of them overridden.
+   */
+  test('one studio can give two couples different languages', async ({ page, context }) => {
+    const stamp = Date.now().toString(36)
+    const email = `mixed-${stamp}@example.test`
+
+    const registered = await page.request.post('/api/partners', {
+      data: {
+        businessName: `Mixed Studio ${stamp}`,
+        contactName: 'A Person',
+        email,
+        password: 'a-long-enough-password',
+        locale: 'hi',
+      },
+    })
+    expect(registered.ok(), await registered.text()).toBe(true)
+
+    await page.goto('/admin/login')
+    await page.getByLabel('Email').fill(email)
+    await page.getByLabel('Password').fill('a-long-enough-password')
+    await page.getByRole('button', { name: 'Sign in' }).click()
+    await expect(page.getByRole('heading', { name: 'Catalogues' })).toBeVisible()
+
+    const make = async (slug: string, locale?: 'en' | 'hi') => {
+      const response = await page.request.post('/api/admin/catalogues', {
+        data: {
+          coupleName: { en: 'A & B' },
+          appName: { en: 'A & B Originals' },
+          weddingDate: '2026-12-01',
+          slug,
+          template: 'films-only',
+          ...(locale ? { locale } : {}),
+        },
+      })
+      expect(response.ok(), await response.text()).toBe(true)
+      const { catalogue } = (await response.json()) as { catalogue: { id: string } }
+      await page.request.post(`/api/admin/catalogues/${catalogue.id}/publish`)
+      return catalogue.id
+    }
+
+    // One inherits the studio's Hindi; the other is created in English despite it.
+    const inheritedSlug = `inherits-${stamp}`
+    const overriddenSlug = `overrides-${stamp}`
+    await make(inheritedSlug)
+    await make(overriddenSlug, 'en')
+
+    const open = async (slug: string) => {
+      const fresh = await context.browser()!.newContext()
+      const guest = await fresh.newPage()
+      await guest.addInitScript((s) => {
+        window.localStorage.setItem(`mehfilbox.profile.${s}`, 'skipped')
+      }, slug)
+      await guest.goto(`/?__catalogue=${slug}`)
+      const lang = await guest.locator('html').getAttribute('lang')
+      await fresh.close()
+      return lang
+    }
+
+    expect(await open(inheritedSlug)).toBe('hi')
+    expect(await open(overriddenSlug)).toBe('en')
+  })
 })

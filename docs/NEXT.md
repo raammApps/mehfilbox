@@ -82,13 +82,6 @@ faults we have actually had. Two parts remain, and both want a third-party servi
 Take this when there is revenue, or when a fault costs more than the subscription. Until then the
 alerts land in a mailbox, and that is the difference between "a partner told us" and "we knew".
 
-### N-29b · Localise the admin console  ·  ~1 session
-
-The guest side inherits a studio's language now (N-29, 8 September). **The console is still
-English-only** — every operator string across ~40 components, and none of them go through the
-dictionary. It is a bigger job than the guest side was and worth scoping on its own, but it is the
-half a Hindi-first studio actually spends its day in.
-
 ### N-54 · Claim a notification row before sending it  ·  ~1h  ·  **paused, 7 September**
 
 `drain` reads, sends, then marks, so two overlapping runs would both see the same `queued` rows and

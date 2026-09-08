@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
-import type { Catalogue, Privacy } from '@/lib/schema'
+import type { Catalogue, Locale, Privacy } from '@/lib/schema'
 
 /** AE-10 — unlisted by default, optional passcode (doc 01 §5.2, doc 05 §4). */
 export function CatalogueSettings({ catalogue }: { catalogue: Catalogue }) {
@@ -11,6 +11,7 @@ export function CatalogueSettings({ catalogue }: { catalogue: Catalogue }) {
   const [passcode, setPasscode] = useState('')
   const [customDomain, setCustomDomain] = useState(catalogue.customDomain ?? '')
   const [includedUntil, setIncludedUntil] = useState(catalogue.includedUntil?.slice(0, 10) ?? '')
+  const [locale, setLocale] = useState<Locale>(catalogue.locale)
   const [status, setStatus] = useState<string | null>(null)
   const [confirmName, setConfirmName] = useState('')
   const [deleting, setDeleting] = useState(false)
@@ -28,6 +29,7 @@ export function CatalogueSettings({ catalogue }: { catalogue: Catalogue }) {
         // unlike the passcode, where empty means "keep the one you have".
         customDomain: customDomain.trim() ? customDomain.trim() : null,
         ...(includedUntil ? { includedUntil } : {}),
+        locale,
       }),
     })
     if (!response.ok) {
@@ -62,6 +64,45 @@ export function CatalogueSettings({ catalogue }: { catalogue: Catalogue }) {
 
   return (
     <div className="max-w-[560px]">
+      {/*
+        Per wedding, not per studio (N-29c). The studio's own language is the default a new
+        wedding inherits, not a rule it is stuck with — a Jaipur studio serves a Hindi family and
+        an English one in the same month.
+
+        In settings rather than in the customizer's branding panel, which is the other obvious
+        home: everything in that panel waits for Publish, and two save models in one panel is the
+        confusion N-56 removed. Here every control behaves the same way.
+      */}
+      <section className="mb-6 rounded-[var(--radius-card)] border border-[var(--color-l-line)] bg-white p-4">
+        <h2 className="mb-1 text-[15px] font-semibold">Language</h2>
+        <p className="mb-3 text-[13px] text-[var(--color-l-text-mid)]">
+          What this wedding opens in for the couple and their guests. They can still switch, and
+          this does not change any other wedding.
+        </p>
+        <div className="flex gap-2">
+          {(
+            [
+              ['en', 'English'],
+              ['hi', 'हिंदी'],
+            ] as const
+          ).map(([value, label]) => (
+            <label
+              key={value}
+              className="flex flex-1 cursor-pointer items-center gap-2 rounded-[var(--radius-input)] border border-[var(--color-l-line)] px-3 py-2 text-[15px] has-[:checked]:border-[var(--color-l-text-hi)] has-[:checked]:font-semibold"
+            >
+              <input
+                type="radio"
+                name="catalogue-locale"
+                value={value}
+                checked={locale === value}
+                onChange={() => setLocale(value)}
+              />
+              {label}
+            </label>
+          ))}
+        </div>
+      </section>
+
       <section className="mb-6 rounded-[var(--radius-card)] border border-[var(--color-l-line)] bg-white p-4">
         <h2 className="mb-3 text-[15px] font-semibold">Who can watch</h2>
 

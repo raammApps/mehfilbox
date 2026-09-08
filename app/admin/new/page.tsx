@@ -26,7 +26,11 @@ export default async function NewCataloguePage() {
       </div>
 
       {/* `lib/env` is server-only, so the address preview gets its inputs as props. */}
-      <CreateWizard rootDomain={env.ROOT_DOMAIN} tenancyMode={env.TENANCY_MODE} />
+      <CreateWizard
+        rootDomain={env.ROOT_DOMAIN}
+        tenancyMode={env.TENANCY_MODE}
+        studioLocale={org?.locale ?? 'en'}
+      />
     </AdminChrome>
   )
 }

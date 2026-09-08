@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { suggestSlug } from '@/lib/format'
 import { TEMPLATES } from '@/lib/admin/templates'
-import { FLIX_SUFFIX, type Title } from '@/lib/schema'
+import { FLIX_SUFFIX, type Locale, type Title } from '@/lib/schema'
 import { catalogueUrl, type TenancyMode } from '@/lib/tenant'
 import { IconCheck } from './icons'
 import { TemplateThumbnail } from './TemplateThumbnail'
@@ -38,10 +38,13 @@ const DRAFT_KEY = 'mehfilbox.wizard.draft'
 export function CreateWizard({
   rootDomain,
   tenancyMode,
+  studioLocale,
 }: {
   /** Passed in rather than read here: `lib/env` is server-only, and this runs in the browser. */
   rootDomain: string
   tenancyMode: TenancyMode
+  /** The studio's own language — the default this wedding starts from, not a rule (N-29c). */
+  studioLocale: Locale
 }) {
   const router = useRouter()
   const [step, setStep] = useState<Step>(1)
@@ -59,6 +62,11 @@ export function CreateWizard({
     suggestion?: string
   } | null>(null)
   const [template, setTemplate] = useState(TEMPLATES[0]!.id)
+  /**
+   * Seeded from the studio, changeable per wedding (N-29c). The studio's language is what most of
+   * their couples read; it is not what all of them read, and asking here costs one line.
+   */
+  const [locale, setLocale] = useState<Locale>(studioLocale)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [busy, setBusy] = useState(false)
 
@@ -126,6 +134,7 @@ export function CreateWizard({
         weddingDate,
         slug,
         city: city ? { en: city } : undefined,
+        locale,
         template,
       }),
     })
@@ -283,6 +292,37 @@ export function CreateWizard({
             Pick a starting shape. Every section can be reordered, renamed, hidden or removed
             afterwards — this only decides what is already there when you open the customizer.
           </p>
+
+          <fieldset className="mb-6">
+            <legend className="mb-1 block text-[14px] font-semibold">
+              What language will this couple read?
+            </legend>
+            <p className="mb-2 text-[13px] text-[var(--color-l-text-mid)]">
+              Guests can still switch. Changeable later in this wedding&rsquo;s settings.
+            </p>
+            <div className="flex max-w-[320px] gap-2">
+              {(
+                [
+                  ['en', 'English'],
+                  ['hi', 'हिंदी'],
+                ] as const
+              ).map(([value, label]) => (
+                <label
+                  key={value}
+                  className="flex flex-1 cursor-pointer items-center gap-2 rounded-[var(--radius-input)] border border-[var(--color-l-line)] bg-white px-3 py-2 text-[15px] has-[:checked]:border-[var(--color-accent)] has-[:checked]:font-semibold"
+                >
+                  <input
+                    type="radio"
+                    name="locale"
+                    value={value}
+                    checked={locale === value}
+                    onChange={() => setLocale(value)}
+                  />
+                  {label}
+                </label>
+              ))}
+            </div>
+          </fieldset>
 
           <ul className="mb-6 grid gap-3 sm:grid-cols-3">
             {TEMPLATES.map((option) => {

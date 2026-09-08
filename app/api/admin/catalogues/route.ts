@@ -7,6 +7,7 @@ import { noStore, readJson, route } from '@/lib/http/handler'
 import {
   appNameSchema,
   brandingSchema,
+  localeSchema,
   localisedRequiredSchema,
   localisedStringSchema,
   occasionSchema,
@@ -26,6 +27,12 @@ const createSchema = z.object({
   synopsis: localisedStringSchema.optional(),
   occasion: occasionSchema.default('wedding'),
   branding: brandingSchema.default({}),
+  /**
+   * Per wedding, not per studio (N-29c). A Jaipur studio serves a Hindi family and an English one
+   * in the same month; the org's choice is the default, not the rule. Optional so the studio's
+   * own language applies when the wizard does not ask.
+   */
+  locale: localeSchema.optional(),
   template: z.string().default('keepsake'),
 })
 
@@ -79,7 +86,8 @@ export async function POST(request: Request) {
        * Copied from the studio rather than read through it (N-29), so a studio changing its own
        * default later does not silently change the language of weddings already delivered.
        */
-      locale: org?.locale ?? 'en',
+      // The operator's choice for this wedding, falling back to the studio's own (N-29c).
+      locale: body.locale ?? org?.locale ?? 'en',
       featuredTitleId: null,
       modules: [],
       draftModules: null,

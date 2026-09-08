@@ -534,3 +534,27 @@ because they are what a guest reads.
 **Consequence:** the console must always say what is waiting. A film held back with no explanation
 is the failure this design risks, so the customizer names the count — *"3 films and 40 photographs
 will go live when you publish"* — rather than leaving an operator to wonder.
+
+
+## D-32 · The console stays English; the guest page does not (8 Sept 2026)
+
+**Decided:** the operator console is English-only and will stay that way. The **guest** page's
+language is chosen by the studio, per wedding.
+
+**Why:** they are different audiences with different economics. A console is used by a handful of
+professionals who chose this tool; a wedding page is opened by two hundred relatives who did not,
+on a phone, once. Localising ~40 components of operator UI buys a nicer day for the studio; getting
+the guest page right is whether the family can read their own wedding.
+
+**Consequence:** N-29b is dropped rather than deferred — an item nobody intends to build is a
+distraction in a backlog, and the reasoning belongs here where it will be found.
+
+The studio sets the language **per couple**, not once for the business (N-29c). The org's choice at
+registration is the default a new wedding starts from; the create wizard asks, and a wedding's
+settings can change it later. A studio in Jaipur serves a Hindi family and an English family in the
+same month, and the partner is the one who knows which is which — they sell the product to the
+couple, and they are the only party in the transaction who has met them.
+
+It is a **setting**, so it takes effect immediately (D-31). The customizer's branding panel is the
+other obvious home, and it is the wrong one: everything there waits for Publish, and two save
+models in one panel is precisely the confusion N-56 removed.

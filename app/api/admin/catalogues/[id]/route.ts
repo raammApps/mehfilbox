@@ -11,6 +11,7 @@ import { ApiError } from '@/lib/http/errors'
 import { noStore, readJson, route } from '@/lib/http/handler'
 import {
   brandingSchema,
+  localeSchema,
   localisedRequiredSchema,
   localisedStringSchema,
   privacySchema,
@@ -35,6 +36,15 @@ const patchSchema = z.object({
    * system stamping "Presented by" at handover, not an operator editing.
    */
   draftBranding: brandingSchema.nullable().optional(),
+  /**
+   * The language this wedding opens in (N-29c). A **setting**, not part of the page's draft: it
+   * lives with passcode and address and takes effect immediately (D-31).
+   *
+   * The customizer's branding panel is where a studio shapes the page and would be the obvious
+   * home, but everything there waits for Publish — and two save models in one panel is the exact
+   * confusion N-56 removed. Better in the drawer where every control behaves the same way.
+   */
+  locale: localeSchema.optional(),
   featuredTitleId: z.string().uuid().nullable().optional(),
   privacy: privacySchema.optional(),
   /**
