@@ -127,12 +127,15 @@ Set the Bunny library to 360p–720p by default; confirm Keep Original Files and
 off. Then upload one real 15-hour wedding and correct `PRICING.md` §1 with the measured GB.
 Without this nothing on the price list holds a wedding.
 
-### N-36 · The delivery message  ·  ~half a session  ·  **Phase 1**
+### N-36c · Send it on WhatsApp for real  ·  ~2h  ·  **needs the MSG91 driver**
 
-One button on the overview, beside the public link: *Send to the couple*. Composes a WhatsApp
-message (and an email) with the poster, the couple's names, "now streaming" copy in the
-catalogue's locale, and the link; records that it was sent. This is the moment the product gets
-forwarded to two hundred people, and today the operator writes it themselves.
+N-36 landed the email and a `wa.me` link that opens the studio's own WhatsApp with the message
+written. That link is honest — it composes, it does not send — but it means nothing is recorded and
+the studio has to be at a device with WhatsApp on it.
+
+The real thing is one `msg91` driver behind `NotificationProvider`, which `drain` already skips
+cleanly for `whatsapp` rows (D-12). Blocked on the ₹500/month subscription and on Meta's template
+approval, not on code.
 
 ### N-24 · Lifecycle: renewal, lapse, **archive**  ·  doc 15  ·  **Phase 2**
 

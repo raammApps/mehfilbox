@@ -1416,3 +1416,33 @@ them to be guessed.
 Over the cap still reads as "full" rather than as an error, because `storageCheck` deliberately
 errs toward letting content in while a film is transcoding — a catalogue can legitimately sit
 slightly over, and that is a state to describe rather than to alarm about.
+
+## N-36 · The message a couple's family forwards — 8 September 2026
+
+**This is the moment the product reaches two hundred people**, and until now the operator wrote it
+themselves — so the first thing a couple's family ever saw of Mehfilbox was whatever a busy studio
+typed at eleven at night. There is a button beside the public link now, because the operator who
+has just checked the address is the operator about to send it.
+
+**Two channels, and only one of them is a send.** The email goes through the notification queue and
+is recorded. WhatsApp is a `wa.me` link that opens the studio's *own* WhatsApp with the message
+already written — which is not us sending anything, and is labelled that way rather than dressed up
+as delivery. It is also the channel that matters in this market, works today, and costs nothing:
+D-12 deferred MSG91 precisely because ₹500 a month against a hundred messages was 44× the traffic
+it carried.
+
+The copy is composed on the server from the same `delivery` template the email uses, in the
+**catalogue's** language rather than the operator's (N-29c). One render, two channels — the
+alternative is a second copy of the words inside a client component, which is how the two drift.
+
+**It refuses to send an unpublished wedding**, and that refusal is the most valuable line in the
+route. A delivery message pointing at "not yet available" is worse than no message: the couple
+forwards it, and two hundred people open a page with nothing on it.
+
+Deliberately re-sendable. A couple who changed address, or a first attempt that went to spam, is a
+normal thing to want fixed, and `notifications` records every attempt so "did we send it, and when"
+stays answerable either way.
+
+A test detail worth keeping: `route()` turns an `ApiError` into a *response* rather than throwing,
+so a test asserting `rejects.toThrow` passes for the wrong reason. Reading the response instead
+also checks the operator is told **why** they were refused.

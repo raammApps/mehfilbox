@@ -5,6 +5,7 @@ import { AttentionChip } from '@/components/admin/CatalogueBoard'
 import { CatalogueAnalytics } from '@/components/admin/CatalogueAnalytics'
 import { HandoverPanel } from '@/components/admin/HandoverPanel'
 import { PublicLink } from '@/components/admin/PublicLink'
+import { SendToCouple } from '@/components/admin/SendToCouple'
 import { SetupChecklist } from '@/components/admin/SetupChecklist'
 import { getOperatorSession, getSessionOrg } from '@/lib/admin/session'
 import { catalogueAttention } from '@/lib/admin/catalogue-health'
@@ -13,6 +14,8 @@ import { hoursFor, resolveLimits, storageUsage } from '@/lib/entitlements'
 import { getRepository } from '@/lib/db'
 import { env } from '@/lib/env'
 import { formatWeddingDate } from '@/lib/format'
+import { resolveLocalised } from '@/lib/i18n'
+import { render } from '@/lib/notify/templates'
 import { catalogueUrl } from '@/lib/tenant'
 
 export const dynamic = 'force-dynamic'
@@ -62,6 +65,22 @@ export default async function CatalogueOverviewPage({
   // A couple owns exactly one wedding — their own — and has nobody to hand it to. Showing them
   // the panel would only invite them to give their own catalogue away.
   const canHandOver = org?.kind === 'partner'
+
+  /**
+   * The delivery copy, composed here from the same template the email uses (N-36). Rendering it
+   * on the server keeps the two channels saying the same thing in the same language — the
+   * alternative is a second copy of the words in a client component, which is how the two drift.
+   */
+  const deliveryMessage = render('delivery', catalogue.locale, {
+    coupleName: resolveLocalised(catalogue.coupleName, catalogue.locale),
+    studioName: catalogue.branding.presentedBy ?? 'your studio',
+    url,
+    date: formatWeddingDate(catalogue.includedUntil, catalogue.locale),
+  }).text
+
+  // Prefilled where a handover is already in flight: that address is the couple's, and retyping
+  // it is a chance to get it wrong.
+  const outstandingTransferEmail = transfer?.toEmail ?? null
 
   return (
     <AdminChrome
@@ -157,6 +176,22 @@ export default async function CatalogueOverviewPage({
             </p>
             <PublicLink url={url} status={catalogue.status} />
           </section>
+
+          {/*
+            Beside the link rather than on its own screen (N-36): the operator who has just
+            checked the address is the operator about to send it, and the two thoughts are one.
+            Published only — a delivery message pointing at "not yet available" gets forwarded to
+            two hundred people who all open nothing.
+          */}
+          {canHandOver && catalogue.status === 'published' ? (
+            <div className="mt-4">
+              <SendToCouple
+                catalogueId={catalogue.id}
+                message={deliveryMessage}
+                defaultEmail={outstandingTransferEmail}
+              />
+            </div>
+          ) : null}
 
           {canHandOver ? (
             <div className="mt-4">
