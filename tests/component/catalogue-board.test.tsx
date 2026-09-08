@@ -28,6 +28,8 @@ function row(over: Partial<CatalogueRow> & { id: string; name: string }): Catalo
     subStatus: 'included',
     weddingDate: '2026-02-14',
     weddingDateLabel: '14 February 2026',
+    // No renewal date by default, so a fixture is never accidentally about to lapse.
+    includedUntil: null,
     counts: { titles: 4, ready: 4, published: 4, failed: 0, photos: 12 },
     ...over,
   }

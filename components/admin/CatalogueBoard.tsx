@@ -30,6 +30,8 @@ export type CatalogueRow = {
   subStatus: SubStatus
   weddingDate: string
   weddingDateLabel: string
+  /** When it stops serving — drives the renewal warning (N-21b). */
+  includedUntil: string | null
   counts: CatalogueCounts
 }
 

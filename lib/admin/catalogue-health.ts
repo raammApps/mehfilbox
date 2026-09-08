@@ -17,12 +17,33 @@ export type Attention = {
   label: string
 }
 
+/**
+ * Days until a catalogue stops serving, or null when there is no date to count to.
+ *
+ * Compared as dates rather than instants, so a wedding does not appear to expire a day early for
+ * an operator in a timezone behind UTC.
+ */
+export function daysUntilLapse(includedUntil: string | null | undefined, now = new Date()): number | null {
+  if (!includedUntil) return null
+  const end = new Date(includedUntil)
+  if (Number.isNaN(end.getTime())) return null
+  const DAY = 24 * 60 * 60 * 1000
+  const a = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())
+  const b = Date.UTC(end.getUTCFullYear(), end.getUTCMonth(), end.getUTCDate())
+  return Math.round((b - a) / DAY)
+}
+
 export function catalogueAttention(input: {
   status: CatalogueStatus
   subStatus: SubStatus
   counts: CatalogueCounts
+  /** Optional so existing callers keep working; without it, renewal is simply not mentioned. */
+  includedUntil?: string | null
+  /** Injectable so the ladder can be tested at a date instead of by waiting for one. */
+  now?: Date
 }): Attention {
   const { counts } = input
+  const untilLapse = daysUntilLapse(input.includedUntil, input.now ?? new Date())
 
   // Ordered by what would embarrass us first. A lapsed wedding is showing guests a renewal
   // screen right now, which beats anything the operator has left half-done.
@@ -37,6 +58,23 @@ export function catalogueAttention(input: {
   }
   if (input.subStatus === 'grace') return { tone: 'warn', label: 'Renewal due' }
 
+  /**
+   * The console half of the warning ladder (N-21b). The emails are a push; a studio working
+   * through their list on a Tuesday should see it without one, and this is the surface where they
+   * would act on it.
+   *
+   * Inside 30 days it outranks housekeeping, because a lapse the studio did not sell against is
+   * revenue lost and a couple's page stopping. Between 31 and 60 it is information rather than
+   * urgency, so it is checked further down — a renewal seven weeks out should not shout over two
+   * films that are still processing.
+   */
+  if (untilLapse !== null && untilLapse >= 0 && untilLapse <= 30) {
+    return {
+      tone: 'warn',
+      label: untilLapse === 0 ? 'Lapses today' : `Lapses in ${untilLapse} day${untilLapse === 1 ? '' : 's'}`,
+    }
+  }
+
   const processing = counts.titles - counts.ready - counts.failed
   if (processing > 0) return { tone: 'act', label: `${processing} still processing` }
 
@@ -49,6 +87,17 @@ export function catalogueAttention(input: {
   }
 
   if (counts.published === 0) return { tone: 'warn', label: 'Live, but nothing to watch' }
+
+  /**
+   * 31–60 days: worth knowing while the studio is already looking, not worth interrupting them.
+   *
+   * `>= 0` is not redundant. A catalogue whose date has passed while its sub-status still reads
+   * as serving is a real inconsistency — `resolveAccess` guards against exactly it — and without
+   * this the console would cheerfully print "Renews in -54 days".
+   */
+  if (untilLapse !== null && untilLapse >= 0 && untilLapse <= 60) {
+    return { tone: 'act', label: `Renews in ${untilLapse} days` }
+  }
 
   return { tone: 'ok', label: 'Live and complete' }
 }

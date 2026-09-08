@@ -1475,3 +1475,27 @@ entirely with every test green.
 
 Redo is proven through the visibility toggle's accessible name, which flips with the state, so no
 test hook was needed and the assertion fails if undo restores the array without the UI following.
+
+## N-21b · The console says which weddings are running out — 8 September 2026
+
+The warning ladder emails the studio (N-21). This is the half that does not need an inbox: a studio
+working through their list on a Tuesday sees which weddings are close, on the surface where they
+would act on it.
+
+**Two tiers, because urgency is not uniform.** Inside 30 days it is a `warn` and outranks
+housekeeping — a lapse the studio did not sell against is revenue lost and a couple's page
+stopping. Between 31 and 60 days it is an `act`, checked further down the ladder: a renewal seven
+weeks out should not shout over two films that are still processing. A failed film still outranks
+both, because it is broken *now* rather than soon, and there is a test for each of those orderings
+rather than a comment claiming them.
+
+Writing the tests found two things worth the trip. `catalogueAttention` read the real clock, so the
+ladder could only be tested by waiting for a date — it takes an injectable `now`. And the 31–60
+branch would have printed **"Renews in -54 days"** for a catalogue whose date had passed while its
+sub-status still read as serving, which is a real inconsistency `resolveAccess` already guards
+against. Both were found by a test failing for the right reason, and the negative-days case has its
+own test now.
+
+The "call them" prompt doc 15 asks for is **N-21c**, and it is blocked rather than skipped: it needs
+to know a catalogue is Cinema, `entitlements.planId` exists, and nothing assigns it. It waits for
+N-27b, or it is a prompt keyed on a plan nobody has.

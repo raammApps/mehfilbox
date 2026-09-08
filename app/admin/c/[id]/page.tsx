@@ -59,6 +59,7 @@ export default async function CatalogueOverviewPage({
     status: catalogue.status,
     subStatus: catalogue.subStatus,
     counts,
+    includedUntil: catalogue.includedUntil,
   })
   const url = catalogueUrl(catalogue.slug, env.ROOT_DOMAIN, '/', env.TENANCY_MODE)
 

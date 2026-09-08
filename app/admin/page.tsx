@@ -67,6 +67,7 @@ export default async function CatalogueListPage() {
     // Formatted on the server: the date format is locale data, and doing it in the browser is
     // how a server-rendered list starts flickering on hydration.
     weddingDateLabel: formatWeddingDate(catalogue.weddingDate, 'en'),
+    includedUntil: catalogue.includedUntil ?? null,
     counts: counts[catalogue.id] ?? { titles: 0, ready: 0, published: 0, failed: 0, photos: 0 },
   }))
 

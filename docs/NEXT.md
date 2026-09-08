@@ -84,16 +84,12 @@ rarer one.
 **Do it before the Vercel Pro move**, when the cron entry returns to `vercel.json` and two
 schedulers exist for however long it takes to delete the workflow.
 
-### N-21b · The console side of the warning ladder  ·  ~2h
+### N-21c · The "call them" prompt for Cinema renewals  ·  ~1h  ·  **needs N-27b**
 
-The emails go out (N-21, 8 September). What doc 15 also asks for and does not exist:
-
-- **A banner in the studio's console** when one of their weddings is inside 60 days. The email is a
-  push; a studio working through their list should see it without one.
-- **A "call them" prompt for Cinema catalogues**, where the renewal is ₹4,000 and an email is not
-  the right instrument.
-- **WhatsApp and SMS**, which the ladder is designed for and which `drain` already skips cleanly
-  (D-12) — it needs the `msg91` driver, not new scheduling.
+doc 15 asks for a prompt to phone rather than email when the renewal is a Cinema catalogue's
+₹4,000. The banner exists (N-21b, 8 September); what does not is any way to know a catalogue *is*
+Cinema — `entitlements.planId` is there, and nothing assigns it. Build it after N-27b puts plan
+assignment in the platform console, or it is a prompt keyed on a plan nobody has.
 
 ### N-22b · A per-film download from the title modal  ·  ~1h
 
