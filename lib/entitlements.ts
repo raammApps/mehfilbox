@@ -114,3 +114,51 @@ export function storageCheck(
     limitGb: limits.storageGb,
   }
 }
+
+
+/**
+ * What an hour of finished film occupies, by ladder (`PRICING.md` §1).
+ *
+ * Bunny's standard encoding covers everything to 1080p at no cost, so the two tiers differ only in
+ * the space they take — which is why the product sells gigabytes and never counts hours. These
+ * exist to answer the question a partner actually asks at purchase, *"is 100 GB a lot?"*, and
+ * nothing enforces them.
+ *
+ * **Estimates, not measurements.** N-24a is the item that uploads a real fifteen-hour wedding and
+ * replaces these with what was observed. Until then the console says "about", because a number
+ * presented precisely is believed precisely.
+ */
+export const GB_PER_HOUR = { standard: 2.15, fullHd: 4.29 } as const
+
+/** Roughly how many finished hours a plan holds, at each ladder. */
+export function hoursFor(storageGb: number): { standard: number; fullHd: number } {
+  return {
+    standard: Math.round(storageGb / GB_PER_HOUR.standard),
+    fullHd: Math.round(storageGb / GB_PER_HOUR.fullHd),
+  }
+}
+
+/** Where a catalogue sits against its plan. */
+export type StorageUsage = {
+  usedGb: number
+  limitGb: number
+  ratio: number
+  /**
+   * `warn` at 80%, which `PRICING.md` §6 asks for and which exists because the failure it prevents
+   * is specific: a partner discovers the cap at 80% *uploaded*, which is the middle of a wedding
+   * and hours into a slow connection. Being told at 80% *used* is early enough to buy more space
+   * or drop the ladder to 720p before it matters.
+   */
+  level: 'ok' | 'warn' | 'full'
+}
+
+export function storageUsage(usedBytes: number, limits: Limits): StorageUsage {
+  const usedGb = bytesToGb(usedBytes)
+  const ratio = limits.storageGb > 0 ? usedGb / limits.storageGb : 0
+  return {
+    usedGb,
+    limitGb: limits.storageGb,
+    ratio,
+    level: ratio >= 1 ? 'full' : ratio >= 0.8 ? 'warn' : 'ok',
+  }
+}

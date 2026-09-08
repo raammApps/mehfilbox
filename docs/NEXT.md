@@ -121,16 +121,6 @@ and a route that signs one asset.
 Worth doing when there is real footage to try it against: the interesting part is what a 6 GB file
 does on a phone, and that cannot be learned from a 750 KB sample.
 
-### N-23 · Plan capacity in the console  ·  ~2h
-
-Nothing shows what a plan holds. `PRICING.md` §6 requires "this plan holds about 9 hours" at
-purchase and a warning at 80% used — otherwise a partner buys the wrong tier and hits the cap at
-80% uploaded.
-
-The cap **is** enforced: `app/api/admin/uploads` runs `storageCheck` and refuses with the figure
-(this file previously claimed otherwise, which was wrong). What is missing is telling a partner
-what the plan holds *before* they fill it, and warning them on the way up.
-
 ### N-24a · The encoding ladder  ·  ~1h  ·  operator task
 
 Set the Bunny library to 360p–720p by default; confirm Keep Original Files and MP4 Fallback are

@@ -1394,3 +1394,25 @@ The test taught something too. `tests/setup.ts` loads `.env.local` so the integr
 real credentials, and that file carries `VIDEO_DRIVER=bunny` — so a unit test that does not inject
 a provider reaches Bunny over the network and reports every film unavailable. That is the correct
 behaviour under a broken provider, which is exactly why it made a confusing failure.
+
+## N-23 · A partner can see what a plan holds — 8 September 2026
+
+The cap was already enforced — `app/api/admin/uploads` runs `storageCheck` and refuses with the
+figure. What was missing was telling anybody *before* they filled it.
+
+Two additions, both small and both from `PRICING.md`:
+
+**What the plan holds, in hours.** "100 GB" means nothing to someone deciding whether to buy it;
+"about 47 hours at 720p, 23 at Full HD" does. The figures come from `PRICING.md` §1 (2.15 and 4.29
+GB per finished hour) rather than being invented, and the console says **"about"** because they are
+estimates — N-24a is the item that uploads a real fifteen-hour wedding and replaces them with what
+was measured. A number presented precisely is believed precisely.
+
+**A warning at 80%**, which §6 asks for and which prevents one specific failure: a partner meeting
+the cap at 80% *uploaded* — the middle of a wedding, hours into a slow connection. At 80% *used*
+there is still time to buy space or drop the ladder, and the banner says both rather than leaving
+them to be guessed.
+
+Over the cap still reads as "full" rather than as an error, because `storageCheck` deliberately
+errs toward letting content in while a film is transcoding — a catalogue can legitimately sit
+slightly over, and that is a state to describe rather than to alarm about.

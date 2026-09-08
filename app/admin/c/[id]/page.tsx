@@ -9,7 +9,7 @@ import { SetupChecklist } from '@/components/admin/SetupChecklist'
 import { getOperatorSession, getSessionOrg } from '@/lib/admin/session'
 import { catalogueAttention } from '@/lib/admin/catalogue-health'
 import { setupChecklist } from '@/lib/admin/setup-checklist'
-import { bytesToGb, resolveLimits } from '@/lib/entitlements'
+import { hoursFor, resolveLimits, storageUsage } from '@/lib/entitlements'
 import { getRepository } from '@/lib/db'
 import { env } from '@/lib/env'
 import { formatWeddingDate } from '@/lib/format'
@@ -50,6 +50,8 @@ export default async function CatalogueOverviewPage({
   }
 
   const checklist = setupChecklist(catalogue, counts)
+  const usage = storageUsage(usedBytes, limits)
+  const capacity = hoursFor(limits.storageGb)
   const attention = catalogueAttention({
     status: catalogue.status,
     subStatus: catalogue.subStatus,
@@ -91,11 +93,40 @@ export default async function CatalogueOverviewPage({
             */}
             <Stat
               label="Storage"
-              value={`${bytesToGb(usedBytes).toFixed(1)} of ${limits.storageGb} GB`}
+              value={`${usage.usedGb.toFixed(1)} of ${usage.limitGb} GB`}
+              hint={
+                // What the plan holds, not just what is left of it (N-23, PRICING.md §6). A
+                // partner asks "is 100 GB a lot?" and the honest answer is in hours of film.
+                usage.level === 'ok'
+                  ? `about ${capacity.standard} hrs at 720p · ${capacity.fullHd} at Full HD`
+                  : undefined
+              }
             />
             <Stat label="Films" value={`${counts.titles} · ${counts.ready} ready`} />
             <Stat label="Shown to guests" value={`${counts.published}`} />
           </div>
+
+          {usage.level !== 'ok' ? (
+            /**
+             * The warning `PRICING.md` §6 asks for, and it exists to prevent one specific failure:
+             * a partner meeting the cap at 80% *uploaded*, which is the middle of a wedding and
+             * hours into a slow connection. At 80% *used* there is still time to buy space or drop
+             * the ladder to 720p, and both of those are said here rather than left to be guessed.
+             */
+            <div className="mt-4 rounded-[var(--radius-card)] border border-[color-mix(in_srgb,var(--color-warn)_45%,white)] bg-[color-mix(in_srgb,var(--color-warn)_10%,white)] p-4">
+              <p className="text-[14px] font-semibold">
+                {usage.level === 'full'
+                  ? 'This plan is full'
+                  : `${Math.round(usage.ratio * 100)}% of this plan is used`}
+              </p>
+              <p className="mt-1 text-[13px] text-[var(--color-l-text-mid)]">
+                {(usage.limitGb - usage.usedGb).toFixed(1)} GB left — roughly{' '}
+                {hoursFor(Math.max(usage.limitGb - usage.usedGb, 0)).standard} hours more at 720p.
+                Extra storage is ₹25 per GB per month, or keep the long functions at 720p and put
+                the films people rewatch in Full HD.
+              </p>
+            </div>
+          ) : null}
 
           {counts.failed > 0 ? (
             <div className="mt-4 rounded-[var(--radius-card)] border border-[color-mix(in_srgb,var(--color-error)_40%,white)] bg-[color-mix(in_srgb,var(--color-error)_8%,white)] p-4">
@@ -165,11 +196,14 @@ export default async function CatalogueOverviewPage({
   )
 }
 
-function Stat({ label, value }: { label: string; value: string }) {
+function Stat({ label, value, hint }: { label: string; value: string; hint?: string }) {
   return (
     <div className="rounded-[var(--radius-card)] border border-[var(--color-l-line)] bg-white p-4">
       <p className="type-label text-[var(--color-l-text-mid)]">{label}</p>
       <p className="mt-1 text-[24px] font-bold tracking-[-0.02em]">{value}</p>
+      {/* Only where a number needs translating. "100 GB" means nothing to someone deciding
+          whether to buy it; "about 46 hours at 720p" does. */}
+      {hint ? <p className="mt-1 text-[12px] text-[var(--color-l-text-mid)]">{hint}</p> : null}
     </div>
   )
 }
