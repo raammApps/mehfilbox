@@ -1499,3 +1499,34 @@ own test now.
 The "call them" prompt doc 15 asks for is **N-21c**, and it is blocked rather than skipped: it needs
 to know a catalogue is Cinema, `entitlements.planId` exists, and nothing assigns it. It waits for
 N-27b, or it is a prompt keyed on a plan nobody has.
+
+## N-27b · A studio's storage allowance, from the console — 8 September 2026
+
+The platform console's second write, and the second half of doc 15 §1's *"add writes one at a time,
+with an audit trail"*. Until now this was `update entitlements …` in a SQL editor: a thing nobody
+wants to do at nine on a Saturday, and a change with no record of who made it.
+
+**Only storage, and that is the finding rather than a shortcut.** `entitlements` also carries
+`plan_id`, `max_titles` and `max_photos`. `resolveLimits` reads **none** of them, `plans` has no
+rows, and nothing in the product consults a plan id. Assigning one would write a foreign key nobody
+reads — furniture that looks like a feature, and the most convincing kind of broken: the console
+would show a plan, the studio would believe it, and nothing would behave differently. Storage is
+the field that decides whether an upload is refused, so storage is what this sets.
+
+That is now **N-27c**, blocked on something actually enforcing a plan — credits at checkout (N-20),
+retention at archive (N-24), or a price on an invoice — with `plans` seeded from `PRICING.md` in
+the same change, so the rows and their reader arrive together.
+
+**Clearing removes the row rather than zeroing it.** A row with every field null is
+indistinguishable from an override that changes nothing, and "back to the default" has to keep
+meaning *follow the default if it ever moves* rather than *frozen at today's number*.
+
+The tests assert the quota **does something** — a 50 GB catalogue that fits under a 100 GB
+override and would not have under the 20 GB default — because a quota that is stored and never
+consulted is exactly the failure this item exists to avoid. The platform guard answers `NOT_FOUND`
+rather than `FORBIDDEN`, so probing the endpoint teaches no more than probing the page. Both proven
+by removing them.
+
+Unlike suspension, there is no confirmation step: the worst a mistyped quota does is refuse an
+upload until it is corrected, and it is corrected here in five seconds. The reason still lands on
+the audit row, because *"why does this studio have 500 GB"* is a question somebody asks a year later.

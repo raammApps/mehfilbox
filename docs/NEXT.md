@@ -188,18 +188,22 @@ most of the value ("all my weddings look like my studio").
 `PRODUCT.md` §6 lists the five product questions that have to be answered before a real
 marketplace is scoped. Build a marketplace when a third party asks to publish into one.
 
-### N-27b · Platform admin: plans and quotas  ·  doc 15 §1  ·  ~half a session
+### N-27c · Plans, once anything reads one  ·  doc 15 §1  ·  **blocked by N-20/N-24**
 
-Suspension, the user list and the audit trail landed on 7 September. What is left of N-27 is the
-other write: **assign a plan or a quota to an org**, which is still SQL.
+The storage quota landed on 8 September (N-27b). **Assigning a *plan* deliberately did not**, and
+the reason is worth keeping: `plans` has no rows, nothing anywhere reads `entitlements.plan_id`,
+and `resolveLimits` consumes `storage_gb` alone. A console that assigned a plan would write a
+foreign key nobody consults — furniture that looks like a feature, and the most convincing kind of
+broken, because the console would show it and everyone would believe it.
 
-The machinery exists — `plans` and `entitlements` from 0006, and `entitlements` already resolves
-catalogue-over-org per field in `lib/entitlements.ts`. What is missing is a write path and the
-console form, and the same audit row every platform write now leaves.
+A plan becomes real when something enforces one: **credits** (N-20's checkout decrements them),
+**retention** (N-24's archive transition reads it), or **price** (an invoice quotes it). Build this
+after whichever of those lands first, and seed `plans` from `PRICING.md` in the same change so the
+rows and the reader arrive together.
 
-Creating a tenant stays out on purpose: `/admin/register` already does it, correctly, with a
-verified email and a real Supabase Auth user behind `operators.id`. A second creation path in the
-platform console would be a second set of rules for the same object.
+`max_titles` and `max_photos` are in the same position — columns nothing reads. They were caps
+before storage replaced them (`lib/schema.ts` says so), and they should probably be dropped rather
+than wired up.
 
 ### N-20 · Razorpay  ·  doc 15 §4  ·  **Phase 2**
 

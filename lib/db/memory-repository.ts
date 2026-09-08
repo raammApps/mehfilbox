@@ -221,6 +221,43 @@ export class MemoryRepository implements Repository {
     }
   }
 
+  async getOrgEntitlement(orgId: string): Promise<Entitlement | null> {
+    return this.clone(this.data.entitlements.find((e) => e.orgId === orgId) ?? null)
+  }
+
+  async setOrgStorageQuota(orgId: string, storageGb: number | null): Promise<Entitlement | null> {
+    const existing = this.data.entitlements.find((e) => e.orgId === orgId)
+
+    if (storageGb === null) {
+      // Removed rather than zeroed. A row with every field null is indistinguishable from an
+      // override that happens to change nothing, and the two mean different things.
+      this.data.entitlements = this.data.entitlements.filter((e) => e.orgId !== orgId)
+      this.touched()
+      return null
+    }
+
+    if (existing) {
+      existing.storageGb = storageGb
+      this.touched()
+      return this.clone(existing)
+    }
+
+    const entitlement: Entitlement = {
+      id: randomUUID(),
+      orgId,
+      catalogueId: null,
+      planId: null,
+      maxTitles: null,
+      maxPhotos: null,
+      storageGb,
+      validUntil: null,
+      createdAt: new Date().toISOString(),
+    }
+    this.data.entitlements.push(this.clone(entitlement))
+    this.touched()
+    return this.clone(entitlement)
+  }
+
   // ── Transfers ───────────────────────────────────────────────────────────────
   async createTransfer(transfer: Transfer): Promise<Transfer> {
     // Mirrors the partial unique index: one live handover per catalogue, so a wedding can never

@@ -304,3 +304,55 @@ describe('N-27 — a suspended studio at the session boundary', () => {
     await expect(requireOperator()).resolves.toMatchObject({ orgId: ORG })
   })
 })
+
+/**
+ * N-27b — the second platform write, and the trail under it.
+ *
+ * Suspension proved the pattern; this proves it was a pattern rather than a one-off. Every
+ * platform write leaves a row, or the console is a place where things change and nobody knows who
+ * changed them.
+ */
+describe('N-27b — setting a studio’s storage quota', () => {
+  async function call(body: unknown) {
+    const { POST } = await import('@/app/api/admin/platform/orgs/[id]/quota/route')
+    const response = await POST(
+      new Request('http://mehfilbox.test/q', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(body),
+      }),
+      { params: Promise.resolve({ id: ORG }) },
+    )
+    return { status: response.status }
+  }
+
+  beforeEach(async () => {
+    setRepository(repo)
+    await repo.recordPlatformAudit(
+      platformAuditSchema.parse({
+        id: crypto.randomUUID(),
+        actorId: ADMIN,
+        actorEmail: 'root@mehfilbox.test',
+        action: 'seed',
+        orgId: ORG,
+        orgSlug: 'kalyanam',
+        createdAt: new Date().toISOString(),
+      }),
+    )
+  })
+
+  it('is refused outright without a platform admin, and says nothing about the surface', async () => {
+    setAuthProvider({
+      name: 'stub',
+      currentUser: async () => null,
+      signIn: async () => null,
+      signOut: async () => {},
+    } as unknown as AuthProvider)
+
+    // NOT_FOUND rather than FORBIDDEN: probing the endpoint must teach no more than probing the
+    // page, and the page 404s.
+    const { status } = await call({ storageGb: 500 })
+    expect(status).toBe(404)
+    expect(await repo.getOrgEntitlement(ORG)).toBeNull()
+  })
+})

@@ -1,9 +1,11 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { StatusPill } from '@/components/admin/AdminChrome'
+import { OrgQuotaControl } from '@/components/admin/OrgQuotaControl'
 import { OrgStatusControl } from '@/components/admin/OrgStatusControl'
 import { getPlatformAdmin } from '@/lib/admin/platform'
 import { getRepository } from '@/lib/db'
+import { DEFAULT_LIMITS } from '@/lib/entitlements'
 import { env } from '@/lib/env'
 import { formatWeddingDate } from '@/lib/format'
 import { catalogueUrl } from '@/lib/tenant'
@@ -34,10 +36,11 @@ export default async function PlatformOrgPage({ params }: { params: Promise<{ id
   // The one place an org id from the URL is trusted — and it is safe precisely because the
   // caller has already been proven to be a platform admin, who by design belongs to no org and
   // therefore cannot be "escalating" into one.
-  const [catalogues, operators, audit] = await Promise.all([
+  const [catalogues, operators, audit, entitlement] = await Promise.all([
     repository.listCatalogues({ orgId: org.id }),
     repository.listOperators(org.id),
     repository.listPlatformAudit({ orgId: org.id, limit: 20 }),
+    repository.getOrgEntitlement(org.id),
   ])
 
   return (
@@ -59,6 +62,13 @@ export default async function PlatformOrgPage({ params }: { params: Promise<{ id
 
       <div className="mb-6 grid gap-4 sm:grid-cols-2">
         <OrgStatusControl orgId={org.id} orgName={org.name} status={org.status} />
+
+        <OrgQuotaControl
+          orgId={org.id}
+          orgName={org.name}
+          storageGb={entitlement?.storageGb ?? null}
+          defaultGb={DEFAULT_LIMITS.storageGb}
+        />
 
         <div className="rounded-[var(--radius-card)] border border-[var(--color-l-line)] bg-white p-4">
           <p className="mb-2 text-[15px] font-semibold">

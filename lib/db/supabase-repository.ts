@@ -376,6 +376,44 @@ export class SupabaseRepository implements Repository {
     return SupabaseRepository.toOperator(data)
   }
 
+  async getOrgEntitlement(orgId: string): Promise<Entitlement | null> {
+    const { data } = await this.db
+      .from('entitlements')
+      .select('*')
+      .eq('org_id', orgId)
+      .maybeSingle()
+    return data ? SupabaseRepository.toEntitlement(data as Row) : null
+  }
+
+  async setOrgStorageQuota(orgId: string, storageGb: number | null): Promise<Entitlement | null> {
+    if (storageGb === null) {
+      /**
+       * Removed rather than zeroed. A row with every field null is indistinguishable from an
+       * override that changes nothing, and "back to the default" has to keep meaning "follow the
+       * default if it ever moves" rather than "frozen at today's value".
+       */
+      const { error } = await this.db.from('entitlements').delete().eq('org_id', orgId)
+      if (error) throw new ApiError('INTERNAL', error.message)
+      return null
+    }
+
+    const existing = await this.getOrgEntitlement(orgId)
+    const result = existing
+      ? await this.db
+          .from('entitlements')
+          .update({ storage_gb: storageGb })
+          .eq('id', existing.id)
+          .select('*')
+          .single()
+      : await this.db
+          .from('entitlements')
+          .insert({ org_id: orgId, storage_gb: storageGb })
+          .select('*')
+          .single()
+
+    return SupabaseRepository.toEntitlement(SupabaseRepository.unwrap<Row>(result))
+  }
+
   // ── Transfers ───────────────────────────────────────────────────────────────
   private static toTransfer(r: Row): Transfer {
     return {

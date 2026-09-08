@@ -145,6 +145,18 @@ export interface Repository {
     orgId: string,
   ): Promise<{ catalogue: Entitlement | null; org: Entitlement | null }>
 
+  /** The org's own entitlement, for the platform console to show and change (N-27b). */
+  getOrgEntitlement(orgId: string): Promise<Entitlement | null>
+
+  /**
+   * Set or clear an org's storage quota (N-27b).
+   *
+   * `null` removes the override so `DEFAULT_LIMITS` applies again, which is a different thing from
+   * setting it to twenty and needs to stay expressible: a studio moved back to the default should
+   * follow the default if it ever changes, not be frozen at today's value.
+   */
+  setOrgStorageQuota(orgId: string, storageGb: number | null): Promise<Entitlement | null>
+
   // ── Transfers (doc 15 §2) ───────────────────────────────────────────────────
   createTransfer(transfer: Transfer): Promise<Transfer>
   /** Looked up by hash: the plaintext token exists only in the link. */
