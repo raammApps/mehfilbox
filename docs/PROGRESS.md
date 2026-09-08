@@ -1446,3 +1446,32 @@ stays answerable either way.
 A test detail worth keeping: `route()` turns an `ApiError` into a *response* rather than throwing,
 so a test asserting `rejects.toThrow` passes for the wrong reason. Reading the response instead
 also checks the operator is told **why** they were refused.
+
+## N-55 · The customizer's three frictions — 8 September 2026
+
+All three noticed by using it rather than reading it, and all three left in the backlog at the time
+rather than guessed at.
+
+**Undo now has redo.** Twenty deep in one direction was half a promise: an operator who undid one
+step too far had no way back and had to rebuild the change by hand — which is worse than never
+offering undo, because they trusted it. A fresh edit clears the redo stack, which is the standard
+rule and the only one that cannot redo into a history that no longer exists.
+
+**Branding sits above the advisories.** Colour, logo, typeface and "Presented by" is what a studio
+sets first and on every wedding, and a dismissible suggestions panel was pushing it down the column
+on the one screen where it is used most.
+
+**The inspector opens on the first section.** A third of the screen said "Nothing selected" on
+arrival — good instruction for a first-timer, poor economics for the hundredth wedding. The
+instruction survives for the case that needs it: a catalogue with no sections selects nothing,
+because there is nothing to select.
+
+That last one broke an existing test, correctly. `selecting a section in the preview edits it
+beside the preview` asserted the empty state on arrival, which is precisely what this removed — so
+it now asserts that clicking a *different* section moves the inspector, which is the behaviour the
+test was always about. Rewritten rather than deleted: the coverage it exists for is the reason it
+was written, and that has not changed. Doc 10's note still applies — this surface once got replaced
+entirely with every test green.
+
+Redo is proven through the visibility toggle's accessible name, which flips with the state, so no
+test hook was needed and the assertion fails if undo restores the array without the UI following.

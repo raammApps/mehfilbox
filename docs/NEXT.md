@@ -50,22 +50,6 @@ and resumable upload — have all now run against the real services.
 
 ## Tier 2 — before a planner sees it
 
-### N-55 · The customizer's remaining gaps  ·  ~2h
-
-Three things noticed while using it as a studio owner would, after the publish-state work of
-7 September. None is a defect; all three are friction.
-
-- **The inspector opens empty.** A third of the screen says "Nothing selected" on arrival. The copy
-  is good instruction for a first-timer and bad economics for the hundredth wedding — probably
-  select the last-edited section, and keep the instruction for a catalogue with no sections.
-- **Branding sits below the advisories.** Colour, logo, typeface and "Presented by" is the thing a
-  studio sets *first* and on every wedding, and it is pushed down the left column by a dismissible
-  suggestions panel.
-- **Undo has no redo.** The stack is twenty deep in one direction only.
-
-Not urgent: none of them can lose work or mislead anyone, which is what the publish-state work was
-about.
-
 ### N-53b · The observability that needs an account  ·  ~2h  ·  **D-24**
 
 Two of N-53's four parts landed on 8 September: an alert when the transcode webhook stops arriving,

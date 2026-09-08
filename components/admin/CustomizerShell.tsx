@@ -18,7 +18,7 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { Eye, EyeOff, GripVertical, Plus, Settings2, Trash2, Undo2 } from 'lucide-react'
+import { Eye, EyeOff, GripVertical, Plus, Redo2, Settings2, Trash2, Undo2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { Album, Catalogue, ModuleInstance, Photo, Title } from '@/lib/schema'
@@ -62,7 +62,15 @@ export function CustomizerShell({
   pendingContent,
 }: Props) {
   const [modules, setModules] = useState<ModuleInstance[]>(initialModules)
-  const [editingId, setEditingId] = useState<string | null>(null)
+  /**
+   * Open on the first section rather than on nothing (N-55).
+   *
+   * A third of the screen said "Nothing selected" on arrival. The copy is good instruction for a
+   * first-timer and poor economics for the hundredth wedding, and the instruction is still there
+   * for the case that needs it — a catalogue with no sections selects nothing, because there is
+   * nothing to select.
+   */
+  const [editingId, setEditingId] = useState<string | null>(initialModules[0]?.id ?? null)
   const [saveState, setSaveState] = useState<SaveStatus>('idle')
   const router = useRouter()
   const [publishing, setPublishing] = useState(false)
@@ -86,6 +94,7 @@ export function CustomizerShell({
   const [published, setPublished] = useState(catalogue.status === 'published')
   const [publishError, setPublishError] = useState<string | null>(null)
   const undoStack = useRef<ModuleInstance[][]>([])
+  const redoStack = useRef<ModuleInstance[][]>([])
 
   /** Every mutation goes through here so undo and autosave cannot be bypassed. */
   const commit = useCallback((next: ModuleInstance[]) => {
@@ -93,15 +102,40 @@ export function CustomizerShell({
       undoStack.current = [...undoStack.current, current].slice(-UNDO_DEPTH)
       return next.map((instance, index) => ({ ...instance, order: index }))
     })
+    // A new edit makes any redo a jump into a history that no longer exists.
+    redoStack.current = []
     setDirty(true)
     setUnpublished(true)
   }, [])
 
+  /**
+   * Undo, and now redo (N-55).
+   *
+   * Twenty deep in one direction was half a promise: an operator who undoes one step too far had
+   * no way back and had to rebuild the change by hand, which is worse than never having offered
+   * undo — they trusted it. `redoStack` is cleared by any fresh edit, which is the standard rule
+   * and the only one that does not produce a redo into a history that no longer exists.
+   */
   const undo = useCallback(() => {
     const previous = undoStack.current.pop()
     if (!previous) return
-    setModules(previous)
+    setModules((current) => {
+      redoStack.current = [...redoStack.current, current].slice(-UNDO_DEPTH)
+      return previous
+    })
     setDirty(true)
+    setUnpublished(true)
+  }, [])
+
+  const redo = useCallback(() => {
+    const next = redoStack.current.pop()
+    if (!next) return
+    setModules((current) => {
+      undoStack.current = [...undoStack.current, current].slice(-UNDO_DEPTH)
+      return next
+    })
+    setDirty(true)
+    setUnpublished(true)
   }, [])
 
   // Autosave to draft_modules, debounced. Publish is separate and explicit (doc 14 §5.6).
@@ -303,6 +337,14 @@ export function CustomizerShell({
             >
               <Undo2 size={15} aria-hidden /> Undo
             </button>
+            <button
+              type="button"
+              onClick={redo}
+              disabled={redoStack.current.length === 0}
+              className="inline-flex h-9 items-center gap-1 rounded-[var(--radius-pill)] px-3 text-[13px] disabled:opacity-40"
+            >
+              <Redo2 size={15} aria-hidden /> Redo
+            </button>
             <AddSectionMenu
               onAdd={(type) => {
                 const instance = instantiate(type, modules.length, catalogue, titles, albums)
@@ -344,7 +386,6 @@ export function CustomizerShell({
           </SortableContext>
         </DndContext>
 
-        {advisories.length > 0 ? <Advisories notes={advisories} /> : null}
 
         <button
           type="button"
@@ -361,6 +402,13 @@ export function CustomizerShell({
             Colour, logo, typeface and “Presented by”
           </span>
         </button>
+
+        {/*
+          Advisories sit *below* branding now (N-55). Colour, logo, typeface and "Presented by" is
+          the thing a studio sets first and on every wedding; a dismissible suggestions panel was
+          pushing it down the column on the one screen where it is used most.
+        */}
+        {advisories.length > 0 ? <Advisories notes={advisories} /> : null}
       </section>
 
       <section aria-label="Preview" className="min-w-0">

@@ -35,6 +35,38 @@ test.describe('the operator console', () => {
     await expect(page.getByRole('heading', { name: 'Catalogues' })).toBeVisible()
   })
 
+  /**
+   * N-55 — undo is only half a promise without redo.
+   *
+   * An operator who undoes one step too far had no way back and had to rebuild the change by
+   * hand, which is worse than never offering undo: they trusted it.
+   *
+   * Asserted through the visibility toggle's accessible name, which flips with the state — no
+   * test hook needed, and it fails if undo restores the array without the UI following.
+   */
+  test('a change can be undone and put back', async ({ page }) => {
+    await openCustomizer(page)
+
+    const toggle = page.getByRole('button', { name: /^(Hide|Show) / }).first()
+    const before = await toggle.getAttribute('aria-label')
+
+    await toggle.click()
+    const after = await page.getByRole('button', { name: /^(Hide|Show) / }).first().getAttribute('aria-label')
+    expect(after).not.toBe(before)
+
+    await page.getByRole('button', { name: 'Undo' }).click()
+    await expect(page.getByRole('button', { name: /^(Hide|Show) / }).first()).toHaveAttribute(
+      'aria-label',
+      before ?? '',
+    )
+
+    await page.getByRole('button', { name: 'Redo' }).click()
+    await expect(page.getByRole('button', { name: /^(Hide|Show) / }).first()).toHaveAttribute(
+      'aria-label',
+      after ?? '',
+    )
+  })
+
   test('requires a session', async ({ browser }) => {
     const anonymous = await browser.newContext()
     const page = await anonymous.newPage()
@@ -110,15 +142,21 @@ test.describe('the operator console', () => {
     const preview = page.getByTestId('preview-viewport')
     const inspector = page.getByRole('complementary', { name: 'Section editor' })
 
-    await expect(inspector).toContainText('Nothing selected')
+    /**
+     * The inspector opens on the first section now (N-55) rather than on "Nothing selected", so
+     * what this asserts is that clicking a *different* section moves it — which is the behaviour
+     * the test was always about. The old assertion checked the empty state, which was the thing
+     * N-55 removed for being a third of the screen doing nothing on arrival.
+     */
+    const opensWith = await inspector.innerText()
 
-    // Click the section itself, the way an operator points at what they want to change.
-    await preview.locator('[data-module-id]').first().click()
-    await expect(inspector).not.toContainText('Nothing selected')
+    // Click a second section, the way an operator points at what they want to change.
+    await preview.locator('[data-module-id]').nth(1).click()
+    await expect(inspector).not.toHaveText(opensWith)
 
     // The list agrees about what is selected, so the two panels never disagree.
     await expect(
-      page.getByRole('region', { name: 'Sections' }).getByRole('listitem').first(),
+      page.getByRole('region', { name: 'Sections' }).getByRole('listitem').nth(1),
     ).toHaveAttribute('aria-current', 'true')
 
     // The editor is a panel, not a dialog: it must not cover the thing it edits.
