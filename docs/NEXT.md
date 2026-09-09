@@ -185,15 +185,17 @@ and verified automatically · N-48 DPDP consent and deletion-on-request · R8 th
 and commission · N-45 guest uploads and guestbook · N-46 studio portfolio page · N-47 draft
 feedback · N-49 API and webhooks.
 
-### N-26 · Saved branding presets — the marketplace's honest first version  ·  doc: `PRODUCT.md` §6
+### N-26b · A second saved look, if a studio asks for one  ·  ~half a session
 
-A theme marketplace is the largest item on the product map and none of it exists. **The first
-version worth building is not a marketplace**: more templates, plus branding presets a partner
-saves and reuses across weddings. No payment, no review process, no versioning — and it delivers
-most of the value ("all my weddings look like my studio").
+A studio now has **one** studio-wide look, set once and inherited by every new wedding (N-26,
+8 September). `PRODUCT.md` §6's presets are the plural of that: a named set a studio picks between
+— a house style and a destination-wedding style, say.
 
-`PRODUCT.md` §6 lists the five product questions that have to be answered before a real
-marketplace is scoped. Build a marketplace when a third party asks to publish into one.
+Two things worth having with it, and neither is worth having alone: **apply a preset to an existing
+wedding** from the customizer (the draft, so it reaches the couple at Publish), and a preview
+thumbnail so choosing one is not a guess.
+
+Build it when a studio asks for a second look. Until then it is a list with one item in it.
 
 ### N-27c · Plans, once anything reads one  ·  doc 15 §1  ·  **blocked by N-20/N-24**
 

@@ -166,6 +166,15 @@ test.describe('doc 10 §4 — accessibility, zero violations', () => {
     expect(describeViolations(results)).toBe('')
   })
 
+  test('the studio branding page', async ({ page }) => {
+    await signIn(page)
+    await page.goto('/admin/studio')
+    await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
+
+    const results = await audit(page)
+    expect(describeViolations(results)).toBe('')
+  })
+
   test('the admin catalogue list', async ({ page }) => {
     test.skip(Boolean(test.info().project.use.isMobile), 'the admin is a desktop tool')
     await signIn(page)

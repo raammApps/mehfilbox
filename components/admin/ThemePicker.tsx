@@ -27,14 +27,39 @@ const PRESETS = [
  * A planner will hand over a brand pink that is unreadable on black. They have to be told
  * while they can still change it — not by a build log they never see.
  */
+/**
+ * Where this panel writes (N-26).
+ *
+ * The same fields serve a wedding and the studio itself, so the panel takes a target rather than
+ * being copied. A second copy of a colour picker with a contrast gate in it is how one of them
+ * quietly stops checking contrast.
+ */
+export type BrandingTarget =
+  /** A wedding's *draft* branding — it reaches the couple at Publish (N-56). */
+  | { kind: 'catalogue'; catalogueId: string }
+  /** The studio's own, which every new wedding is created from. Live immediately: it is a setting. */
+  | { kind: 'studio' }
+
 export function ThemePicker({
   catalogue,
+  target,
   onPreview,
 }: {
-  catalogue: Catalogue
+  /** The values to start from. For the studio, an org's branding wrapped in a bare object. */
+  catalogue: Pick<Catalogue, 'id' | 'branding' | 'draftBranding'>
+  target?: BrandingTarget
   /** Called on every edit so the preview follows the picker rather than the last save. */
   onPreview?: (branding: Catalogue['branding']) => void
 }) {
+  /**
+   * Primitives, not an object.
+   *
+   * The autosave effect below depends on where it writes, and an object rebuilt each render would
+   * re-fire it on every render — the same shape of bug `carriedOver` exists to avoid a few lines
+   * down, and the one that made Publish appear to do nothing (N-56).
+   */
+  const targetKind = target?.kind ?? 'catalogue'
+  const targetId = target && target.kind === 'studio' ? null : (target?.catalogueId ?? catalogue.id)
   /**
    * Seeded from the draft when there is one (N-56). An operator who set a colour yesterday and
    * has not published yet must come back to their colour, not to the one the couple can see —
@@ -98,21 +123,30 @@ export function ThemePicker({
 
     const timer = window.setTimeout(async () => {
       try {
-        const response = await fetch(`/api/admin/catalogues/${catalogue.id}`, {
-          method: 'PATCH',
-          headers: { 'content-type': 'application/json' },
-          body: JSON.stringify({
-            // Draft, not live (N-56): the couple keeps seeing the published branding until the
-            // operator publishes. Sent whole every time, because the column is replaced rather
-            // than merged — omitting a field here is how it gets cleared.
-            draftBranding: {
-              accent,
-              presentedBy: presentedBy || undefined,
-              logoUrl: logoUrl || undefined,
-              displayFont,
-            },
-          }),
-        })
+        const branding = {
+          accent,
+          presentedBy: presentedBy || undefined,
+          logoUrl: logoUrl || undefined,
+          displayFont,
+        }
+        const response = await fetch(
+          targetKind === 'studio' ? '/api/admin/studio' : `/api/admin/catalogues/${targetId}`,
+          {
+            method: 'PATCH',
+            headers: { 'content-type': 'application/json' },
+            /**
+             * A wedding's branding is a **draft** — it reaches the couple at Publish (N-56).
+             * The studio's own is a setting and takes effect at once (D-31); nothing is on a
+             * guest's screen because of it until a wedding is created from it.
+             *
+             * Sent whole either way, because the column is replaced rather than merged — omitting
+             * a field here is how it gets cleared.
+             */
+            body: JSON.stringify(
+              targetKind === 'studio' ? { branding } : { draftBranding: branding },
+            ),
+          },
+        )
         setSaveState(response.ok ? 'saved' : 'error')
         /**
          * Clear the flag, exactly as the sections' autosave clears `dirty` after writing.
@@ -130,7 +164,7 @@ export function ThemePicker({
     }, 700)
 
     return () => window.clearTimeout(timer)
-  }, [accent, presentedBy, logoUrl, displayFont, touched, catalogue.id])
+  }, [accent, presentedBy, logoUrl, displayFont, touched, targetKind, targetId])
 
   return (
     <section

@@ -33,6 +33,16 @@ export const IconGrid = () => (
   </Svg>
 )
 
+/** A paint swatch: the studio's own look rather than any one wedding's (N-26). */
+export const IconPalette = () => (
+  <Svg>
+    <circle cx="12" cy="12" r="9" />
+    <circle cx="9" cy="9" r="1.2" />
+    <circle cx="15" cy="9" r="1.2" />
+    <circle cx="9.5" cy="15" r="1.2" />
+  </Svg>
+)
+
 export const IconPlus = () => (
   <Svg>
     <path d="M12 5v14M5 12h14" />

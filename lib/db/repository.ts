@@ -145,6 +145,15 @@ export interface Repository {
     orgId: string,
   ): Promise<{ catalogue: Entitlement | null; org: Entitlement | null }>
 
+  /**
+   * Update the studio's own branding (N-26).
+   *
+   * Scoped by the caller, never by a body: `requireOperator` supplies the org id, so a studio can
+   * only ever repaint itself. Deliberately narrow — this is not `updateOrg`, because the only
+   * field an operator has any business changing about their own org is how it looks.
+   */
+  setOrgBranding(orgId: string, branding: Org['branding']): Promise<Org>
+
   /** The org's own entitlement, for the platform console to show and change (N-27b). */
   getOrgEntitlement(orgId: string): Promise<Entitlement | null>
 

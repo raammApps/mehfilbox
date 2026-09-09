@@ -376,6 +376,13 @@ export class SupabaseRepository implements Repository {
     return SupabaseRepository.toOperator(data)
   }
 
+  async setOrgBranding(orgId: string, branding: Org['branding']): Promise<Org> {
+    const data = SupabaseRepository.unwrap<Row>(
+      await this.db.from('orgs').update({ branding }).eq('id', orgId).select('*').single(),
+    )
+    return SupabaseRepository.toOrg(data)
+  }
+
   async getOrgEntitlement(orgId: string): Promise<Entitlement | null> {
     const { data } = await this.db
       .from('entitlements')

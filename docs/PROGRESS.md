@@ -1556,3 +1556,31 @@ either.
 What is left is **N-25b**: the pull zone's true total is the check on the multiplier, and comparing
 a month's summed estimates against it says how wrong the assumption is in one number. It needs
 traffic to be worth running — today every chart reads zero.
+
+## N-26 · A studio has a look, and can set it — 8 September 2026
+
+`PRODUCT.md` §6 calls saved branding presets the honest first version of a theme marketplace.
+Reading the code against the item found something more basic: **`orgs.branding` could not be edited
+at all.** It was written once at registration holding nothing but the business name, inherited by
+every new wedding, and no surface anywhere could change it. So a studio re-entered its colour, logo
+and typeface by hand on every wedding, forever — *"all my weddings look like my studio"* was not a
+feature they lacked, it was one the product made impossible.
+
+`/admin/studio` sets it once. Every new wedding is created from it — that inheritance already
+existed in the catalogues route and was simply never given anything to inherit.
+
+**The same panel, not a second one.** `ThemePicker` takes a target now rather than being copied,
+because a second colour picker means a second copy of the **contrast gate** — and that is the check
+a white-label product can least afford to have quietly stop running on one of two screens.
+
+**A wedding's branding is a draft; a studio's is a setting.** The panel writes `draftBranding` for
+one and `branding` for the other, which is D-31 applied without a second thought: what a couple sees
+waits for Publish, and a studio-wide default has nobody's page in front of it yet. Changing it does
+not repaint weddings already delivered, and a test says so.
+
+Lint caught the interesting bug before it shipped: the autosave effect depends on where it writes,
+and a target object rebuilt each render would have re-fired it on every render — the same shape as
+the bug that made Publish appear to do nothing in N-56. Primitives, not an object.
+
+Plural presets are **N-26b**, worth building when a studio asks for a second look. Until then it is
+a list with one item in it.

@@ -227,6 +227,14 @@ export class MemoryRepository implements Repository {
     }
   }
 
+  async setOrgBranding(orgId: string, branding: Org['branding']): Promise<Org> {
+    const org = this.data.orgs.find((o) => o.id === orgId)
+    if (!org) throw new ApiError('NOT_FOUND', 'Org not found')
+    org.branding = { ...branding }
+    this.touched()
+    return this.clone(org)
+  }
+
   async getOrgEntitlement(orgId: string): Promise<Entitlement | null> {
     return this.clone(this.data.entitlements.find((e) => e.orgId === orgId) ?? null)
   }
