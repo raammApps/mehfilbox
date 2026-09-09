@@ -117,23 +117,22 @@ The real thing is one `msg91` driver behind `NotificationProvider`, which `drain
 cleanly for `whatsapp` rows (D-12). Blocked on the ₹500/month subscription and on Meta's template
 approval, not on code.
 
-### N-24 · Lifecycle: renewal, lapse, **archive**  ·  doc 15  ·  **Phase 2**
+### N-24b · Renewal, and what restores a cold catalogue  ·  doc 15  ·  **blocked by N-20**
 
-> Rewritten 6 September 2026: **no automatic deletion.** `PRICING.md` §2 and `ROADMAP.md` §4.
->
-> Add the **`studio_gone` predicate** (D-26): origin org closed or suspended, **or** its Studio
-> plan lapsed past grace, **or** this catalogue lapsed ≥ 90 days with the studio's last warning
-> unanswered. Computed rather than stored, and logged when it unlocks a purchase — it is the only
-> thing that lets a couple pay us directly, so it needs an audit trail rather than a boolean.
+The ladder moves on its own now (N-24, 8 September): a term ends → 90 days' grace → cold, never
+silently and never to `deleted`. What is left all needs money to change hands:
 
-The state machine exists and `resolveAccess` honours it. Nothing writes it. Needs: the renewal
-path (N-20 writes it), the **90-day Deliver term** with the day-60 Keep offer sent to the studio
-(N-50), the lapse transition at expiry, **90 days' grace** with the catalogue
-read-only for the couple and download offered, then the **archive transition**: streaming paused,
-a restore-on-payment screen for guests, files retained. Measure first whether moving renditions
-out of Stream into Edge Storage saves enough to be worth the code; at ₹0.95/GB/month it may not.
-`deleted` becomes reachable only from an explicit, recorded request by the couple. Twelve months
-of archive at our cost after grace, then the archive fee applies.
+- **The renewal path.** Nothing writes `active`, because nothing takes a payment (N-20).
+- **The restore-on-payment screen** a cold catalogue's guests should see instead of the current
+  renewal screen — the difference between them is a paid button.
+- **The `studio_gone` predicate** (D-26), which is only interesting when a couple can act on it:
+  it exists to let them pay *us* directly. Computed rather than stored, and logged when it unlocks
+  a purchase.
+- **Twelve months of archive at our cost after grace**, then the fee — a billing rule with no
+  billing to attach to.
+
+Do not build the predicate before the checkout. On its own it is a boolean nobody can act on, and
+`PRICING.md` §2 is explicit that it needs an audit trail rather than a flag.
 
 ### N-25b · Reconcile the delivery estimate against the bill  ·  ~2h  ·  **after real traffic**
 

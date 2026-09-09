@@ -1584,3 +1584,35 @@ the bug that made Publish appear to do nothing in N-56. Primitives, not an objec
 
 Plural presets are **N-26b**, worth building when a studio asks for a second look. Until then it is
 a list with one item in it.
+
+## N-24 · The lapse ladder finally moves — 8 September 2026
+
+The state machine has existed since Phase 0 and `resolveAccess` has always honoured it. **Nothing
+ever wrote it.** So a wedding whose term ended a year ago is still streaming, and one nobody
+renewed is still costing Stream storage — the states were real and the transitions were imaginary.
+
+`PRICING.md` §2's ladder, now applied daily: a term ends → **90 days' grace**, everything still
+playing → **cold**, streaming paused and every file retained. `deleted` is not on the ladder and a
+test enumerates every state to prove nothing reaches it — a job that could delete a wedding on a
+timer is the one thing this product must never contain.
+
+**It serves through the whole of its final day.** Falling into grace on the morning the term ends
+would cut a wedding short for anyone west of UTC, which is the same rule `resolveAccess` already
+applies to the same date.
+
+**Going cold is never silent** (`PRICING.md` §2). It queues the `archived` message — the template
+N-50 wrote and nothing had yet sent — so *"what was sent, and when"* is answerable from the
+`notifications` table. Falling into grace deliberately says nothing extra: the warning ladder
+already has 30/60/89-day rungs across grace (N-21), and a second message about the same day is how
+a mailbox becomes noise.
+
+The cron runs **before** the warnings in the same job, which is not arbitrary: a catalogue that
+fell into grace this morning should be warned about grace, not about an expiry it has already
+passed.
+
+Both rules were proven by breaking them — pointing the ladder at `deleted` failed four tests, and
+making the archive silent failed two.
+
+What remains is N-24b, and all of it needs money to change hands: the renewal path, the
+restore-on-payment screen, the twelve-months-at-our-cost rule, and the `studio_gone` predicate —
+which is deliberately **not** built yet, because on its own it is a boolean nobody can act on.
