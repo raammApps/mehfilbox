@@ -51,12 +51,14 @@ export async function GET(request: Request) {
         const titles = await repository.listTitles(catalogue.id)
         let storedGb = 0
         let deliveredGb = 0
+        let watchSeconds = 0
 
         for (const title of titles) {
           if (!title.providerId) continue
           const usage = await provider.getUsage(title.providerId)
           storedGb += usage.storedGb
           deliveredGb += usage.deliveredGb
+          watchSeconds += usage.watchSeconds
         }
 
         await repository.upsertUsage({
@@ -64,6 +66,9 @@ export async function GET(request: Request) {
           month,
           storedGb: Number(storedGb.toFixed(3)),
           deliveredGb: Number(deliveredGb.toFixed(3)),
+          // Kept beside the derived figure (N-25): if the bitrate assumption is ever corrected,
+          // history can be recomputed instead of being wrong forever.
+          watchSeconds: Math.round(watchSeconds),
         })
         examined += 1
 

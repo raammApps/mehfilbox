@@ -295,11 +295,14 @@ export interface Repository {
     catalogueId: string
     month: string
     storedGb: number
+    /** Derived from `watchSeconds`; see `Usage` in `lib/video/provider.ts`. */
     deliveredGb: number
+    /** Measured. Kept so a corrected bitrate can recompute rather than rewrite (N-25). */
+    watchSeconds: number
   }): Promise<void>
 
   listUsage(catalogueId: string): Promise<
-    { catalogueId: string; month: string; storedGb: number; deliveredGb: number }[]
+    { catalogueId: string; month: string; storedGb: number; deliveredGb: number; watchSeconds: number }[]
   >
 }
 

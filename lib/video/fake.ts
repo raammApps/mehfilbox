@@ -123,7 +123,7 @@ export class FakeVideoProvider implements VideoProvider {
   }
 
   async getUsage(): Promise<Usage> {
-    return { storedGb: 0, deliveredGb: 0 }
+    return { storedGb: 0, watchSeconds: 0, deliveredGb: 0 }
   }
 
   verifyWebhook(rawBody: string, headers: Headers) {

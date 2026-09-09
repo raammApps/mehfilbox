@@ -1,6 +1,7 @@
 import 'server-only'
 import { createHash, createHmac, timingSafeEqual } from 'node:crypto'
 import { env } from '@/lib/env'
+import { GB_PER_HOUR } from '@/lib/entitlements'
 import { ApiError } from '@/lib/http/errors'
 import { log } from '@/lib/log'
 import {
@@ -231,8 +232,33 @@ export class BunnyProvider implements VideoProvider {
   }
 
   async getUsage(providerId: string): Promise<Usage> {
-    const video = await this.call<{ storageSize: number }>(`/videos/${providerId}`)
-    return { storedGb: video.storageSize / 1024 ** 3, deliveredGb: 0 }
+    /**
+     * Bunny reports **watch time** per video, never bandwidth (N-25). Bandwidth exists at the pull
+     * zone, which is the entire library and cannot be attributed to one wedding — so per-catalogue
+     * delivery is watch time times a bitrate, and there is no version of this that is measured.
+     *
+     * The multiplier is `PRICING.md` §1's own figure for the standard ladder, so the meter and the
+     * price list cannot drift apart. Both numbers are returned: seconds are what Bunny said, and
+     * gigabytes are what we concluded.
+     */
+    const [video, statistics] = await Promise.all([
+      this.call<{ storageSize: number }>(`/videos/${providerId}`),
+      this.call<{ watchTimeChart?: Record<string, number> }>(
+        `/statistics?videoGuid=${providerId}`,
+        // One unreachable statistic must not make a catalogue look like it stores nothing.
+      ).catch(() => null),
+    ])
+
+    const watchSeconds = Object.values(statistics?.watchTimeChart ?? {}).reduce(
+      (total, value) => total + (typeof value === 'number' ? value : 0),
+      0,
+    )
+
+    return {
+      storedGb: video.storageSize / 1024 ** 3,
+      watchSeconds,
+      deliveredGb: (watchSeconds / 3600) * GB_PER_HOUR.standard,
+    }
   }
 
   verifyWebhook(rawBody: string, headers: Headers) {

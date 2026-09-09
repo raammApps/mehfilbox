@@ -49,6 +49,22 @@ export type AssetStatus = {
 
 export type Usage = {
   storedGb: number
+  /**
+   * Watch time, in seconds — **measured**, from the provider.
+   *
+   * This is the honest unit. Bunny Stream reports views and watch time per video and does **not**
+   * report bandwidth per video; bandwidth exists only at the pull zone, which is the whole library
+   * and cannot be attributed to one wedding. Carrying seconds keeps the measured number and the
+   * derived one separate, so a change to the bitrate assumption never silently rewrites history.
+   */
+  watchSeconds: number
+  /**
+   * Gigabytes delivered — **derived** from `watchSeconds`, not measured.
+   *
+   * `PRICING.md` §1's own figure for the standard ladder is the multiplier, so the meter and the
+   * price list cannot drift apart. It is an estimate and is labelled one everywhere it surfaces:
+   * a number that looks measured and is not is worse than an obviously approximate one.
+   */
   deliveredGb: number
 }
 

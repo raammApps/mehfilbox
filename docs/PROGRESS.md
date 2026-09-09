@@ -1530,3 +1530,29 @@ by removing them.
 Unlike suspension, there is no confirmation step: the worst a mistyped quota does is refuse an
 upload until it is corrected, and it is corrected here in five seconds. The reason still lands on
 the audit row, because *"why does this studio have 500 GB"* is a question somebody asks a year later.
+
+## N-25 · Delivery, attributed to a wedding — 8 September 2026
+
+The item asked for real delivered gigabytes. **Bunny cannot give them**, and finding that out was
+most of the work: Stream's per-video statistics return views and watch time, and bandwidth exists
+only at the **pull zone** — the whole library, attributable to no particular couple. Checked
+against the live API rather than assumed.
+
+So delivery is watch time times a bitrate, and the two numbers are kept apart everywhere:
+`watchSeconds` is what the provider said, `deliveredGb` is what we concluded. The multiplier is
+`PRICING.md` §1's own figure for the standard ladder, so the meter and the price list cannot drift
+apart — and both the `Usage` type and the migration say in as many words which number is measured
+and which is derived.
+
+**`usage_rollup.watch_seconds` exists so a correction can recompute rather than rewrite.** §1's
+figure is an estimate until N-24a uploads a real fifteen-hour wedding, so the bitrate *will* move.
+Storing only the derived gigabytes would have made every historical month permanently wrong at that
+moment; storing the seconds makes it a recalculation.
+
+A statistics call that fails is caught and treated as zero watch time rather than allowed to fail
+the whole reading — one unreachable chart must not make a catalogue look like it stores nothing
+either.
+
+What is left is **N-25b**: the pull zone's true total is the check on the multiplier, and comparing
+a month's summed estimates against it says how wrong the assumption is in one number. It needs
+traffic to be worth running — today every chart reads zero.

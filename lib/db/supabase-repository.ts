@@ -1325,6 +1325,7 @@ export class SupabaseRepository implements Repository {
     month: string
     storedGb: number
     deliveredGb: number
+    watchSeconds: number
   }): Promise<void> {
     const { error } = await this.db.from('usage_rollup').upsert(
       {
@@ -1332,6 +1333,7 @@ export class SupabaseRepository implements Repository {
         month: usage.month,
         stored_gb: usage.storedGb,
         delivered_gb: usage.deliveredGb,
+        watch_seconds: usage.watchSeconds,
       },
       { onConflict: 'catalogue_id,month' },
     )
@@ -1349,6 +1351,8 @@ export class SupabaseRepository implements Repository {
       month: r.month,
       storedGb: Number(r.stored_gb),
       deliveredGb: Number(r.delivered_gb),
+      // Defaulted: 0015 adds the column, and a row read mid-rollout has no value for it.
+      watchSeconds: Number(r.watch_seconds ?? 0),
     }))
   }
 

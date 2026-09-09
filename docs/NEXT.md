@@ -135,11 +135,18 @@ out of Stream into Edge Storage saves enough to be worth the code; at ₹0.95/GB
 `deleted` becomes reachable only from an explicit, recorded request by the couple. Twelve months
 of archive at our cost after grace, then the archive fee applies.
 
-### N-25 · Delivery metering  ·  ~2h
+### N-25b · Reconcile the delivery estimate against the bill  ·  ~2h  ·  **after real traffic**
 
-`getUsage` returns real stored bytes and `deliveredGb: 0`. Until it is real, allowances cannot be
-enforced and no catalogue's cost can be attributed. Fine at 60 weddings from the Bunny dashboard;
-impossible at 300.
+N-25 attributes delivery per catalogue by deriving it from watch time (8 September), because Bunny
+reports no per-video bandwidth. The derivation is only as good as `PRICING.md` §1's bitrate, which
+is itself an estimate until N-24a measures a real wedding.
+
+What closes the loop: Bunny's **pull zone** statistics give the true total bandwidth for the
+library. Summing every catalogue's derived figure for a month and comparing it to that total says
+how wrong the multiplier is, in one number — and `usage_rollup.watch_seconds` means the whole
+history can be recomputed once it is corrected rather than left wrong.
+
+Needs traffic to be worth running. Today every chart reads zero.
 
 ### N-36b · The credit that survives  ·  ~half a session  ·  **Phase 3**
 

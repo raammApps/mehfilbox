@@ -44,7 +44,13 @@ export type Snapshot = {
   notifications: Notification[]
   platformAudit: PlatformAudit[]
   playEvents: PlayEvent[]
-  usage: { catalogueId: string; month: string; storedGb: number; deliveredGb: number }[]
+  usage: {
+    catalogueId: string
+    month: string
+    storedGb: number
+    deliveredGb: number
+    watchSeconds: number
+  }[]
 }
 
 export function emptySnapshot(): Snapshot {
@@ -762,6 +768,7 @@ export class MemoryRepository implements Repository {
     month: string
     storedGb: number
     deliveredGb: number
+    watchSeconds: number
   }): Promise<void> {
     this.data.usage ??= []
     const index = this.data.usage.findIndex(
