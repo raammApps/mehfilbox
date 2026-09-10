@@ -284,6 +284,15 @@ permission-granted material. Sandeep's, per doc 13 §8.
 
 ## Held by Sandeep, not by an agent (doc 13 §8)
 
+**The Resend API key is invalid, and registration is broken because of it.** Found on 11 September
+by trying to register a studio through the live site: Supabase answers
+`"Error sending confirmation email"`, and `/admin/register` turns that into *"Try a different email
+address"* — so a real studio is told their own address is the problem. The same key is
+`NOTIFY_DRIVER=resend`, so every handover, delivery, expiry, grace, archive and ops-alert email
+would fail too. It worked on 7 September; it has been revoked or rotated since. Issue a new key and
+put it in **both** `.env.vercel.local` (then deploy) **and** Supabase's SMTP settings — they are
+separate, and both are needed. `docs/MANUAL-TEST.md` §0 has the verification command.
+
 **Insert yourself into `platform_admins`** if you want the platform console. It is built and
 gated (N-16), and the table is empty, so today nobody can reach it — which is the correct default.
 `id` must be your Supabase `auth.users` id:
