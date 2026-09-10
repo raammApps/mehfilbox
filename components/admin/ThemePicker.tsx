@@ -302,12 +302,23 @@ export function ThemePicker({
         being true when branding became a draft (N-56): saved and *shown to the couple* are now
         different things here, as they always were for the sections beside it.
       */}
+      {/*
+        The two targets save into different worlds, so they cannot share one sentence. A wedding's
+        branding is a draft that reaches the couple at Publish; the studio's is a setting with
+        nobody's page in front of it yet — telling a studio their colour "reaches the couple when
+        you publish" on a screen with no Publish on it is just untrue.
+      */}
       {saveState === 'idle' ? (
         <p className="text-[13px] text-[var(--color-l-text-mid)]">
-          Changes save as you make them, and reach the couple when you publish.
+          {targetKind === 'studio'
+            ? 'Changes save as you make them. Every new wedding starts from this.'
+            : 'Changes save as you make them, and reach the couple when you publish.'}
         </p>
       ) : (
-        <SaveState status={saveState} savedLabel="Saved as draft" />
+        <SaveState
+          status={saveState}
+          savedLabel={targetKind === 'studio' ? 'Saved' : 'Saved as draft'}
+        />
       )}
 
       <p className="mt-3 text-[12px] text-[var(--color-l-text-mid)]">
