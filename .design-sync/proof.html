@@ -1,0 +1,54 @@
+<!doctype html>
+<meta charset="utf-8"><title>Mehfilbox tokens — proof</title>
+<!-- Deliberately the ONLY stylesheet: a rendered design receives styles.css's import closure and
+     nothing else, so if this page looks right, a design will too. Local reference, never uploaded. -->
+<link rel="stylesheet" href="../ds-bundle/styles.css">
+<style>
+  main { max-width: 1100px; margin: 0 auto; padding-block: 32px; }
+  .sw { display: grid; grid-template-columns: repeat(auto-fill,minmax(150px,1fr)); gap: 10px; }
+  .sw div { border-radius: var(--radius-card); padding: 14px 12px; border: var(--edge-plain); }
+  .light { background: var(--color-l-surface-0); color: var(--color-l-text-mid);
+           border-radius: var(--radius-card); padding: 20px; }
+  .light h3 { color: var(--color-l-text-hi); }
+</style>
+<main class="gutter-x">
+  <p class="type-label" style="color:var(--color-accent-hi)">FOR WEDDING STUDIOS</p>
+  <h1 class="type-display-xl">Hand over the wedding.</h1>
+  <h2 class="type-display-lg">A display-large heading</h2>
+  <h3 class="type-title">A title</h3>
+  <p class="type-body-lg">Body large — the paragraph a guest reads first.</p>
+  <p>Body default, set in Inter at 0.9375rem.</p>
+  <p class="type-meta">META · 14 NOVEMBER 2026</p>
+  <p lang="hi" class="type-body-lg">आपकी शादी की फ़िल्में और तस्वीरें अब तैयार हैं।</p>
+
+  <h2 class="type-display-lg" style="margin-top:28px">Surfaces</h2>
+  <div class="sw">
+    <div style="background:var(--color-surface-0)">surface-0</div>
+    <div style="background:var(--color-surface-1)">surface-1</div>
+    <div style="background:var(--color-surface-2)">surface-2</div>
+    <div style="background:var(--color-surface-3)">surface-3</div>
+    <div style="background:var(--color-accent);color:var(--color-accent-ink)">accent</div>
+    <div style="background:var(--color-accent-dim);color:var(--color-accent-ink)">accent-dim</div>
+    <div style="color:var(--color-marigold)">marigold</div>
+    <div style="color:var(--color-rose)">rose</div>
+    <div style="color:var(--color-gold)">gold</div>
+    <div style="color:var(--color-ok)">ok</div>
+    <div style="color:var(--color-warn)">warn</div>
+    <div style="color:var(--color-error)">error</div>
+  </div>
+
+  <h2 class="type-display-lg" style="margin-top:28px">The light set — admin console</h2>
+  <div class="light">
+    <h3 class="type-title">Catalogues</h3>
+    <p>The console runs on the light tokens while a guest page stays near-black.</p>
+    <span style="display:inline-block;background:var(--color-accent);color:var(--color-accent-ink);
+                 border-radius:var(--radius-pill);padding:10px 20px;font-weight:600">Publish</span>
+  </div>
+
+  <h2 class="type-display-lg" style="margin-top:28px">edge · clamp-2</h2>
+  <div class="edge" style="border-radius:var(--radius-card);padding:16px;margin-top:8px">
+    <p class="clamp-2">A clamped paragraph that runs on well past two lines so the ellipsis has
+      something to do — repeated because clamping needs length to prove itself, and a single short
+      line would look identical clamped or not, which would prove nothing at all.</p>
+  </div>
+</main>

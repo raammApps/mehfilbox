@@ -1,0 +1,7 @@
+{
+  "shape": "tokens",
+  "readmeHeader": ".design-sync/conventions.md",
+  "build": "node .design-sync/build-tokens.mjs",
+  "outDir": "ds-bundle",
+  "note": "Neither 'storybook' nor 'package'. Mehfilbox is a Next.js application with no library build, so the /design-sync converter has nothing to bundle; this repo ships its design language instead. See .design-sync/NOTES.md."
+}
