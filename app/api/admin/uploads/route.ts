@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto'
 import { z } from 'zod'
-import { requireOwnedCatalogue } from '@/lib/admin/session'
+import { requireEditableCatalogue } from '@/lib/admin/session'
 import { getRepository } from '@/lib/db'
 import { slugify, titleFromFilename } from '@/lib/format'
 import { ApiError } from '@/lib/http/errors'
@@ -32,7 +32,7 @@ const bodySchema = z.object({
 export async function POST(request: Request) {
   return route('admin/uploads', async () => {
     const body = await readJson(request, bodySchema)
-    const { catalogue } = await requireOwnedCatalogue(body.catalogueId)
+    const { catalogue } = await requireEditableCatalogue(body.catalogueId)
     const repository = getRepository()
 
     if (!isAcceptedVideo(body.filename, body.mimeType)) {

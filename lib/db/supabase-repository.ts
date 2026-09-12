@@ -190,6 +190,10 @@ export class SupabaseRepository implements Repository {
       tenantSlug: r.tenant_slug ?? '',
       customDomain: r.custom_domain,
       originOrgId: r.origin_org_id ?? null,
+      // Defaulted: 0018 adds these, and a row read mid-rollout has no value for them.
+      coupleOrgId: r.couple_org_id ?? null,
+      supportAccessUntil: r.support_access_until ?? null,
+      passcodeVersion: r.passcode_version ?? 1,
       coupleName: r.couple_name,
       appName: r.app_name,
       weddingDate: r.wedding_date,
@@ -226,6 +230,9 @@ export class SupabaseRepository implements Repository {
       tenantSlug: 'tenant_slug',
       customDomain: 'custom_domain',
       originOrgId: 'origin_org_id',
+      coupleOrgId: 'couple_org_id',
+      supportAccessUntil: 'support_access_until',
+      passcodeVersion: 'passcode_version',
       coupleName: 'couple_name',
       appName: 'app_name',
       weddingDate: 'wedding_date',
@@ -909,6 +916,50 @@ export class SupabaseRepository implements Repository {
 
   async getCatalogueById(id: string): Promise<Catalogue | null> {
     const { data } = await this.db.from('catalogues').select('*').eq('id', id).maybeSingle()
+    return data ? SupabaseRepository.toCatalogue(data) : null
+  }
+
+  // ── Couple accounts and the support window ──────────────────────────────────
+  async listCataloguesForCouple(coupleOrgId: string): Promise<Catalogue[]> {
+    const { data, error } = await this.db
+      .from('catalogues')
+      .select('*')
+      .or(`org_id.eq.${coupleOrgId},couple_org_id.eq.${coupleOrgId}`)
+      .order('created_at', { ascending: false })
+    if (error) throw new ApiError('INTERNAL', error.message)
+    return (data ?? []).map(SupabaseRepository.toCatalogue)
+  }
+
+  async getCatalogueForCouple(id: string, coupleOrgId: string): Promise<Catalogue | null> {
+    const { data } = await this.db
+      .from('catalogues')
+      .select('*')
+      .eq('id', id)
+      .or(`org_id.eq.${coupleOrgId},couple_org_id.eq.${coupleOrgId}`)
+      .maybeSingle()
+    return data ? SupabaseRepository.toCatalogue(data) : null
+  }
+
+  async listOriginatedCatalogues(orgId: string): Promise<Catalogue[]> {
+    const { data, error } = await this.db
+      .from('catalogues')
+      .select('*')
+      .eq('origin_org_id', orgId)
+      .neq('org_id', orgId)
+      .order('created_at', { ascending: false })
+    if (error) throw new ApiError('INTERNAL', error.message)
+    return (data ?? []).map(SupabaseRepository.toCatalogue)
+  }
+
+  async getCatalogueForSupport(id: string, originOrgId: string, now: Date): Promise<Catalogue | null> {
+    const { data } = await this.db
+      .from('catalogues')
+      .select('*')
+      .eq('id', id)
+      .eq('origin_org_id', originOrgId)
+      .neq('org_id', originOrgId)
+      .gt('support_access_until', now.toISOString())
+      .maybeSingle()
     return data ? SupabaseRepository.toCatalogue(data) : null
   }
 

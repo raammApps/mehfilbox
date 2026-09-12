@@ -21,6 +21,7 @@ export default async function SettingsPage({ params }: { params: Promise<{ id: s
       operatorName={session.operator.name}
       operatorEmail={session.operator.email}
       orgName={org?.name}
+      orgKind={org?.kind}
       catalogue={{
         id: catalogue.id,
         name: catalogue.coupleName.en,

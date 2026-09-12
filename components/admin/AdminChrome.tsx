@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { RailLink, TabLink } from './AdminNav'
 import { UserMenu } from './UserMenu'
 import { IconGrid, IconPlus, IconPalette } from './icons'
+import type { OrgKind } from '@/lib/schema'
 
 /**
  * Persistent left rail plus, inside a catalogue, a horizontal sub-nav (doc 02 §4).
@@ -27,6 +28,7 @@ export function AdminChrome({
   operatorName,
   operatorEmail,
   orgName,
+  orgKind = 'partner',
   catalogue,
 }: {
   children: React.ReactNode
@@ -34,6 +36,8 @@ export function AdminChrome({
   operatorEmail?: string
   /** Whose console this is. A partner runs several weddings; a couple runs one. */
   orgName?: string
+  /** A couple's rail points home to their account rather than to a studio's settings (D-37). */
+  orgKind?: OrgKind
   catalogue?: { id: string; name: string; slug: string; status: string }
 }) {
   return (
@@ -50,16 +54,24 @@ export function AdminChrome({
         </Link>
 
         <ul className="space-y-1">
-          <RailLink href="/admin" icon={<IconGrid />} exact>
-            Catalogues
-          </RailLink>
-          {/*
-            The studio's own look (N-26). In the rail rather than inside a wedding, because it is
-            not about any one wedding — it is the default every new one is created from.
-          */}
-          <RailLink href="/admin/studio" icon={<IconPalette />}>
-            Your studio
-          </RailLink>
+          {orgKind === 'couple' ? (
+            <RailLink href="/my" icon={<IconGrid />} exact>
+              Your weddings
+            </RailLink>
+          ) : (
+            <>
+              <RailLink href="/admin" icon={<IconGrid />} exact>
+                Catalogues
+              </RailLink>
+              {/*
+                The studio's own look (N-26). In the rail rather than inside a wedding, because it is
+                not about any one wedding — it is the default every new one is created from.
+              */}
+              <RailLink href="/admin/studio" icon={<IconPalette />}>
+                Your studio
+              </RailLink>
+            </>
+          )}
         </ul>
 
         {/*

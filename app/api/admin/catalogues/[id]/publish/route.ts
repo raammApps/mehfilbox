@@ -1,4 +1,4 @@
-import { requireOwnedCatalogue } from '@/lib/admin/session'
+import { requireEditableCatalogue } from '@/lib/admin/session'
 import { revalidateCatalogue } from '@/lib/catalogue-cache'
 import { getRepository } from '@/lib/db'
 import { noStore, route } from '@/lib/http/handler'
@@ -17,12 +17,12 @@ export const dynamic = 'force-dynamic'
 export async function POST(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   return route('admin/catalogue:publish', async () => {
     const { id } = await params
-    const { session, catalogue } = await requireOwnedCatalogue(id)
+    const { catalogue } = await requireEditableCatalogue(id)
 
     const modules = catalogue.draftModules ?? catalogue.modules
     const now = new Date().toISOString()
 
-    const published = await getRepository().updateCatalogue(id, session.orgId, {
+    const published = await getRepository().updateCatalogue(id, catalogue.orgId, {
       modules,
       /**
        * Branding is promoted here too (N-56), and this is the line that makes "nothing reaches
@@ -65,8 +65,8 @@ export async function POST(_request: Request, { params }: { params: Promise<{ id
 export async function DELETE(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   return route('admin/catalogue:unpublish', async () => {
     const { id } = await params
-    const { session } = await requireOwnedCatalogue(id)
-    const updated = await getRepository().updateCatalogue(id, session.orgId, { status: 'draft' })
+    const { catalogue } = await requireEditableCatalogue(id)
+    const updated = await getRepository().updateCatalogue(id, catalogue.orgId, { status: 'draft' })
     revalidateCatalogue(updated.slug)
     return noStore({ catalogue: updated })
   })

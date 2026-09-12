@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { requireOwnedCatalogue } from '@/lib/admin/session'
+import { requireEditableCatalogue } from '@/lib/admin/session'
 import { revalidateCatalogue } from '@/lib/catalogue-cache'
 import { getRepository } from '@/lib/db'
 import { ApiError } from '@/lib/http/errors'
@@ -27,11 +27,11 @@ const patchSchema = z.object({
   sortOrder: z.number().int().optional(),
 })
 
-/** Ownership is proven through the title's catalogue — never from a body-supplied org. */
+/** The right to edit is proven through the title's catalogue — never from a body-supplied org. */
 async function loadOwned(titleId: string) {
   const title = await getRepository().getTitle(titleId)
   if (!title) throw new ApiError('NOT_FOUND', 'Title not found')
-  const { catalogue } = await requireOwnedCatalogue(title.catalogueId)
+  const { catalogue } = await requireEditableCatalogue(title.catalogueId)
   return { title, catalogue }
 }
 

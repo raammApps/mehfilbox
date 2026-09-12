@@ -81,7 +81,7 @@ graph, so there is no privilege-escalation path to get wrong; what is missing is
 
 | | Status | Where it stands |
 |---|---|---|
-| Create a user account with credentials | **Partial** | Done through **handover**: the partner issues a link, the couple sets their own password. There is no "create the couple an account with a password and hand it over". Deliberate — we never hold a couple's password — but it is not what "account creation" usually means, and it is worth confirming that is what you want. |
+| Create a user account with credentials | **Built** | N-62, 12 Sept. The studio issues the couple's sign-in from the overview — a set-password link, or a temporary password shown once and replaced at first sign-in. We still never hold a couple's chosen password. |
 | Tier selection at creation | **Missing** | The wizard has no plan step. Every catalogue gets the same default caps. Tiers are now Deliver (90 days) / Keep / Cinema (`PRICING.md`, Sept 2026); a Deliver catalogue needs the 90-day term from N-24. |
 | Skin selection from a marketplace | **Missing** | Three hardcoded templates (`keepsake`, `films-only`, `anniversary`) chosen in the wizard. **No marketplace, no purchasable skins.** See §6. |
 | Customisation — layout, text, message | **Built** | The customizer: drag or keyboard reorder, in-place heading editing, per-section editors, live preview of the real guest components. |
@@ -111,13 +111,13 @@ graph, so there is no privilege-escalation path to get wrong; what is missing is
 | Share a film | **Built** | `ShareButton` in the title modal — `navigator.share` (the WhatsApp sheet on a phone) with a copy-link fallback, and a `?t=` deep link so "watch from 7:08" works. |
 | Share a photograph | **Built** | The same `ShareButton` films use, in the lightbox. A photograph's address is the catalogue page plus `?photo=<id>`; the address bar follows the guest as they swipe and clears on close, so what they copy is what they are looking at. |
 | Like a film or photograph | **Built** | A heart on both, **counted across guests and shown to all of them** (decided rather than assumed — the alternative was a private keepsake). Keyed on a device-local guest key, not a profile, because the gate can be skipped; the count is of devices that tapped, which is the honest description. |
-| Own the account after handover | **Built** | Their own org, full console minus the handover panel. |
+| Own the account after handover | **Built** | Their own org and, since N-62, their own account at `/my`; the full customizer one link away. |
 | Told they now own it | **Missing** | **No migration email.** The couple learns they own it only if the partner tells them. This is the single biggest hole in the commercial model — `PRICING.md` §2. |
 | Renewal | **Missing** | `subStatus` drives a renewal screen for guests. There is no way to actually renew — no payment, no self-service, no reminder. |
 | Credentials management | **Partial** | Supabase Auth handles password reset. No in-app profile screen, no email change. |
-| Passcode management | **Built** | Same settings screen the partner used. |
+| Passcode management | **Built** | From `/my`, before and after the handover; changing it signs out everyone holding the old one (N-71, 12 Sept). |
 | Buy and apply a theme | **Missing** | Branding only — accent, logo, font, "presented by". No purchasable themes. See §6. |
-| Hand back to the studio | **Missing** | Sandeep's idea, and a good one: let a couple return the catalogue for a re-skin or an update. No mechanism. |
+| Hand back to the studio | **Built** | N-62, 12 Sept — as a window rather than a return: the couple opens the studio's access for seven or fourteen days from `/my`, and it closes on its own. |
 | Download everything | **Missing** | **Required before any lapse behaviour ships.** Available at any time — before expiry, in grace, and from archive. `PRICING.md` §2. |
 | Archive instead of deletion *(changed 6 Sept 2026)* | **Missing** | Lapse → 90 days' grace → archive (streaming paused, files kept, restore on payment). Automatic deletion is **removed from the product**; `deleted` is reachable only by a recorded request from the couple. N-24. |
 | Family circles *(new)* | **Missing** | Scoped links per side, "who watched". The profile gate already identifies a guest; nothing groups them. N-38. |
@@ -266,11 +266,11 @@ N-60 to N-75 in [`NEXT.md`](./NEXT.md).
 | One sign-in with a Studio door and a Couple door | **Built** | N-61, 12 Sept. `/login`; `/admin/login` redirects. The door is a tab, the landing is decided by the org. |
 | Forgot password, on both doors | **Built** | N-61, 12 Sept. Credential links, hashed and single-use, identical on both auth drivers. |
 | Per-address lockout and a captcha seam | **Built** | N-61, 12 Sept. Per-address and per-IP buckets, a per-catalogue bucket on the guest code, Turnstile behind `CAPTCHA_DRIVER`. |
-| Studio issues the couple's credentials at creation | **Missing** | N-62. Today the couple only gets an account through handover. |
-| Couple account with many catalogues, from many studios | **Missing** | N-62. A second handover to the same address fails today. |
-| Couple console `/my` | **Missing** | N-62. A couple gets the full operator console. |
-| Studio support window after handover | **Missing** | N-62. Access ends completely at handover. |
-| Delivered view — every originated catalogue with its renewal date | **Missing** | N-74. |
+| Studio issues the couple's credentials at creation | **Built** | N-62, 12 Sept. From the overview: a link to choose a password, or a temporary one shown once. |
+| Couple account with many catalogues, from many studios | **Built** | N-62, 12 Sept. An address with an account is linked, never duplicated. |
+| Couple console `/my` | **Built** | N-62, 12 Sept. Link, share, download, guest code; letter, sections and the studio window once theirs. |
+| Studio support window after handover | **Built** | N-62, 12 Sept. Seven or fourteen days, opened by the couple, closing on its own. |
+| Delivered view — every originated catalogue with its renewal date | **Built** | N-74 with N-62, 12 Sept. On the console's list page. |
 | Themes — seven built in, chosen per catalogue | **Missing** | N-63. One surface, one theme, since Phase 0. |
 | Platform-authored themes | **Missing** | N-63. |
 | House styles — saved presets, frozen while in use | **Missing** | N-64. One studio-wide look exists (N-26). |

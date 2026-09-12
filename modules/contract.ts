@@ -103,6 +103,15 @@ export interface ModuleDefinition<C = unknown> {
    * both should read from one selection function rather than two copies of the rule.
    */
   consumes?: (config: C, ctx: GuestContext) => string[]
+  /**
+   * The one section a couple may rewrite from their account without the customizer (D-37): a
+   * long-form message. Optional — the account offers the panel to the first section that has it,
+   * so nothing outside `modules/` names the type that does.
+   */
+  prose?: {
+    read: (config: C, locale: Locale) => { body: string; signature: string }
+    write: (config: C, input: { body: string; signature: string; locale: Locale }) => C
+  }
 }
 
 /** Helper so a module file can stay strongly typed without repeating the generic. */

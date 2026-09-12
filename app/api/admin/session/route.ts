@@ -33,9 +33,10 @@ const PER_ADDRESS = 5
 const PER_IP = 10
 const WINDOW_S = 15 * 60
 
-/** Where a signed-in person is sent. The same for every door until N-62 builds `/my`. */
-function landingFor(operator: { mustChangePassword: boolean }): string {
-  return operator.mustChangePassword ? '/login/change-password' : '/admin'
+/** Where a signed-in person is sent — decided by the org their row belongs to, never by the door. */
+function landingFor(operator: { mustChangePassword: boolean }, kind: 'partner' | 'couple'): string {
+  if (operator.mustChangePassword) return '/login/change-password'
+  return kind === 'couple' ? '/my' : '/admin'
 }
 
 export async function POST(request: Request) {
@@ -88,10 +89,11 @@ export async function POST(request: Request) {
     reset(ipKey)
     log.info('admin login: ok', { operatorId: operator.id, driver: getAuthProvider().name })
 
+    const org = await getRepository().getOrg(operator.orgId)
     const response = NextResponse.json(
       {
         operator: { id: operator.id, name: operator.name, email: operator.email },
-        landing: landingFor(operator),
+        landing: landingFor(operator, org?.kind ?? 'partner'),
       },
       { headers: { 'cache-control': 'no-store' } },
     )

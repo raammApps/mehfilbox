@@ -1,19 +1,21 @@
 import { notFound, redirect } from 'next/navigation'
 import { AdminChrome } from '@/components/admin/AdminChrome'
 import { PhotoManager } from '@/components/admin/PhotoManager'
-import { getOperatorSession, getSessionOrg } from '@/lib/admin/session'
+import { getEditableCatalogue, getOperatorSession, getSessionOrg } from '@/lib/admin/session'
 import { getRepository } from '@/lib/db'
 
 export const dynamic = 'force-dynamic'
 
 export default async function PhotosPage({ params }: { params: Promise<{ id: string }> }) {
-  const session = await getOperatorSession()
-  if (!session) redirect('/admin/login')
-
   const { id } = await params
+  // Owner, or the originating studio inside the couple's support window (doc 16 §3).
+  const editable = await getEditableCatalogue(id)
+  if (!editable) {
+    if (!(await getOperatorSession())) redirect('/admin/login')
+    notFound()
+  }
+  const { session, catalogue } = editable
   const repository = getRepository()
-  const catalogue = await repository.getCatalogue(id, session.orgId)
-  if (!catalogue) notFound()
 
   const org = await getSessionOrg(session)
 
@@ -24,6 +26,7 @@ export default async function PhotosPage({ params }: { params: Promise<{ id: str
       operatorName={session.operator.name}
       operatorEmail={session.operator.email}
       orgName={org?.name}
+      orgKind={org?.kind}
       catalogue={{
         id: catalogue.id,
         name: catalogue.coupleName.en,

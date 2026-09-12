@@ -25,6 +25,8 @@ export default async function ClaimPage({ params }: { params: Promise<{ token: s
 
   const catalogue = live ? await repository.getCatalogueById(transfer.catalogueId) : null
   const partner = live ? await repository.getOrg(transfer.fromOrgId) : null
+  // An address that already has an account accepts by signing in (D-37), and the form says so.
+  const existing = live ? await repository.getOperatorByEmail(transfer.toEmail) : null
 
   if (!live || !catalogue) {
     return (
@@ -44,6 +46,7 @@ export default async function ClaimPage({ params }: { params: Promise<{ token: s
       coupleName={resolveLocalised(catalogue.coupleName, 'en')}
       partnerName={partner?.name ?? 'Your planner'}
       email={transfer.toEmail}
+      existing={existing !== null}
     />
   )
 }

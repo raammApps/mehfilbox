@@ -1689,3 +1689,42 @@ The prototype's arithmetic puzzle was not built: a script solves it faster than 
 29 new unit tests across three files; 558 unit and component tests. The E2E harness runs the fake
 driver so the widget's appearance after three failures is exercised, and the spec ends with a real
 sign-in on purpose — success clears the device bucket every other spec shares.
+
+## N-62 · Couple accounts — 12 September 2026
+
+**The studio issues the couple's sign-in** (D-33, D-37), from the wedding's overview: an email, a
+name, and how the first password reaches them — a link to choose their own, or a temporary one
+shown once for the couple sitting across the table, which lives exactly one sign-in. The account
+is an org of `kind = couple`, exactly as a handover used to create one; what changed is *when*.
+`catalogues.couple_org_id` links it from that moment, so the couple sees the wedding in their
+account as *being prepared by <studio>* while the studio still owns it. An address that already
+has a couple account is **linked, never duplicated** — the second wedding, the anniversary from
+another studio, all in one account (`listCataloguesForCouple` is the only disjunction in the
+product, and it lives in `lib/my/session.ts` and the two repository methods, never in a route).
+
+**The handover no longer needs a link** when the account exists: *Hand over now* moves ownership,
+snapshots the studio's credit, tells the couple by email, and closes the studio's access. The
+token path stays for couples without an account, and a claim on an address that has one attaches
+by signing in.
+
+**`/my`** is the couple's account: every catalogue they own or are linked to, with who made it;
+per catalogue the link and the WhatsApp share, download everything, the guest code, and — once
+theirs — the letter, the section toggles and the studio's access window. A linked couple can set
+the code and cannot touch the letter; the route says so in a sentence rather than a 403. The full
+customizer is one link away for a catalogue they own; it is the same component.
+
+**The support window** is the second, and last, authorisation path (doc 16 §3). After a handover
+the originating studio gets the same 404 it always got — until the couple opens a window from
+their account, seven or fourteen days, closing on its own. `requireEditableCatalogue` in
+`session.ts` is the one function that knows; content, sections, branding and publishing use it,
+and every write through it scopes by the catalogue's own org. Settings, the handover, the delivery
+message and deletion stay with `requireOwnedCatalogue`. The overview says *on the couple's
+invitation* and hides what a supporter cannot do. The studio's console gains a **Delivered** list
+(N-74): every wedding it handed over, its state, its renewal date, and whether a window is open.
+
+**Changing the guest code signs out everyone holding the old one** (N-71). The grant cookie
+carries `passcode_version`; a change bumps it, from the settings drawer or the couple's account,
+and the old grants stop matching without anything to enumerate or revoke.
+
+Migration 0018. 15 new unit tests on where the boundaries fall; an E2E spec that walks from a
+temporary password to a wedding of their own. 573 unit and component tests.

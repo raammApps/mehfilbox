@@ -76,3 +76,45 @@ export async function requireOwnedCatalogue(catalogueId: string): Promise<{
   if (!catalogue) throw new ApiError('NOT_FOUND', 'Catalogue not found')
   return { session, catalogue }
 }
+
+/**
+ * The second, and last, authorisation path in the product (doc 16 §3).
+ *
+ * A catalogue is *editable* by the org that owns it — and, after a handover, by the studio that
+ * originated it **while the couple's support window is open**. The window is a timestamp the
+ * couple sets from their account, seven days at a time, and it closes on its own; a studio with
+ * no open window gets the same 404 it always got.
+ *
+ * Deliberately narrower than ownership. Content, sections, branding and publishing are what a
+ * studio comes back to fix; settings, the handover, the delivery message and deletion stay with
+ * the owner, and the routes for those still call `requireOwnedCatalogue`. Every write through
+ * this path scopes its update by `catalogue.orgId` — the owner's — never by the session's.
+ */
+export type EditableCatalogue = {
+  session: OperatorSession
+  catalogue: Catalogue
+  via: 'owner' | 'support'
+}
+
+/** Page-side: null when nobody is signed in, the org is suspended, or the catalogue is out of reach. */
+export async function getEditableCatalogue(catalogueId: string): Promise<EditableCatalogue | null> {
+  const session = await getOperatorSession()
+  if (!session || session.orgStatus === 'suspended') return null
+
+  const repository = getRepository()
+  const owned = await repository.getCatalogue(catalogueId, session.orgId)
+  if (owned) return { session, catalogue: owned, via: 'owner' }
+
+  const supported = await repository.getCatalogueForSupport(catalogueId, session.orgId, new Date())
+  if (supported) return { session, catalogue: supported, via: 'support' }
+
+  return null
+}
+
+/** Route-side: the same rule, as the error codes routes answer with. */
+export async function requireEditableCatalogue(catalogueId: string): Promise<EditableCatalogue> {
+  await requireOperator()
+  const editable = await getEditableCatalogue(catalogueId)
+  if (!editable) throw new ApiError('NOT_FOUND', 'Catalogue not found')
+  return editable
+}

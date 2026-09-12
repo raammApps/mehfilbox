@@ -1,4 +1,4 @@
-import { requireOwnedCatalogue } from '@/lib/admin/session'
+import { requireEditableCatalogue } from '@/lib/admin/session'
 import { revalidateCatalogue } from '@/lib/catalogue-cache'
 import { getRepository } from '@/lib/db'
 import { ApiError } from '@/lib/http/errors'
@@ -34,7 +34,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     // anything the request supplied.
     const album = await repository.getAlbum(photo.albumId)
     if (!album) throw new ApiError('NOT_FOUND', 'Photograph not found')
-    const { catalogue } = await requireOwnedCatalogue(album.catalogueId)
+    const { catalogue } = await requireEditableCatalogue(album.catalogueId)
 
     const updated = await repository.updatePhoto(id, { caption: body.caption ?? undefined })
 
@@ -54,7 +54,7 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
     // Ownership runs through the album's catalogue — never from anything the request supplied.
     const album = await repository.getAlbum(photo.albumId)
     if (!album) throw new ApiError('NOT_FOUND', 'Photograph not found')
-    const { catalogue } = await requireOwnedCatalogue(album.catalogueId)
+    const { catalogue } = await requireEditableCatalogue(album.catalogueId)
 
     // Row first, file second. The reverse can leave a row pointing at nothing, which renders a
     // broken image on a wedding page; a file with no row is invisible and costs a fraction of a

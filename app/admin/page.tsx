@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { AdminChrome } from '@/components/admin/AdminChrome'
 import { CatalogueBoard, type CatalogueRow } from '@/components/admin/CatalogueBoard'
+import { DeliveredList } from '@/components/admin/DeliveredList'
 import { getPlatformAdmin } from '@/lib/admin/platform'
 import { getOperatorSession, getSessionOrg } from '@/lib/admin/session'
 import { getRepository } from '@/lib/db'
@@ -53,11 +54,15 @@ export default async function CatalogueListPage() {
   // Counts come from one method rather than `listTitles` per row: a partner with thirty weddings
   // would otherwise make sixty round trips to draw this screen, and it would get slower with
   // every wedding they sold.
-  const [catalogues, counts, org] = await Promise.all([
+  const [catalogues, counts, org, delivered] = await Promise.all([
     repository.listCatalogues({ orgId: session.orgId }),
     repository.catalogueCounts({ orgId: session.orgId }),
     getSessionOrg(session),
+    repository.listOriginatedCatalogues(session.orgId),
   ])
+
+  // A couple's home is their account, not a studio's list (D-37).
+  if (org?.kind === 'couple') redirect('/my')
 
   const rows: CatalogueRow[] = catalogues.map((catalogue) => ({
     id: catalogue.id,
@@ -95,6 +100,9 @@ export default async function CatalogueListPage() {
       </div>
 
       <CatalogueBoard rows={rows} />
+
+      {/* Every wedding this studio handed over — the list a renewal season is worked from (N-74). */}
+      <DeliveredList catalogues={delivered} />
     </AdminChrome>
   )
 }

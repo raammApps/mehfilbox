@@ -145,6 +145,12 @@ export interface ModuleDefinition<C> {
 }
 ```
 
+Two optional hooks were added after Phase 0, both for the same reason — a surface outside
+`modules/` needed to reason about a section without naming its type: `consumes` (which titles a
+section shows, so later sections do not repeat them) and, on 12 September 2026, `prose` (the
+section a couple may rewrite from their account, D-37 — `read`/`write` on the config, so the
+couple's page finds "the letter" through the contract rather than by name).
+
 Registration is a single `modules/registry.ts` map. **Adding a module must require zero
 changes to the browse page, the customizer, the schema, or the admin.** If a new module
 forces an edit outside its own folder, the abstraction has leaked — fix it before merging.

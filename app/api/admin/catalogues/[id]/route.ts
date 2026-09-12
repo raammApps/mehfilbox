@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { requireOwnedCatalogue } from '@/lib/admin/session'
+import { requireEditableCatalogue, requireOwnedCatalogue } from '@/lib/admin/session'
 import { revalidateCatalogue } from '@/lib/catalogue-cache'
 import { hashSecret } from '@/lib/auth'
 import { getRepository } from '@/lib/db'
@@ -71,7 +71,7 @@ const patchSchema = z.object({
 export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   return route('admin/catalogue:get', async () => {
     const { id } = await params
-    const { catalogue } = await requireOwnedCatalogue(id)
+    const { catalogue } = await requireEditableCatalogue(id)
     const repository = getRepository()
     const [titles, albums, photos, grants] = await Promise.all([
       repository.listTitles(catalogue.id),
@@ -89,8 +89,19 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   return route('admin/catalogue:patch', async () => {
     const { id } = await params
-    const { session, catalogue } = await requireOwnedCatalogue(id)
     const body = await readJson(request, patchSchema)
+
+    /**
+     * What a studio may change on the couple's invitation is the look of the page and which film
+     * leads it — the things it came back to fix. Everything else on this schema is a setting, and
+     * settings stay with the owner (doc 16 §3). Decided by the keys actually sent, so the
+     * customizer's autosave and the settings drawer hit the same route and get different answers.
+     */
+    const SUPPORT_FIELDS = new Set(['draftBranding', 'featuredTitleId'])
+    const supportOnly = Object.keys(body).every((key) => SUPPORT_FIELDS.has(key))
+    const { catalogue } = supportOnly
+      ? await requireEditableCatalogue(id)
+      : await requireOwnedCatalogue(id)
     const repository = getRepository()
 
     if (body.slug && body.slug !== catalogue.slug && !(await repository.slugAvailable(body.slug))) {
@@ -108,7 +119,15 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     // Switching privacy back to unlisted must not leave a live passcode hash behind.
     if (body.privacy === 'unlisted') patch.passcodeHash = null
 
-    const updated = await repository.updateCatalogue(id, session.orgId, patch)
+    /**
+     * A new guest code signs out everyone holding the old one (N-71): the grant cookie carries the
+     * version it was issued under, and this is the bump that stops it matching.
+     */
+    if (passcode !== undefined || body.privacy === 'unlisted') {
+      patch.passcodeVersion = catalogue.passcodeVersion + 1
+    }
+
+    const updated = await repository.updateCatalogue(id, catalogue.orgId, patch)
     // Both slugs: the address a guest may already be holding, and the one they will use next.
     revalidateCatalogue(catalogue.slug)
     if (updated.slug !== catalogue.slug) revalidateCatalogue(updated.slug)

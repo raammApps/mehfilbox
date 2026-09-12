@@ -49,7 +49,9 @@ export async function resolveAccess(slug: string): Promise<AccessVerdict> {
 
   if (catalogue.privacy === 'passcode') {
     const grant = (await cookies()).get(passcodeCookieName(catalogue.slug))?.value
-    if (!verifyPasscodeGrant(grant, catalogue.id)) return { kind: 'locked', catalogue }
+    if (!verifyPasscodeGrant(grant, catalogue.id, catalogue.passcodeVersion)) {
+      return { kind: 'locked', catalogue }
+    }
   }
 
   return { kind: 'ok', catalogue }

@@ -17,6 +17,7 @@ export default async function NewCataloguePage() {
       operatorName={session.operator.name}
       operatorEmail={session.operator.email}
       orgName={org?.name}
+      orgKind={org?.kind}
     >
       <div className="mb-6">
         <h1 className="text-[24px] font-bold tracking-[-0.01em]">New catalogue</h1>

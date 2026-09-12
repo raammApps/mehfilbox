@@ -237,6 +237,24 @@ https://mehfilbox.com/admin/studio
 
 ---
 
+## 9b. The couple's sign-in and their account · N-62
+
+On a wedding's overview, **Give the couple their sign-in**: their email, their name, and *Show me
+a temporary one*. Read the password off the screen — it is shown once. Sign out, open
+`/login?door=couple`, and sign in with it: the first thing that happens is a screen asking for a
+password of their own. After that, `/my` lists the wedding as *being prepared by* your studio;
+**Manage** offers the link, the share, download, and the guest code — and nothing else yet.
+
+Set a guest code from there while a second browser has the page open with the old one: the second
+browser is back at the code screen on its next navigation.
+
+Back in the studio console the overview says *Their account is …* and the handover panel offers
+**Hand over now**. Take it. The wedding leaves your list and appears under **Delivered** at the
+bottom of the console with *Access closed*; the couple's `/my` now says *Yours* and offers the
+letter, the sections and your studio's access window. Open a window for seven days there, and
+the Delivered card says *Access open* with a link into the customizer; the overview inside carries
+an *on the couple's invitation* banner and no handover or delivery panels.
+
 ## 10. Handing over to the couple
 
 On the Overview, **Hand this over to the couple**.

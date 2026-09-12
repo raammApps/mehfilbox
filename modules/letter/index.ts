@@ -1,7 +1,20 @@
 import dynamic from 'next/dynamic'
+import { resolveLocalised } from '@/lib/i18n'
+import type { LocalisedString } from '@/lib/schema'
 import { defineModule } from '../contract'
 import Guest from './Guest'
 import { configSchema, type LetterConfig } from './schema'
+
+/**
+ * The couple writes in the language their account reads. English is the fallback every localised
+ * string must carry, so it is filled in when it was empty and left alone when it was not — a
+ * Hindi rewrite must not overwrite the English a guest with the toggle sees.
+ */
+function localised(current: LocalisedString, text: string, locale: 'en' | 'hi'): LocalisedString {
+  const next = { ...current, [locale]: text }
+  if (!next.en) next.en = text
+  return next
+}
 
 export default defineModule<LetterConfig>({
   meta: {
@@ -28,6 +41,19 @@ export default defineModule<LetterConfig>({
   Editor: dynamic(() => import('./Editor')),
 
   defaults: () => ({ body: { en: '' }, signature: { en: '' }, theme: 'plain' }),
+
+  /** The letter is what a couple rewrites from their account (D-37). */
+  prose: {
+    read: (config, locale) => ({
+      body: resolveLocalised(config.body, locale),
+      signature: resolveLocalised(config.signature, locale),
+    }),
+    write: (config, { body, signature, locale }) => ({
+      ...config,
+      body: localised(config.body, body, locale),
+      signature: localised(config.signature, signature, locale),
+    }),
+  },
 
   advise: (config) => {
     const words = config.body.en.trim().split(/\s+/).filter(Boolean).length

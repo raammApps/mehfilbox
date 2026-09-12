@@ -24,6 +24,7 @@ export default async function StudioPage() {
       operatorName={session.operator.name}
       operatorEmail={session.operator.email}
       orgName={org.name}
+      orgKind={org.kind}
     >
       <div className="mx-auto w-full max-w-[560px] p-6">
         <h1 className="mb-1 text-[24px] font-bold tracking-[-0.01em]">Your studio&rsquo;s look</h1>

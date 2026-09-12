@@ -209,6 +209,22 @@ export interface Repository {
   getCatalogue(id: string, orgId: string): Promise<Catalogue | null>
   /** Unscoped lookup, for paths that already hold a trusted id (webhooks, ISR revalidation). */
   getCatalogueById(id: string): Promise<Catalogue | null>
+
+  // ── Couple accounts and the support window (D-37, doc 16 §3) ────────────────
+  /**
+   * Everything a couple's account can see: what it owns, and what is linked to it before the
+   * handover. A disjunction, and the only one in the product — contained here and in
+   * `lib/my/session.ts`, never in a route.
+   */
+  listCataloguesForCouple(coupleOrgId: string): Promise<Catalogue[]>
+  getCatalogueForCouple(id: string, coupleOrgId: string): Promise<Catalogue | null>
+  /** What a studio originated but no longer owns — the Delivered view (N-74). */
+  listOriginatedCatalogues(orgId: string): Promise<Catalogue[]>
+  /**
+   * A handed-over catalogue the originating studio may still edit, because the couple opened a
+   * window and it has not closed. The second authorisation path, read only by `session.ts`.
+   */
+  getCatalogueForSupport(id: string, originOrgId: string, now: Date): Promise<Catalogue | null>
   /** Guest path: resolve by subdomain label with no org scope. */
   getCatalogueBySlug(slug: string): Promise<Catalogue | null>
   getCatalogueByCustomDomain(host: string): Promise<Catalogue | null>

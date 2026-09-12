@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { requireOwnedCatalogue } from '@/lib/admin/session'
+import { requireEditableCatalogue } from '@/lib/admin/session'
 import { getRepository } from '@/lib/db'
 import { noStore, readJson, route } from '@/lib/http/handler'
 
@@ -15,7 +15,7 @@ const bodySchema = z.object({
 export async function POST(request: Request) {
   return route('admin/titles:reorder', async () => {
     const body = await readJson(request, bodySchema)
-    const { catalogue } = await requireOwnedCatalogue(body.catalogueId)
+    const { catalogue } = await requireEditableCatalogue(body.catalogueId)
     await getRepository().reorderTitles(catalogue.id, body.order)
     return noStore({ ok: true })
   })

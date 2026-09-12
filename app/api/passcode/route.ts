@@ -72,7 +72,7 @@ export async function POST(request: Request) {
     const response = NextResponse.json({ ok: true }, { headers: { 'cache-control': 'no-store' } })
     response.cookies.set(
       passcodeCookieName(catalogue.slug),
-      createPasscodeGrant(catalogue.id),
+      createPasscodeGrant(catalogue.id, catalogue.passcodeVersion),
       cookieOptions(PASSCODE_TTL_S),
     )
     return response

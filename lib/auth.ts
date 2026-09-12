@@ -85,11 +85,30 @@ export function passcodeCookieName(catalogueSlug: string): string {
   return `${PASSCODE_COOKIE_PREFIX}${catalogueSlug}`
 }
 
-export function createPasscodeGrant(catalogueId: string): string {
-  return encodeToken({ cid: catalogueId, exp: Math.floor(Date.now() / 1000) + PASSCODE_TTL_S })
+/**
+ * `version` is the catalogue's `passcodeVersion` at the time the code was accepted (N-71). A grant
+ * from before the code changed carries the old number and stops matching, so changing the code is
+ * how the couple signs out everyone holding the old one — nothing to enumerate, nothing to revoke.
+ */
+export function createPasscodeGrant(catalogueId: string, version = 1): string {
+  return encodeToken({
+    cid: catalogueId,
+    v: version,
+    exp: Math.floor(Date.now() / 1000) + PASSCODE_TTL_S,
+  })
 }
 
-export function verifyPasscodeGrant(token: string | null | undefined, catalogueId: string): boolean {
-  const payload = decodeToken<{ cid: string; exp: number }>(token)
-  return !!payload && payload.cid === catalogueId && payload.exp * 1000 > Date.now()
+export function verifyPasscodeGrant(
+  token: string | null | undefined,
+  catalogueId: string,
+  version = 1,
+): boolean {
+  const payload = decodeToken<{ cid: string; v?: number; exp: number }>(token)
+  return (
+    !!payload &&
+    payload.cid === catalogueId &&
+    // A grant minted before versions existed carries none and counts as the first.
+    (payload.v ?? 1) === version &&
+    payload.exp * 1000 > Date.now()
+  )
 }

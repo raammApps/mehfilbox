@@ -16,11 +16,14 @@ export function ClaimForm({
   coupleName,
   partnerName,
   email,
+  existing = false,
 }: {
   token: string
   coupleName: string
   partnerName: string
   email: string
+  /** The address already has a couple account: the password field is the existing one (D-37). */
+  existing?: boolean
 }) {
   const router = useRouter()
   const [busy, setBusy] = useState(false)
@@ -106,9 +109,9 @@ export function ClaimForm({
       </p>
       <h1 className="mt-1 text-[26px] font-bold">{coupleName}</h1>
       <p className="mb-6 mt-2 text-[15px] text-[var(--color-l-text-mid)]">
-        Set a password and it becomes yours: your films, your photographs, yours to keep going.
-        {' '}
-        {partnerName} will no longer be able to change it.
+        {existing
+          ? `Sign in with the password you already use and this wedding joins your account. ${partnerName} will no longer be able to change it.`
+          : `Set a password and it becomes yours: your films, your photographs, yours to keep going. ${partnerName} will no longer be able to change it.`}
       </p>
 
       {error ? (
@@ -140,18 +143,22 @@ export function ClaimForm({
       </label>
 
       <label className="mb-5 block">
-        <span className="mb-1 block text-[13px] font-semibold">Choose a password</span>
+        <span className="mb-1 block text-[13px] font-semibold">
+          {existing ? 'Your password' : 'Choose a password'}
+        </span>
         <input
           name="password"
           type="password"
           required
-          minLength={12}
-          autoComplete="new-password"
+          minLength={existing ? 1 : 12}
+          autoComplete={existing ? 'current-password' : 'new-password'}
           className="h-11 w-full rounded-[var(--radius-input)] border border-[var(--color-l-line)] px-3 text-[15px]"
         />
-        <span className="mt-1 block text-[12px] text-[var(--color-l-text-mid)]">
-          At least 12 characters.
-        </span>
+        {!existing ? (
+          <span className="mt-1 block text-[12px] text-[var(--color-l-text-mid)]">
+            At least 12 characters.
+          </span>
+        ) : null}
       </label>
 
       <button
@@ -159,7 +166,7 @@ export function ClaimForm({
         disabled={busy}
         className="h-11 w-full rounded-[var(--radius-pill)] bg-accent text-[15px] font-semibold text-accent-ink disabled:opacity-60"
       >
-        {busy ? 'Setting up…' : 'Take ownership'}
+        {busy ? (existing ? 'Adding…' : 'Setting up…') : existing ? 'Add to my account' : 'Take ownership'}
       </button>
     </form>
   )

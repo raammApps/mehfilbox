@@ -230,7 +230,12 @@ export type Transfer = z.infer<typeof transferSchema>
 export const claimSchema = z.object({
   token: z.string().min(20).max(200),
   coupleName: z.string().trim().min(2).max(80),
-  password: z.string().min(12, 'Use at least 12 characters').max(200),
+  /**
+   * A new password when the address has no account, the existing one when it does (D-37). The
+   * twelve-character floor for a new one is applied in the route, which is the only place that
+   * knows which case this is.
+   */
+  password: z.string().min(1).max(200),
 })
 
 /** What a partner signs up with. The password never lands in this object. */
@@ -434,9 +439,28 @@ export const catalogueSchema = z.object({
   locale: localeSchema.default('en'),
   template: z.string().nullable().default(null),
 
+  /**
+   * The couple's account, linked from the moment the studio creates it (D-37). Until the
+   * handover the studio owns the row and the couple sees it as "being prepared"; afterwards
+   * `orgId` is the couple's and this still says who it was for.
+   */
+  coupleOrgId: z.string().uuid().nullable().default(null),
+  /**
+   * The originating studio's way back in after a handover (doc 16 §3): while this is in the
+   * future the studio may open the customizer. Set from the couple's account, seven days at a
+   * time, and it closes on its own. Read in exactly one place, `lib/admin/session.ts`.
+   */
+  supportAccessUntil: z.string().nullable().default(null),
+
   status: catalogueStatusSchema.default('draft'),
   privacy: privacySchema.default('unlisted'),
   passcodeHash: z.string().nullable().default(null),
+  /**
+   * Bumped whenever the guest code changes (N-71). The grant cookie carries the version it was
+   * issued under, so changing the code signs out everyone who typed the old one — which is what
+   * the couple who changed it expects, and what the console tells them.
+   */
+  passcodeVersion: z.number().int().positive().default(1),
 
   includedUntil: z.string(),
   subStatus: subStatusSchema.default('included'),

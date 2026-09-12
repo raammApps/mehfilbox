@@ -48,7 +48,7 @@ export async function resolveDownloadAccess(slug: string): Promise<DownloadVerdi
 
   if (catalogue.privacy === 'passcode') {
     const grant = (await cookies()).get(passcodeCookieName(catalogue.slug))?.value
-    if (!verifyPasscodeGrant(grant, catalogue.id)) return { kind: 'locked' }
+    if (!verifyPasscodeGrant(grant, catalogue.id, catalogue.passcodeVersion)) return { kind: 'locked' }
   }
 
   return { kind: 'ok', catalogue }

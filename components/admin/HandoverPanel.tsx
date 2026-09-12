@@ -22,12 +22,16 @@ import { IconSend } from './icons'
 export function HandoverPanel({
   catalogueId,
   outstanding,
+  linkedEmail = null,
 }: {
   catalogueId: string
   outstanding: { toEmail: string; expiresAtLabel: string } | null
+  /** The couple's account, when the studio has already issued one (D-37): no link needed. */
+  linkedEmail?: string | null
 }) {
   const router = useRouter()
   const [email, setEmail] = useState('')
+  const [handedOver, setHandedOver] = useState(false)
   const [claimUrl, setClaimUrl] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
@@ -56,6 +60,36 @@ export function HandoverPanel({
     setClaimUrl(body.claimUrl)
     setEmail('')
     setBusy(false)
+    router.refresh()
+  }
+
+  /**
+   * The usual case since D-37: the couple already has an account, so ownership moves now and
+   * they are told by email. Nothing to forward, nothing to accept.
+   */
+  const handOverNow = async () => {
+    if (!window.confirm(`Hand this wedding over to ${linkedEmail} now? You lose access to it, and they gain it.`)) return
+    setBusy(true)
+    setError(null)
+    const response = await fetch(`/api/admin/catalogues/${catalogueId}/transfer`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ direct: true }),
+    })
+    if (!response.ok) {
+      const body = (await response.json().catch(() => null)) as { error?: { message?: string } } | null
+      setError(body?.error?.message ?? 'Could not hand over')
+      setBusy(false)
+      return
+    }
+    setHandedOver(true)
+    setBusy(false)
+    /**
+     * The list, not a refresh. This page is the wedding's overview, and the studio has just
+     * stopped owning it — a refresh here is a 404 with the studio still standing on it. The list
+     * is where the wedding reappears, under Delivered.
+     */
+    router.replace('/admin')
     router.refresh()
   }
 
@@ -118,7 +152,31 @@ export function HandoverPanel({
         </div>
       ) : null}
 
-      {outstanding ? (
+      {handedOver ? (
+        <p className="rounded-[var(--radius-card)] border border-[color-mix(in_srgb,var(--color-ok)_35%,white)] bg-[color-mix(in_srgb,var(--color-ok)_8%,white)] px-3 py-2.5 text-[13px]">
+          Handed over. The couple has been told by email, and this wedding is now in their account.
+        </p>
+      ) : linkedEmail && !outstanding ? (
+        <div className="flex flex-wrap items-center justify-between gap-2 rounded-[var(--radius-card)] border border-[var(--color-l-line)] bg-[var(--color-l-surface-2)] px-3 py-2.5">
+          <p className="text-[13px]">
+            Their account is <strong className="font-semibold">{linkedEmail}</strong>.
+            <span className="block text-[12px] text-[var(--color-l-text-mid)]">
+              No link to forward — it moves now, and they are told by email.
+            </span>
+          </p>
+          <button
+            type="button"
+            onClick={() => void handOverNow()}
+            disabled={busy}
+            className="inline-flex h-10 shrink-0 items-center gap-2 rounded-[var(--radius-pill)] bg-accent px-4 text-[14px] font-semibold text-accent-ink disabled:opacity-50"
+          >
+            <span aria-hidden>
+              <IconSend />
+            </span>
+            {busy ? 'Handing over…' : 'Hand over now'}
+          </button>
+        </div>
+      ) : outstanding ? (
         <div className="flex flex-wrap items-center justify-between gap-2 rounded-[var(--radius-card)] border border-[var(--color-l-line)] bg-[var(--color-l-surface-2)] px-3 py-2.5">
           <p className="text-[13px]">
             Waiting to be accepted by{' '}

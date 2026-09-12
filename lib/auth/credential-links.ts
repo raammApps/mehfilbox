@@ -1,5 +1,5 @@
 import 'server-only'
-import { createHash, randomBytes, randomUUID } from 'node:crypto'
+import { createHash, randomBytes, randomInt, randomUUID } from 'node:crypto'
 import { getRepository } from '@/lib/db'
 import { env } from '@/lib/env'
 import { log } from '@/lib/log'
@@ -25,6 +25,21 @@ export const RESET_TTL_S = 60 * 60
 export const SET_PASSWORD_TTL_S = 14 * 24 * 60 * 60
 
 export type CredentialPurpose = CredentialLink['purpose']
+
+const WORDS = [
+  'marigold', 'sangeet', 'mandap', 'baraat', 'mehendi', 'jaimala', 'haldi', 'sehra', 'dhol',
+  'phera', 'shehnai', 'kalire', 'chunari', 'rangoli', 'diya', 'genda', 'mogra', 'saffron',
+]
+
+/**
+ * A password a studio can read out to a couple sitting across the table (D-33): two words a
+ * Hindi speaker will spell correctly and four digits, which is over sixty bits and still fits on
+ * a Post-it. Flagged `mustChangePassword`, so it lives exactly one sign-in.
+ */
+export function temporaryPassword(): string {
+  const pick = () => WORDS[randomInt(WORDS.length)]!
+  return `${pick()}-${pick()}-${String(randomInt(1000, 9999))}`
+}
 
 export function hashToken(token: string): string {
   return createHash('sha256').update(token).digest('hex')

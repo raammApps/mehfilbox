@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto'
 import { z } from 'zod'
-import { requireOwnedCatalogue } from '@/lib/admin/session'
+import { requireEditableCatalogue } from '@/lib/admin/session'
 import { revalidateCatalogue } from '@/lib/catalogue-cache'
 import { getRepository } from '@/lib/db'
 import { ApiError } from '@/lib/http/errors'
@@ -69,7 +69,7 @@ const metaSchema = z.object({
 export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   return route('admin/photos:list', async () => {
     const { id } = await params
-    await requireOwnedCatalogue(id)
+    await requireEditableCatalogue(id)
 
     const repository = getRepository()
     const albums = await repository.listAlbums(id)
@@ -82,7 +82,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   return route('admin/photos:create', async () => {
     const { id } = await params
-    const { catalogue } = await requireOwnedCatalogue(id)
+    const { catalogue } = await requireEditableCatalogue(id)
 
     const form = await request.formData().catch(() => null)
     const file = form?.get('file')

@@ -1,11 +1,16 @@
 import { randomBytes, randomUUID, createHash } from 'node:crypto'
 import { z } from 'zod'
+import { publicUrlOf } from '@/lib/address'
 import { requireOwnedCatalogue } from '@/lib/admin/session'
+import { revalidateCatalogue } from '@/lib/catalogue-cache'
 import { getRepository } from '@/lib/db'
 import { env } from '@/lib/env'
+import { formatWeddingDate } from '@/lib/format'
 import { ApiError } from '@/lib/http/errors'
 import { noStore, readJson, route } from '@/lib/http/handler'
+import { resolveLocalised } from '@/lib/i18n'
 import { log } from '@/lib/log'
+import { enqueue } from '@/lib/notify/send'
 import { transferSchema } from '@/lib/schema'
 import { rootUrl } from '@/lib/tenant'
 
@@ -27,7 +32,11 @@ export const dynamic = 'force-dynamic'
  */
 
 const DAYS = 14
-const bodySchema = z.object({ email: z.string().email() })
+const bodySchema = z.union([
+  z.object({ email: z.string().email() }),
+  /** Hand over to the linked couple account now — no link, no wait (D-37). */
+  z.object({ direct: z.literal(true) }),
+])
 
 /** The token is a bearer credential; only its hash is ever written down. */
 function hashToken(token: string): string {
@@ -41,6 +50,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     const body = await readJson(request, bodySchema)
 
     const repository = getRepository()
+
+    if ('direct' in body) return noStore(await handOverNow(catalogue, session.orgId))
 
     // One live handover per catalogue. Two outstanding links is a way to give a wedding to the
     // wrong household, so superseding is explicit: cancel, then issue again.
@@ -80,6 +91,66 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       claimUrl: rootUrl(env.ROOT_DOMAIN, `/claim/${token}`),
     })
   })
+}
+
+/**
+ * The handover when the couple already has an account, which since D-37 is the usual case: the
+ * studio issued it when the catalogue was created. Nothing to forward, nothing to accept —
+ * ownership moves now, the studio's access closes, and the couple is told by email.
+ */
+async function handOverNow(
+  catalogue: Awaited<ReturnType<typeof requireOwnedCatalogue>>['catalogue'],
+  fromOrgId: string,
+) {
+  const repository = getRepository()
+  if (!catalogue.coupleOrgId) {
+    throw new ApiError('VALIDATION_FAILED', 'Create the couple’s sign-in first, or send them a link')
+  }
+  const couple = await repository.getOrg(catalogue.coupleOrgId)
+  if (!couple || couple.kind !== 'couple') {
+    throw new ApiError('VALIDATION_FAILED', 'The linked account is no longer there')
+  }
+
+  // Snapshot the studio's credit while it still owns the row, exactly as the claim route does.
+  const studio = await repository.getOrg(fromOrgId)
+  if (!catalogue.branding.presentedBy && studio?.name) {
+    await repository.updateCatalogue(catalogue.id, fromOrgId, {
+      branding: { ...catalogue.branding, presentedBy: studio.name },
+    })
+  }
+
+  await repository.transferCatalogue(catalogue.id, fromOrgId, couple.id)
+  // The window is the couple's to open; a handover starts with it shut.
+  await repository.updateCatalogue(catalogue.id, couple.id, { supportAccessUntil: null })
+  revalidateCatalogue(catalogue.slug)
+
+  const operators = await repository.listOperators(couple.id)
+  for (const operator of operators) {
+    await enqueue({
+      template: 'handover',
+      channel: 'email',
+      address: operator.email,
+      locale: catalogue.locale,
+      orgId: couple.id,
+      catalogueId: catalogue.id,
+      params: {
+        coupleName: resolveLocalised(catalogue.coupleName, catalogue.locale),
+        studioName: studio?.name ?? 'your studio',
+        url: rootUrl(env.ROOT_DOMAIN, '/my'),
+        date: formatWeddingDate(catalogue.includedUntil, catalogue.locale),
+      },
+    }).catch((error: unknown) => {
+      log.error('handover: email could not be queued', { reason: String(error) })
+    })
+  }
+
+  log.info('catalogue handed over directly', {
+    catalogueId: catalogue.id,
+    fromOrgId,
+    toOrgId: couple.id,
+    guestUrl: publicUrlOf(catalogue),
+  })
+  return { transferred: true, toOrgId: couple.id }
 }
 
 /** Cancel a handover the couple has not accepted. */

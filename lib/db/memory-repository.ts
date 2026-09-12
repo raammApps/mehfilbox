@@ -430,6 +430,44 @@ export class MemoryRepository implements Repository {
     return this.clone(this.data.catalogues.find((c) => c.id === id) ?? null)
   }
 
+  // ── Couple accounts and the support window ──────────────────────────────────
+  async listCataloguesForCouple(coupleOrgId: string): Promise<Catalogue[]> {
+    return this.clone(
+      this.data.catalogues
+        .filter((c) => c.orgId === coupleOrgId || c.coupleOrgId === coupleOrgId)
+        .sort((a, b) => b.createdAt.localeCompare(a.createdAt)),
+    )
+  }
+
+  async getCatalogueForCouple(id: string, coupleOrgId: string): Promise<Catalogue | null> {
+    return this.clone(
+      this.data.catalogues.find(
+        (c) => c.id === id && (c.orgId === coupleOrgId || c.coupleOrgId === coupleOrgId),
+      ) ?? null,
+    )
+  }
+
+  async listOriginatedCatalogues(orgId: string): Promise<Catalogue[]> {
+    return this.clone(
+      this.data.catalogues
+        .filter((c) => c.originOrgId === orgId && c.orgId !== orgId)
+        .sort((a, b) => b.createdAt.localeCompare(a.createdAt)),
+    )
+  }
+
+  async getCatalogueForSupport(id: string, originOrgId: string, now: Date): Promise<Catalogue | null> {
+    return this.clone(
+      this.data.catalogues.find(
+        (c) =>
+          c.id === id &&
+          c.originOrgId === originOrgId &&
+          c.orgId !== originOrgId &&
+          c.supportAccessUntil !== null &&
+          new Date(c.supportAccessUntil).getTime() > now.getTime(),
+      ) ?? null,
+    )
+  }
+
   async getCatalogueBySlug(slug: string): Promise<Catalogue | null> {
     return this.clone(this.data.catalogues.find((c) => c.slug === slug) ?? null)
   }

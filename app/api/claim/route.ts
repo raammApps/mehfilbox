@@ -13,7 +13,7 @@ import { log } from '@/lib/log'
 import { enqueue } from '@/lib/notify/send'
 import { publicUrlOf } from '@/lib/address'
 import { suggestOrgSlug } from '@/lib/format'
-import { claimSchema, orgSchema } from '@/lib/schema'
+import { claimSchema, orgSchema, type Catalogue, type Transfer } from '@/lib/schema'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -65,6 +65,36 @@ export async function POST(request: Request) {
     const catalogue = await repository.getCatalogueById(transfer.catalogueId)
     if (!catalogue) throw new ApiError('NOT_FOUND', 'This link is no longer valid. Ask for a new one.')
 
+    /**
+     * An address that already has a couple account accepts by signing in, and the catalogue joins
+     * that account (D-37) — the second wedding, the anniversary from another studio. One account,
+     * never two. The password field on the form is the existing password in that case.
+     */
+    const existing = await repository.getOperatorByEmail(transfer.toEmail)
+    if (existing) {
+      const existingOrg = await repository.getOrg(existing.orgId)
+      if (existingOrg?.kind !== 'couple') {
+        throw new ApiError('VALIDATION_FAILED', 'That address belongs to a studio account')
+      }
+      const holder = await getAuthProvider().signIn(transfer.toEmail, body.password, new NextResponse(null))
+      if (!holder || holder.id !== existing.id) {
+        throw new ApiError('VALIDATION_FAILED', 'That is not the password for this account', {
+          fields: { password: 'Sign in with the password you already use' },
+        })
+      }
+      await attach(catalogue, transfer, existingOrg.id)
+      return NextResponse.json(
+        { catalogue: { slug: catalogue.slug }, email: transfer.toEmail, existing: true },
+        { status: 201, headers: { 'cache-control': 'no-store' } },
+      )
+    }
+
+    if (body.password.length < 12) {
+      throw new ApiError('VALIDATION_FAILED', 'Use at least 12 characters', {
+        fields: { password: 'Use at least 12 characters' },
+      })
+    }
+
     // The credential first: nothing has moved yet, so a failure here leaves the handover intact
     // and the link still usable.
     const user = await getAuthProvider().signUp(transfer.toEmail, body.password)
@@ -103,32 +133,51 @@ export async function POST(request: Request) {
       throw error
     }
 
-    // Snapshot the partner's credit while they still own the row, so it survives them losing
-    // the ability to set it.
-    const partner = await repository.getOrg(transfer.fromOrgId)
-    if (!catalogue.branding.presentedBy && partner?.name) {
-      await repository.updateCatalogue(catalogue.id, transfer.fromOrgId, {
-        branding: { ...catalogue.branding, presentedBy: partner.name },
-      })
-    }
+    await attach(catalogue, transfer, org.id)
 
-    /**
+    // No session: signing in is deliberate, and under Supabase Auth the address may still need
+    // confirming, which this route cannot know.
+    return NextResponse.json(
+      { catalogue: { slug: catalogue.slug }, email: transfer.toEmail },
+      { status: 201, headers: { 'cache-control': 'no-store' } },
+    )
+  })
+}
+
+/**
+ * Everything that happens once the couple's org is known: the studio's credit is snapshotted,
+ * the row moves, the transfer is spent, the cache dropped, and the couple is told. Shared by the
+ * new-account path and the existing-account path so neither can drift.
+ */
+
+async function attach(catalogue: Catalogue, transfer: Transfer, toOrgId: string): Promise<void> {
+  const repository = getRepository()
+  // Snapshot the partner's credit while they still own the row, so it survives them losing
+  // the ability to set it.
+  const partner = await repository.getOrg(transfer.fromOrgId)
+  if (!catalogue.branding.presentedBy && partner?.name) {
+    await repository.updateCatalogue(catalogue.id, transfer.fromOrgId, {
+      branding: { ...catalogue.branding, presentedBy: partner.name },
+    })
+  }
+
+  /**
      * Scoped by the *partner's* org, which is what makes this safe to run from a route a
      * stranger reached: the only catalogue it can move is the one the transfer names, owned by
      * the org that issued it. A tampered token still cannot reach anybody else's wedding.
      */
-    await repository.transferCatalogue(catalogue.id, transfer.fromOrgId, org.id)
+  await repository.transferCatalogue(catalogue.id, transfer.fromOrgId, toOrgId)
 
-    await repository.markTransferClaimed(transfer.id, org.id)
-    revalidateCatalogue(catalogue.slug)
+  await repository.markTransferClaimed(transfer.id, toOrgId)
+  revalidateCatalogue(catalogue.slug)
 
-    log.info('catalogue claimed', {
-      catalogueId: catalogue.id,
-      fromOrgId: transfer.fromOrgId,
-      toOrgId: org.id,
-    })
+  log.info('catalogue claimed', {
+    catalogueId: catalogue.id,
+    fromOrgId: transfer.fromOrgId,
+    toOrgId: toOrgId,
+  })
 
-    /**
+  /**
      * The handover email (N-21).
      *
      * A couple only learns what they have if somebody tells them, and until now that was the
@@ -142,33 +191,25 @@ export async function POST(request: Request) {
      * Queued rather than sent, and failure is swallowed: a mailer being down must not turn a
      * successful claim into an error for someone who has just typed their name into a form.
      */
-    try {
-      await enqueue({
-        template: 'handover',
-        channel: 'email',
-        address: transfer.toEmail,
-        locale: catalogue.locale,
-        orgId: org.id,
-        catalogueId: catalogue.id,
-        params: {
-          coupleName: resolveLocalised(catalogue.coupleName, catalogue.locale),
-          studioName: partner?.name ?? 'your studio',
-          url: publicUrlOf(catalogue),
-          date: formatWeddingDate(catalogue.includedUntil, catalogue.locale),
-        },
-      })
-    } catch (error) {
-      log.error('claim: handover email could not be queued', {
-        catalogueId: catalogue.id,
-        reason: (error as Error).message,
-      })
-    }
-
-    // No session: signing in is deliberate, and under Supabase Auth the address may still need
-    // confirming, which this route cannot know.
-    return NextResponse.json(
-      { catalogue: { slug: catalogue.slug }, email: transfer.toEmail },
-      { status: 201, headers: { 'cache-control': 'no-store' } },
-    )
-  })
+  try {
+    await enqueue({
+      template: 'handover',
+      channel: 'email',
+      address: transfer.toEmail,
+      locale: catalogue.locale,
+      orgId: toOrgId,
+      catalogueId: catalogue.id,
+      params: {
+        coupleName: resolveLocalised(catalogue.coupleName, catalogue.locale),
+        studioName: partner?.name ?? 'your studio',
+        url: publicUrlOf(catalogue),
+        date: formatWeddingDate(catalogue.includedUntil, catalogue.locale),
+      },
+    })
+  } catch (error) {
+    log.error('claim: handover email could not be queued', {
+      catalogueId: catalogue.id,
+      reason: (error as Error).message,
+    })
+  }
 }

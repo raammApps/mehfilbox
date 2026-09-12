@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { requireOwnedCatalogue } from '@/lib/admin/session'
+import { requireEditableCatalogue } from '@/lib/admin/session'
 import { getRepository } from '@/lib/db'
 import { ApiError } from '@/lib/http/errors'
 import { noStore, readJson, route } from '@/lib/http/handler'
@@ -23,7 +23,8 @@ const bodySchema = z.object({ modules: z.array(moduleInstanceSchema) })
 export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
   return route('admin/catalogue:modules', async () => {
     const { id } = await params
-    const { session } = await requireOwnedCatalogue(id)
+    // Owner, or the originating studio inside the couple's support window (doc 16 §3).
+    const { catalogue: owned } = await requireEditableCatalogue(id)
     const body = await readJson(request, bodySchema)
 
     const fields: Record<string, string> = {}
@@ -49,7 +50,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     // the same slot.
     const normalised = body.modules.map((instance, index) => ({ ...instance, order: index }))
 
-    const catalogue = await getRepository().updateCatalogue(id, session.orgId, {
+    const catalogue = await getRepository().updateCatalogue(id, owned.orgId, {
       draftModules: normalised,
     })
 

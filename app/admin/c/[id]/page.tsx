@@ -3,11 +3,12 @@ import { notFound, redirect } from 'next/navigation'
 import { AdminChrome } from '@/components/admin/AdminChrome'
 import { AttentionChip } from '@/components/admin/CatalogueBoard'
 import { CatalogueAnalytics } from '@/components/admin/CatalogueAnalytics'
+import { CoupleAccountPanel } from '@/components/admin/CoupleAccountPanel'
 import { HandoverPanel } from '@/components/admin/HandoverPanel'
 import { PublicLink } from '@/components/admin/PublicLink'
 import { SendToCouple } from '@/components/admin/SendToCouple'
 import { SetupChecklist } from '@/components/admin/SetupChecklist'
-import { getOperatorSession, getSessionOrg } from '@/lib/admin/session'
+import { getEditableCatalogue, getSessionOrg } from '@/lib/admin/session'
 import { catalogueAttention } from '@/lib/admin/catalogue-health'
 import { setupChecklist } from '@/lib/admin/setup-checklist'
 import { hoursFor, resolveLimits, storageUsage } from '@/lib/entitlements'
@@ -24,13 +25,15 @@ export default async function CatalogueOverviewPage({
 }: {
   params: Promise<{ id: string }>
 }) {
-  const session = await getOperatorSession()
-  if (!session) redirect('/admin/login')
-
   const { id } = await params
+  const editable = await getEditableCatalogue(id)
+  if (!editable) {
+    const { getOperatorSession } = await import('@/lib/admin/session')
+    if (!(await getOperatorSession())) redirect('/admin/login')
+    notFound()
+  }
+  const { session, catalogue, via } = editable
   const repository = getRepository()
-  const catalogue = await repository.getCatalogue(id, session.orgId)
-  if (!catalogue) notFound()
 
   const [titles, photos, org, transfer, grants, usedBytes] = await Promise.all([
     repository.listTitles(catalogue.id),
@@ -40,6 +43,11 @@ export default async function CatalogueOverviewPage({
     repository.getEntitlements(catalogue.id, catalogue.orgId),
     repository.catalogueStorageBytes(catalogue.id),
   ])
+
+  // The couple's account, when the studio has issued one (D-37): who signs in, and to what.
+  const coupleOrg = catalogue.coupleOrgId ? await repository.getOrg(catalogue.coupleOrgId) : null
+  const coupleOperator = coupleOrg ? (await repository.listOperators(coupleOrg.id))[0] ?? null : null
+  const linkedCouple = coupleOperator ? { email: coupleOperator.email, name: coupleOperator.name } : null
 
   const limits = resolveLimits(grants.catalogue, grants.org)
 
@@ -62,9 +70,9 @@ export default async function CatalogueOverviewPage({
   })
   const url = publicUrlOf(catalogue)
 
-  // A couple owns exactly one wedding — their own — and has nobody to hand it to. Showing them
-  // the panel would only invite them to give their own catalogue away.
-  const canHandOver = org?.kind === 'partner'
+  // A couple has nobody to hand their own wedding to, and a studio inside a support window is
+  // there to fix the page, not to move it (doc 16 §3).
+  const canHandOver = org?.kind === 'partner' && via === 'owner'
 
   /**
    * The delivery copy, composed here from the same template the email uses (N-36). Rendering it
@@ -78,15 +86,16 @@ export default async function CatalogueOverviewPage({
     date: formatWeddingDate(catalogue.includedUntil, catalogue.locale),
   }).text
 
-  // Prefilled where a handover is already in flight: that address is the couple's, and retyping
-  // it is a chance to get it wrong.
-  const outstandingTransferEmail = transfer?.toEmail ?? null
+  // Prefilled from the couple's account, or from a handover already in flight: that address is
+  // the couple's, and retyping it is a chance to get it wrong.
+  const outstandingTransferEmail = linkedCouple?.email ?? transfer?.toEmail ?? null
 
   return (
     <AdminChrome
       operatorName={session.operator.name}
       operatorEmail={session.operator.email}
       orgName={org?.name}
+      orgKind={org?.kind}
       catalogue={{
         id: catalogue.id,
         name: catalogue.coupleName.en,
@@ -94,6 +103,16 @@ export default async function CatalogueOverviewPage({
         status: catalogue.status,
       }}
     >
+      {via === 'support' ? (
+        <p className="mb-5 rounded-[var(--radius-card)] border border-[color-mix(in_srgb,var(--color-warn)_45%,white)] bg-[color-mix(in_srgb,var(--color-warn)_10%,white)] px-4 py-3 text-[13px]">
+          <strong className="font-semibold">On the couple&rsquo;s invitation.</strong> This wedding is
+          theirs now; they opened a window for you until{' '}
+          {catalogue.supportAccessUntil ? formatWeddingDate(catalogue.supportAccessUntil, 'en') : 'they close it'}
+          . Films, photographs, sections and branding are yours to fix; the settings and the
+          handover are not.
+        </p>
+      ) : null}
+
       <div className="mb-5 flex flex-wrap items-center gap-3">
         <AttentionChip attention={attention} />
         <p className="text-[13px] text-[var(--color-l-text-mid)]">
@@ -195,8 +214,15 @@ export default async function CatalogueOverviewPage({
 
           {canHandOver ? (
             <div className="mt-4">
+              <CoupleAccountPanel catalogueId={catalogue.id} linked={linkedCouple} />
+            </div>
+          ) : null}
+
+          {canHandOver ? (
+            <div className="mt-4">
               <HandoverPanel
                 catalogueId={catalogue.id}
+                linkedEmail={linkedCouple?.email ?? null}
                 outstanding={
                   transfer
                     ? {
