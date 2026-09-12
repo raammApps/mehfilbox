@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test'
-import { signIn } from './helpers'
+import { DEMO_CATALOGUE, signIn } from './helpers'
 
 /**
  * Every console surface works from 360px up (doc 16 §12, N-70).
@@ -18,10 +18,11 @@ test.describe('the consoles at 360px', () => {
 
   test('nothing scrolls sideways', async ({ page }) => {
     await signIn(page)
+    // The demo wedding by slug: other specs create fixtures, and the list's first row is theirs.
     const { catalogues } = (await (await page.request.get('/api/admin/catalogues')).json()) as {
-      catalogues: { id: string }[]
+      catalogues: { id: string; slug: string }[]
     }
-    const id = catalogues[0]!.id
+    const id = catalogues.find((catalogue) => catalogue.slug === DEMO_CATALOGUE)!.id
 
     const pages: { path: string; heading: RegExp }[] = [
       { path: '/admin', heading: /Catalogues/ },
@@ -48,9 +49,9 @@ test.describe('the consoles at 360px', () => {
   test('the customizer puts the preview first on a phone', async ({ page }) => {
     await signIn(page)
     const { catalogues } = (await (await page.request.get('/api/admin/catalogues')).json()) as {
-      catalogues: { id: string }[]
+      catalogues: { id: string; slug: string }[]
     }
-    await page.goto(`/admin/c/${catalogues[0]!.id}/customizer`)
+    await page.goto(`/admin/c/${catalogues.find((catalogue) => catalogue.slug === DEMO_CATALOGUE)!.id}/customizer`)
     await expect(page.getByTestId('preview-viewport')).toBeVisible()
     // The rail is labelled "Sections" too, and it is hidden on a phone; the customizer's own
     // panes are the two `section` elements inside `main`.
