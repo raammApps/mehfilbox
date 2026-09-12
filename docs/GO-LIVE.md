@@ -389,31 +389,39 @@ to `mehfilbox.com`.** Every link already sent to a guest points at it, and a wed
 
 ---
 
-# The second pass, before it can be deployed — 12 September 2026
+# The second pass, deployed — 12 September 2026
 
-N-60 to N-76 changed the schema and added configuration. The code is committed and green; the
-live environment is not ready for it yet. Two of the three prerequisites are done.
+N-60 to N-76 changed the schema and added configuration. **All of it is live** as of
+12 September 2026.
 
 | | |
 |---|---|
-| Vercel configuration | ✅ `DOMAIN_DRIVER`, `DOMAIN_CNAME_TARGET`, `DOMAIN_A_RECORD`, `DOMAIN_NAMESERVERS`, `CAPTCHA_DRIVER`, `VERCEL_PROJECT_ID`, `VERCEL_TEAM_ID` set on Production |
+| Vercel configuration | ✅ `DOMAIN_DRIVER`, `DOMAIN_CNAME_TARGET`, `DOMAIN_A_RECORD`, `DOMAIN_NAMESERVERS`, `CAPTCHA_DRIVER`, `VERCEL_PROJECT_ID`, `VERCEL_TEAM_ID` on Production |
 | Platform owner | ✅ `sandeep.bh5+platform@gmail.com`, auth account and `platform_admins` row; password in `.env.platform.local` |
-| **Migrations 0016–0025** | ❌ **yours** — the SQL editor, once |
+| Migrations 0016–0025 | ✅ applied in the SQL editor; six new tables, nine new `catalogues` columns, `tenant_slug` backfilled |
+| Deployed | ✅ `main` pushed, `/api/health` serving the pushed commit on `supabase` + `bunny` |
 
-## 1. The migrations — the only blocker
+## 1. What was verified against production
 
-The live project is at **0015**: `credential_links`, `themes`, `presets`, `credits`, `job_runs`
-and `domains` do not exist, and `catalogues` is missing `tenant_slug`, `served_at`, `premiere_at`
-and five more columns. **Deploying the new code before they are applied breaks the console**, not
-just the new surfaces — the catalogue list reads columns that are not there.
+- `mehfilbox.com/kalyanam/aanya-and-vikram` → 200. Path addressing works on real data.
+- `/c/aanya-and-vikram` → 307 to the canonical address.
+- `/admin/platform` → **404 signed out**, and 200 with the platform account; `/admin` bounces
+  that same account, which is the isolation doc 15 §1 is built on, observed rather than assumed.
+- `pnpm preflight` green across Supabase, Bunny Stream and the photo zone.
 
-Supabase → SQL Editor → paste the bundle → Run. It is one transaction, every statement is
-re-runnable, and the query at the end lists the six new tables as proof. Generate it again any
-time with:
+**Not verified**: creating a wedding and uploading a film, because that needs a studio operator's
+password and would leave real rows behind. The paths are covered by the E2E suite, which was green
+on all 156 before the push.
 
-```bash
-cat supabase/migrations/00{16..25}_*.sql
-```
+## 2. The one thing to do before making a new wedding
+
+**Every existing studio has zero credits**, because the table was created empty and only a new
+registration grants one. Existing published weddings are unaffected — a republish spends nothing —
+but the *first* publish of any new wedding will be refused with "needs a credit", and
+`swarit-and-smriti-2026` is already sitting in draft in that state.
+
+Grant them in the platform console: Studios → the studio → Credits. The reason is recorded on the
+audit trail. This is the trial mechanism working as designed (D-38), not a fault.
 
 ## 2. What is set, and what is deliberately not
 
