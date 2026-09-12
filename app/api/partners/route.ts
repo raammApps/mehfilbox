@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto'
 import { NextResponse } from 'next/server'
 import { getAuthProvider } from '@/lib/admin/auth'
+import { grantRegistrationCredit } from '@/lib/admin/credits'
 import { captchaEnabled, verifyCaptcha } from '@/lib/captcha/verify'
 import { hashSecret } from '@/lib/crypto'
 import { getRepository } from '@/lib/db'
@@ -127,6 +128,10 @@ export async function POST(request: Request) {
       log.error('partner registration: rolled back the org', { orgId: org.id, error: String(error) })
       throw error
     }
+
+    // The trial (D-38): one credit, so the first wedding publishes and the second is the
+    // conversation. Granted after the operator exists — an org that failed to get one is gone.
+    await grantRegistrationCredit(org.id)
 
     log.info('partner registered', { orgId: org.id, slug: org.slug })
 

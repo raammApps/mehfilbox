@@ -27,6 +27,7 @@ import { getModule, listModules, instantiate } from '@/modules/registry'
 import type { GuestContext } from '@/modules/contract'
 import { SectionInspector } from './SectionInspector'
 import { resolveLocalised } from '@/lib/i18n'
+import { CreditPanel } from './CreditPanel'
 import { BRANDING_SELECTION, PreviewPane } from './PreviewPane'
 import { ThemePicker } from './ThemePicker'
 import { SaveState, type SaveStatus } from './SaveState'
@@ -97,6 +98,8 @@ export function CustomizerShell({
   )
   const [published, setPublished] = useState(catalogue.status === 'published')
   const [publishError, setPublishError] = useState<string | null>(null)
+  // The one refusal with a way forward built in (D-38): a panel rather than a sentence.
+  const [creditRequired, setCreditRequired] = useState(false)
   const undoStack = useRef<ModuleInstance[][]>([])
   const redoStack = useRef<ModuleInstance[][]>([])
 
@@ -234,6 +237,7 @@ export function CustomizerShell({
   const publish = async () => {
     setPublishing(true)
     setPublishError(null)
+    setCreditRequired(false)
     try {
       // Flush any in-flight autosave first, so Publish can never ship a stale draft.
       const saved = await fetch(`/api/admin/catalogues/${catalogue.id}/modules`, {
@@ -279,8 +283,12 @@ export function CustomizerShell({
       })
       if (!response.ok) {
         const body = (await response.json().catch(() => null)) as {
-          error?: { message?: string }
+          error?: { code?: string; message?: string }
         } | null
+        if (body?.error?.code === 'CREDIT_REQUIRED') {
+          setCreditRequired(true)
+          return
+        }
         setPublishError(body?.error?.message ?? 'Publishing failed. Nothing has changed for guests.')
         return
       }
@@ -481,6 +489,8 @@ export function CustomizerShell({
                   : 'Published'}
           </button>
         </div>
+
+        {creditRequired ? <CreditPanel catalogueId={catalogue.id} /> : null}
 
         {publishError ? (
           <p

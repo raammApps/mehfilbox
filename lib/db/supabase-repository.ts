@@ -2,6 +2,7 @@ import 'server-only'
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import { env } from '@/lib/env'
 import { ApiError } from '@/lib/http/errors'
+import { balanceOf } from './memory-repository'
 import { log } from '@/lib/log'
 import type {
   Album,
@@ -22,6 +23,8 @@ import type {
   Profile,
   Title,
   Preset,
+  CreditBalance,
+  PublishCredit,
 } from '@/lib/schema'
 import type { Entitlement } from '@/lib/entitlements'
 import type { CustomTheme } from '@/themes/contract'
@@ -582,6 +585,86 @@ export class SupabaseRepository implements Repository {
       .update({ used_at: new Date().toISOString() })
       .eq('id', id)
     if (error) throw new ApiError('INTERNAL', error.message)
+  }
+
+  // ── Credits (D-38) ────────────────────────────────────────────────────────
+  private static toCredit(r: Row): PublishCredit {
+    return {
+      id: r.id,
+      orgId: r.org_id,
+      planId: r.plan_id ?? 'deliver',
+      grantedBy: r.granted_by ?? 'registration',
+      reason: r.reason ?? '',
+      purchasedAt: r.purchased_at,
+      expiresAt: r.expires_at,
+      consumedByCatalogueId: r.consumed_by_catalogue_id ?? null,
+      consumedAt: r.consumed_at ?? null,
+    }
+  }
+
+  async listCredits(orgId: string): Promise<PublishCredit[]> {
+    const { data, error } = await this.db
+      .from('credits')
+      .select('*')
+      .eq('org_id', orgId)
+      .order('purchased_at')
+    if (error) throw new ApiError('INTERNAL', error.message)
+    return (data ?? []).map(SupabaseRepository.toCredit)
+  }
+
+  async grantCredits(credits: PublishCredit[]): Promise<PublishCredit[]> {
+    if (credits.length === 0) return []
+    const { data, error } = await this.db
+      .from('credits')
+      .insert(
+        credits.map((credit) => ({
+          id: credit.id,
+          org_id: credit.orgId,
+          plan_id: credit.planId,
+          granted_by: credit.grantedBy,
+          reason: credit.reason,
+          purchased_at: credit.purchasedAt,
+          expires_at: credit.expiresAt,
+          consumed_by_catalogue_id: credit.consumedByCatalogueId,
+          consumed_at: credit.consumedAt,
+        })),
+      )
+      .select('*')
+    if (error) throw new ApiError('INTERNAL', error.message)
+    return (data ?? []).map(SupabaseRepository.toCredit)
+  }
+
+  async consumeCredit(orgId: string, catalogueId: string, nowIso: string): Promise<PublishCredit | null> {
+    // Pick, then claim with `consumed_at is null` as the guard: two publishes racing for the last
+    // credit cannot both win it, and the loser simply looks again.
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      const { data: candidate, error } = await this.db
+        .from('credits')
+        .select('id')
+        .eq('org_id', orgId)
+        .is('consumed_at', null)
+        .gt('expires_at', nowIso)
+        .order('expires_at')
+        .limit(1)
+        .maybeSingle()
+      if (error) throw new ApiError('INTERNAL', error.message)
+      if (!candidate) return null
+
+      const claimed = await this.db
+        .from('credits')
+        .update({ consumed_by_catalogue_id: catalogueId, consumed_at: nowIso })
+        .eq('id', candidate.id)
+        .is('consumed_at', null)
+        .select('*')
+        .maybeSingle()
+      if (claimed.error) throw new ApiError('INTERNAL', claimed.error.message)
+      if (claimed.data) return SupabaseRepository.toCredit(claimed.data)
+    }
+    return null
+  }
+
+  async creditBalance(orgId: string, nowIso: string): Promise<CreditBalance> {
+    return balanceOf(await this.listCredits(orgId), nowIso)
   }
 
   // ── House styles (D-36) ───────────────────────────────────────────────────

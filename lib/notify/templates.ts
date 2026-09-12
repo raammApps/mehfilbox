@@ -23,6 +23,8 @@ export const TEMPLATES = [
   'ops-alert',
   /** A set-password link — forgot password, or a first sign-in a studio issued (D-33). */
   'credential',
+  /** Addressed to us: a studio with no credit left asked for one (D-38). */
+  'credit-request',
 ] as const
 export type TemplateName = (typeof TEMPLATES)[number]
 

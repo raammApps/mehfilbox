@@ -238,6 +238,28 @@ export const presetSchema = z.object({
 export type Preset = z.infer<typeof presetSchema>
 
 /**
+ * One wedding's first publish (D-38, doc 16 §7). Registration grants a studio one; a catalogue's
+ * first publish consumes one; a republish consumes nothing. `grantedBy` is `registration`, a
+ * platform admin's email, or later a payment id — the row is its own receipt.
+ */
+export const publishCreditSchema = z.object({
+  id: z.string().uuid(),
+  orgId: z.string().uuid(),
+  planId: z.string().min(1).default('deliver'),
+  grantedBy: z.string().min(1).default('registration'),
+  reason: z.string().max(500).default(''),
+  purchasedAt: z.string(),
+  /** `purchasedAt` + 24 months (REQUIREMENTS.md §9). An expired credit publishes nothing. */
+  expiresAt: z.string(),
+  consumedByCatalogueId: z.string().uuid().nullable().default(null),
+  consumedAt: z.string().nullable().default(null),
+})
+export type PublishCredit = z.infer<typeof publishCreditSchema>
+
+/** What a studio sees: how many it can spend, has spent, and let lapse. */
+export type CreditBalance = { available: number; consumed: number; expired: number }
+
+/**
  * A catalogue mid-handover.
  *
  * The token itself is never in here — only its hash reaches the database, and the plaintext is

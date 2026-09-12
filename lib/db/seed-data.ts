@@ -352,5 +352,18 @@ export function demoSnapshot(
     titles: buildTitles(),
     albums: [album],
     photos: buildPhotos(),
+    // A demo studio publishes freely (D-38): enough for a planner meeting and for the E2E suite,
+    // which creates and publishes a fresh wedding per test. Two years, like a bought one.
+    credits: Array.from({ length: 40 }, (_, index) => ({
+      id: `44444444-4444-4444-8444-${String(index + 1).padStart(12, '0')}`,
+      orgId: ORG_ID,
+      planId: 'deliver',
+      grantedBy: 'demo',
+      reason: 'Demo allowance',
+      purchasedAt: CREATED_AT,
+      expiresAt: '2028-01-01T00:00:00.000Z',
+      consumedByCatalogueId: null,
+      consumedAt: null,
+    })),
   }
 }

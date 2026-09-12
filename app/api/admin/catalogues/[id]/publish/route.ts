@@ -1,6 +1,7 @@
 import { requireEditableCatalogue } from '@/lib/admin/session'
 import { revalidateCatalogue } from '@/lib/catalogue-cache'
 import { getRepository } from '@/lib/db'
+import { ApiError } from '@/lib/http/errors'
 import { noStore, route } from '@/lib/http/handler'
 import { log } from '@/lib/log'
 
@@ -21,6 +22,23 @@ export async function POST(_request: Request, { params }: { params: Promise<{ id
 
     const modules = catalogue.draftModules ?? catalogue.modules
     const now = new Date().toISOString()
+
+    /**
+     * The first publish spends a credit (D-38). A republish after an unpublish spends nothing —
+     * `publishedAt` is already set — and so does a catalogue published before credits existed.
+     * The credit is the catalogue's org's: after a handover that is the couple's account, and a
+     * handed-over wedding has always been published already.
+     */
+    if (catalogue.publishedAt === null) {
+      const credit = await getRepository().consumeCredit(catalogue.orgId, catalogue.id, now)
+      if (!credit) {
+        throw new ApiError(
+          'CREDIT_REQUIRED',
+          'Publishing this wedding needs a credit, and there is none left to spend.',
+        )
+      }
+      log.info('credit consumed', { catalogueId: id, orgId: catalogue.orgId, creditId: credit.id })
+    }
 
     const published = await getRepository().updateCatalogue(id, catalogue.orgId, {
       modules,

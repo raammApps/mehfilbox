@@ -54,11 +54,12 @@ export default async function CatalogueListPage() {
   // Counts come from one method rather than `listTitles` per row: a partner with thirty weddings
   // would otherwise make sixty round trips to draw this screen, and it would get slower with
   // every wedding they sold.
-  const [catalogues, counts, org, delivered] = await Promise.all([
+  const [catalogues, counts, org, delivered, balance] = await Promise.all([
     repository.listCatalogues({ orgId: session.orgId }),
     repository.catalogueCounts({ orgId: session.orgId }),
     getSessionOrg(session),
     repository.listOriginatedCatalogues(session.orgId),
+    repository.creditBalance(session.orgId, new Date().toISOString()),
   ])
 
   // A couple's home is their account, not a studio's list (D-37).
@@ -96,6 +97,11 @@ export default async function CatalogueListPage() {
           {catalogues.length === 0
             ? 'Nothing here yet.'
             : `${catalogues.length} wedding${catalogues.length === 1 ? '' : 's'}${org?.name ? ` at ${org.name}` : ''}.`}
+          {/* The number that decides whether the next Publish goes through (D-38). */}
+          {' '}
+          <span data-testid="credit-balance">
+            {balance.available} credit{balance.available === 1 ? '' : 's'} to publish with.
+          </span>
         </p>
       </div>
 

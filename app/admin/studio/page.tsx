@@ -21,7 +21,10 @@ export default async function StudioPage() {
 
   const org = await getSessionOrg(session)
   if (!org) redirect('/admin')
-  const styles = await getRepository().listPresets(org.id)
+  const [styles, balance] = await Promise.all([
+    getRepository().listPresets(org.id),
+    getRepository().creditBalance(org.id, new Date().toISOString()),
+  ])
 
   return (
     <AdminChrome
@@ -38,6 +41,18 @@ export default async function StudioPage() {
         </p>
 
         <StudioBranding branding={org.branding} themes={await allThemes()} />
+
+        {/* What publishing costs, in the one place a studio looks at its own account (D-38). */}
+        <section className="mt-6 rounded-[var(--radius-card)] border border-[var(--color-l-line)] bg-white p-4">
+          <h2 className="text-[15px] font-semibold">Credits</h2>
+          <p className="mt-1 text-[13px] text-[var(--color-l-text-mid)]">
+            <span className="font-semibold text-[var(--color-l-text-hi)]">{balance.available} available</span>
+            {' · '}
+            {balance.consumed} spent{balance.expired > 0 ? ` · ${balance.expired} expired` : ''}. A
+            wedding&rsquo;s first publish spends one; publishing it again after a change is free.
+            Your first was on us; each after that is ₹1,999, or five for ₹7,999.
+          </p>
+        </section>
 
         {/* Named looks, the plural of this page (D-36). One line here; the list is its own page. */}
         <section className="mt-6 rounded-[var(--radius-card)] border border-[var(--color-l-line)] bg-white p-4">

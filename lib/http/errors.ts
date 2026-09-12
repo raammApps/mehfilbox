@@ -9,6 +9,8 @@ export const ERROR_CODES = {
   PASSCODE_REQUIRED: 401,
   UNAUTHORIZED: 401,
   SUBSCRIPTION_INACTIVE: 402,
+  /** A first publish with no credit to spend (D-38). The console offers the way to add one. */
+  CREDIT_REQUIRED: 402,
   FORBIDDEN: 403,
   CATALOGUE_NOT_FOUND: 404,
   NOT_FOUND: 404,

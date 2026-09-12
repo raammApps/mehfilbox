@@ -25,6 +25,11 @@ export default async function PlatformPage() {
     repository.listOrgs(),
     repository.catalogueCountsByOrg(),
   ])
+  // One query per org is fine at this size; a `creditBalancesByOrg` is the day it is not.
+  const now = new Date().toISOString()
+  const balances = Object.fromEntries(
+    await Promise.all(orgs.map(async (org) => [org.id, await repository.creditBalance(org.id, now)] as const)),
+  )
 
   const partners = orgs.filter((org) => org.kind === 'partner')
   const couples = orgs.filter((org) => org.kind === 'couple')
@@ -70,6 +75,7 @@ export default async function PlatformPage() {
                 <Th>Access</Th>
                 <Th>Address</Th>
                 <Th>Catalogues</Th>
+                <Th>Credits</Th>
               </tr>
             </thead>
             <tbody>
@@ -95,6 +101,10 @@ export default async function PlatformPage() {
                     <code className="text-[12px] text-[var(--color-l-text-mid)]">{org.slug}</code>
                   </td>
                   <td className="px-3 py-2.5 tabular-nums">{counts[org.id] ?? 0}</td>
+                  <td className="px-3 py-2.5 tabular-nums">
+                    {balances[org.id]?.available ?? 0}
+                    <span className="text-[var(--color-l-text-mid)]"> · {balances[org.id]?.consumed ?? 0} spent</span>
+                  </td>
                 </tr>
               ))}
             </tbody>

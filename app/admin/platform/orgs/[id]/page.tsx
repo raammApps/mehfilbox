@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { StatusPill } from '@/components/admin/AdminChrome'
+import { OrgCreditsControl } from '@/components/admin/OrgCreditsControl'
 import { OrgQuotaControl } from '@/components/admin/OrgQuotaControl'
 import { OrgStatusControl } from '@/components/admin/OrgStatusControl'
 import { getPlatformAdmin } from '@/lib/admin/platform'
@@ -35,11 +36,12 @@ export default async function PlatformOrgPage({ params }: { params: Promise<{ id
   // The one place an org id from the URL is trusted — and it is safe precisely because the
   // caller has already been proven to be a platform admin, who by design belongs to no org and
   // therefore cannot be "escalating" into one.
-  const [catalogues, operators, audit, entitlement] = await Promise.all([
+  const [catalogues, operators, audit, entitlement, balance] = await Promise.all([
     repository.listCatalogues({ orgId: org.id }),
     repository.listOperators(org.id),
     repository.listPlatformAudit({ orgId: org.id, limit: 20 }),
     repository.getOrgEntitlement(org.id),
+    repository.creditBalance(org.id, new Date().toISOString()),
   ])
 
   return (
@@ -68,6 +70,9 @@ export default async function PlatformOrgPage({ params }: { params: Promise<{ id
           storageGb={entitlement?.storageGb ?? null}
           defaultGb={DEFAULT_LIMITS.storageGb}
         />
+
+        {/* Studios spend credits; a couple's account starts with none and is granted one here too. */}
+        <OrgCreditsControl orgId={org.id} orgName={org.name} balance={balance} />
 
         <div className="rounded-[var(--radius-card)] border border-[var(--color-l-line)] bg-white p-4">
           <p className="mb-2 text-[15px] font-semibold">

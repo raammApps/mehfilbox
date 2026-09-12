@@ -20,6 +20,8 @@ import type {
   Profile,
   Title,
   Preset,
+  CreditBalance,
+  PublishCredit,
 } from '@/lib/schema'
 import type { Entitlement } from '@/lib/entitlements'
 import type { CustomTheme } from '@/themes/contract'
@@ -30,6 +32,19 @@ import type {
   Repository,
 } from './repository'
 
+/** One definition of "available", so the two drivers cannot disagree about it. */
+export function balanceOf(credits: readonly PublishCredit[], nowIso: string): CreditBalance {
+  let available = 0
+  let consumed = 0
+  let expired = 0
+  for (const credit of credits) {
+    if (credit.consumedAt !== null) consumed += 1
+    else if (credit.expiresAt <= nowIso) expired += 1
+    else available += 1
+  }
+  return { available, consumed, expired }
+}
+
 export type Snapshot = {
   platformAdmins: PlatformAdmin[]
   entitlements: Entitlement[]
@@ -37,6 +52,7 @@ export type Snapshot = {
   credentialLinks: CredentialLink[]
   customThemes: CustomTheme[]
   presets: Preset[]
+  credits: PublishCredit[]
   orgs: Org[]
   operators: Operator[]
   catalogues: Catalogue[]
@@ -67,6 +83,7 @@ export function emptySnapshot(): Snapshot {
     credentialLinks: [],
     customThemes: [],
     presets: [],
+    credits: [],
     orgs: [],
     operators: [],
     catalogues: [],
@@ -225,6 +242,38 @@ export class MemoryRepository implements Repository {
   }
 
   // ── Platform-authored themes ────────────────────────────────────────────────
+  // ── Credits (D-38) ────────────────────────────────────────────────────────
+  async listCredits(orgId: string): Promise<PublishCredit[]> {
+    return this.clone(
+      (this.data.credits ?? [])
+        .filter((credit) => credit.orgId === orgId)
+        .sort((a, b) => a.purchasedAt.localeCompare(b.purchasedAt)),
+    )
+  }
+
+  async grantCredits(credits: PublishCredit[]): Promise<PublishCredit[]> {
+    this.data.credits ??= []
+    this.data.credits.push(...this.clone(credits))
+    this.touched()
+    return this.clone(credits)
+  }
+
+  async consumeCredit(orgId: string, catalogueId: string, nowIso: string): Promise<PublishCredit | null> {
+    const credit = (this.data.credits ?? [])
+      .filter((c) => c.orgId === orgId && c.consumedAt === null && c.expiresAt > nowIso)
+      // The one closest to expiring goes first, so nothing lapses while a later one is spent.
+      .sort((a, b) => a.expiresAt.localeCompare(b.expiresAt))[0]
+    if (!credit) return null
+    credit.consumedByCatalogueId = catalogueId
+    credit.consumedAt = nowIso
+    this.touched()
+    return this.clone(credit)
+  }
+
+  async creditBalance(orgId: string, nowIso: string): Promise<CreditBalance> {
+    return balanceOf((this.data.credits ?? []).filter((c) => c.orgId === orgId), nowIso)
+  }
+
   // ── House styles (D-36) ───────────────────────────────────────────────────
   async listPresets(orgId: string): Promise<Preset[]> {
     return this.clone(

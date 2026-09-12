@@ -1818,3 +1818,37 @@ them quietly stops checking contrast (N-26).
 
 10 new unit tests; 613 unit and component tests. One E2E test: a wedding made from a style starts
 in it, code and all.
+
+## N-65 · Credits and the trial — 12 September 2026
+
+**The first published wedding is free; the second needs a credit** (D-38, doc 16 §7). `credits`
+(migration 0021) is the table `REQUIREMENTS.md` §9 has specified since the pricing was settled —
+org, plan, granted by, reason, purchased and expiry at twenty-four months, consumed by — and this
+is the day something reads it: N-27c's condition for a plan becoming real is met by the publish
+gate. Registration grants one. A catalogue's **first** publish spends one, the soonest-to-expire
+first; a republish after an unpublish spends nothing, because `publishedAt` is already set; a
+catalogue published before today has it set too and is untouched. An expired credit publishes
+nothing and is counted as expired rather than quietly missing.
+
+**No credit refuses Publish with a panel, not a sentence:** `CREDIT_REQUIRED` (402) from the route,
+and in the customizer what it means — the first was on us, each after that is ₹1,999 or five for
+₹7,999 — with *Ask for a credit*. Until Razorpay lands (N-20) the way to add one is a message the
+platform sees: one `credit-request` email per studio per day through the notification queue,
+naming the studio, the wedding, the operator and the balance, linking to the org's platform page.
+Nothing is lost while a studio waits; the draft keeps and publishing works the moment a credit is
+added. The console's list says how many are left; the studio page says what they cost.
+
+**The platform grants** from the org page: a count and a reason, recorded as `credits.grant` on
+the audit row, additive only — a credit a studio was told it had is a promise. The org list gains
+a credits column. A couple's account starts with none, as decided; a catalogue they create
+themselves (N-73) publishes when their studio, or we, add one. On Supabase the spend is a pick
+and a guarded claim, so two publishes racing for the last credit cannot both win it.
+
+The demo studio is seeded with forty, so a planner meeting and the E2E suite — which creates and
+publishes a fresh wedding per test — never meet the gate by accident. The locale spec did meet
+it: a fresh studio publishing two weddings now has the second refused, which is the trial working,
+and the test says so.
+
+7 new unit tests; 620 unit and component tests. One E2E spec: from a fresh registration, the first
+publish goes through, the second is refused with the panel, the request is sent, and the console
+says the studio is out.

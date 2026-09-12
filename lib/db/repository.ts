@@ -20,6 +20,8 @@ import type {
   Profile,
   Title,
   Preset,
+  CreditBalance,
+  PublishCredit,
 } from '@/lib/schema'
 
 /**
@@ -121,6 +123,16 @@ export interface Repository {
   deleteOrg(id: string): Promise<void>
 
   // ── Platform-authored themes (D-35) ─────────────────────────────────────────
+  // ── Credits (D-38) ───────────────────────────────────────────────────────
+  listCredits(orgId: string): Promise<PublishCredit[]>
+  grantCredits(credits: PublishCredit[]): Promise<PublishCredit[]>
+  /**
+   * Spend one: the soonest-to-expire credit that is unconsumed and unexpired, marked as spent by
+   * this catalogue. `null` when there is none — which is the publish gate's whole question.
+   */
+  consumeCredit(orgId: string, catalogueId: string, nowIso: string): Promise<PublishCredit | null>
+  creditBalance(orgId: string, nowIso: string): Promise<CreditBalance>
+
   // ── House styles (D-36) ─────────────────────────────────────────────────
   listPresets(orgId: string): Promise<Preset[]>
   getPreset(id: string, orgId: string): Promise<Preset | null>

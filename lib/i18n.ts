@@ -140,6 +140,12 @@ export const dictionary = {
     'notify.ops-alert.html':
       '<p><strong>{kind}</strong></p><p>{detail}</p><p>Deploy <code>{version}</code>, seen at {at}.</p>',
 
+    'notify.credit-request.subject': 'Credit request: {studio}',
+    'notify.credit-request.text':
+      '{studio} ({slug}) has no credit left and wants to publish "{couple}".\n\nAsked by {email}.\nBalance: {available} available, {consumed} used.\n\nGrant one here: {url}',
+    'notify.credit-request.html':
+      '<p><strong>{studio}</strong> (<code>{slug}</code>) has no credit left and wants to publish “{couple}”.</p><p>Asked by {email}. Balance: {available} available, {consumed} used.</p><p><a href="{url}">Grant one from the platform console</a>.</p>',
+
     'notify.credential.subject': 'Set your Mehfilbox password',
     'notify.credential.text':
       'Hello {name},\n\nUse this link to set your password:\n{url}\n\nIt works once and expires in {hours} hours. If you did not ask for it, ignore this message — nothing changes.',
@@ -291,6 +297,12 @@ export const dictionary = {
       '{kind}\n\n{detail}\n\nडिप्लॉय: {version}\nसमय: {at}',
     'notify.ops-alert.html':
       '<p><strong>{kind}</strong></p><p>{detail}</p><p>डिप्लॉय <code>{version}</code>, समय {at}।</p>',
+
+    'notify.credit-request.subject': 'क्रेडिट अनुरोध: {studio}',
+    'notify.credit-request.text':
+      '{studio} ({slug}) के पास कोई क्रेडिट नहीं बचा और वे "{couple}" प्रकाशित करना चाहते हैं।\n\nअनुरोध: {email}।\nशेष: {available} उपलब्ध, {consumed} उपयोग किए गए।\n\nयहाँ से दें: {url}',
+    'notify.credit-request.html':
+      '<p><strong>{studio}</strong> (<code>{slug}</code>) के पास कोई क्रेडिट नहीं बचा और वे “{couple}” प्रकाशित करना चाहते हैं।</p><p>अनुरोध: {email}। शेष: {available} उपलब्ध, {consumed} उपयोग किए गए।</p><p><a href="{url}">प्लेटफ़ॉर्म कंसोल से दें</a>।</p>',
 
     'notify.credential.subject': 'अपना Mehfilbox पासवर्ड सेट करें',
     'notify.credential.text':

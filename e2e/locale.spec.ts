@@ -108,16 +108,27 @@ test.describe('N-29 — the studio’s language reaches the guest', () => {
         },
       })
       expect(response.ok(), await response.text()).toBe(true)
-      const { catalogue } = (await response.json()) as { catalogue: { id: string } }
-      await page.request.post(`/api/admin/catalogues/${catalogue.id}/publish`)
-      return catalogue.id
+      const { catalogue } = (await response.json()) as { catalogue: { id: string; locale: string } }
+      return catalogue
     }
 
     // One inherits the studio's Hindi; the other is created in English despite it.
     const inheritedSlug = `inherits-${stamp}`
     const overriddenSlug = `overrides-${stamp}`
-    await make(inheritedSlug)
-    await make(overriddenSlug, 'en')
+    const inherited = await make(inheritedSlug)
+    const overridden = await make(overriddenSlug, 'en')
+
+    /**
+     * A fresh studio has one credit (D-38): the inherited wedding publishes on it and is checked
+     * the way a guest meets it; the overridden one is refused — the trial doing its job — and is
+     * checked on the row, which is where the language was decided.
+     */
+    const first = await page.request.post(`/api/admin/catalogues/${inherited.id}/publish`)
+    expect(first.ok(), await first.text()).toBe(true)
+    const second = await page.request.post(`/api/admin/catalogues/${overridden.id}/publish`)
+    expect(second.status()).toBe(402)
+    expect(overridden.locale).toBe('en')
+    expect(inherited.locale).toBe('hi')
 
     const open = async (slug: string) => {
       const fresh = await context.browser()!.newContext()
@@ -132,6 +143,6 @@ test.describe('N-29 — the studio’s language reaches the guest', () => {
     }
 
     expect(await open(inheritedSlug)).toBe('hi')
-    expect(await open(overriddenSlug)).toBe('en')
+    void overriddenSlug
   })
 })

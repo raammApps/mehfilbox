@@ -172,6 +172,8 @@ version"* immediately — that sentence is the whole point of N-55.
 | Footer | *"प्रस्तुति: <your studio>"* and a **download** link |
 | Toggle EN/हिं | Switches, and survives a reload |
 | Play a film | Starts in about a second on 4G |
+| **The second wedding** (a fresh studio; the demo one has forty credits) | Publish is refused with *"This wedding needs a credit to publish"*, the price, and **Ask for a credit** — which emails `SUPPORT_EMAIL` once a day. The list page says *0 credits to publish with* |
+| Publish again after a change | Free — the credit was for the first publish |
 | Like a photograph | The heart counts, survives a reload, and is visible to another guest |
 | Share | Copies a link that opens the same film directly |
 
@@ -304,6 +306,7 @@ https://mehfilbox.com/admin/platform
 | **Suspend** | Confirms, asks a reason, and the studio cannot sign in |
 | A suspended studio | Its console explains why and who to email — **its delivered weddings keep playing** |
 | **Storage** | Set a quota; "Back to default" clears it rather than pinning today's number |
+| **Credits** | Grant five with a reason: the balance updates, `credits.grant` lands in the trail, and the studio's refused wedding publishes on the next click |
 | Audit trail | Every write above appears with who did it and why |
 | **Themes** (`/admin/platform/themes`) | *Start from* Carnival, name it, darken *Body text* to `#5a4a70`: the verdict line goes red, **Add this theme** disables. Put it back, add it — it is in a studio's Branding panel on the next load, marked *Yours* |
 | **Withdraw** a theme a wedding is on | Gone from the pickers; the wedding still renders with it, and its own panel still shows it as *(withdrawn)* |
