@@ -76,5 +76,33 @@ test.describe('the couple’s account', () => {
     await page.getByRole('button', { name: 'Sign in' }).click()
     await expect(page.getByRole('heading', { name: 'Your weddings' })).toBeVisible()
     await expect(page.getByRole('list', { name: 'Your catalogues' })).toContainText('Filmed by')
+
+    /**
+     * A catalogue of their own (doc 16 §6, N-73): the same wizard in its couple shape — the
+     * occasion first, no house styles, no "the couple's sign-in" — and a draft that costs nothing
+     * until a credit is added, which the customizer says in the couple's words.
+     */
+    await page.getByRole('link', { name: 'Start a catalogue of your own' }).click()
+    await expect(page.getByRole('heading', { name: 'A catalogue of your own' })).toBeVisible()
+    await page.getByRole('radio', { name: 'Birthday' }).check({ force: true })
+    await page.getByLabel('Name', { exact: true }).fill('Aarav turns one')
+    await page.getByLabel('Date', { exact: true }).fill('2027-03-02')
+    await page.getByLabel('Web address').fill(`e2e-aarav-${Date.now().toString(36)}`)
+    await expect(page.getByText('Available')).toBeVisible()
+    await page.getByRole('button', { name: 'Continue' }).click()
+    await page.getByRole('button', { name: 'Continue' }).click()
+    await expect(page.getByRole('heading', { name: 'The couple’s sign-in' })).toHaveCount(0)
+    await page.getByRole('button', { name: 'Create and start uploading' }).click()
+    await expect(page.getByText(/exists as a draft/)).toBeVisible()
+
+    await page.getByRole('button', { name: 'Title the films' }).click()
+    await page.getByRole('button', { name: 'Finish and customise' }).click()
+    await page.getByRole('button', { name: /^Publish/ }).click()
+    await expect(page.getByTestId('credit-required')).toContainText('your studio can add for you')
+
+    // And it is theirs, in their account.
+    await page.goto('/my')
+    await expect(page.getByRole('list', { name: 'Your catalogues' })).toContainText('Aarav turns one')
+    await expect(page.getByRole('list', { name: 'Your catalogues' })).toContainText('Birthday')
   })
 })

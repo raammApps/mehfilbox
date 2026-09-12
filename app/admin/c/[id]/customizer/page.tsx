@@ -60,6 +60,7 @@ export default async function CustomizerPage({ params }: { params: Promise<{ id:
         publicUrl={publicUrlOf(catalogue)}
         pendingContent={pending}
         themes={themes}
+        audience={org?.kind === 'couple' ? 'couple' : 'studio'}
       />
     </AdminChrome>
   )

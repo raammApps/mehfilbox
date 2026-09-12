@@ -47,6 +47,8 @@ type Props = {
   pendingContent: { titles: number; photos: number }
   /** Every theme, withdrawn ones included, resolved on the server (D-35). */
   themes: readonly ThemeDefinition[]
+  /** Who is reading the console: the credit panel's words differ (N-73). */
+  audience?: 'studio' | 'couple'
 }
 
 /**
@@ -65,6 +67,7 @@ export function CustomizerShell({
   publicUrl,
   pendingContent,
   themes,
+  audience = 'studio',
 }: Props) {
   const [modules, setModules] = useState<ModuleInstance[]>(initialModules)
   /**
@@ -490,7 +493,7 @@ export function CustomizerShell({
           </button>
         </div>
 
-        {creditRequired ? <CreditPanel catalogueId={catalogue.id} /> : null}
+        {creditRequired ? <CreditPanel catalogueId={catalogue.id} audience={audience} /> : null}
 
         {publishError ? (
           <p

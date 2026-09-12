@@ -50,7 +50,6 @@ depends on it. The decisions behind them are D-32 to D-41.
 | | Item | Doc 16 | Size |
 |---|---|---|---|
 | **N-70** | **Responsive audit** of every console surface | §12 | half a session |
-| **N-73** | Couple-created catalogues from `/my` | §6 | with N-65 |
 | **N-75** | Documentation: `PRODUCT.md`, `DEPLOYMENT.md` (new variables), `MANUAL-TEST.md` | — | as each lands |
 
 ## Tier 1b — unretired risk

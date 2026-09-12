@@ -290,6 +290,16 @@ letter, the sections and your studio's access window. Open a window for seven da
 the Delivered card says *Access open* with a link into the customizer; the overview inside carries
 an *on the couple's invitation* banner and no handover or delivery panels.
 
+### 9c. A catalogue of the couple's own · N-73
+
+From `/my`, **Start a catalogue of your own** → the wizard in its couple shape: *What is it for?*
+first (birthday, naming day…), no house styles, no *The couple's sign-in* card. Create it, title
+the films, open the customizer, press **Publish**: refused with *"your studio can add for you, or
+we can"* — a couple's account starts with no credits. Grant one from the platform (§11) and it
+publishes. It lists at `/my` as theirs, with the occasion.
+
+---
+
 ## 10. Handing over to the couple
 
 On the Overview, **Hand this over to the couple**.

@@ -13,10 +13,12 @@ export const dynamic = 'force-dynamic'
 
 const OCCASION_LABEL: Record<Catalogue['occasion'], string> = {
   wedding: 'Wedding',
-  anniversary: 'Anniversary',
-  proposal: 'Proposal',
-  birthday: 'Birthday',
   engagement: 'Engagement',
+  anniversary: 'Anniversary',
+  birthday: 'Birthday',
+  proposal: 'Proposal',
+  'baby-shower': 'Baby shower',
+  'naming-day': 'Naming day',
 }
 
 /**
@@ -52,6 +54,10 @@ export default async function MyPage() {
             Everything made for you, in one place — however many studios it took.
           </p>
         </div>
+        {/*
+          The same wizard a studio uses, in its couple shape (N-73): the occasion first, no house
+          styles, no "the couple's sign-in". A draft costs nothing until it is published (D-38).
+        */}
         <Link
           href="/admin/new"
           className="inline-flex h-10 items-center rounded-[var(--radius-pill)] border border-[var(--color-l-line)] bg-white px-4 text-[13px] font-semibold"

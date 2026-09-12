@@ -42,7 +42,16 @@ export const categorySchema = z.enum(CATEGORIES)
 export type Category = z.infer<typeof categorySchema>
 
 // ── Enumerations ──────────────────────────────────────────────────────────────
-export const OCCASIONS = ['wedding', 'anniversary', 'proposal', 'birthday', 'engagement'] as const
+export const OCCASIONS = [
+  'wedding',
+  'engagement',
+  'anniversary',
+  'birthday',
+  'proposal',
+  /** The two a couple starts for themselves most often (doc 16 §6). */
+  'baby-shower',
+  'naming-day',
+] as const
 export const occasionSchema = z.enum(OCCASIONS)
 export type Occasion = z.infer<typeof occasionSchema>
 

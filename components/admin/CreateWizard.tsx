@@ -33,6 +33,8 @@ const OCCASION_LABELS: Record<Occasion, string> = {
   anniversary: 'Anniversary',
   birthday: 'Birthday',
   proposal: 'Proposal',
+  'baby-shower': 'Baby shower',
+  'naming-day': 'Naming day',
 }
 
 const DRAFT_KEY = 'mehfilbox.wizard.draft'
@@ -58,6 +60,7 @@ export function CreateWizard({
   themes,
   studioTheme,
   styles,
+  mode = 'studio',
 }: {
   /** Passed in rather than read here: `lib/env` is server-only, and this runs in the browser. */
   rootDomain: string
@@ -72,13 +75,19 @@ export function CreateWizard({
   studioTheme: string
   /** The studio's house styles (D-36); the default one is preselected. */
   styles: Preset[]
+  /**
+   * A couple starting a catalogue of their own (doc 16 §6, N-73) gets the same wizard with the
+   * occasion first and without the two cards that only make sense for a studio — house styles
+   * and the couple's sign-in. Same route, same rows; what differs is the vocabulary.
+   */
+  mode?: 'studio' | 'couple'
 }) {
   const router = useRouter()
   const [step, setStep] = useState<Step>(1)
   const [catalogueId, setCatalogueId] = useState<string | null>(null)
 
   const [coupleName, setCoupleName] = useState('')
-  const [occasion, setOccasion] = useState<Occasion>('wedding')
+  const [occasion, setOccasion] = useState<Occasion>(mode === 'couple' ? 'anniversary' : 'wedding')
   const [appName, setAppName] = useState('')
   const [weddingDate, setWeddingDate] = useState('')
   const [city, setCity] = useState('')
@@ -277,17 +286,47 @@ export function CreateWizard({
 
       {step === 1 ? (
         <section>
-          <Card title="The couple" hint="What guests see, and how the wedding is listed for you.">
+          <Card
+            title={mode === 'couple' ? 'The occasion' : 'The couple'}
+            hint={
+              mode === 'couple'
+                ? 'What it is for, whose it is, and when. Guests see the name; the date orders it for you.'
+                : 'What guests see, and how the wedding is listed for you.'
+            }
+          >
+            {mode === 'couple' ? (
+              <fieldset className="mb-4">
+                <legend className="mb-2 text-[13px] font-semibold">What is it for?</legend>
+                <div className="flex flex-wrap gap-2">
+                  {OCCASIONS.map((option) => (
+                    <label
+                      key={option}
+                      className="cursor-pointer rounded-[var(--radius-pill)] border border-[var(--color-l-line)] px-3 py-1.5 text-[13px] has-[:checked]:border-[var(--color-accent)] has-[:checked]:font-semibold"
+                    >
+                      <input
+                        type="radio"
+                        name="occasion"
+                        value={option}
+                        checked={occasion === option}
+                        onChange={() => setOccasion(option)}
+                        className="sr-only"
+                      />
+                      {OCCASION_LABELS[option]}
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
+            ) : null}
             <Text
-              label="Couple"
+              label={mode === 'couple' ? 'Name' : 'Couple'}
               value={coupleName}
               onChange={setCoupleName}
-              placeholder="Aanya & Vikram"
+              placeholder={mode === 'couple' ? 'Aarav turns one' : 'Aanya & Vikram'}
               autoFocus
             />
             <div className="grid gap-x-4 sm:grid-cols-2">
               <Text
-                label="Wedding date"
+                label={mode === 'couple' ? 'Date' : 'Wedding date'}
                 value={weddingDate}
                 onChange={setWeddingDate}
                 type="date"
@@ -295,6 +334,7 @@ export function CreateWizard({
               />
               <Text label="City" value={city} onChange={setCity} placeholder="Jaipur" />
             </div>
+            {mode === 'couple' ? null : (
             <fieldset className="mb-2">
               <legend className="mb-2 text-[13px] font-semibold">Occasion</legend>
               <div className="flex flex-wrap gap-2">
@@ -316,6 +356,7 @@ export function CreateWizard({
                 ))}
               </div>
             </fieldset>
+            )}
           </Card>
 
           <Card
@@ -653,6 +694,7 @@ export function CreateWizard({
             ) : null}
           </Card>
 
+          {mode === 'couple' ? null : (
           <Card title="The couple’s sign-in" hint="Optional now; the overview offers it again. Their account shows this wedding as it is prepared.">
             <div className="grid gap-x-4 sm:grid-cols-2">
               <Text label="Couple’s email" value={coupleEmail} onChange={setCoupleEmail} type="email" placeholder="aanya@example.com" />
@@ -680,6 +722,7 @@ export function CreateWizard({
               </fieldset>
             ) : null}
           </Card>
+          )}
 
           {errors._ ? (
             <p role="alert" className="mb-3 text-[14px] text-[var(--color-error)]">

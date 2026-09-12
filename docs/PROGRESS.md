@@ -1981,3 +1981,18 @@ the premiere in the couple's wall time and clears it in one click.
 6 new unit tests; 654 unit and component tests. One E2E test sets a premiere for tomorrow, sees the
 countdown as a guest, clears it and sees the wedding; the wizard's three E2E walks gained the
 third step.
+
+## N-73 · A catalogue of the couple's own — 12 September 2026
+
+**The same wizard, in its couple shape** (doc 16 §6). *Start a catalogue of your own* on `/my`
+opens `/admin/new`, which reads the org's kind and asks the occasion first — baby shower and
+naming day join the list, with the CHECK constraint widened (migration 0025) — and drops the two
+cards that only make sense for a studio: house styles, and the couple's sign-in. Same route, same
+rows, same scoping: the catalogue is theirs, addressed under their own segment, listed in their
+account as owned rather than linked, and the customizer is theirs because it is the same
+component. A draft costs nothing; Publish is refused until a credit is added, and the panel says
+so in the couple's words — *your studio can add for you, or we can* — since their account starts
+with none (D-38).
+
+2 new unit tests; 656 unit and component tests. The couple's E2E walk now ends by starting a
+birthday of their own and meeting the credit panel.

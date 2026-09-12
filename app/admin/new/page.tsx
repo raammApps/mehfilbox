@@ -24,9 +24,13 @@ export default async function NewCataloguePage() {
       orgKind={org?.kind}
     >
       <div className="mb-6">
-        <h1 className="text-[24px] font-bold tracking-[-0.01em]">New catalogue</h1>
+        <h1 className="text-[24px] font-bold tracking-[-0.01em]">
+          {org?.kind === 'couple' ? 'A catalogue of your own' : 'New catalogue'}
+        </h1>
         <p className="mt-0.5 text-[14px] text-[var(--color-l-text-mid)]">
-          About half an hour, most of it the upload running while you do something else.
+          {org?.kind === 'couple'
+            ? 'An anniversary, a birthday, a naming day. A draft costs nothing; publishing needs a credit, which your studio or we can add.'
+            : 'About half an hour, most of it the upload running while you do something else.'}
         </p>
       </div>
 
@@ -39,6 +43,7 @@ export default async function NewCataloguePage() {
         themes={await allThemes()}
         studioTheme={org?.branding.theme ?? DEFAULT_THEME_ID}
         styles={styles}
+        mode={org?.kind === 'couple' ? 'couple' : 'studio'}
       />
     </AdminChrome>
   )

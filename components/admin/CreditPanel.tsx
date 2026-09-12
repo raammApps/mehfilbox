@@ -9,7 +9,7 @@ import { useState } from 'react'
  * panel says so plainly — a price, a button, and what happens next — rather than pretending to
  * be a checkout.
  */
-export function CreditPanel({ catalogueId }: { catalogueId: string }) {
+export function CreditPanel({ catalogueId, audience = 'studio' }: { catalogueId: string; audience?: 'studio' | 'couple' }) {
   const [state, setState] = useState<'idle' | 'sending' | 'sent' | 'repeated' | 'error'>('idle')
 
   async function request() {
@@ -34,11 +34,13 @@ export function CreditPanel({ catalogueId }: { catalogueId: string }) {
       data-testid="credit-required"
       className="mb-3 rounded-[var(--radius-card)] border border-[color-mix(in_srgb,var(--color-warn)_45%,white)] bg-[color-mix(in_srgb,var(--color-warn)_10%,white)] p-4"
     >
-      <p className="text-[14px] font-semibold">This wedding needs a credit to publish</p>
+      <p className="text-[14px] font-semibold">
+        {audience === 'couple' ? 'This catalogue needs a credit to publish' : 'This wedding needs a credit to publish'}
+      </p>
       <p className="mt-1 text-[13px] text-[var(--color-l-text-mid)]">
-        Your first wedding was on us. Each one after that is one Deliver credit — ₹1,999, or five
-        for ₹7,999 — and you have none left. Nothing here is lost: the page, the films and the
-        draft all keep, and publishing works the moment a credit is added.
+        {audience === 'couple'
+          ? 'A catalogue you start yourself publishes on a credit — ₹1,999 — which your studio can add for you, or we can. Nothing here is lost: the page, the films and the draft all keep, and publishing works the moment one is added.'
+          : 'Your first wedding was on us. Each one after that is one Deliver credit — ₹1,999, or five for ₹7,999 — and you have none left. Nothing here is lost: the page, the films and the draft all keep, and publishing works the moment a credit is added.'}
       </p>
       {state === 'sent' || state === 'repeated' ? (
         <p className="mt-3 text-[13px]">

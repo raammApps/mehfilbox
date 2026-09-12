@@ -288,3 +288,4 @@ N-60 to N-75 in [`NEXT.md`](./NEXT.md).
 | Five-step wizard with the couple in the room | **Built** | N-69, 12 Sept. The couple (with occasion) → the look (style, or theme and layout) → guests and the couple (code, language, time zone, premiere, the couple's sign-in) → upload → titles. |
 | Every console surface at 360px | **Partial** | Guest surface yes; consoles unaudited. N-70. |
 | Premiere date with a countdown | **Built** | N-72, 12 Sept. Set in the couple's zone in the wizard or settings; the link shows a countdown until then and opens into the wedding after. |
+| Couple-created catalogues from `/my` | **Built** | N-73, 12 Sept. *Start a catalogue of your own* opens the same wizard in its couple shape — occasion first (baby shower and naming day added), no house styles, no sign-in card. A draft until a credit is added by the studio or us. |
