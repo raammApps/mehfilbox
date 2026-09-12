@@ -51,6 +51,20 @@ type Props = {
 }
 
 /**
+ * An instance id inside an attribute selector.
+ *
+ * `CSS.escape` is a browser API, and `SelectionStyles` runs on the server too: since the
+ * customizer opens with a section already selected (N-55), every server render of the page
+ * threw `CSS is not defined`, logged an error, and left the client to render the tree again.
+ * Nothing was visibly wrong, which is why it lasted. Escaped by hand when the API is absent.
+ */
+function escapeAttr(value: string): string {
+  return typeof CSS !== 'undefined' && typeof CSS.escape === 'function'
+    ? CSS.escape(value)
+    : value.replace(/["\\]/g, '\\$&')
+}
+
+/**
  * The heading of a section, located by shape rather than by a marker each module opts into.
  *
  * Every module renders its `ctx.heading` as the first `h1`/`h2` inside its own wrapper. Asking
@@ -62,7 +76,7 @@ type Props = {
  * still has the field.
  */
 function headingNodeOf(root: HTMLElement, instanceId: string): HTMLElement | null {
-  const section = root.querySelector(`[data-module-id="${CSS.escape(instanceId)}"]`)
+  const section = root.querySelector(`[data-module-id="${escapeAttr(instanceId)}"]`)
   return (section?.querySelector('h1, h2') as HTMLElement | null) ?? null
 }
 
@@ -122,7 +136,7 @@ export function PreviewPane({
     const root = viewport.current
     if (!root) return
 
-    const section = root.querySelector(`[data-module-id="${CSS.escape(selectedId)}"]`)
+    const section = root.querySelector(`[data-module-id="${escapeAttr(selectedId)}"]`)
     section?.scrollIntoView({ behavior: 'smooth', block: 'center' })
   }, [selectedId, debounced])
 
@@ -418,7 +432,7 @@ function DeviceButton({
  */
 function SelectionStyles({ selectedId }: { selectedId: string | null }) {
   const selected = selectedId
-    ? `[data-module-id="${CSS.escape(selectedId)}"] { outline: 2px solid var(--color-accent); outline-offset: -2px; }`
+    ? `[data-module-id="${escapeAttr(selectedId)}"] { outline: 2px solid var(--color-accent); outline-offset: -2px; }`
     : ''
 
   return (

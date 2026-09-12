@@ -1773,3 +1773,12 @@ id. The platform console's second and third writes, both recorded, both 404 to a
 29 new unit tests across three files; 603 unit and component tests. Two E2E tests: a theme
 repaints the preview and nothing outside it; a theme reaches the couple only when published, and
 then all of it.
+
+## The customizer's server render had thrown on every open
+
+Found in the E2E log while landing N-63, present since N-55: `SelectionStyles` escaped the
+selected section's id with `CSS.escape` during render, the customizer opens with a section
+selected, and `CSS` does not exist on the server. Every server render of the page threw, logged
+`CSS is not defined`, and React rendered the tree again in the browser — so nothing was visibly
+wrong, every test passed, and the error log had one line per open. Escaped by hand when the
+browser API is absent. One function, three call sites.
