@@ -16,7 +16,7 @@ import { hashSecret } from '@/lib/crypto'
 import { setRepository } from '@/lib/db'
 import { MemoryRepository, emptySnapshot } from '@/lib/db/memory-repository'
 import { reset } from '@/lib/http/rate-limit'
-import { operatorSchema, orgSchema } from '@/lib/schema'
+import { operatorSchema, orgSchema, platformAdminSchema } from '@/lib/schema'
 import { makeCatalogue } from '../helpers/repository'
 
 const ORG = '11111111-1111-4111-8111-11111111111a'
@@ -213,5 +213,70 @@ describe('registration', () => {
     const reply = await register({ ...studio, captchaToken: 'ok' }, '10.30.0.2')
     expect(reply.status).toBe(201)
     expect(await repo.listOrgs()).toHaveLength(2)
+  })
+})
+
+/**
+ * The platform owner comes through the same door, and has no operator row by design (doc 15 §1).
+ *
+ * Written because the row was not enough: the route answered on the operator lookup alone, so
+ * `platform_admins` could be populated and the console still could not be reached by anybody.
+ * The authenticator is a stub here for the same reason the Supabase driver is the production
+ * one — it can authenticate a person who is not an operator, which is precisely the case.
+ */
+describe('the platform door', () => {
+  const ADMIN = '00000000-0000-4000-8000-00000000000a'
+  const STRANGER = '00000000-0000-4000-8000-00000000000b'
+
+  /** Authenticates against a list that owes nothing to `operators`, as Supabase Auth does. */
+  class StubAuthProvider extends LocalAuthProvider {
+    private readonly users: Record<string, string> = {
+      'root@mehfilbox.test': ADMIN,
+      'stranger@example.test': STRANGER,
+    }
+
+    override async signIn(email: string, password: string) {
+      const id = this.users[email]
+      if (!id || password !== PASSWORD) return null
+      return { id, email }
+    }
+  }
+
+  beforeEach(() => {
+    // `snapshot()` clones, so the admin is added to a copy the repository is rebuilt from.
+    const snapshot = repo.snapshot()
+    snapshot.platformAdmins.push(
+      platformAdminSchema.parse({
+        id: ADMIN,
+        email: 'root@mehfilbox.test',
+        name: 'Platform Root',
+        createdAt: AT,
+      }),
+    )
+    repo = new MemoryRepository(snapshot)
+    setRepository(repo)
+    setAuthProvider(new StubAuthProvider())
+    for (const key of ['login:email:root@mehfilbox.test', 'login:email:stranger@example.test']) {
+      reset(key)
+    }
+  })
+
+  it('lets an admin in, and sends them to the console written for them', async () => {
+    const reply = await signIn('root@mehfilbox.test', PASSWORD, '10.40.0.1')
+    expect(reply.status).toBe(200)
+    expect(reply.body.landing).toBe('/admin/platform')
+  })
+
+  /** The property doc 15 §1 is built on: authenticating is still not membership of an org. */
+  it('still refuses an account that is neither an operator nor an admin', async () => {
+    const reply = await signIn('stranger@example.test', PASSWORD, '10.40.0.2')
+    expect(reply.status).toBe(401)
+    expect(reply.body.error?.message).toMatch(/did not work/)
+  })
+
+  /** And the wrong password is the wrong password, admin row or not. */
+  it('does not let the row stand in for the credential', async () => {
+    const reply = await signIn('root@mehfilbox.test', 'wrong', '10.40.0.3')
+    expect(reply.status).toBe(401)
   })
 })

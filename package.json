@@ -2,7 +2,7 @@
   "name": "mehfilbox",
   "version": "0.1.0",
   "private": true,
-  "description": "Mehfilbox \u2014 a white-label platform that presents a wedding's best moments as a private, cinematic streaming service.",
+  "description": "Mehfilbox — a white-label platform that presents a wedding's best moments as a private, cinematic streaming service.",
   "packageManager": "pnpm@9.15.0",
   "engines": {
     "node": ">=20.11"
@@ -33,6 +33,7 @@
     "verify:upload": "tsx scripts/verify-upload-resume.ts",
     "dev:live": "scripts/dev-live.sh",
     "rotate:password": "tsx scripts/rotate-operator-password.ts",
+    "platform:admin": "tsx scripts/create-platform-admin.ts",
     "check:dead": "knip --no-progress",
     "test:ci": "vitest run --coverage --reporter=default --reporter=json --outputFile=reports/vitest.json",
     "check:vitals": "tsx scripts/check-vitals.ts",

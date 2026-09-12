@@ -21,7 +21,8 @@ const bodySchema = z.object({
 /**
  * Sign in (P0-04, D-33, D-34). Email and password; the door a person picked is not sent and
  * would not be trusted if it were — where they land is decided by the org their operator row
- * belongs to, never by which tab they clicked.
+ * belongs to, never by which tab they clicked. The platform owner comes through the same form
+ * and has no operator row at all; see the second lookup below.
  *
  * Two buckets, and both have to allow the attempt: the address, so a script that rotates
  * through IPs still meets a wall on the one account it is after; and the IP, so a script that
@@ -77,6 +78,36 @@ export async function POST(request: Request) {
     // valid account; only an `operators` row grants access to an org, and the two failures are
     // reported identically so neither becomes an account-enumeration oracle.
     const operator = user ? await getRepository().getOperator(user.id) : null
+
+    /**
+     * The platform owner signs in through the same door, and has no operator row *by design*
+     * (doc 15 §1): an admin who belonged to an org would make every scoped query ask whether
+     * this member is special. So the operator lookup missing is not, on its own, a refusal —
+     * it is the second lookup's turn.
+     *
+     * This is not a widening. Nothing here changes what an operator may reach, and nothing
+     * converts between the two rows in either direction; the session this mints is refused by
+     * `requireOperator` exactly as an unaffiliated account's is. All it does is stop the console
+     * from being unreachable by the only person it was written for — which is what it was, for
+     * as long as this route answered on the operator row alone.
+     */
+    const platformAdmin =
+      user && !operator ? await getRepository().getPlatformAdmin(user.id) : null
+    if (user && !operator && platformAdmin) {
+      reset(addressKey)
+      reset(ipKey)
+      log.info('platform login: ok', { adminId: platformAdmin.id, driver: getAuthProvider().name })
+      const response = NextResponse.json(
+        {
+          platformAdmin: { id: platformAdmin.id, name: platformAdmin.name, email: platformAdmin.email },
+          landing: '/admin/platform',
+        },
+        { headers: { 'cache-control': 'no-store' } },
+      )
+      for (const cookie of carrier.cookies.getAll()) response.cookies.set(cookie)
+      return response
+    }
+
     if (!user || !operator) {
       log.warn('admin login: rejected', { email })
       throw new ApiError('UNAUTHORIZED', 'Those details did not work', {

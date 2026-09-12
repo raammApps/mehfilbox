@@ -41,12 +41,25 @@ curl -s https://api.resend.com/domains -H "Authorization: Bearer $RESEND_API_KEY
 ### Nobody is a platform admin, so `/admin/platform` 404s
 
 `platform_admins` is empty, which is the correct default — the console is invisible rather than
-refused. To reach it, insert yourself:
+refused. To reach it, create the account and the row together:
+
+```bash
+pnpm platform:admin you@example.com "Sandeep"
+```
+
+It makes the Supabase Auth account if there is none, writes the row, and leaves the password in
+`.env.platform.local` rather than in your scrollback. Doing it by hand in SQL needs the
+`auth.users` id and only works if the account already exists:
 
 ```sql
 insert into platform_admins (id, email, name)
 values ('<your auth.users id>', 'you@example.com', 'Sandeep');
 ```
+
+The row and the account are both required and neither is enough. A row without an account has no
+credential to sign in with; an account without a row reaches nothing, because every platform page
+answers 404. Sign in at `/login` like anybody else — the route reads `platform_admins` when there
+is no operator row, and sends you to `/admin/platform`.
 
 ---
 

@@ -98,6 +98,41 @@ Verify: `pnpm preflight` shows the schema and the first org. `pnpm test:integrat
 > If the integration run fails immediately after applying the DDL with `PGRST205`, wait thirty
 > seconds. PostgREST caches the schema and takes a moment to notice new tables.
 
+### Migrations after the bootstrap
+
+`bootstrap:sql` is for an empty project. A project that is already live takes the migrations it
+has not seen, in order, the same way — SQL editor, paste, run. `pnpm db:migrate` prints the list
+rather than applying it, for the reason above.
+
+```bash
+pnpm db:migrate                      # the ordered list
+cat supabase/migrations/00{16..25}_*.sql > /tmp/next.sql   # or bundle a range by hand
+```
+
+Every migration is written to be re-runnable (`create table if not exists`, `add column if not
+exists`), so applying one twice is not a mistake worth fearing — but wrap a bundle in `begin;` /
+`commit;` so a range either lands whole or not at all.
+
+**Which ones are already applied is a question the tables answer**, since there is no ledger: if
+`domains` exists, 0023 has run. `pnpm preflight` lists the schema it can see.
+
+### The platform owner
+
+The console at `/admin/platform` is invisible — a 404, not a refusal — until a `platform_admins`
+row exists, and that row has no credential of its own. Both halves come from one command:
+
+```bash
+pnpm platform:admin you@example.com "Your Name"
+```
+
+It reuses an existing Supabase Auth account or creates a confirmed one, writes the row, and
+leaves the generated password in `.env.platform.local` (gitignored) rather than in a terminal.
+Sign in at `/login` like anyone else; with no operator row and an admin row, the session route
+sends you to `/admin/platform`.
+
+A platform admin deliberately belongs to **no org** (doc 15 §1), so this account cannot open a
+studio's console, and no operator can be widened into it.
+
 ## 5. DNS and addressing
 
 `TENANCY_MODE=path` is the product (D-32, 12 September 2026). A catalogue's address is

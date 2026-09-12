@@ -2022,3 +2022,29 @@ applies, in order, and every new variable is in its table. The README's spec ran
 
 The day in numbers: N-60 to N-75, sixteen tickets, ten migrations, D-32 to D-41; 387 → 656 unit
 and component tests, 108 → 157 E2E.
+
+## N-76 · The platform owner could not sign in — 12 September 2026
+
+**Found while carrying out the deploy steps, which is the only way it could have been found.**
+`platform_admins` has existed since 0004 and every platform page reads it, but the sign-in route
+answered on the `operators` row alone: authenticate, look up the operator, and refuse when there
+is none. A platform admin has no operator row *by design* (doc 15 §1) — so the console was
+unreachable by the only person it was written for, and inserting the row changed nothing. No test
+caught it because the E2E only ever proved the opposite property, that an ordinary operator gets a
+404 there, and that stayed true.
+
+The route now takes a second lookup when the first misses, and sends an admin to
+`/admin/platform`. It is not a widening: nothing converts between the two rows, `requireOperator`
+refuses the session exactly as it refuses an unaffiliated account's, and a wrong password is still
+a wrong password. Three unit tests, on a stub authenticator — the local driver authenticates
+against `operators` and so cannot represent this case at all, which is itself why production runs
+`AUTH_DRIVER=supabase`.
+
+`pnpm platform:admin <email> [name]` now does both halves: it reuses or creates the confirmed
+Supabase Auth account, writes the row, and leaves the generated password in `.env.platform.local`
+rather than in a terminal, following `rotate:password`. Doing this by hand meant two dashboards
+and a uuid copied between them, and getting it half right looked exactly like the console being
+broken. `DEPLOYMENT.md` §4 gains that step and the one above it — how to apply migrations to a
+project that is already live, and how to tell which have run when there is no ledger.
+
+3 new unit tests; 659 unit and component tests.
