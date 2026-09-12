@@ -22,8 +22,8 @@ rows: no hard delete, multi-channel notifications, and the studio's credit survi
 > against the code and the design prototype, are specified in
 > [`spec/16-platform-v2.md`](./spec/16-platform-v2.md) and decided as D-32 to D-41. They change
 > the shape of several rows below — addressing, accounts, themes, the couple's surface, the
-> platform console — and §8 at the end of this file carries the new rows. Each is marked
-> **Built** as its `NEXT.md` ticket (N-60 to N-75) lands.
+> platform console — and §8 at the end of this file carries the new rows. **All of N-60 to N-75
+> landed the same day**; every row in §8 is marked Built with its ticket.
 
 ## The name
 
@@ -286,6 +286,6 @@ N-60 to N-75 in [`NEXT.md`](./NEXT.md).
 | Platform health page | **Built** | N-67, 12 Sept. `/admin/platform/health`: ten rows probed live — database, Bunny Stream and Storage, the CDN, Resend, the queue, the pipeline, every job's last run (`job_runs`), the synthetic walk. `/api/health` stays shallow for monitors. |
 | Custom domains with generated instructions and verification | **Built** | N-68, 12 Sept. A studio's (`films.studio.in/<wedding>`) or a couple's (one wedding at the root); records generated from what was typed with copy buttons and registrar hints; *Check DNS* from the server; attached through `DOMAIN_DRIVER` or by hand from the platform; the mehfilbox path 301s to it. |
 | Five-step wizard with the couple in the room | **Built** | N-69, 12 Sept. The couple (with occasion) → the look (style, or theme and layout) → guests and the couple (code, language, time zone, premiere, the couple's sign-in) → upload → titles. |
-| Every console surface at 360px | **Partial** | Guest surface yes; consoles unaudited. N-70. |
+| Every console surface at 360px | **Built** | N-70, 12 Sept. `e2e/responsive.spec.ts` opens every studio surface at 360×800 and fails on a sideways scroll; the customizer stacks with the preview first; platform tables scroll inside their region. |
 | Premiere date with a countdown | **Built** | N-72, 12 Sept. Set in the couple's zone in the wizard or settings; the link shows a countdown until then and opens into the wedding after. |
 | Couple-created catalogues from `/my` | **Built** | N-73, 12 Sept. *Start a catalogue of your own* opens the same wizard in its couple shape — occasion first (baby shower and naming day added), no house styles, no sign-in card. A draft until a credit is added by the studio or us. |

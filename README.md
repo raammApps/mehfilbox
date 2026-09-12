@@ -20,7 +20,7 @@ running and shipping the code.
 | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | How it fits together, with diagrams — **start here** |
 | [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) | Running it: accounts, variables, DNS |
 | [`docs/README.md`](docs/README.md) | Why there are two documentation trees |
-| [`docs/spec/`](docs/spec/) | The original specification, docs 01–15 |
+| [`docs/spec/`](docs/spec/) | The specification, docs 01–16 — 16 is the second pass of 12 September |
 
 ## Quick start
 

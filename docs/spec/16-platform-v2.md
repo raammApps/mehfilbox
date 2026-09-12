@@ -6,6 +6,13 @@ document and surface in this repository as it stood that morning. It is the spec
 work recorded as **N-60 to N-75** in `NEXT.md`, and it supersedes doc 02 §1 (addressing), doc 15
 §1–§2 (accounts and handover) and doc 14 §5's "Theme customisation, safely" wherever they disagree.
 
+> **Status, 12 September 2026, end of day: built.** N-60 to N-75 all landed the same day —
+> §1 as N-60 and N-68, §2 as N-61, §3 and §6 as N-62 and N-73, §4 as N-63, §5 as N-64, §7 as
+> N-65, §8 as N-66, §9 as N-67, §10 as N-69 and N-72, §12 as N-70, the rest as N-75. Each is a
+> `PROGRESS.md` entry; what a section says and what shipped differ only where the entry says so
+> (the prototype's arithmetic captcha was not built; the term moved to the platform; a couple's
+> own catalogue uses the studio's wizard in a second shape). Migrations 0016–0025.
+
 Everything here follows the two rules that have kept the codebase coherent: **one isolation
 mechanism** (`org_id` from the session, never from a request) and **a seam for every external
 service** (a fake driver in the suite, a real one in production). Nothing below adds a third way

@@ -21,8 +21,10 @@ Update this file as items land — move them out, do not leave them ticked.
 
 Phase 0 is built and deployed: guest catalogue, player, admin console, customizer, the module
 registry, and the partner/handover model. All six doc 10 §2 journeys run, plus an OG size budget,
-a first-load JS budget and a zero-axe-violations gate. **387 unit and component tests, 108 E2E,
-all green.**
+a first-load JS budget and a zero-axe-violations gate. The second pass of 12 September (doc 16)
+is built on top of it: the tenant path, two sign-in doors, couple accounts, themes and house
+styles, credits, the platform console with health, custom domains, the five-step wizard and the
+premiere. **656 unit and component tests, 157 E2E, all green.**
 
 **Live on `https://heirloomfilms.in`** with `DATA_DRIVER=supabase` + `VIDEO_DRIVER=bunny`: an
 operator signs in against real Postgres, and create → publish → guest page works. Registration
@@ -43,14 +45,12 @@ few seconds and is more trustworthy than this paragraph.
 
 ## Tier 1 — the second pass (12 September 2026) · `docs/spec/16-platform-v2.md`
 
-Sandeep's list of 12 September, refined against the codebase and the design prototype. Each item
-is one commit, in this order, because each one leaves the product working and the next one
-depends on it. The decisions behind them are D-32 to D-41.
-
-| | Item | Doc 16 | Size |
-|---|---|---|---|
-| **N-70** | **Responsive audit** of every console surface | §12 | half a session |
-| **N-75** | Documentation: `PRODUCT.md`, `DEPLOYMENT.md` (new variables), `MANUAL-TEST.md` | — | as each lands |
+**Landed, all of it, on 12 September.** N-60 to N-75 — the tenant path, two doors and credential
+links, couple accounts, themes, house styles, credits and the trial, the platform console, health,
+custom domains, the five-step wizard, the premiere, a catalogue of the couple's own, the consoles
+at 360px — each with its entry in `PROGRESS.md` and its rows in `PRODUCT.md` §8. The decisions are
+D-32 to D-41. Nothing from the list is deferred; what the spec left open is listed under Tier 2
+where it belongs (Razorpay for credits, N-20; the ops account, N-53b).
 
 ## Tier 1b — unretired risk
 

@@ -19,7 +19,7 @@ Read in this order. Each document states its own audience and what depends on it
 | 13 | [Agent Runbook](13-agent-runbook.md) | Which files to load per ticket; how not to blow a session | **Anything — read this first** |
 | 14 | [Modules & Customizer](14-modules-and-customizer.md) | **The differentiator.** Module registry, contract, customizer spec | Any module or admin work |
 | 15 | [Partners & Scale](15-partners-and-scale.md) | Who accounts belong to, how a catalogue changes hands, what breaks at volume | Any account or billing work |
-| 16 | [The platform, second pass](16-platform-v2.md) | **12 September 2026.** Tenant-path addressing, two sign-in doors, couple accounts, themes, house styles, credits, the platform console, health, custom domains | Any work on N-60 to N-75 |
+| 16 | [The platform, second pass](16-platform-v2.md) | **12 September 2026.** Tenant-path addressing, two sign-in doors, couple accounts, themes, house styles, credits, the platform console, health, custom domains | Built the same day as N-60 to N-75 — read it for *why*, `PROGRESS.md` for *what* |
 
 Also in `/reference`: `00-decision-log.md` (why this differs from the original brief),
 `original-business-case.pdf`, `reference-reel.mp4` and `frames/*.jpg` (the visual reference —

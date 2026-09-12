@@ -293,6 +293,13 @@ Everything is structured JSON on stdout, which Vercel captures. No vendor is wir
 is available before every handover. Nothing in a deploy migrates data, so rolling back the app
 never risks the content.
 
+**The second pass (12 September) added ten migrations**, all additive, in `supabase/migrations/`
+0016 to 0025: the tenant path (0016), credential links (0017), couple accounts (0018), themes
+(0019), house styles (0020), credits (0021), job runs (0022), custom domains (0023), the premiere
+and time zone (0024), and the two new occasions (0025). Apply them in order in the SQL editor
+before deploying the build that expects them; every column they add is read with a default, so a
+row read mid-rollout is fine.
+
 **Schema changes** are additive-only while a wedding is live. Add a migration to
 `supabase/migrations/`, apply it in the SQL editor, then deploy — in that order, so the old
 code never meets the new schema mid-request.

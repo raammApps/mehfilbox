@@ -1996,3 +1996,29 @@ with none (D-38).
 
 2 new unit tests; 656 unit and component tests. The couple's E2E walk now ends by starting a
 birthday of their own and meeting the credit panel.
+
+## N-70 · The consoles at 360px — 12 September 2026
+
+**An audit that runs on every build** (doc 16 §12). The guest surface has been mobile-first since
+Phase 0; the consoles were built at a desk. `e2e/responsive.spec.ts` opens every studio surface —
+the list, the wizard, a wedding's overview, customizer, settings, films and photographs, the
+studio's look, house styles — at 360×800 in the mobile project and fails on a sideways scroll,
+which is the one symptom every off-screen control shares. All of them passed on the first run,
+which is what the design tokens and the `min-w-0` discipline were for; the one change the spec
+asked for by name was the customizer stacking its three panes with the **preview first** below
+`lg`, since on a phone the page is the point and the section list is a means to it. Platform
+tables already scroll inside their own region; nothing on the console depends on hover.
+
+No new unit tests; two E2E tests in the mobile project.
+
+## N-75 · The documentation, closed out — 12 September 2026
+
+Each ticket updated `PRODUCT.md`, `DEPLOYMENT.md` and `MANUAL-TEST.md` as it landed; this is the
+sweep for what a per-ticket update cannot see. `NEXT.md`'s Tier 1 table is gone — every row landed
+— and its "where things stand" paragraph says what the codebase is now. Doc 16 carries a status
+banner mapping each section to the ticket that built it and naming the three places the shipped
+thing differs from the section. `DEPLOYMENT.md` lists the ten migrations a second-pass deploy
+applies, in order, and every new variable is in its table. The README's spec range reads 01–16.
+
+The day in numbers: N-60 to N-75, sixteen tickets, ten migrations, D-32 to D-41; 387 → 656 unit
+and component tests, 108 → 157 E2E.
