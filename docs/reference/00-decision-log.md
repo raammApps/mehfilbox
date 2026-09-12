@@ -558,3 +558,98 @@ couple, and they are the only party in the transaction who has met them.
 It is a **setting**, so it takes effect immediately (D-31). The customizer's branding panel is the
 other obvious home, and it is the wrong one: everything there waits for Publish, and two save
 models in one panel is precisely the confusion N-56 removed.
+
+## D-32 · The tenant is in the path (12 Sept 2026)
+
+**Was:** doc 02 §1 — `<wedding>.mehfilbox.com`, with `path` mode (`/c/<wedding>`) as a stopgap
+that production happened to run.
+
+**Decided:** `mehfilbox.com/<studio>/<wedding>`. The studio segment is the **originating** org's
+slug, permanent across handover; the wedding slug stays globally unique; `/c/<wedding>` stays as
+the internal route and a 301 alias so links already sent survive. Subdomain mode is retired as a
+product mode and kept only as harness configuration.
+
+**Why:** one certificate, no wildcard DNS, no nameserver delegation for a domain that carries mail,
+and a studio's own domain can front the same paths later. A per-wedding subdomain bought a nicer
+address at the cost of every one of those. Doc 16 §1.
+
+## D-33 · Two doors, one credential store (12 Sept 2026)
+
+One `/login` with **Studio** and **Couple** doors posting to the same session route; the console a
+person lands in is decided by their org's `kind`, never by the door. Forgot-password on both,
+answering identically for known and unknown addresses, through single-use hashed credential links
+that work on both auth drivers. **Studios issue couple credentials** at catalogue creation — a link
+to set a password by default, or a temporary password shown once for the studio in the room —
+and an address that already has a couple account is attached rather than duplicated. Doc 16 §2.
+
+## D-34 · Brute force: per-address limits, lockout, a challenge behind a seam (12 Sept 2026)
+
+Sign-in is limited per email as well as per IP; five failures lock for fifteen minutes; a
+Cloudflare Turnstile challenge appears after the third failure and on every registration, behind
+`CAPTCHA_DRIVER=none|turnstile` with a fake for the suite. The prototype's arithmetic puzzle is
+deliberately not built — it stops people and not scripts. Guest-code cookies carry a version, so
+changing the code signs out everyone holding the old one. Doc 16 §2.
+
+## D-35 · Themes change the whole guest surface; brand changes the accent (12 Sept 2026)
+
+**Was:** doc 04 §1 and doc 14 §5 — the near-black surface is the product identity and is not
+customer-configurable.
+
+**Decided:** a **theme** is a validated token set (surfaces, text, accent, radii, faces, poster
+palette, colour scheme) chosen per catalogue; **brand** is the accent, logo, face and credit within
+it. Seven built-in themes, named for their feel and never for another company's product; platform
+admins can author more, validated for contrast on save. `judgeAccent` judges against the theme's
+surface. Sandeep asked for the range — social-grid, light feed, carnival, classic, rainbow, kids —
+and the token architecture already made every guest component read from custom properties, so the
+cost is a registry and a picker, not a second tree. Doc 16 §4.
+
+**What is kept from the old rule:** the default is still marquee, red on near-black, and the
+streaming mechanics of doc 04 §1b are unchanged in every theme.
+
+## D-36 · House styles are frozen while in use (12 Sept 2026)
+
+A studio saves named presets (theme, layout, branding, language, guest code on/off, poster
+palette), one default, and can save a finished catalogue as one. Values are **copied** into a
+catalogue at creation, so editing a style never repaints a delivered wedding — and a style that a
+published catalogue references is **frozen**: editing is refused with the count and a
+*Duplicate and edit* action. Sandeep asked for the prompt; the freeze is what makes the record of
+"which look did we deliver" stay true. Doc 16 §5.
+
+## D-37 · The couple's account, multi-catalogue, not a second console (12 Sept 2026)
+
+`/my`: a light surface listing every catalogue the account owns or is linked to, from any studio;
+per catalogue the six things a couple actually does (open, share, download, change the code,
+rewrite the letter, hide a section) plus a seven-day studio access window; per account, password
+and closure. Couples can start catalogues of their own, published on a credit. The session is the
+same `operators` row and the same `org_id` scope as a studio's — only the chrome differs. Doc 16 §6.
+
+## D-38 · First publish free, second on a credit (12 Sept 2026)
+
+Registration grants one credit; a catalogue's **first** publish consumes one; no credit refuses
+Publish with the reason and the way to add one. Until Razorpay (N-20) that way is a grant from the
+platform console with a reason on the audit row. This is the "something that reads a plan" N-27c
+was waiting for. Doc 16 §7.
+
+## D-39 · The platform console writes, one at a time, recorded (12 Sept 2026)
+
+Create a studio (and its first operator, who receives a credential link), grant credits, send a
+password link to any operator, add an operator, take a catalogue offline, **extend a term** — the
+last of which moves off the studio's settings screen, where a studio could set its own renewal
+date for free. Self-registration stays open; suspension after the fact replaces approval before
+use. Doc 16 §8.
+
+## D-40 · Health is "would a guest notice", not "did it boot" (12 Sept 2026)
+
+A platform-only health page probing Supabase, Bunny Stream, Bunny Storage and CDN, Resend, the
+notification queue, the transcode pipeline, every scheduled job's last run (a `job_runs` table
+every cron writes) and the synthetic guest check. `/api/health` stays shallow and public for
+uptime monitors. Doc 16 §9.
+
+## D-41 · A "Made with Mehfilbox" line, on by default, a studio setting (12 Sept 2026)
+
+**Was:** doc 11 §4 — our credit off by default; the landing FAQ says we never appear.
+
+**Decided:** on by default, one click to turn off per studio. The white-label promise is kept for
+the studio that wants it and costs nothing for the studio that does not; Sandeep wants the share
+to bring the next studio in. A share-this-wedding control joins the per-film and per-photograph
+share. Doc 16 §11.

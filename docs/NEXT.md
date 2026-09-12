@@ -41,7 +41,32 @@ few seconds and is more trustworthy than this paragraph.
 
 ---
 
-## Tier 1 — unretired risk
+## Tier 1 — the second pass (12 September 2026) · `docs/spec/16-platform-v2.md`
+
+Sandeep's list of 12 September, refined against the codebase and the design prototype. Each item
+is one commit, in this order, because each one leaves the product working and the next one
+depends on it. The decisions behind them are D-32 to D-41.
+
+| | Item | Doc 16 | Size |
+|---|---|---|---|
+| **N-60** | **Tenant-path addressing** — `/<studio>/<wedding>`, canonical redirects, `/c/` alias, share-this-wedding, the platform credit toggle | §1, §11 | 1 session |
+| **N-61** | **Two doors, one credential store** — `/login`, forgot-password credential links, `AuthProvider.setPassword`, per-address lockout, the captcha seam | §2 | 1 session |
+| **N-62** | **Couple accounts** — created by the studio, linked before owned, handover attaches, the support window, `/my` v1 | §3, §6 | 1–2 sessions |
+| **N-63** | **Themes** — registry of seven, `ThemeStyle` writes the whole token set, picker in the customizer and wizard, contrast per theme, platform-authored themes | §4 | 1 session |
+| **N-64** | **House styles** — presets, the freeze, save-as-style, start from style / template / blank | §5, §10 | 1 session |
+| **N-65** | **Credits and the trial** — first publish free, the publish gate, platform grants | §7 | half a session |
+| **N-66** | **Platform console v2** — create a studio, operators and password links, every catalogue, extend a term, dashboard | §8 | 1 session |
+| **N-67** | **Platform health** — the probes, `job_runs`, the page | §9 | half a session |
+| **N-68** | **Custom domains** — the table, generated instructions, DNS verification, the provider seam, the 301 | §1 | 1 session |
+| **N-69** | **Wizard v2** — five steps, the couple in the room | §10 | half a session |
+| **N-70** | **Responsive audit** of every console surface | §12 | half a session |
+| **N-71** | Guest-code versioning and the couple's code change signing everyone out | §2, §6 | with N-62 |
+| **N-72** | Premiere date and time — a countdown screen until it | §10 | half a session |
+| **N-73** | Couple-created catalogues from `/my` | §6 | with N-65 |
+| **N-74** | Delivered view for studios — every originated catalogue, its state and renewal date | §3 | with N-62 |
+| **N-75** | Documentation: `PRODUCT.md`, `DEPLOYMENT.md` (new variables), `MANUAL-TEST.md` | — | as each lands |
+
+## Tier 1b — unretired risk
 
 Empty. The three things doc 09 called out as schedule risk — the video provider, the database,
 and resumable upload — have all now run against the real services.

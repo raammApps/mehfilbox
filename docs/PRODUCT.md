@@ -18,6 +18,13 @@ Last reviewed: **14 August 2026** — full consistency audit against the code an
 merged in [`ROADMAP.md`](./ROADMAP.md), which also records three decisions that changed existing
 rows: no hard delete, multi-channel notifications, and the studio's credit surviving renewal.
 
+> **12 September 2026 — the second pass.** Sandeep's requirements of that morning, refined
+> against the code and the design prototype, are specified in
+> [`spec/16-platform-v2.md`](./spec/16-platform-v2.md) and decided as D-32 to D-41. They change
+> the shape of several rows below — addressing, accounts, themes, the couple's surface, the
+> platform console — and §8 at the end of this file carries the new rows. Each is marked
+> **Built** as its `NEXT.md` ticket (N-60 to N-75) lands.
+
 ## The name
 
 **Mehfilbox** — decided 7 September 2026. **The domain is still `heirloomfilms.in`**, and so is
@@ -243,3 +250,35 @@ was considered.
 | [`PRICING.md`](./PRICING.md) | What the built parts are sold for |
 | [`ARCHITECTURE.md`](./ARCHITECTURE.md) | How the built parts fit together |
 | [`USAGE-GUIDE.md`](./USAGE-GUIDE.md) | How to use the built parts |
+
+---
+
+## 8. The second pass — 12 September 2026
+
+The rows the second pass adds or changes. Specified in
+[`spec/16-platform-v2.md`](./spec/16-platform-v2.md); decided as D-32 to D-41; scheduled as
+N-60 to N-75 in [`NEXT.md`](./NEXT.md).
+
+| | Status | Where it stands |
+|---|---|---|
+| Tenant-path addressing `/<studio>/<wedding>` | **Missing** | N-60. `/c/<wedding>` becomes an alias that redirects. |
+| Share this wedding (WhatsApp) and the "Made with Mehfilbox" toggle | **Missing** | N-60. Per-film and per-photograph share exist. |
+| One sign-in with a Studio door and a Couple door | **Missing** | N-61. Today `/admin/login` with studio-only copy. |
+| Forgot password, on both doors | **Partial** | Supabase Auth's reset exists and nothing links to it. N-61. |
+| Per-address lockout and a captcha seam | **Partial** | Per-IP limits only. N-61. |
+| Studio issues the couple's credentials at creation | **Missing** | N-62. Today the couple only gets an account through handover. |
+| Couple account with many catalogues, from many studios | **Missing** | N-62. A second handover to the same address fails today. |
+| Couple console `/my` | **Missing** | N-62. A couple gets the full operator console. |
+| Studio support window after handover | **Missing** | N-62. Access ends completely at handover. |
+| Delivered view — every originated catalogue with its renewal date | **Missing** | N-74. |
+| Themes — seven built in, chosen per catalogue | **Missing** | N-63. One surface, one theme, since Phase 0. |
+| Platform-authored themes | **Missing** | N-63. |
+| House styles — saved presets, frozen while in use | **Missing** | N-64. One studio-wide look exists (N-26). |
+| Start from blank | **Missing** | N-64. Three templates only. |
+| First publish free, second on a credit | **Missing** | N-65. Nothing gates a publish. |
+| Platform console: create a studio, credits, password links, all catalogues, extend a term | **Partial** | Suspend and quota exist (N-27, N-27b). N-66. |
+| Platform health page | **Missing** | N-67. `/api/health` reports drivers only. |
+| Custom domains with generated instructions and verification | **Partial** | Stored, never served. N-68. |
+| Five-step wizard with the couple in the room | **Partial** | Four steps; no theme, code, timezone or couple step. N-69. |
+| Every console surface at 360px | **Partial** | Guest surface yes; consoles unaudited. N-70. |
+| Premiere date with a countdown | **Missing** | N-72. |

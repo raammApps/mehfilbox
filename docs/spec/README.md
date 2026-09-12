@@ -58,6 +58,8 @@ docs/11-whitelabel-and-b2b.md         Pricing, partner onboarding, the pitch, ob
 docs/12-compliance-and-risk.md        IP constraints, DPDP, WhatsApp, payments, risk register
 docs/13-agent-runbook.md      Per-ticket reading map, context budget, session handoff
 docs/14-modules-and-customizer.md  ★ THE DIFFERENTIATOR — module registry + customizer spec
+docs/15-partners-and-scale.md      Accounts, handover, entitlements, what breaks at volume
+docs/16-platform-v2.md             ★ THE SECOND PASS (12 Sept 2026) — addressing, accounts, themes, styles, credits, health, domains
 reference/00-decision-log.md  Why this differs from the original brief (D-1 … D-9)
 reference/original-business-case.pdf  The starting document
 reference/reference-reel.mp4  The visual reference; frames/ has stills. Described in doc 14 §1
