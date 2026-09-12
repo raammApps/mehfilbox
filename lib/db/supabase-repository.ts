@@ -25,6 +25,8 @@ import type {
   Preset,
   CreditBalance,
   PublishCredit,
+  JobRun,
+  QueueStats,
 } from '@/lib/schema'
 import type { Entitlement } from '@/lib/entitlements'
 import type { CustomTheme } from '@/themes/contract'
@@ -585,6 +587,74 @@ export class SupabaseRepository implements Repository {
       .update({ used_at: new Date().toISOString() })
       .eq('id', id)
     if (error) throw new ApiError('INTERNAL', error.message)
+  }
+
+  // ── Jobs and health (D-40) ────────────────────────────────────────────────
+  private static toJobRun(r: Row): JobRun {
+    return {
+      id: r.id,
+      job: r.job,
+      startedAt: r.started_at,
+      finishedAt: r.finished_at,
+      ok: r.ok,
+      detail: r.detail ?? {},
+    }
+  }
+
+  async recordJobRun(run: JobRun): Promise<JobRun> {
+    const { error } = await this.db.from('job_runs').insert({
+      id: run.id,
+      job: run.job,
+      started_at: run.startedAt,
+      finished_at: run.finishedAt,
+      ok: run.ok,
+      detail: run.detail,
+    })
+    if (error) throw new ApiError('INTERNAL', error.message)
+    return run
+  }
+
+  async latestJobRuns(): Promise<JobRun[]> {
+    // The newest two hundred cover every job's last run many times over; reduced here rather
+    // than with a lateral join the client library cannot express.
+    const { data, error } = await this.db
+      .from('job_runs')
+      .select('*')
+      .order('finished_at', { ascending: false })
+      .limit(200)
+    if (error) throw new ApiError('INTERNAL', error.message)
+    const newest = new Map<string, JobRun>()
+    for (const row of (data ?? []) as Row[]) {
+      const run = SupabaseRepository.toJobRun(row)
+      if (!newest.has(run.job)) newest.set(run.job, run)
+    }
+    return [...newest.values()].sort((a, b) => a.job.localeCompare(b.job))
+  }
+
+  async notificationQueueStats(failedSinceIso: string): Promise<QueueStats> {
+    const [queued, failed, oldest] = await Promise.all([
+      this.db.from('notifications').select('id', { count: 'exact', head: true }).eq('status', 'queued'),
+      this.db
+        .from('notifications')
+        .select('id', { count: 'exact', head: true })
+        .eq('status', 'failed')
+        .gte('created_at', failedSinceIso),
+      this.db
+        .from('notifications')
+        .select('created_at')
+        .eq('status', 'queued')
+        .order('created_at', { ascending: true })
+        .limit(1)
+        .maybeSingle(),
+    ])
+    for (const result of [queued, failed, oldest]) {
+      if (result.error) throw new ApiError('INTERNAL', result.error.message)
+    }
+    return {
+      queued: queued.count ?? 0,
+      failedSince: failed.count ?? 0,
+      oldestQueuedAt: (oldest.data?.created_at as string | undefined) ?? null,
+    }
   }
 
   // ── Credits (D-38) ────────────────────────────────────────────────────────

@@ -3,6 +3,7 @@ import { getRepository } from '@/lib/db'
 import { revalidateCatalogue } from '@/lib/catalogue-cache'
 import { env } from '@/lib/env'
 import { route } from '@/lib/http/handler'
+import { runJob } from '@/lib/jobs/run'
 import { log } from '@/lib/log'
 import { alertOps } from '@/lib/notify/alert'
 import { getVideoProvider, posterRoute } from '@/lib/video'
@@ -33,6 +34,12 @@ export async function GET(request: Request) {
       return new NextResponse(null, { status: 401 })
     }
 
+    const result = await runJob('reconcile', () => reconcile())
+    return NextResponse.json(result, { headers: { 'cache-control': 'no-store' } })
+  })
+}
+
+async function reconcile(): Promise<{ examined: number; settled: number; failed: number }> {
     const repository = getRepository()
     const provider = getVideoProvider()
     const stalled = await repository.listStalledTitles(STALL_MINUTES)
@@ -113,9 +120,5 @@ export async function GET(request: Request) {
       )
     }
 
-    return NextResponse.json(
-      { examined: stalled.length, settled, failed },
-      { headers: { 'cache-control': 'no-store' } },
-    )
-  })
+    return { examined: stalled.length, settled, failed }
 }

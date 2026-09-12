@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { env } from '@/lib/env'
 import { route } from '@/lib/http/handler'
+import { runJob } from '@/lib/jobs/run'
 import { runLifecycle } from '@/lib/lifecycle'
 
 export const runtime = 'nodejs'
@@ -23,7 +24,7 @@ export async function GET(request: Request) {
       return new NextResponse(null, { status: 401 })
     }
 
-    const result = await runLifecycle()
+    const result = await runJob('lifecycle', () => runLifecycle())
     return NextResponse.json(result, { headers: { 'cache-control': 'no-store' } })
   })
 }

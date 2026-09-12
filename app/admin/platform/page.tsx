@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import { PlatformNav } from '@/components/admin/PlatformNav'
 import { getPlatformAdmin } from '@/lib/admin/platform'
 import { getRepository } from '@/lib/db'
+import { probeAll, summarise } from '@/lib/health/probes'
 
 export const dynamic = 'force-dynamic'
 
@@ -26,7 +27,11 @@ export default async function PlatformPage() {
     repository.listAllCatalogues(),
     repository.listPlatformAudit({ limit: 10 }),
   ])
-  const balances = await Promise.all(orgs.map((org) => repository.creditBalance(org.id, now)))
+  const [balances, health] = await Promise.all([
+    Promise.all(orgs.map((org) => repository.creditBalance(org.id, now))),
+    // Remembered for a minute by the probes themselves, so the dashboard costs no extra calls.
+    probeAll().then(summarise),
+  ])
 
   const partners = orgs.filter((org) => org.kind === 'partner')
   const couples = orgs.filter((org) => org.kind === 'couple')
@@ -49,7 +54,12 @@ export default async function PlatformPage() {
         <Stat label="Couples" value={couples.length} href="/admin/platform/couples" />
         <Stat label="Catalogues" value={catalogues.length} hint={`${live} live · ${catalogues.length - live} draft`} href="/admin/platform/catalogues" />
         <Stat label="Credits outstanding" value={outstanding} hint="unspent, across every studio" />
-        <Stat label="Themes" value={7} hint="built in, plus yours" href="/admin/platform/themes" />
+        <Stat
+          label="Health"
+          value={health.ok}
+          hint={`of ${health.total} services answering${health.state === 'ok' ? '' : health.state === 'down' ? ' — something is down' : ' — something needs a look'}`}
+          href="/admin/platform/health"
+        />
       </dl>
 
       <div className="mb-2 flex items-baseline justify-between">

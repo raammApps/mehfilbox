@@ -22,6 +22,8 @@ import type {
   Preset,
   CreditBalance,
   PublishCredit,
+  JobRun,
+  QueueStats,
 } from '@/lib/schema'
 
 /**
@@ -123,6 +125,12 @@ export interface Repository {
   deleteOrg(id: string): Promise<void>
 
   // ── Platform-authored themes (D-35) ─────────────────────────────────────────
+  // ── Jobs and health (D-40) ───────────────────────────────────────────────
+  recordJobRun(run: JobRun): Promise<JobRun>
+  /** The newest run of every job that has ever run. */
+  latestJobRuns(): Promise<JobRun[]>
+  notificationQueueStats(failedSinceIso: string): Promise<QueueStats>
+
   // ── Credits (D-38) ───────────────────────────────────────────────────────
   listCredits(orgId: string): Promise<PublishCredit[]>
   grantCredits(credits: PublishCredit[]): Promise<PublishCredit[]>

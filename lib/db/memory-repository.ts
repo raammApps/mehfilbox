@@ -22,6 +22,8 @@ import type {
   Preset,
   CreditBalance,
   PublishCredit,
+  JobRun,
+  QueueStats,
 } from '@/lib/schema'
 import type { Entitlement } from '@/lib/entitlements'
 import type { CustomTheme } from '@/themes/contract'
@@ -53,6 +55,7 @@ export type Snapshot = {
   customThemes: CustomTheme[]
   presets: Preset[]
   credits: PublishCredit[]
+  jobRuns: JobRun[]
   orgs: Org[]
   operators: Operator[]
   catalogues: Catalogue[]
@@ -84,6 +87,7 @@ export function emptySnapshot(): Snapshot {
     customThemes: [],
     presets: [],
     credits: [],
+    jobRuns: [],
     orgs: [],
     operators: [],
     catalogues: [],
@@ -242,6 +246,35 @@ export class MemoryRepository implements Repository {
   }
 
   // ── Platform-authored themes ────────────────────────────────────────────────
+  // ── Jobs and health (D-40) ────────────────────────────────────────────────
+  async recordJobRun(run: JobRun): Promise<JobRun> {
+    this.data.jobRuns ??= []
+    this.data.jobRuns.push(this.clone(run))
+    // A file store that kept every run forever would grow by the minute; the page reads the newest.
+    if (this.data.jobRuns.length > 2000) this.data.jobRuns.splice(0, this.data.jobRuns.length - 2000)
+    this.touched()
+    return this.clone(run)
+  }
+
+  async latestJobRuns(): Promise<JobRun[]> {
+    const newest = new Map<string, JobRun>()
+    for (const run of this.data.jobRuns ?? []) {
+      const seen = newest.get(run.job)
+      if (!seen || run.finishedAt >= seen.finishedAt) newest.set(run.job, run)
+    }
+    return this.clone([...newest.values()].sort((a, b) => a.job.localeCompare(b.job)))
+  }
+
+  async notificationQueueStats(failedSinceIso: string): Promise<QueueStats> {
+    const queued = this.data.notifications.filter((n) => n.status === 'queued')
+    const oldest = queued.map((n) => n.createdAt).sort()[0] ?? null
+    return {
+      queued: queued.length,
+      failedSince: this.data.notifications.filter((n) => n.status === 'failed' && n.createdAt >= failedSinceIso).length,
+      oldestQueuedAt: oldest,
+    }
+  }
+
   // ── Credits (D-38) ────────────────────────────────────────────────────────
   async listCredits(orgId: string): Promise<PublishCredit[]> {
     return this.clone(

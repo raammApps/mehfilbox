@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { env } from '@/lib/env'
 import { route } from '@/lib/http/handler'
+import { runJob } from '@/lib/jobs/run'
 import { log } from '@/lib/log'
 import { drain } from '@/lib/notify/send'
 
@@ -41,7 +42,7 @@ export async function GET(request: Request) {
       return new NextResponse(null, { status: 401 })
     }
 
-    const result = await drain()
+    const result = await runJob('notify', () => drain())
     if (result.attempted > 0 || result.skipped > 0) log.info('notify: drained', result)
     return NextResponse.json(result)
   })

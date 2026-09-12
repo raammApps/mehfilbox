@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { getRepository } from '@/lib/db'
 import { env } from '@/lib/env'
 import { route } from '@/lib/http/handler'
+import { runJob } from '@/lib/jobs/run'
 import { log } from '@/lib/log'
 import { reportError } from '@/lib/observability'
 import { getVideoProvider } from '@/lib/video'
@@ -35,6 +36,12 @@ export async function GET(request: Request) {
       return new NextResponse(null, { status: 401 })
     }
 
+    const result = await runJob('usage', () => rollUp())
+    return NextResponse.json(result, { headers: { 'cache-control': 'no-store' } })
+  })
+}
+
+async function rollUp(): Promise<{ examined: number; alerted: number; month: string }> {
     const repository = getRepository()
     const provider = getVideoProvider()
     const month = new Date().toISOString().slice(0, 7) + '-01'
@@ -92,9 +99,5 @@ export async function GET(request: Request) {
     }
 
     log.info('usage rollup complete', { examined, alerted, month })
-    return NextResponse.json(
-      { examined, alerted, month },
-      { headers: { 'cache-control': 'no-store' } },
-    )
-  })
+    return { examined, alerted, month }
 }

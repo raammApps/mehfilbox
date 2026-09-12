@@ -259,6 +259,20 @@ export type PublishCredit = z.infer<typeof publishCreditSchema>
 /** What a studio sees: how many it can spend, has spent, and let lapse. */
 export type CreditBalance = { available: number; consumed: number; expired: number }
 
+/** One run of a scheduled job (D-40): every cron writes one, the health page reads the newest. */
+export const jobRunSchema = z.object({
+  id: z.string().uuid(),
+  job: z.string().min(1),
+  startedAt: z.string(),
+  finishedAt: z.string(),
+  ok: z.boolean(),
+  detail: z.record(z.string(), z.unknown()).default({}),
+})
+export type JobRun = z.infer<typeof jobRunSchema>
+
+/** The notification queue as the health page reads it. */
+export type QueueStats = { queued: number; failedSince: number; oldestQueuedAt: string | null }
+
 /**
  * A catalogue mid-handover.
  *

@@ -315,6 +315,7 @@ Catalogues, Themes, Audit. Every write asks why and lands on the audit trail.
 | **Catalogues**, soonest to lapse first | Open one: **Serving until** with *+ 1 year* and a reason — a lapsed wedding comes back as *active* at once; **Take offline** for abuse, and *Put it back* republishes for free |
 | **Themes** (`/admin/platform/themes`) | *Start from* Carnival, name it, darken *Body text* to `#5a4a70`: the verdict line goes red, **Add this theme** disables. Put it back, add it — it is in a studio's Branding panel on the next load, marked *Yours* |
 | **Withdraw** a theme a wedding is on | Gone from the pickers; the wedding still renders with it, and its own panel still shows it as *(withdrawn)* |
+| **Health** | Ten rows with a dot each: database, Bunny Stream (token auth on), Storage, CDN, Resend, the queue, the pipeline, the jobs, the synthetic walk, domains. *Check again now* re-probes. Run a cron by hand (§12) and its row moves from *never run* to a time |
 | Audit | Every write above, newest first, with who, the org and the reason |
 
 ✅ The one to verify deliberately: suspend a studio, then open one of its **published weddings** in
@@ -354,7 +355,8 @@ curl -H "Authorization: Bearer $CRON_SECRET" https://mehfilbox.com/api/cron/synt
 
 ✅ The synthetic check walks a guest's whole path — resolve, bundle, a ready film, a playback
 token — and names the step that broke. `/api/health` only proves the app booted; it stayed green
-through every real fault this product has had.
+through every real fault this product has had. Since N-67 every job writes a `job_runs` row, and
+the platform's **Health** page shows each one's last run and outcome.
 
 ---
 

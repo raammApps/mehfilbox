@@ -278,7 +278,8 @@ docker build -t heirloomfilms .
 docker run -p 3000:3000 --env-file .env.production heirloomfilms
 ```
 
-Standalone output, non-root user, health check on `/api/health`. No secret is baked in — the
+Standalone output, non-root user, health check on `/api/health` (shallow, for the container
+runtime; the platform console's Health page is the one that says whether a guest could watch). No secret is baked in — the
 build skips `lib/env.ts`'s production guards precisely so it can run without real configuration.
 
 You lose three things Vercel provides, and each needs replacing: wildcard TLS (a reverse proxy

@@ -1884,3 +1884,30 @@ is on the platform, credits outstanding included, and shows the last ten things 
 No E2E: a platform admin has no operator row and the local driver signs in by one, which is the
 isolation doc 15 §1 chose. 9 new unit tests hold every route's effect and its 404 to an operator;
 629 unit and component tests.
+
+## N-67 · Platform health — 12 September 2026
+
+**"Would a guest notice", not "did the app boot"** (D-40, doc 16 §9). `/api/health` reports which
+drivers are configured, and it stayed green through every real fault this product has had — the
+dead webhook URL, the storage column nothing wrote, the SMTP credential that authenticated but
+could not send. `/admin/platform/health` is the page a platform admin opens when a studio writes
+in: ten rows, each probed live inside a three-second budget and remembered for a minute, each a
+state and a sentence written for the person reading it on a Saturday.
+
+The rows: the database answers through the driver the app uses and the newest migration's table
+exists; Bunny Stream's library answers **and token authentication is on** — a library with it off
+would make every film public, and the row says so; Bunny Storage accepts the credential; the photo
+CDN serves; Resend accepts the key; the notification queue — waiting is fine, failed today is not,
+an hour-old queued row asks whether the drain is running; films stuck past the stall window; every
+scheduled job's last run, outcome and lateness against its own cadence; the synthetic walk's last
+result with the step that broke; custom domains stored (served with N-68). A service the deploy
+does not use says *not configured* rather than failing.
+
+**Every cron leaves a record.** `job_runs` (migration 0022) gets one row per run — when, how long,
+whether it worked, the counts the job already reported — written by `runJob`, which never lets the
+record fail the work. The synthetic check records the job as run and the walk as failed, which are
+different facts. The reconcile and usage jobs kept their bodies and moved them into a function so
+the wrapper could see the counts.
+
+The dashboard's fifth number is now health — how many configured services answer — and the nav
+gains the page. 9 new unit tests; 638 unit and component tests.

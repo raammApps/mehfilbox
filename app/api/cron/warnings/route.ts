@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { env } from '@/lib/env'
 import { route } from '@/lib/http/handler'
+import { runJob } from '@/lib/jobs/run'
 import { queueDueWarnings } from '@/lib/notify/schedule'
 
 export const runtime = 'nodejs'
@@ -24,7 +25,7 @@ export async function GET(request: Request) {
       return new NextResponse(null, { status: 401 })
     }
 
-    const result = await queueDueWarnings()
+    const result = await runJob('warnings', () => queueDueWarnings())
     return NextResponse.json(result, { headers: { 'cache-control': 'no-store' } })
   })
 }

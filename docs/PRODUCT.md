@@ -283,7 +283,7 @@ N-60 to N-75 in [`NEXT.md`](./NEXT.md).
 | Start from blank | **Built** | N-64, 12 Sept. A fourth layout, in the wizard and in a style. |
 | First publish free, second on a credit | **Built** | N-65, 12 Sept. `credits` table; registration grants one; the first publish spends one; refusal is a panel with *Ask for a credit* until Razorpay (N-20). |
 | Platform console: create a studio, credits, password links, all catalogues, extend a term | **Built** | N-66, 12 Sept. Dashboard, studios (create one), couples, every catalogue (term, offline), themes, audit. The term left the studio's settings. |
-| Platform health page | **Missing** | N-67. `/api/health` reports drivers only. |
+| Platform health page | **Built** | N-67, 12 Sept. `/admin/platform/health`: ten rows probed live — database, Bunny Stream and Storage, the CDN, Resend, the queue, the pipeline, every job's last run (`job_runs`), the synthetic walk. `/api/health` stays shallow for monitors. |
 | Custom domains with generated instructions and verification | **Partial** | Stored, never served. N-68. |
 | Five-step wizard with the couple in the room | **Partial** | Four steps; step 2 asks for a house style, or a theme and a layout (N-63, N-64). No code, timezone or couple step yet. N-69. |
 | Every console surface at 360px | **Partial** | Guest surface yes; consoles unaudited. N-70. |
