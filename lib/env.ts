@@ -118,6 +118,21 @@ const schema = z
     CRON_SECRET: z.string().min(16).optional(),
 
     /**
+     * Custom domains (doc 16 §1). `none` verifies DNS and then waits for a person to attach the
+     * domain at the host (the platform console lists it under *awaiting attachment*); `vercel`
+     * attaches it through the API so the row reaches `active` on its own; `fake` is the suite's.
+     * The three record targets are what the generated instructions print, so they are
+     * configuration rather than constants: they change when the host does.
+     */
+    DOMAIN_DRIVER: z.enum(['none', 'fake', 'vercel']).default('none'),
+    DOMAIN_CNAME_TARGET: nonEmpty.default('cname.mehfilbox.com'),
+    DOMAIN_A_RECORD: nonEmpty.default('76.76.21.21'),
+    DOMAIN_NAMESERVERS: nonEmpty.default('ns1.vercel-dns.com,ns2.vercel-dns.com'),
+    VERCEL_API_TOKEN: z.string().optional(),
+    VERCEL_PROJECT_ID: z.string().optional(),
+    VERCEL_TEAM_ID: z.string().optional(),
+
+    /**
      * How long a title may sit in a non-terminal state before reconcile asks the provider what
      * actually happened. Two hours by default so the job never races a healthy webhook.
      *
@@ -172,6 +187,12 @@ const schema = z
     SUPABASE_SERVICE_ROLE_KEY: env.SUPABASE_SERVICE_ROLE_KEY || env.SUPABASE_SECRET_KEY,
   }))
   .superRefine((env, ctx) => {
+    if (env.DOMAIN_DRIVER === 'vercel' && (!env.VERCEL_API_TOKEN || !env.VERCEL_PROJECT_ID)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'DOMAIN_DRIVER=vercel needs VERCEL_API_TOKEN and VERCEL_PROJECT_ID',
+      })
+    }
     if (env.DATA_DRIVER === 'supabase') {
       for (const key of [
         'NEXT_PUBLIC_SUPABASE_URL',

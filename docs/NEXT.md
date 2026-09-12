@@ -49,10 +49,7 @@ depends on it. The decisions behind them are D-32 to D-41.
 
 | | Item | Doc 16 | Size |
 |---|---|---|---|
-| **N-68** | **Custom domains** — the table, generated instructions, DNS verification, the provider seam, the 301 | §1 | 1 session |
-| **N-69** | **Wizard v2** — five steps, the couple in the room | §10 | half a session |
 | **N-70** | **Responsive audit** of every console surface | §12 | half a session |
-| **N-72** | Premiere date and time — a countdown screen until it | §10 | half a session |
 | **N-73** | Couple-created catalogues from `/my` | §6 | with N-65 |
 | **N-75** | Documentation: `PRODUCT.md`, `DEPLOYMENT.md` (new variables), `MANUAL-TEST.md` | — | as each lands |
 

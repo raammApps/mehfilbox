@@ -1911,3 +1911,73 @@ the wrapper could see the counts.
 
 The dashboard's fifth number is now health — how many configured services answer — and the nav
 gains the page. 9 new unit tests; 638 unit and component tests.
+
+## N-68 · Custom domains — 12 September 2026
+
+**A studio's own domain, or a couple's** (doc 16 §1). `domains` (migration 0023) carries both: a
+studio's serves every wedding it makes at `films.kalyanam.in/<wedding>`; a couple's serves one at
+its root. A row moves pending → verified → active, or failed, and the console says what it saw at
+each step in words rather than as a status code.
+
+**Generated from what was typed.** A subdomain gets a CNAME; a root domain gets an A record and a
+`www` CNAME, with the warning that a root domain usually carries the family's email and the MX
+records must not be touched; both get the TXT at `_mehfilbox.<host>` that proves ownership. Every
+record has the relative name a registrar's form asks for, the fully qualified one, the value, a
+copy button, and a note; the nameserver handover is offered for the studio that would rather
+delegate the whole domain; four registrars get a hint. Public suffixes with two labels — `co.in`,
+`co.uk` — are told apart from subdomains, so `kalyanam.co.in` is a root.
+
+**Check DNS** resolves the TXT and the CNAME or A from the server (`node:dns`, injectable for the
+suite) and moves the row to `verified` only when both hold. What happens next is the
+`DomainProvider` seam: `vercel` attaches the domain through the API so it goes live on its own;
+`none` leaves it at verified and the platform's new Domains page lists it under awaiting
+attachment, with *Mark attached* for the person who added it to the project by hand — honest,
+rather than a status that says "active" about a domain nobody attached. `fake` is the suite's: a
+`.test` host is verified and attached at once.
+
+**Live means every URL follows.** Activation stamps `catalogues.served_at` on every wedding the
+domain covers — the couple's one, or every wedding under the studio's segment, handed-over ones
+included, and each one the studio makes afterwards — and `publicUrlOf` reads that one column, so
+the share, the OG tag, the delivery message and the console's link change on the spot. The
+mehfilbox path 301s to it, so links already in two hundred phones survive; a request on the domain
+stays there, links and all. Middleware rewrites a custom host to `/d/<host>/…`, which resolves it
+and renders **the same page components** `/c/<wedding>` renders. Removal puts everything back and
+detaches at the host. The typed `customDomain` field on the studio's settings is gone; the panel
+that replaced it also sits on the studio page for the studio's own domain.
+
+10 new unit tests; 648 unit and component tests. One E2E test walks the console's whole path on
+the fake driver.
+
+## N-69 · Wizard v2 — 12 September 2026
+
+**Five steps, two of them with the couple in the room** (doc 16 §10). The couple, with the occasion
+now asked; the look — a house style, or a theme and a layout; **guests and the couple** — who can
+watch (unlisted, or a guest code typed or generated), the language, the time zone, an optional
+premiere, and the couple's email with how their first password reaches them; then upload and
+titles as before. The wedding is created at the end of the third step rather than the second, so
+everything the couple has an opinion about is answered before the row exists, and the generated
+code and the couple's sign-in outcome are shown once at the top of the upload step. A style that
+asks for a code arrives at the third step with it already chosen. The couple's sign-in is the same
+route the overview uses; its failure is reported rather than allowed to block the wedding, since
+the overview offers the form again.
+
+The create route takes the step's answers: a typed code is hashed and never echoed, a wanted code
+is made and returned once, the time zone is checked against `Intl` rather than a list, and the
+premiere is an instant. `lib/time.ts` does the clock arithmetic without a library: a wall time in
+a named zone becomes an instant by measuring the zone's offset at that wall time, twice, which
+settles either side of a DST change.
+
+## N-72 · The premiere — 12 September 2026
+
+**A countdown until the moment, then the films.** `catalogues.premiere_at` and `timezone`
+(migration 0024) make a published wedding answer `premiere` from `resolveAccess` until the instant
+passes — after the draft check, before the guest code, so anyone with the link sees the countdown
+and the code stays for the films. Every guest page routes the verdict to `/premiere`, the domain
+resolver included; the screen counts down in the browser from the instant the server rendered,
+says the moment in the guest's language and the couple's zone — *Saturday, 14 November 2026 at
+7:00 pm IST* — and at zero offers the wedding rather than reloading under a thumb. Settings edits
+the premiere in the couple's wall time and clears it in one click.
+
+6 new unit tests; 654 unit and component tests. One E2E test sets a premiere for tomorrow, sees the
+countdown as a guest, clears it and sees the wedding; the wizard's three E2E walks gained the
+third step.

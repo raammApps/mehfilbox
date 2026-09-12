@@ -19,6 +19,8 @@ export type AccessVerdict =
   | { kind: 'draft'; catalogue: Catalogue }
   | { kind: 'locked'; catalogue: Catalogue }
   | { kind: 'lapsed'; catalogue: Catalogue }
+  /** Published, but before its premiere (N-72): a countdown, not the films. */
+  | { kind: 'premiere'; catalogue: Catalogue }
 
 /** Today as `YYYY-MM-DD`, so an expiry compares like the date column it came from. */
 function today(): string {
@@ -46,6 +48,10 @@ export async function resolveAccess(slug: string): Promise<AccessVerdict> {
   }
 
   if (catalogue.status !== 'published') return { kind: 'draft', catalogue }
+  // Before the passcode: anyone with the link may see the countdown, and the code is for the films.
+  if (catalogue.premiereAt && Date.parse(catalogue.premiereAt) > Date.now()) {
+    return { kind: 'premiere', catalogue }
+  }
 
   if (catalogue.privacy === 'passcode') {
     const grant = (await cookies()).get(passcodeCookieName(catalogue.slug))?.value
@@ -75,5 +81,8 @@ export async function requireServableCatalogue(slug: string): Promise<Catalogue>
       throw new ApiError('PASSCODE_REQUIRED', 'This catalogue needs a passcode')
     case 'lapsed':
       throw new ApiError('SUBSCRIPTION_INACTIVE', 'This catalogue needs renewing')
+    case 'premiere':
+      // Not yet, and not a secret: the API says so the way the page does, without a code.
+      throw new ApiError('CATALOGUE_NOT_FOUND', 'This catalogue has not premiered yet')
   }
 }

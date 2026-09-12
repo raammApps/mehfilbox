@@ -270,6 +270,41 @@ export const jobRunSchema = z.object({
 })
 export type JobRun = z.infer<typeof jobRunSchema>
 
+/** A bare, lowercased host — `films.kalyanam.in`. No protocol, no path, no port. */
+export const hostSchema = z
+  .string()
+  .trim()
+  .toLowerCase()
+  .max(253)
+  .regex(
+    /^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$/,
+    'Enter a domain like films.example.com',
+  )
+
+export const DOMAIN_STATUSES = ['pending', 'verified', 'active', 'failed'] as const
+export const domainStatusSchema = z.enum(DOMAIN_STATUSES)
+export type DomainStatus = z.infer<typeof domainStatusSchema>
+
+/**
+ * A custom domain (doc 16 §1): a studio's, serving every wedding it makes under `/<wedding>`, or a
+ * couple's, serving one wedding at its root. `pending` until DNS proves ownership (the TXT) and
+ * pointing (the CNAME or A); `verified` until the host has it attached; `active` once it serves.
+ */
+export const domainSchema = z.object({
+  id: z.string().uuid(),
+  orgId: z.string().uuid(),
+  /** Set for a single-catalogue domain; null for a studio's. */
+  catalogueId: z.string().uuid().nullable().default(null),
+  host: hostSchema,
+  /** Expected in a TXT record at `_mehfilbox.<host>`. */
+  verificationToken: z.string().min(8),
+  status: domainStatusSchema.default('pending'),
+  lastCheckedAt: z.string().nullable().default(null),
+  error: z.string().nullable().default(null),
+  createdAt: z.string(),
+})
+export type Domain = z.infer<typeof domainSchema>
+
 /** The notification queue as the health page reads it. */
 export type QueueStats = { queued: number; failedSince: number; oldestQueuedAt: string | null }
 
@@ -504,6 +539,20 @@ export const catalogueSchema = z.object({
    */
   locale: localeSchema.default('en'),
   template: z.string().nullable().default(null),
+  /** Where the couple is (N-69): a premiere at "seven in the evening" means their evening. */
+  timezone: z.string().default('Asia/Kolkata'),
+  /**
+   * The instant before which a published wedding shows a countdown rather than the films
+   * (N-72). Null is no premiere — live the moment it is published.
+   */
+  premiereAt: z.string().nullable().default(null),
+  /**
+   * The absolute address this catalogue is served from while a custom domain is active (doc 16
+   * §1): `https://aanyaandvikram.in`, or `https://films.kalyanam.in/aanya-vikram-2026` under a
+   * studio's domain. Null means the mehfilbox path. Stamped on activation, cleared on removal, and
+   * the one column every printed URL reads — so it is on the row rather than joined.
+   */
+  servedAt: z.string().nullable().default(null),
   /**
    * The house style this catalogue was created from (D-36), if any. A record, not a link: the
    * values were copied at creation and the style may since have been renamed or deleted.

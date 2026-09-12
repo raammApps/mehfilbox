@@ -3,7 +3,7 @@ import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { ThemeStyle } from '@/components/chrome/ThemeStyle'
 import { CatalogueShell } from '@/components/streaming/CatalogueShell'
-import { basePathOf, ogImageUrlOf, publicUrlOf, requireCanonicalAddress } from '@/lib/address'
+import { addressFor, ogImageUrlOf, publicUrlOf, requireCanonicalAddress } from '@/lib/address'
 import { loadBundle, resolveAccess } from '@/lib/catalogue-access'
 import { getRepository } from '@/lib/db'
 import { env } from '@/lib/env'
@@ -80,9 +80,11 @@ export default async function CataloguePage({
       // Both of these are catalogue-scoped pages, so they hang off the catalogue's own base —
       // which in path mode is `/<studio>/<wedding>` and in subdomain mode is the root. A bare
       // `/locked` in path mode lands on the marketing site with nowhere to type the code.
-      redirect(`${basePathOf(verdict.catalogue)}/locked`)
+      redirect(`${(await addressFor(verdict.catalogue)).basePath}/locked`)
     case 'lapsed':
-      redirect(`${basePathOf(verdict.catalogue)}/renew`)
+      redirect(`${(await addressFor(verdict.catalogue)).basePath}/renew`)
+    case 'premiere':
+      redirect(`${(await addressFor(verdict.catalogue)).basePath}/premiere`)
     case 'ok':
       break
   }
@@ -95,7 +97,7 @@ export default async function CataloguePage({
   if (titleParam) query.set('title', titleParam)
   if (profileParam) query.set('profile', profileParam)
   const search = [...query.keys()].length > 0 ? `?${query.toString()}` : ''
-  await requireCanonicalAddress(catalogue, '', search)
+  const address = await requireCanonicalAddress(catalogue, '', search)
 
   const bundle = await loadBundle(catalogue)
   const locale = await guestLocale(catalogue)
@@ -110,7 +112,7 @@ export default async function CataloguePage({
     }
   }
 
-  const publicUrl = publicUrlOf(catalogue)
+  const publicUrl = address.publicUrl
   // The whole guest surface follows the theme (D-35); resolved once, custom-aware, here.
   const theme = await resolveTheme(catalogue.branding)
 
@@ -126,7 +128,7 @@ export default async function CataloguePage({
         initialProgress={progress}
         shareBaseUrl={publicUrl.replace(/\/$/, '')}
         publicUrl={publicUrl}
-        basePath={basePathOf(catalogue)}
+        basePath={address.basePath}
         platformCredit={showsPlatformCredit(catalogue.branding)}
         // The referral carries the studio segment, so a studio that keeps the line on gets the
         // enquiry it brought in (D-13, D-41).

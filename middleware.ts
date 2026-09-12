@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server'
-import { parseTenantPath, resolveTenant } from '@/lib/tenant'
+import { isCustomHost, normaliseHost, parseTenantPath, resolveTenant } from '@/lib/tenant'
 
 /**
  * Host and path → route rewrite (doc 05 §5, D-32).
@@ -15,6 +15,8 @@ export const config = {
 /** Set on every rewrite onto a catalogue route, so the page can tell a canonical arrival from a legacy one. */
 const TENANT_HEADER = 'x-mehfilbox-tenant'
 const CATALOGUE_HEADER = 'x-mehfilbox-catalogue'
+/** Set when the request arrived on somebody's own domain (doc 16 §1); `lib/address.ts` reads it. */
+const HOST_HEADER = 'x-mehfilbox-host'
 
 export function middleware(request: NextRequest) {
   const url = request.nextUrl.clone()
@@ -30,6 +32,21 @@ export function middleware(request: NextRequest) {
   // The fallback matches `lib/env.ts`'s default, which middleware cannot import (it is server-only
   // and validates the whole environment at load).
   if ((process.env.TENANCY_MODE ?? 'path') === 'path') {
+    /**
+     * Somebody's own domain (doc 16 §1). Nothing hangs off a label of the root in path mode, so
+     * any other host is a candidate; the database decides whether it serves, in `/d/<host>`,
+     * which renders the same guest pages. The API passes through: the page's own calls arrive on
+     * this host too.
+     */
+    const host = request.headers.get('host')
+    if (isCustomHost(host, rootDomain) && !url.pathname.startsWith('/api')) {
+      const bare = normaliseHost(host)
+      url.pathname = `/d/${bare}${url.pathname === '/' ? '' : url.pathname}`
+      const response = NextResponse.rewrite(url)
+      response.headers.set(HOST_HEADER, bare)
+      return response
+    }
+
     const tenantPath = parseTenantPath(url.pathname)
     if (!tenantPath) return NextResponse.next()
 

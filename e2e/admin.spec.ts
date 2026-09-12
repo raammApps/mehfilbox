@@ -149,6 +149,8 @@ test.describe('the admin console', () => {
     await page.getByLabel('Web address').fill(slug)
     await expect(page.getByText('Available')).toBeVisible()
     await page.getByRole('button', { name: 'Continue' }).click()
+    // The look, then guests and the couple (doc 16 §10); the wedding exists after the third step.
+    await page.getByRole('button', { name: 'Continue' }).click()
 
     await page.getByRole('button', { name: 'Create and start uploading' }).click()
     await expect(page.getByText(new RegExp(slug))).toBeVisible()
@@ -195,6 +197,9 @@ test.describe('the admin console', () => {
     await page.getByRole('radio', { name: /^E2E Carnival/ }).check({ force: true })
     // Picking a style hides the theme and layout cards: the style has answered them.
     await expect(page.getByRole('radio', { name: /^The Keepsake/ })).toHaveCount(0)
+    await page.getByRole('button', { name: 'Continue' }).click()
+    // The style asked for a guest code, so the third step arrives with it already chosen.
+    await expect(page.getByRole('radio', { name: 'A guest code' })).toBeChecked()
     await page.getByRole('button', { name: 'Create and start uploading' }).click()
 
     // The code, shown once, with the couple present.

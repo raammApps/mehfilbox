@@ -3,14 +3,18 @@
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import type { Catalogue, Locale, Privacy } from '@/lib/schema'
+import { TIMEZONES, wallTimeIn, zonedTimeToUtc } from '@/lib/time'
 
 /** AE-10 — unlisted by default, optional passcode (doc 01 §5.2, doc 05 §4). */
 export function CatalogueSettings({ catalogue }: { catalogue: Catalogue }) {
   const router = useRouter()
   const [privacy, setPrivacy] = useState<Privacy>(catalogue.privacy)
   const [passcode, setPasscode] = useState('')
-  const [customDomain, setCustomDomain] = useState(catalogue.customDomain ?? '')
   const [locale, setLocale] = useState<Locale>(catalogue.locale)
+  const [timezone, setTimezone] = useState(catalogue.timezone)
+  const premiereWall = catalogue.premiereAt ? wallTimeIn(catalogue.premiereAt, catalogue.timezone) : null
+  const [premiereDate, setPremiereDate] = useState(premiereWall?.date ?? '')
+  const [premiereTime, setPremiereTime] = useState(premiereWall?.time ?? '19:00')
   const [status, setStatus] = useState<string | null>(null)
   const [confirmName, setConfirmName] = useState('')
   const [deleting, setDeleting] = useState(false)
@@ -24,10 +28,10 @@ export function CatalogueSettings({ catalogue }: { catalogue: Catalogue }) {
         // Only send a passcode when one was typed; an empty box must not wipe a working one.
         ...(privacy === 'passcode' && passcode ? { passcode } : {}),
         ...(privacy === 'unlisted' ? { passcode: null } : {}),
-        // Empty means "no custom domain", which is a real choice and must clear the field —
-        // unlike the passcode, where empty means "keep the one you have".
-        customDomain: customDomain.trim() ? customDomain.trim() : null,
         locale,
+        timezone,
+        // A cleared date is "no premiere"; the wall time is the couple's, so it is converted here.
+        premiereAt: premiereDate ? zonedTimeToUtc(premiereDate, premiereTime || '00:00', timezone) : null,
       }),
     })
     if (!response.ok) {
@@ -167,25 +171,54 @@ export function CatalogueSettings({ catalogue }: { catalogue: Catalogue }) {
       </section>
 
       <section className="mb-6 rounded-[var(--radius-card)] border border-[var(--color-l-line)] bg-white p-4">
-        <h2 className="mb-1 text-[15px] font-semibold">Their own address</h2>
+        <h2 className="mb-1 text-[15px] font-semibold">Premiere</h2>
         <p className="mb-3 text-[13px] text-[var(--color-l-text-mid)]">
-          A domain the couple owns, pointed here. Leave empty to use the address above.
+          Until this moment the link shows a countdown instead of the films. Leave the date empty
+          for no premiere. The time is in the couple&rsquo;s zone.
         </p>
-        <input
-          type="text"
-          inputMode="url"
-          autoCapitalize="none"
-          spellCheck={false}
-          value={customDomain}
-          onChange={(event) => setCustomDomain(event.target.value)}
-          placeholder="aanyaandvikram.in"
-          className="h-11 w-full rounded-[var(--radius-input)] border border-[var(--color-l-line)] px-3 text-[14px]"
-        />
-        <p className="mt-2 text-[12px] text-[var(--color-l-text-mid)]">
-          They point a CNAME at us, and the domain is added to the hosting project. Until both
-          are done this is stored but not served.
-        </p>
+        <div className="grid gap-3 sm:grid-cols-3">
+          <label className="text-[13px]">
+            <span className="mb-1 block font-semibold">Date</span>
+            <input
+              type="date"
+              value={premiereDate}
+              onChange={(event) => setPremiereDate(event.target.value)}
+              className="h-11 w-full rounded-[var(--radius-input)] border border-[var(--color-l-line)] px-3 text-[14px]"
+            />
+          </label>
+          <label className="text-[13px]">
+            <span className="mb-1 block font-semibold">Time</span>
+            <input
+              type="time"
+              value={premiereTime}
+              onChange={(event) => setPremiereTime(event.target.value)}
+              className="h-11 w-full rounded-[var(--radius-input)] border border-[var(--color-l-line)] px-3 text-[14px]"
+            />
+          </label>
+          <label className="text-[13px]">
+            <span className="mb-1 block font-semibold">Time zone</span>
+            <select
+              value={timezone}
+              onChange={(event) => setTimezone(event.target.value)}
+              className="h-11 w-full rounded-[var(--radius-input)] border border-[var(--color-l-line)] bg-white px-2 text-[14px]"
+            >
+              {TIMEZONES.map((zone) => (
+                <option key={zone.id} value={zone.id}>
+                  {zone.label}
+                </option>
+              ))}
+              {TIMEZONES.some((zone) => zone.id === timezone) ? null : <option value={timezone}>{timezone}</option>}
+            </select>
+          </label>
+        </div>
+        {premiereDate ? (
+          <button type="button" onClick={() => setPremiereDate('')} className="mt-2 text-[12px] underline underline-offset-4">
+            No premiere — live when published
+          </button>
+        ) : null}
       </section>
+
+      {/* Their own address moved to `DomainPanel`, rendered by the page beside this drawer (doc 16 §1). */}
 
       {/*
         Read-only now (D-39). This was a date field a studio could type into, which made the

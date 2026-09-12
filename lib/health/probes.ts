@@ -207,10 +207,20 @@ export function probeSynthetic(fresh = false): Promise<HealthRow> {
 
 export function probeDomains(fresh = false): Promise<HealthRow> {
   return probe('domains', 'Custom domains', fresh, async () => {
-    const stored = (await getRepository().listAllCatalogues()).filter((catalogue) => catalogue.customDomain).length
+    const domains = await getRepository().listAllDomains()
+    const count = (status: string) => domains.filter((domain) => domain.status === status).length
+    const active = count('active')
+    const waiting = count('verified')
+    const failed = count('failed')
+    const pending = count('pending')
+    if (failed > 0) return { state: 'warn', detail: `${failed} failed to attach — see Domains` }
+    if (waiting > 0 && env.DOMAIN_DRIVER === 'none') {
+      return { state: 'warn', detail: `${waiting} verified and awaiting attachment by hand (DOMAIN_DRIVER=none)` }
+    }
+    if (domains.length === 0) return { state: 'ok', detail: 'none configured' }
     return {
       state: 'ok',
-      detail: stored === 0 ? 'none stored' : `${stored} stored, none served yet (N-68)`,
+      detail: `${active} live${pending > 0 ? `, ${pending} waiting for DNS` : ''}${waiting > 0 ? `, ${waiting} attaching` : ''}`,
     }
   })
 }

@@ -24,6 +24,7 @@ import type {
   PublishCredit,
   JobRun,
   QueueStats,
+  Domain,
 } from '@/lib/schema'
 
 /**
@@ -125,6 +126,18 @@ export interface Repository {
   deleteOrg(id: string): Promise<void>
 
   // ── Platform-authored themes (D-35) ─────────────────────────────────────────
+  // ── Custom domains (doc 16 §1) ───────────────────────────────────────────
+  listDomains(orgId: string): Promise<Domain[]>
+  /** Platform only: every domain, awaiting attachment first. */
+  listAllDomains(): Promise<Domain[]>
+  getDomain(id: string, orgId: string): Promise<Domain | null>
+  /** Platform only. */
+  getDomainById(id: string): Promise<Domain | null>
+  /** The guest path: a host arrives and the row says whose it is and whether it serves. */
+  getDomainByHost(host: string): Promise<Domain | null>
+  saveDomain(domain: Domain): Promise<Domain>
+  deleteDomain(id: string, orgId: string): Promise<void>
+
   // ── Jobs and health (D-40) ───────────────────────────────────────────────
   recordJobRun(run: JobRun): Promise<JobRun>
   /** The newest run of every job that has ever run. */
@@ -264,6 +277,7 @@ export interface Repository {
   getCatalogueForSupport(id: string, originOrgId: string, now: Date): Promise<Catalogue | null>
   /** Guest path: resolve by subdomain label with no org scope. */
   getCatalogueBySlug(slug: string): Promise<Catalogue | null>
+  /** The catalogue served at the root of `host` — `servedAt === https://<host>`. */
   getCatalogueByCustomDomain(host: string): Promise<Catalogue | null>
   slugAvailable(slug: string): Promise<boolean>
   createCatalogue(catalogue: Catalogue): Promise<Catalogue>

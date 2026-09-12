@@ -203,7 +203,7 @@ test.describe('doc 10 §4 — accessibility, zero violations', () => {
     await page.getByLabel('Web address').fill(`e2e-axe-${Date.now().toString(36)}`)
     await expect(page.getByText('Available')).toBeVisible()
     await page.getByRole('button', { name: 'Continue' }).click()
-    await expect(page.getByRole('button', { name: 'Create and start uploading' })).toBeVisible()
+    await expect(page.getByRole('radio', { name: /The Keepsake/ })).toBeVisible()
 
     expect(describeViolations(await audit(page))).toBe('')
 
@@ -218,6 +218,12 @@ test.describe('doc 10 §4 — accessibility, zero violations', () => {
     await expect(page.getByRole('radio', { name: /The Keepsake/ })).toHaveCount(1)
     await expect(page.getByRole('radio', { name: /Films Only/ })).toHaveCount(1)
     await expect(page.getByRole('radio', { name: /Anniversary/ })).toHaveCount(1)
+
+    // The third step, with its radios, selects and dates — the densest form in the console.
+    await page.getByRole('button', { name: 'Continue' }).click()
+    await expect(page.getByRole('button', { name: 'Create and start uploading' })).toBeVisible()
+
+    expect(describeViolations(await audit(page))).toBe('')
   })
 
   test('the customizer', async ({ page }) => {

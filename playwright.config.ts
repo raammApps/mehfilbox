@@ -31,6 +31,8 @@ const SHARED_ENV = {
   // The suite's challenge driver: a checkbox that yields a fixed token (D-34), so the widget's
   // appearance after repeated failures is exercised without Cloudflare.
   CAPTCHA_DRIVER: 'fake',
+  // A `.test` host is taken as correctly configured and attached at once (doc 16 §1).
+  DOMAIN_DRIVER: 'fake',
 }
 
 /**

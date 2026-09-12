@@ -1,6 +1,8 @@
 import { notFound, redirect } from 'next/navigation'
 import { AdminChrome } from '@/components/admin/AdminChrome'
 import { CatalogueSettings } from '@/components/admin/CatalogueSettings'
+import { DomainPanel } from '@/components/admin/DomainPanel'
+import { instructionsOf } from '@/lib/domains'
 import { getOperatorSession, getSessionOrg } from '@/lib/admin/session'
 import { getRepository } from '@/lib/db'
 
@@ -15,6 +17,8 @@ export default async function SettingsPage({ params }: { params: Promise<{ id: s
   if (!catalogue) notFound()
 
   const org = await getSessionOrg(session)
+  // One domain per wedding (doc 16 §1); the panel takes it with the records it needs.
+  const domain = (await getRepository().listDomains(session.orgId)).find((d) => d.catalogueId === catalogue.id) ?? null
 
   return (
     <AdminChrome
@@ -37,6 +41,12 @@ export default async function SettingsPage({ params }: { params: Promise<{ id: s
       </div>
 
       <CatalogueSettings catalogue={catalogue} />
+
+      <DomainPanel
+        scope="catalogue"
+        catalogueId={catalogue.id}
+        initial={domain ? { domain, instructions: instructionsOf(domain) } : null}
+      />
     </AdminChrome>
   )
 }

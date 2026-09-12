@@ -3,7 +3,9 @@ import { AdminChrome } from '@/components/admin/AdminChrome'
 import { StudioBranding } from '@/components/admin/StudioBranding'
 import Link from 'next/link'
 import { getOperatorSession, getSessionOrg } from '@/lib/admin/session'
+import { DomainPanel } from '@/components/admin/DomainPanel'
 import { getRepository } from '@/lib/db'
+import { instructionsOf } from '@/lib/domains'
 import { allThemes } from '@/themes/resolve'
 
 export const dynamic = 'force-dynamic'
@@ -21,10 +23,12 @@ export default async function StudioPage() {
 
   const org = await getSessionOrg(session)
   if (!org) redirect('/admin')
-  const [styles, balance] = await Promise.all([
+  const [styles, balance, domains] = await Promise.all([
     getRepository().listPresets(org.id),
     getRepository().creditBalance(org.id, new Date().toISOString()),
+    getRepository().listDomains(org.id),
   ])
+  const studioDomain = domains.find((domain) => domain.catalogueId === null) ?? null
 
   return (
     <AdminChrome
@@ -53,6 +57,15 @@ export default async function StudioPage() {
             Your first was on us; each after that is ₹1,999, or five for ₹7,999.
           </p>
         </section>
+
+        {/* films.yourstudio.in/<wedding> — every wedding this studio makes, from its own domain (doc 16 §1). */}
+        <div className="mt-6">
+          <DomainPanel
+            scope="studio"
+            catalogueId={null}
+            initial={studioDomain ? { domain: studioDomain, instructions: instructionsOf(studioDomain) } : null}
+          />
+        </div>
 
         {/* Named looks, the plural of this page (D-36). One line here; the list is its own page. */}
         <section className="mt-6 rounded-[var(--radius-card)] border border-[var(--color-l-line)] bg-white p-4">

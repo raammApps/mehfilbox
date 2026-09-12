@@ -8,26 +8,37 @@ import type { Preset } from '@/lib/schema'
 import type { ThemeDefinition } from '@/themes/contract'
 import { themeFrom } from '@/themes/registry'
 import { ThemeCards } from './ThemeCards'
-import { FLIX_SUFFIX, type Locale, type Title } from '@/lib/schema'
+import { FLIX_SUFFIX, OCCASIONS, type Locale, type Occasion, type Privacy, type Title } from '@/lib/schema'
+import { DEFAULT_TIMEZONE, TIMEZONES, zonedTimeToUtc } from '@/lib/time'
 import { catalogueUrl, type TenancyMode } from '@/lib/tenant'
 import { IconCheck } from './icons'
 import { TemplateThumbnail } from './TemplateThumbnail'
 import { TitleList } from './TitleList'
 import { UploadManager } from './UploadManager'
 
-type Step = 1 | 2 | 3 | 4
+type Step = 1 | 2 | 3 | 4 | 5
 
+/** Five steps (doc 16 §10); the second and third are the ones to do with the couple in the room. */
 const STEPS: { n: Step; label: string; hint: string }[] = [
-  { n: 1, label: 'The wedding', hint: 'Names, date and the address guests will use' },
-  { n: 2, label: 'The shape', hint: 'A starting layout you can rearrange afterwards' },
-  { n: 3, label: 'Upload', hint: 'Films go straight to the video service, not through us' },
-  { n: 4, label: 'Titles', hint: 'Name them and choose what guests see' },
+  { n: 1, label: 'The couple', hint: 'Names, date, occasion and the address guests will use' },
+  { n: 2, label: 'The look', hint: 'A house style, or a theme and a layout' },
+  { n: 3, label: 'Guests & the couple', hint: 'Who can watch, when, in what language, and the couple’s sign-in' },
+  { n: 4, label: 'Upload', hint: 'Films go straight to the video service, not through us' },
+  { n: 5, label: 'Titles', hint: 'Name them and choose what guests see' },
 ]
+
+const OCCASION_LABELS: Record<Occasion, string> = {
+  wedding: 'Wedding',
+  engagement: 'Engagement',
+  anniversary: 'Anniversary',
+  birthday: 'Birthday',
+  proposal: 'Proposal',
+}
 
 const DRAFT_KEY = 'mehfilbox.wizard.draft'
 
 /**
- * The four-step create wizard (doc 02 §3).
+ * The five-step create wizard (doc 02 §3, doc 16 §10).
  *
  * Three properties matter more than the form itself:
  *  - **nothing is lost on refresh** — an operator does this between phone calls, so step 1–2
@@ -67,6 +78,7 @@ export function CreateWizard({
   const [catalogueId, setCatalogueId] = useState<string | null>(null)
 
   const [coupleName, setCoupleName] = useState('')
+  const [occasion, setOccasion] = useState<Occasion>('wedding')
   const [appName, setAppName] = useState('')
   const [weddingDate, setWeddingDate] = useState('')
   const [city, setCity] = useState('')
@@ -87,8 +99,18 @@ export function CreateWizard({
   const [styleId, setStyleId] = useState<string | null>(
     styles.find((style) => style.isDefault)?.id ?? null,
   )
-  /** Generated at creation when the style asks for a code; shown once, on the next step. */
+  /** Generated at creation when a code was asked for but not typed; shown once, on the next step. */
   const [passcode, setPasscode] = useState<string | null>(null)
+  // Step 3 — guests and the couple (doc 16 §10).
+  const [privacy, setPrivacy] = useState<Privacy>('unlisted')
+  const [typedCode, setTypedCode] = useState('')
+  const [timezone, setTimezone] = useState(DEFAULT_TIMEZONE)
+  const [premiereDate, setPremiereDate] = useState('')
+  const [premiereTime, setPremiereTime] = useState('19:00')
+  const [coupleEmail, setCoupleEmail] = useState('')
+  const [coupleContact, setCoupleContact] = useState('')
+  const [delivery, setDelivery] = useState<'link' | 'temporary'>('link')
+  const [coupleResult, setCoupleResult] = useState<{ email: string; existing: boolean; temporaryPassword?: string; error?: string } | null>(null)
   const chooseStyle = (id: string | null) => {
     setStyleId(id)
     const style = styles.find((candidate) => candidate.id === id)
@@ -96,6 +118,7 @@ export function CreateWizard({
     setLocale(style.locale)
     setTheme(style.branding.theme ?? studioTheme)
     setTemplate(style.templateId as typeof template)
+    setPrivacy(style.passcodeOn ? 'passcode' : 'unlisted')
   }
   /**
    * Seeded from the studio, changeable per wedding (N-29c). The studio's language is what most of
@@ -169,7 +192,13 @@ export function CreateWizard({
         weddingDate,
         slug,
         city: city ? { en: city } : undefined,
+        occasion,
         locale,
+        // Step 3: who can watch, and when — in the couple's own time.
+        privacy,
+        ...(privacy === 'passcode' && typedCode.trim() ? { passcode: typedCode.trim() } : {}),
+        timezone,
+        premiereAt: premiereDate ? zonedTimeToUtc(premiereDate, premiereTime || '00:00', timezone) : null,
         // From a style, the route copies its layout and branding; otherwise only the theme is
         // sent and the rest of the studio's branding is inherited.
         ...(styleId ? { presetId: styleId } : { template, branding: { theme } }),
@@ -190,6 +219,30 @@ export function CreateWizard({
     window.localStorage.removeItem(DRAFT_KEY)
 
     /**
+     * The couple's sign-in, issued now if an address was given (D-33, D-37). Its failure is not
+     * the wedding's: the catalogue exists, so the outcome is reported on the next step rather
+     * than blocking it, and the overview offers the same form again.
+     */
+    if (coupleEmail.trim()) {
+      const issued = await fetch(`/api/admin/catalogues/${body.catalogue.id}/couple`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ email: coupleEmail.trim(), name: coupleContact.trim() || coupleName, delivery }),
+      })
+      const outcome = (await issued.json().catch(() => null)) as {
+        email?: string
+        existing?: boolean
+        temporaryPassword?: string
+        error?: { message?: string; fields?: Record<string, string> }
+      } | null
+      setCoupleResult(
+        issued.ok && outcome?.email
+          ? { email: outcome.email, existing: outcome.existing ?? false, temporaryPassword: outcome.temporaryPassword }
+          : { email: coupleEmail.trim(), existing: false, error: outcome?.error?.fields?.email ?? outcome?.error?.message ?? 'Could not create the sign-in' },
+      )
+    }
+
+    /**
      * The list is a server component the router has already cached — from *before* this
      * catalogue existed, because the operator was looking at it a moment ago. Without this,
      * clicking "Catalogues" replays that render and says "No weddings here yet" about a wedding
@@ -201,7 +254,7 @@ export function CreateWizard({
     router.refresh()
 
     setCatalogueId(body.catalogue.id)
-    setStep(3)
+    setStep(4)
     setBusy(false)
   }
 
@@ -242,6 +295,27 @@ export function CreateWizard({
               />
               <Text label="City" value={city} onChange={setCity} placeholder="Jaipur" />
             </div>
+            <fieldset className="mb-2">
+              <legend className="mb-2 text-[13px] font-semibold">Occasion</legend>
+              <div className="flex flex-wrap gap-2">
+                {OCCASIONS.map((option) => (
+                  <label
+                    key={option}
+                    className="cursor-pointer rounded-[var(--radius-pill)] border border-[var(--color-l-line)] px-3 py-1.5 text-[13px] has-[:checked]:border-[var(--color-accent)] has-[:checked]:font-semibold"
+                  >
+                    <input
+                      type="radio"
+                      name="occasion"
+                      value={option}
+                      checked={occasion === option}
+                      onChange={() => setOccasion(option)}
+                      className="sr-only"
+                    />
+                    {OCCASION_LABELS[option]}
+                  </label>
+                ))}
+              </div>
+            </fieldset>
           </Card>
 
           <Card
@@ -332,40 +406,10 @@ export function CreateWizard({
       {step === 2 ? (
         <section>
           <p className="mb-4 text-[14px] text-[var(--color-l-text-mid)]">
-            Pick a starting shape. Every section can be reordered, renamed, hidden or removed
-            afterwards — this only decides what is already there when you open the customizer.
+            Pick a starting look and shape, with the couple if they are here. Every section can be
+            reordered, renamed, hidden or removed afterwards — this only decides what is already
+            there when you open the customizer.
           </p>
-
-          <fieldset className="mb-6">
-            <legend className="mb-1 block text-[14px] font-semibold">
-              What language will this couple read?
-            </legend>
-            <p className="mb-2 text-[13px] text-[var(--color-l-text-mid)]">
-              Guests can still switch. Changeable later in this wedding&rsquo;s settings.
-            </p>
-            <div className="flex max-w-[320px] gap-2">
-              {(
-                [
-                  ['en', 'English'],
-                  ['hi', 'हिंदी'],
-                ] as const
-              ).map(([value, label]) => (
-                <label
-                  key={value}
-                  className="flex flex-1 cursor-pointer items-center gap-2 rounded-[var(--radius-input)] border border-[var(--color-l-line)] bg-white px-3 py-2 text-[15px] has-[:checked]:border-[var(--color-accent)] has-[:checked]:font-semibold"
-                >
-                  <input
-                    type="radio"
-                    name="locale"
-                    value={value}
-                    checked={locale === value}
-                    onChange={() => setLocale(value)}
-                  />
-                  {label}
-                </label>
-              ))}
-            </div>
-          </fieldset>
 
           {styles.length > 0 ? (
             <fieldset className="mb-6">
@@ -505,8 +549,146 @@ export function CreateWizard({
             </p>
           ) : null}
 
+          <Nav onBack={() => setStep(1)} onNext={() => setStep(3)} />
+        </section>
+      ) : null}
+
+      {step === 3 ? (
+        <section>
+          <p className="mb-4 text-[14px] text-[var(--color-l-text-mid)]">
+            The questions to ask with the couple in the room. Every one of them can be changed
+            later in the wedding&rsquo;s settings.
+          </p>
+
+          <Card title="Who can watch" hint="Unlisted means anyone with the link. A guest code is asked for once per phone.">
+            <div className="flex max-w-[420px] gap-2">
+              {(
+                [
+                  ['unlisted', 'Anyone with the link'],
+                  ['passcode', 'A guest code'],
+                ] as const
+              ).map(([value, label]) => (
+                <label
+                  key={value}
+                  className="flex flex-1 cursor-pointer items-center gap-2 rounded-[var(--radius-input)] border border-[var(--color-l-line)] bg-white px-3 py-2 text-[14px] has-[:checked]:border-[var(--color-accent)] has-[:checked]:font-semibold"
+                >
+                  <input
+                    type="radio"
+                    name="privacy"
+                    value={value}
+                    checked={privacy === value}
+                    onChange={() => setPrivacy(value)}
+                  />
+                  {label}
+                </label>
+              ))}
+            </div>
+            {privacy === 'passcode' ? (
+              <div className="mt-3">
+                <Text
+                  label="Guest code"
+                  value={typedCode}
+                  onChange={setTypedCode}
+                  placeholder="Leave empty to have one made for you"
+                  hint="Six digits works best over the phone. Shown once on the next step if it is generated."
+                  mono
+                />
+              </div>
+            ) : null}
+          </Card>
+
+          <Card title="Language and time" hint="What the couple reads, and whose clock a premiere is on.">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <fieldset>
+                <legend className="mb-1 block text-[13px] font-semibold">Language</legend>
+                <div className="flex gap-2">
+                  {(
+                    [
+                      ['en', 'English'],
+                      ['hi', 'हिंदी'],
+                    ] as const
+                  ).map(([value, label]) => (
+                    <label
+                      key={value}
+                      className="flex flex-1 cursor-pointer items-center gap-2 rounded-[var(--radius-input)] border border-[var(--color-l-line)] bg-white px-3 py-2 text-[15px] has-[:checked]:border-[var(--color-accent)] has-[:checked]:font-semibold"
+                    >
+                      <input
+                        type="radio"
+                        name="locale"
+                        value={value}
+                        checked={locale === value}
+                        onChange={() => setLocale(value)}
+                      />
+                      {label}
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
+              <label className="text-[13px]">
+                <span className="mb-1 block font-semibold">Time zone</span>
+                <select
+                  value={timezone}
+                  onChange={(event) => setTimezone(event.target.value)}
+                  className="h-11 w-full rounded-[var(--radius-input)] border border-[var(--color-l-line)] bg-white px-3 text-[14px]"
+                >
+                  {TIMEZONES.map((zone) => (
+                    <option key={zone.id} value={zone.id}>
+                      {zone.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+          </Card>
+
+          <Card title="Premiere" hint="Optional. Until then the link shows a countdown instead of the films.">
+            <div className="grid gap-x-4 sm:grid-cols-2">
+              <Text label="Premiere date" value={premiereDate} onChange={setPremiereDate} type="date" />
+              <Text label="Premiere time" value={premiereTime} onChange={setPremiereTime} type="time" />
+            </div>
+            {premiereDate ? (
+              <button type="button" onClick={() => setPremiereDate('')} className="-mt-2 text-[12px] underline underline-offset-4">
+                No premiere — live when published
+              </button>
+            ) : null}
+          </Card>
+
+          <Card title="The couple’s sign-in" hint="Optional now; the overview offers it again. Their account shows this wedding as it is prepared.">
+            <div className="grid gap-x-4 sm:grid-cols-2">
+              <Text label="Couple’s email" value={coupleEmail} onChange={setCoupleEmail} type="email" placeholder="aanya@example.com" />
+              <Text label="Name on the account" value={coupleContact} onChange={setCoupleContact} placeholder={coupleName || 'Aanya & Vikram'} />
+            </div>
+            {coupleEmail.trim() ? (
+              <fieldset>
+                <legend className="mb-1 block text-[13px] font-semibold">How their first password reaches them</legend>
+                <div className="flex flex-col gap-1.5 sm:flex-row sm:gap-2">
+                  {(
+                    [
+                      ['link', 'Email them a link to set one'],
+                      ['temporary', 'Show me a temporary one now'],
+                    ] as const
+                  ).map(([value, label]) => (
+                    <label
+                      key={value}
+                      className="flex flex-1 cursor-pointer items-center gap-2 rounded-[var(--radius-input)] border border-[var(--color-l-line)] bg-white px-3 py-2 text-[14px] has-[:checked]:border-[var(--color-accent)] has-[:checked]:font-semibold"
+                    >
+                      <input type="radio" name="delivery" value={value} checked={delivery === value} onChange={() => setDelivery(value)} />
+                      {label}
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
+            ) : null}
+          </Card>
+
+          {errors._ ? (
+            <p role="alert" className="mb-3 text-[14px] text-[var(--color-error)]">
+              {errors._}
+            </p>
+          ) : null}
+
           <Nav
-            onBack={() => setStep(1)}
+            onBack={() => setStep(2)}
             onNext={() => void create()}
             nextLabel={busy ? 'Creating…' : 'Create and start uploading'}
             nextDisabled={busy}
@@ -514,8 +696,30 @@ export function CreateWizard({
         </section>
       ) : null}
 
-      {step === 3 && catalogueId ? (
+      {step === 4 && catalogueId ? (
         <section>
+          {coupleResult ? (
+            <p
+              role="status"
+              className={`mb-4 rounded-[var(--radius-card)] border px-4 py-3 text-[14px] ${
+                coupleResult.error
+                  ? 'border-[color-mix(in_srgb,var(--color-error)_40%,white)] bg-[color-mix(in_srgb,var(--color-error)_8%,white)]'
+                  : 'border-[var(--color-l-line)] bg-white'
+              }`}
+            >
+              {coupleResult.error
+                ? `The couple’s sign-in could not be made: ${coupleResult.error}. The overview offers it again.`
+                : coupleResult.temporaryPassword
+                  ? `${coupleResult.email} can sign in with the temporary password `
+                  : coupleResult.existing
+                    ? `${coupleResult.email} already had an account; this wedding is in it.`
+                    : `A link to set their password is on its way to ${coupleResult.email}.`}
+              {coupleResult.temporaryPassword ? (
+                <strong className="font-mono text-[16px] font-bold">{coupleResult.temporaryPassword}</strong>
+              ) : null}
+              {coupleResult.temporaryPassword ? ' — shown once; they replace it at first sign-in.' : ''}
+            </p>
+          ) : null}
           {passcode ? (
             /* Shown once, here, with the couple present — it is not sent anywhere. Settings can
                change it later, which is where it is if this screen is gone. */
@@ -532,11 +736,11 @@ export function CreateWizard({
             while you work anywhere else in the admin.
           </p>
           <UploadManager catalogueId={catalogueId} />
-          <Nav onBack={() => setStep(2)} onNext={() => setStep(4)} nextLabel="Title the films" />
+          <Nav onNext={() => setStep(5)} nextLabel="Title the films" />
         </section>
       ) : null}
 
-      {step === 4 && catalogueId ? (
+      {step === 5 && catalogueId ? (
         <section>
           <p className="mb-4 text-[14px] text-[var(--color-l-text-mid)]">
             Names have been guessed from the filenames. Correct them, set a category, and make
@@ -552,7 +756,7 @@ export function CreateWizard({
           <StepTitles catalogueId={catalogueId} />
 
           <Nav
-            onBack={() => setStep(3)}
+            onBack={() => setStep(4)}
             onNext={() => router.push(`/admin/c/${catalogueId}/customizer`)}
             nextLabel="Finish and customise"
           />
@@ -563,7 +767,7 @@ export function CreateWizard({
 }
 
 /**
- * Steps 1–2 can be walked back; 3–4 cannot, because by then the catalogue exists and "back" past
+ * Steps 1–3 can be walked back; 4–5 cannot, because by then the catalogue exists and "back" past
  * its own creation is not a thing the operator can be offered. The stepper says so rather than
  * leaving them to discover it.
  */
@@ -595,7 +799,7 @@ function Stepper({ current, created }: { current: Step; created: boolean }) {
               </span>
               {label}
             </span>
-            {n < 4 ? (
+            {n < 5 ? (
               <span aria-hidden className="mx-1 h-px w-3 bg-[var(--color-l-line)] sm:w-5" />
             ) : null}
           </li>

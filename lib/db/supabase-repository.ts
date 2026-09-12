@@ -27,6 +27,7 @@ import type {
   PublishCredit,
   JobRun,
   QueueStats,
+  Domain,
 } from '@/lib/schema'
 import type { Entitlement } from '@/lib/entitlements'
 import type { CustomTheme } from '@/themes/contract'
@@ -218,6 +219,11 @@ export class SupabaseRepository implements Repository {
       template: r.template,
       // Defaulted: 0020 adds the column, and a row read mid-rollout has no value for it.
       presetId: r.preset_id ?? null,
+      // Defaulted: 0023 adds the column, and a row read mid-rollout has no value for it.
+      servedAt: r.served_at ?? null,
+      // Defaulted: 0024 adds these, and a row read mid-rollout has no value for them.
+      timezone: r.timezone ?? 'Asia/Kolkata',
+      premiereAt: r.premiere_at ?? null,
       status: r.status,
       privacy: r.privacy,
       passcodeHash: r.passcode_hash,
@@ -256,6 +262,9 @@ export class SupabaseRepository implements Repository {
       locale: 'locale',
       template: 'template',
       presetId: 'preset_id',
+      servedAt: 'served_at',
+      timezone: 'timezone',
+      premiereAt: 'premiere_at',
       status: 'status',
       privacy: 'privacy',
       passcodeHash: 'passcode_hash',
@@ -586,6 +595,78 @@ export class SupabaseRepository implements Repository {
       .from('credential_links')
       .update({ used_at: new Date().toISOString() })
       .eq('id', id)
+    if (error) throw new ApiError('INTERNAL', error.message)
+  }
+
+  // ── Custom domains (doc 16 §1) ────────────────────────────────────────────
+  private static toDomain(r: Row): Domain {
+    return {
+      id: r.id,
+      orgId: r.org_id,
+      catalogueId: r.catalogue_id ?? null,
+      host: r.host,
+      verificationToken: r.verification_token,
+      status: r.status,
+      lastCheckedAt: r.last_checked_at ?? null,
+      error: r.error ?? null,
+      createdAt: r.created_at,
+    }
+  }
+
+  private static fromDomain(domain: Domain): Row {
+    return {
+      id: domain.id,
+      org_id: domain.orgId,
+      catalogue_id: domain.catalogueId,
+      host: domain.host,
+      verification_token: domain.verificationToken,
+      status: domain.status,
+      last_checked_at: domain.lastCheckedAt,
+      error: domain.error,
+      created_at: domain.createdAt,
+    }
+  }
+
+  async listDomains(orgId: string): Promise<Domain[]> {
+    const { data, error } = await this.db.from('domains').select('*').eq('org_id', orgId).order('created_at')
+    if (error) throw new ApiError('INTERNAL', error.message)
+    return (data ?? []).map(SupabaseRepository.toDomain)
+  }
+
+  async listAllDomains(): Promise<Domain[]> {
+    const { data, error } = await this.db.from('domains').select('*').order('created_at')
+    if (error) throw new ApiError('INTERNAL', error.message)
+    const order: Record<Domain['status'], number> = { verified: 0, failed: 1, pending: 2, active: 3 }
+    return (data ?? [])
+      .map(SupabaseRepository.toDomain)
+      .sort((a, b) => order[a.status] - order[b.status] || a.createdAt.localeCompare(b.createdAt))
+  }
+
+  async getDomain(id: string, orgId: string): Promise<Domain | null> {
+    const { data } = await this.db.from('domains').select('*').eq('id', id).eq('org_id', orgId).maybeSingle()
+    return data ? SupabaseRepository.toDomain(data) : null
+  }
+
+  async getDomainById(id: string): Promise<Domain | null> {
+    const { data } = await this.db.from('domains').select('*').eq('id', id).maybeSingle()
+    return data ? SupabaseRepository.toDomain(data) : null
+  }
+
+  async getDomainByHost(host: string): Promise<Domain | null> {
+    const { data } = await this.db.from('domains').select('*').eq('host', host).maybeSingle()
+    return data ? SupabaseRepository.toDomain(data) : null
+  }
+
+  async saveDomain(domain: Domain): Promise<Domain> {
+    const result = await this.db.from('domains').upsert(SupabaseRepository.fromDomain(domain)).select('*').single()
+    if (result.error?.code === '23505') {
+      throw new ApiError('VALIDATION_FAILED', 'That domain is already in use', { fields: { host: 'Already in use' } })
+    }
+    return SupabaseRepository.toDomain(SupabaseRepository.unwrap(result))
+  }
+
+  async deleteDomain(id: string, orgId: string): Promise<void> {
+    const { error } = await this.db.from('domains').delete().eq('id', id).eq('org_id', orgId)
     if (error) throw new ApiError('INTERNAL', error.message)
   }
 
@@ -1263,7 +1344,7 @@ export class SupabaseRepository implements Repository {
     const { data } = await this.db
       .from('catalogues')
       .select('*')
-      .eq('custom_domain', host)
+      .eq('served_at', `https://${host}`)
       .maybeSingle()
     return data ? SupabaseRepository.toCatalogue(data) : null
   }

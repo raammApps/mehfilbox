@@ -110,6 +110,16 @@ export const dictionary = {
       '{count} could not be prepared just now. Everything is still stored — try again in a few minutes.',
     'download.all': 'Download everything',
 
+    'premiere.eyebrow': 'Premiering soon',
+    'premiere.heading': 'The films go live on {when}',
+    'premiere.body': 'Come back then — this link opens straight into the wedding.',
+    'premiere.days': 'days',
+    'premiere.hours': 'hours',
+    'premiere.minutes': 'minutes',
+    'premiere.seconds': 'seconds',
+    'premiere.now': 'It’s time',
+    'premiere.watch': 'Open the wedding',
+
     'renew.heading': 'Your catalogue is waiting',
     'renew.body':
       'The subscription has lapsed, so playback is paused. Nothing has been deleted — renew and everything is back.',
@@ -278,6 +288,16 @@ export const dictionary = {
     'download.unavailable':
       '{count} अभी तैयार नहीं हो सकीं। सब कुछ सुरक्षित है — कुछ मिनट बाद फिर कोशिश कीजिए।',
     'download.all': 'सब कुछ डाउनलोड करें',
+
+    'premiere.eyebrow': 'जल्द ही प्रीमियर',
+    'premiere.heading': 'फ़िल्में {when} को लाइव होंगी',
+    'premiere.body': 'तब वापस आइए — यह लिंक सीधे शादी में खुलेगा।',
+    'premiere.days': 'दिन',
+    'premiere.hours': 'घंटे',
+    'premiere.minutes': 'मिनट',
+    'premiere.seconds': 'सेकंड',
+    'premiere.now': 'समय हो गया',
+    'premiere.watch': 'शादी खोलें',
 
     'renew.heading': 'आपका कैटलॉग सुरक्षित है',
     'renew.body':

@@ -9,6 +9,7 @@ const LINKS: { href: string; label: string; exact?: boolean }[] = [
   { href: '/admin/platform/couples', label: 'Couples' },
   { href: '/admin/platform/catalogues', label: 'Catalogues' },
   { href: '/admin/platform/themes', label: 'Themes' },
+  { href: '/admin/platform/domains', label: 'Domains' },
   { href: '/admin/platform/health', label: 'Health' },
   { href: '/admin/platform/audit', label: 'Audit' },
 ]

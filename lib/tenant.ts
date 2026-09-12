@@ -64,6 +64,22 @@ export function normaliseHost(rawHost: string | null | undefined): string {
   return rawHost.trim().toLowerCase().split(':')[0]!.replace(/\.$/, '')
 }
 
+/**
+ * Whether a request's host is somebody's own domain rather than ours (doc 16 §1).
+ *
+ * In path mode nothing hangs off a label of the root, so any host that is not the root, `www`, or a
+ * developer's loopback is a candidate custom domain; the database decides whether it serves. Pure,
+ * because middleware calls it on every request and cannot ask the database.
+ */
+export function isCustomHost(rawHost: string | null | undefined, rawRoot: string): boolean {
+  const host = normaliseHost(rawHost)
+  const root = normaliseHost(rawRoot)
+  if (!host || host === root || host === `www.${root}`) return false
+  if (host === 'localhost' || host === '127.0.0.1' || host === 'lvh.me') return false
+  if (host.endsWith('.localhost') || host.endsWith('.lvh.me')) return false
+  return true
+}
+
 export function resolveTenant(rawHost: string | null | undefined, rawRoot: string): TenantResolution {
   const host = normaliseHost(rawHost)
   const root = normaliseHost(rawRoot)

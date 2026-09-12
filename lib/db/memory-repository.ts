@@ -24,6 +24,7 @@ import type {
   PublishCredit,
   JobRun,
   QueueStats,
+  Domain,
 } from '@/lib/schema'
 import type { Entitlement } from '@/lib/entitlements'
 import type { CustomTheme } from '@/themes/contract'
@@ -56,6 +57,7 @@ export type Snapshot = {
   presets: Preset[]
   credits: PublishCredit[]
   jobRuns: JobRun[]
+  domains: Domain[]
   orgs: Org[]
   operators: Operator[]
   catalogues: Catalogue[]
@@ -88,6 +90,7 @@ export function emptySnapshot(): Snapshot {
     presets: [],
     credits: [],
     jobRuns: [],
+    domains: [],
     orgs: [],
     operators: [],
     catalogues: [],
@@ -246,6 +249,58 @@ export class MemoryRepository implements Repository {
   }
 
   // ── Platform-authored themes ────────────────────────────────────────────────
+  // ── Custom domains (doc 16 §1) ────────────────────────────────────────────
+  private static readonly DOMAIN_ORDER: Record<Domain['status'], number> = {
+    verified: 0,
+    failed: 1,
+    pending: 2,
+    active: 3,
+  }
+
+  async listDomains(orgId: string): Promise<Domain[]> {
+    return this.clone(
+      (this.data.domains ?? [])
+        .filter((domain) => domain.orgId === orgId)
+        .sort((a, b) => a.createdAt.localeCompare(b.createdAt)),
+    )
+  }
+
+  async listAllDomains(): Promise<Domain[]> {
+    return this.clone(
+      [...(this.data.domains ?? [])].sort(
+        (a, b) =>
+          MemoryRepository.DOMAIN_ORDER[a.status] - MemoryRepository.DOMAIN_ORDER[b.status] ||
+          a.createdAt.localeCompare(b.createdAt),
+      ),
+    )
+  }
+
+  async getDomain(id: string, orgId: string): Promise<Domain | null> {
+    return this.clone((this.data.domains ?? []).find((d) => d.id === id && d.orgId === orgId) ?? null)
+  }
+
+  async getDomainById(id: string): Promise<Domain | null> {
+    return this.clone((this.data.domains ?? []).find((d) => d.id === id) ?? null)
+  }
+
+  async getDomainByHost(host: string): Promise<Domain | null> {
+    return this.clone((this.data.domains ?? []).find((d) => d.host === host) ?? null)
+  }
+
+  async saveDomain(domain: Domain): Promise<Domain> {
+    this.data.domains ??= []
+    const index = this.data.domains.findIndex((d) => d.id === domain.id)
+    if (index === -1) this.data.domains.push(this.clone(domain))
+    else this.data.domains[index] = this.clone(domain)
+    this.touched()
+    return this.clone(domain)
+  }
+
+  async deleteDomain(id: string, orgId: string): Promise<void> {
+    this.data.domains = (this.data.domains ?? []).filter((d) => !(d.id === id && d.orgId === orgId))
+    this.touched()
+  }
+
   // ── Jobs and health (D-40) ────────────────────────────────────────────────
   async recordJobRun(run: JobRun): Promise<JobRun> {
     this.data.jobRuns ??= []
@@ -621,7 +676,8 @@ export class MemoryRepository implements Repository {
   }
 
   async getCatalogueByCustomDomain(host: string): Promise<Catalogue | null> {
-    return this.clone(this.data.catalogues.find((c) => c.customDomain === host) ?? null)
+    const served = `https://${host}`
+    return this.clone(this.data.catalogues.find((c) => c.servedAt === served) ?? null)
   }
 
   async slugAvailable(slug: string): Promise<boolean> {

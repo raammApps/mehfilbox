@@ -4,6 +4,7 @@ import { requireOperator } from '@/lib/admin/session'
 import { generatePasscode } from '@/lib/admin/presets'
 import { seedModules } from '@/lib/admin/templates'
 import { hashSecret } from '@/lib/crypto'
+import { isValidTimeZone } from '@/lib/time'
 import { getRepository } from '@/lib/db'
 import { ApiError } from '@/lib/http/errors'
 import { noStore, readJson, route } from '@/lib/http/handler'
@@ -14,6 +15,7 @@ import {
   localisedRequiredSchema,
   localisedStringSchema,
   occasionSchema,
+  privacySchema,
   slugSchema,
 } from '@/lib/schema'
 
@@ -42,6 +44,14 @@ const createSchema = z.object({
    * copied in now and recorded on the row; the fields above still win where they are given.
    */
   presetId: z.string().uuid().optional(),
+  /**
+   * The wizard's third step (doc 16 §10): who can watch and when. A typed guest code is hashed
+   * here; asking for a code without typing one generates it and returns it exactly once.
+   */
+  privacy: privacySchema.optional(),
+  passcode: z.string().min(4).max(64).optional(),
+  timezone: z.string().refine(isValidTimeZone, 'Unknown time zone').default('Asia/Kolkata'),
+  premiereAt: z.string().datetime().nullable().optional(),
 })
 
 /**
@@ -77,8 +87,15 @@ export async function POST(request: Request) {
     if (body.presetId && !preset) throw new ApiError('NOT_FOUND', 'House style not found')
 
     const template = body.template ?? preset?.templateId ?? 'keepsake'
-    // Generated once, returned once: the wizard shows it to the operator with the couple present.
-    const passcode = preset?.passcodeOn ? generatePasscode() : null
+    // A studio with its own domain serves every wedding it makes from it (doc 16 §1).
+    const studioDomain = (await repository.listDomains(orgId)).find(
+      (domain) => domain.status === 'active' && domain.catalogueId === null,
+    )
+    // A code the operator typed, or one generated because the step (or the style) asked for one —
+    // returned once, so the wizard can show it with the couple present.
+    const wantsCode = body.privacy === 'passcode' || (body.privacy === undefined && preset?.passcodeOn === true)
+    const passcode = wantsCode ? (body.passcode ?? generatePasscode()) : null
+    const generated = wantsCode && !body.passcode
 
     const catalogue = await repository.createCatalogue({
       id: randomUUID(),
@@ -119,6 +136,9 @@ export async function POST(request: Request) {
       coupleOrgId: null,
       supportAccessUntil: null,
       passcodeVersion: 1,
+      timezone: body.timezone,
+      premiereAt: body.premiereAt ?? null,
+      servedAt: studioDomain ? `https://${studioDomain.host}/${body.slug}` : null,
       includedUntil: includedUntil.toISOString(),
       subStatus: 'included',
       subPlan: null,
@@ -134,6 +154,6 @@ export async function POST(request: Request) {
       draftModules: modules,
     })
 
-    return noStore({ catalogue: withModules, ...(passcode ? { passcode } : {}) }, 201)
+    return noStore({ catalogue: withModules, ...(generated && passcode ? { passcode } : {}) }, 201)
   })
 }

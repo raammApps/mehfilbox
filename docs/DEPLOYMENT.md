@@ -126,6 +126,29 @@ Reserved first segments (`admin`, `api`, `c`, `d`, `claim`, `my`, `login`, `regi
 subdomain label) can never be a studio slug; `lib/tenant.ts` lists them and registration refuses
 them.
 
+### Custom domains
+
+A studio can serve every wedding it makes from its own domain (`films.kalyanam.in/<wedding>`),
+and a couple can serve one wedding from theirs (`aanyaandvikram.in`). The console generates the
+records from what was typed — a CNAME to `DOMAIN_CNAME_TARGET` for a subdomain; an A record to
+`DOMAIN_A_RECORD` and a `www` CNAME for a root, with the warning not to touch the MX records —
+plus a TXT at `_mehfilbox.<host>` that proves ownership, and *Check DNS* resolves them from the
+server. Three values are configuration because they change with the host:
+
+```
+DOMAIN_CNAME_TARGET=cname.mehfilbox.com     # a CNAME on our side pointing at the host's target
+DOMAIN_A_RECORD=76.76.21.21                 # the host's anycast address for root domains
+DOMAIN_NAMESERVERS=ns1.vercel-dns.com,ns2.vercel-dns.com
+```
+
+What happens after DNS is right depends on `DOMAIN_DRIVER`: `none` leaves the domain at *verified*
+and the platform console's Domains page lists it under awaiting attachment — add it to the
+project's domains at the host, then *Mark attached*; `vercel` attaches it through the API
+(`VERCEL_API_TOKEN`, `VERCEL_PROJECT_ID`, and `VERCEL_TEAM_ID` for a team) so it goes live on its
+own. Either way, once live the mehfilbox path 301s to the domain and every URL the product prints
+uses it. Requests on a custom host are rewritten by middleware to `/d/<host>/…`, which renders the
+same guest pages.
+
 ### `subdomain` — retired, kept for the harness
 
 `TENANCY_MODE=subdomain` still works — `<wedding>.<root>` and `admin.<root>` — because the
@@ -146,6 +169,9 @@ Set these on the Vercel project (Production, and Preview if you want previews to
 | `VIDEO_DRIVER` | `bunny` | |
 | `ROOT_DOMAIN` | e.g. `marquee.raammcorp.in` — no protocol, no port | |
 | `TENANCY_MODE` | `path` or `subdomain` — see §5 | |
+| `DOMAIN_DRIVER` | `none`, `fake` or `vercel` — what happens after a custom domain's DNS is verified (§5) | |
+| `DOMAIN_CNAME_TARGET` · `DOMAIN_A_RECORD` · `DOMAIN_NAMESERVERS` | The record values the console prints for custom domains (§5) | |
+| `VERCEL_API_TOKEN` · `VERCEL_PROJECT_ID` · `VERCEL_TEAM_ID` | For `DOMAIN_DRIVER=vercel` | |
 | `SUPPORT_EMAIL` | Shown on the renewal screen, told to a suspended studio (N-27), **where every operational alert is sent** (N-53), and where a studio's credit request lands (N-65). It must be an address that can *receive* — a `.test` domain here means the alerting built in N-53 goes nowhere, which is how it sat for a day. | |
 | `NOTIFY_DRIVER` | `resend` in production. The default is `fake`, which records a send and returns success without sending; `lib/env.ts` refuses to boot on `fake` against the supabase driver for exactly that reason. | |
 | `NOTIFY_FROM` | `Mehfilbox <hello@mehfilbox.com>` — a verified Resend sender | |

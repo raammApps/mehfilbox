@@ -2,6 +2,7 @@ import { z } from 'zod'
 import { requireEditableCatalogue, requireOwnedCatalogue } from '@/lib/admin/session'
 import { revalidateCatalogue } from '@/lib/catalogue-cache'
 import { hashSecret } from '@/lib/auth'
+import { isValidTimeZone } from '@/lib/time'
 import { getRepository } from '@/lib/db'
 import { resolveLimits } from '@/lib/entitlements'
 import { log } from '@/lib/log'
@@ -45,20 +46,16 @@ const patchSchema = z.object({
    * confusion N-56 removed. Better in the drawer where every control behaves the same way.
    */
   locale: localeSchema.optional(),
+  /** The couple's clock and the premiere (N-69, N-72). Settings, so they take effect at once. */
+  timezone: z.string().refine(isValidTimeZone, 'Unknown time zone').optional(),
+  premiereAt: z.string().datetime().nullable().optional(),
   featuredTitleId: z.string().uuid().nullable().optional(),
   privacy: privacySchema.optional(),
   /**
-   * A domain the couple owns, pointed at us. Stored bare and lowercased — `resolveTenant`
-   * normalises the `Host` header the same way, and the two must agree or the lookup misses.
+   * `customDomain` is no longer accepted here (doc 16 §1). A domain is a `domains` row with a
+   * verification and an attachment behind it — `/api/admin/domains` — and `served_at` on this row
+   * is stamped by that process, never typed.
    */
-  customDomain: z
-    .string()
-    .trim()
-    .toLowerCase()
-    .regex(/^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$/, 'Enter a domain like ours.example.com')
-    .max(253)
-    .nullable()
-    .optional(),
   /**
    * `includedUntil` is deliberately absent (D-39). When the catalogue stops serving is what a
    * renewal buys, and a studio setting its own date was a billing hole; the platform sets it from

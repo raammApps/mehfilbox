@@ -284,7 +284,7 @@ N-60 to N-75 in [`NEXT.md`](./NEXT.md).
 | First publish free, second on a credit | **Built** | N-65, 12 Sept. `credits` table; registration grants one; the first publish spends one; refusal is a panel with *Ask for a credit* until Razorpay (N-20). |
 | Platform console: create a studio, credits, password links, all catalogues, extend a term | **Built** | N-66, 12 Sept. Dashboard, studios (create one), couples, every catalogue (term, offline), themes, audit. The term left the studio's settings. |
 | Platform health page | **Built** | N-67, 12 Sept. `/admin/platform/health`: ten rows probed live — database, Bunny Stream and Storage, the CDN, Resend, the queue, the pipeline, every job's last run (`job_runs`), the synthetic walk. `/api/health` stays shallow for monitors. |
-| Custom domains with generated instructions and verification | **Partial** | Stored, never served. N-68. |
-| Five-step wizard with the couple in the room | **Partial** | Four steps; step 2 asks for a house style, or a theme and a layout (N-63, N-64). No code, timezone or couple step yet. N-69. |
+| Custom domains with generated instructions and verification | **Built** | N-68, 12 Sept. A studio's (`films.studio.in/<wedding>`) or a couple's (one wedding at the root); records generated from what was typed with copy buttons and registrar hints; *Check DNS* from the server; attached through `DOMAIN_DRIVER` or by hand from the platform; the mehfilbox path 301s to it. |
+| Five-step wizard with the couple in the room | **Built** | N-69, 12 Sept. The couple (with occasion) → the look (style, or theme and layout) → guests and the couple (code, language, time zone, premiere, the couple's sign-in) → upload → titles. |
 | Every console surface at 360px | **Partial** | Guest surface yes; consoles unaudited. N-70. |
-| Premiere date with a countdown | **Missing** | N-72. |
+| Premiere date with a countdown | **Built** | N-72, 12 Sept. Set in the couple's zone in the wizard or settings; the link shows a countdown until then and opens into the wedding after. |

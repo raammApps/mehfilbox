@@ -96,8 +96,8 @@ Delete it when you are done: remove the `operators` row, then the `orgs` row, th
 
 Start at https://mehfilbox.com/admin/new
 
-1. **Step 1 — the couple.** Type a couple name. The web address should auto-suggest
-   `name-and-name-<year>`; typing "Meera & Arjun" gave `meera-and-arjun-2026`.
+1. **Step 1 — the couple.** Type a couple name and pick the occasion. The web address should
+   auto-suggest `name-and-name-<year>`; typing "Meera & Arjun" gave `meera-and-arjun-2026`.
    The year is deliberate — two couples with the same names in different years do not collide.
 2. Watch the address line: it says **Available** or **taken** as you type, before you commit.
 3. **Step 2 — the shape.** If the studio has house styles, **Start from** lists them with the
@@ -105,9 +105,14 @@ Start at https://mehfilbox.com/admin/new
    because it has answered them. Otherwise pick a language (**this is per wedding**, seeded from
    your studio), a **look** — the theme cards, starting on your studio's — and a template, which
    now includes **Blank**. Choose **हिंदी** to exercise §5, and **Carnival** to exercise §4's
-   theme row. A style with the guest code on shows the six-digit code **once**, on step 3.
-4. **Create and start uploading.** It says *"exists as a draft at /… Nothing from here on can lose
-   it."*
+   theme row.
+4. **Step 3 — guests and the couple.** Who can watch (a guest code, typed or generated), the
+   language, the time zone, an optional **premiere** date and time, and the couple's email with
+   how their first password reaches them. A style with the code on arrives here with *A guest
+   code* already chosen.
+5. **Create and start uploading.** It says *"exists as a draft at /… Nothing from here on can lose
+   it."* A generated code and the couple's sign-in outcome are shown **once**, at the top of the
+   upload step.
 
 ✅ It is a **draft**: nobody can open the address yet.
 
@@ -172,6 +177,7 @@ version"* immediately — that sentence is the whole point of N-55.
 | Footer | *"प्रस्तुति: <your studio>"* and a **download** link |
 | Toggle EN/हिं | Switches, and survives a reload |
 | Play a film | Starts in about a second on 4G |
+| **A premiere** | Set tomorrow 7 pm in Settings, publish, open the link: a countdown with the day and *7:00 pm IST*; clear it and the same link is the wedding |
 | **The second wedding** (a fresh studio; the demo one has forty credits) | Publish is refused with *"This wedding needs a credit to publish"*, the price, and **Ask for a credit** — which emails `SUPPORT_EMAIL` once a day. The list page says *0 credits to publish with* |
 | Publish again after a change | Free — the credit was for the first publish |
 | Like a photograph | The heart counts, survives a reload, and is visible to another guest |
@@ -227,6 +233,8 @@ On the wedding's **Overview**, below the link — appears only once published.
 | **Passcode** | Set one; a private window is asked for it. Five wrong tries locks the address for fifteen minutes |
 | **Their own address** | Stored but not served until the CNAME exists |
 | **Serving until** | Read-only here since N-66: the date and *a renewal extends it*. The platform sets it (§11) |
+| **Premiere** | Date, time and zone; *No premiere — live when published* clears it. The guest link counts down in the couple's zone |
+| **Their own address** | Type `aanyaandvikram.in`: a TXT, an A record and a `www` CNAME appear with copy buttons and the MX warning; a subdomain gets a CNAME instead. **Check DNS** says what it saw in words. Once live, the overview's link and the share text carry the domain, and the mehfilbox address 301s to it |
 | **Take offline** | Guests get a neutral "not yet available"; the films stay |
 | **Delete** | Asks you to type the couple's name |
 
@@ -315,6 +323,7 @@ Catalogues, Themes, Audit. Every write asks why and lands on the audit trail.
 | **Catalogues**, soonest to lapse first | Open one: **Serving until** with *+ 1 year* and a reason — a lapsed wedding comes back as *active* at once; **Take offline** for abuse, and *Put it back* republishes for free |
 | **Themes** (`/admin/platform/themes`) | *Start from* Carnival, name it, darken *Body text* to `#5a4a70`: the verdict line goes red, **Add this theme** disables. Put it back, add it — it is in a studio's Branding panel on the next load, marked *Yours* |
 | **Withdraw** a theme a wedding is on | Gone from the pickers; the wedding still renders with it, and its own panel still shows it as *(withdrawn)* |
+| **Domains** | Every custom domain, awaiting attachment first. With `DOMAIN_DRIVER=none`, add a verified one to the hosting project and **Mark attached**: the wedding's printed address changes on the spot |
 | **Health** | Ten rows with a dot each: database, Bunny Stream (token auth on), Storage, CDN, Resend, the queue, the pipeline, the jobs, the synthetic walk, domains. *Check again now* re-probes. Run a cron by hand (§12) and its row moves from *never run* to a time |
 | Audit | Every write above, newest first, with who, the org and the reason |
 
