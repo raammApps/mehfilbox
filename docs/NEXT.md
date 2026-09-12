@@ -49,7 +49,6 @@ depends on it. The decisions behind them are D-32 to D-41.
 
 | | Item | Doc 16 | Size |
 |---|---|---|---|
-| **N-63** | **Themes** — registry of seven, `ThemeStyle` writes the whole token set, picker in the customizer and wizard, contrast per theme, platform-authored themes | §4 | 1 session |
 | **N-64** | **House styles** — presets, the freeze, save-as-style, start from style / template / blank | §5, §10 | 1 session |
 | **N-65** | **Credits and the trial** — first publish free, the publish gate, platform grants | §7 | half a session |
 | **N-66** | **Platform console v2** — create a studio, operators and password links, every catalogue, extend a term, dashboard | §8 | 1 session |

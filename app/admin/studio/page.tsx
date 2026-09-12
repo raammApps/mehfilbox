@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { AdminChrome } from '@/components/admin/AdminChrome'
 import { StudioBranding } from '@/components/admin/StudioBranding'
 import { getOperatorSession, getSessionOrg } from '@/lib/admin/session'
+import { allThemes } from '@/themes/resolve'
 
 export const dynamic = 'force-dynamic'
 
@@ -33,7 +34,7 @@ export default async function StudioPage() {
           already delivered — those keep the look the couple was given.
         </p>
 
-        <StudioBranding branding={org.branding} />
+        <StudioBranding branding={org.branding} themes={await allThemes()} />
       </div>
     </AdminChrome>
   )

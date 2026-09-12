@@ -4,6 +4,7 @@ import { useEffect } from 'react'
 import { SiteFooter } from '@/components/chrome/SiteFooter'
 import { TopNav } from '@/components/chrome/TopNav'
 import { createTranslator, resolveLocalised } from '@/lib/i18n'
+import type { PosterPaletteName } from '@/lib/poster'
 import type { CatalogueBundle, Locale, ModuleInstance, PlaybackProgress } from '@/lib/schema'
 import { firstRowInstanceId } from '@/modules/registry'
 import { CatalogueProvider } from './CatalogueProvider'
@@ -28,6 +29,8 @@ type Props = {
   platformCredit?: boolean
   /** Where that line points: the marketing site, carrying the studio that sent the guest. */
   platformHref?: string
+  /** The theme's poster palette (D-35): generated art, profile tiles and the avatar draw from it. */
+  palette?: PosterPaletteName
 }
 
 /**
@@ -53,6 +56,7 @@ export function CatalogueShell({
   preview = false,
   platformCredit = true,
   platformHref,
+  palette = 'warm',
 }: Props) {
   const { catalogue, titles, albums, photos } = bundle
   /**
@@ -84,6 +88,7 @@ export function CatalogueShell({
       initialProgress={initialProgress}
       firstRowId={firstRowInstanceId(modules)}
       preview={preview}
+      palette={palette}
     >
       <a
         href="#content"
@@ -92,12 +97,13 @@ export function CatalogueShell({
         {t('nav.skipToContent')}
       </a>
 
-      <ProfileGate appName={appName} t={t} />
+      <ProfileGate appName={appName} t={t} palette={palette} />
       <TopNav
         appName={appName}
         logoUrl={catalogue.branding.logoUrl || null}
         locale={locale}
         t={t}
+        palette={palette}
         // The whole wedding, not one film: the share that brings the next studio in (D-41).
         shareUrl={publicUrl ?? `${shareBaseUrl}/`}
         shareText={t('share.catalogue', { couple: coupleName })}
@@ -135,6 +141,7 @@ export function CatalogueShell({
         locale={locale}
         t={t}
         shareBaseUrl={shareBaseUrl}
+        palette={palette}
       />
     </CatalogueProvider>
   )

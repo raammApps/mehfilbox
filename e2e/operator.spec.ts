@@ -302,16 +302,51 @@ test.describe('the operator console', () => {
     await expect(page.getByTestId('preview-viewport').getByTestId('letter-module')).toHaveCount(0)
   })
 
-  test('warns at pick time about an accent that will not read on black', async ({ page }) => {
+  test('warns at pick time about an accent that will not carry a button label', async ({ page }) => {
     await openCustomizer(page)
 
     // Branding is a selection now, like a section — it opens in the inspector rather than
     // sitting permanently in the sidebar.
     await page.getByRole('button', { name: /Branding/ }).click()
-    await page.getByLabel('Custom').fill('#ff8fc7')
+    // A mid grey: neither white nor near-black lettering reads on it (D-35 chooses the ink).
+    await page.getByLabel('Custom').fill('#7a7a7a')
     // Scoped to the branding panel: Next's route announcer is also role="alert".
     const branding = page.getByRole('region', { name: 'Branding' })
-    await expect(branding.getByRole('alert')).toContainText(/white button text/i)
+    await expect(branding.getByRole('alert')).toContainText(/button text/i)
+  })
+
+  /**
+   * A theme is the whole page, not the accent (D-35): the surface, the type, the corners. The
+   * preview has to repaint its own frame to the theme's page — an ivory theme in a black frame
+   * previews wrong — while the console around it stays the console.
+   */
+  test('choosing a theme repaints the whole preview, and nothing outside it', async ({ page }) => {
+    await openCustomizer(page)
+    await page.getByRole('button', { name: /Branding/ }).click()
+    const branding = page.getByRole('region', { name: 'Branding' })
+    await branding.getByRole('radio', { name: /^Carnival/ }).check({ force: true })
+
+    const themed = page.locator('[data-preview-theme]')
+    await expect
+      .poll(async () =>
+        themed.evaluate((el) => getComputedStyle(el).getPropertyValue('--color-surface-0').trim()),
+      )
+      .toBe('#1b0f2e')
+    await expect(page.locator('style[data-tenant-theme="carnival"]')).toHaveCount(1)
+
+    const admin = await page.evaluate(() =>
+      getComputedStyle(document.documentElement).getPropertyValue('--color-surface-0').trim(),
+    )
+    expect(admin).toBe('#0c0c0d')
+
+    // Back to the default, so the next spec meets the demo wedding as it was seeded.
+    await branding.getByRole('radio', { name: /^Marquee/ }).check({ force: true })
+    await expect
+      .poll(async () =>
+        themed.evaluate((el) => getComputedStyle(el).getPropertyValue('--color-surface-0').trim()),
+      )
+      .toBe('#0c0c0d')
+    await expect(page.getByText('Saved as draft').first()).toBeVisible()
   })
 
   /**

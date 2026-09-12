@@ -2,7 +2,7 @@
 
 import { memo, useEffect, useRef, useState } from 'react'
 import { photoSrcSet } from '@/lib/photos/srcset'
-import { posterDataUri } from '@/lib/poster'
+import { posterDataUri, type PosterPaletteName } from '@/lib/poster'
 
 export type Aspect = '2:3' | '16:9' | '1:1' | '4:3'
 
@@ -22,6 +22,8 @@ export type RowItem = {
    * to move.
    */
   previewUrl?: string | null
+  /** The theme's palette for generated art (D-35). Set by the module that built the item. */
+  palette?: PosterPaletteName
 }
 
 const ASPECT_CLASS: Record<Aspect, string> = {
@@ -98,7 +100,7 @@ function PosterCardImpl({ item, aspect, onOpen, eager = false, wide = false }: P
    * twice. The DOM label is the single source: it truncates, it localises, and a screen reader
    * can read it.
    */
-  const src = item.posterUrl || posterDataUri({ slug: item.key, label: '' })
+  const src = item.posterUrl || posterDataUri({ slug: item.key, label: '', palette: item.palette })
 
   return (
     <button

@@ -6,6 +6,7 @@ import { getRepository } from '@/lib/db'
 import { env } from '@/lib/env'
 import {createTranslator, resolveLocalised} from '@/lib/i18n'
 import { guestLocale } from '@/lib/guest-locale'
+import { resolveTheme } from '@/themes/resolve'
 
 export const dynamic = 'force-dynamic'
 
@@ -28,7 +29,7 @@ export default async function RenewPage({ params }: { params: Promise<{ slug: st
 
   return (
     <>
-      <ThemeStyle branding={verdict.catalogue.branding} />
+      <ThemeStyle branding={verdict.catalogue.branding} theme={await resolveTheme(verdict.catalogue.branding)} />
       <main className="gutter-x mx-auto flex min-h-svh max-w-[640px] flex-col justify-center py-16">
         <p className="type-label mb-4 text-accent-hi">
           {resolveLocalised(verdict.catalogue.coupleName, locale)}

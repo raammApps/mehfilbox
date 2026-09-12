@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { useCatalogue } from '@/components/streaming/CatalogueProvider'
 import { LOCALE_LABELS, type Translator } from '@/lib/i18n'
-import { hashSlug } from '@/lib/poster'
+import { hashSlug, tileColours, type PosterPaletteName } from '@/lib/poster'
 import { LOCALES, type Locale } from '@/lib/schema'
 import { ShareButton } from '@/components/streaming/ShareButton'
 
@@ -16,9 +16,9 @@ type Props = {
   /** The whole wedding's address and the text that travels with it (D-41). Omit to hide the control. */
   shareUrl?: string
   shareText?: string
+  /** The theme's palette (D-35); the avatar is painted from it. */
+  palette?: PosterPaletteName
 }
-
-const AVATAR_COLOURS = ['#f2933a', '#d4547e', '#3b3f8f', '#1f6b52', '#e0b155', '#8e1220']
 
 /**
  * Sticky, transparent over the billboard, solid on scroll (doc 02 §4).
@@ -29,7 +29,7 @@ const AVATAR_COLOURS = ['#f2933a', '#d4547e', '#3b3f8f', '#1f6b52', '#e0b155', '
  * untappable. doc 02 §4 specifies an avatar here, and the avatar is also what makes the
  * row fit.
  */
-export function TopNav({ appName, logoUrl, locale, t, shareUrl, shareText }: Props) {
+export function TopNav({ appName, logoUrl, locale, t, shareUrl, shareText, palette = 'warm' }: Props) {
   const { setProfileId, preview, basePath } = useCatalogue()
   const [solid, setSolid] = useState(false)
 
@@ -40,7 +40,8 @@ export function TopNav({ appName, logoUrl, locale, t, shareUrl, shareText }: Pro
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
-  const colour = AVATAR_COLOURS[hashSlug(appName) % AVATAR_COLOURS.length]!
+  const colours = tileColours(palette)
+  const colour = colours[hashSlug(appName) % colours.length]!
 
   return (
     <header

@@ -12,6 +12,7 @@ import { guestLocale } from '@/lib/guest-locale'
 import { rootUrl } from '@/lib/tenant'
 import { effectiveModules } from '@/lib/db/repository'
 import { showsPlatformCredit, type PlaybackProgress } from '@/lib/schema'
+import { resolveTheme } from '@/themes/resolve'
 
 /**
  * The browse page. ISR — revalidated explicitly on publish (doc 05 §6), not on a timer, so a
@@ -110,11 +111,14 @@ export default async function CataloguePage({
   }
 
   const publicUrl = publicUrlOf(catalogue)
+  // The whole guest surface follows the theme (D-35); resolved once, custom-aware, here.
+  const theme = await resolveTheme(catalogue.branding)
 
   return (
     <>
-      <ThemeStyle branding={catalogue.branding} />
+      <ThemeStyle branding={catalogue.branding} theme={theme} />
       <CatalogueShell
+        palette={theme.tokens.posterPalette}
         bundle={bundle}
         modules={effectiveModules(catalogue, false)}
         locale={locale}

@@ -23,6 +23,7 @@ import type {
   Title,
 } from '@/lib/schema'
 import type { Entitlement } from '@/lib/entitlements'
+import type { CustomTheme } from '@/themes/contract'
 import type {
   CatalogueCounts,
   CatalogueFilter,
@@ -815,6 +816,55 @@ export class SupabaseRepository implements Repository {
     }
 
     return counts
+  }
+
+  // ── Platform-authored themes ────────────────────────────────────────────────
+  private static toCustomTheme(r: Row): CustomTheme {
+    return {
+      id: r.id,
+      name: r.name,
+      description: r.description ?? '',
+      tokens: r.tokens,
+      enabled: r.enabled ?? true,
+      createdBy: r.created_by ?? null,
+      createdAt: r.created_at,
+      updatedAt: r.updated_at ?? r.created_at,
+    }
+  }
+
+  async listCustomThemes(): Promise<CustomTheme[]> {
+    const { data, error } = await this.db.from('themes').select('*').order('name')
+    if (error) {
+      // The table arrives with migration 0019; until then the built-in seven are the themes.
+      log.warn('themes: falling back to built-in only', { message: error.message })
+      return []
+    }
+    return (data ?? []).map(SupabaseRepository.toCustomTheme)
+  }
+
+  async getCustomTheme(id: string): Promise<CustomTheme | null> {
+    const { data } = await this.db.from('themes').select('*').eq('id', id).maybeSingle()
+    return data ? SupabaseRepository.toCustomTheme(data) : null
+  }
+
+  async saveCustomTheme(theme: CustomTheme): Promise<CustomTheme> {
+    const data = SupabaseRepository.unwrap<Row>(
+      await this.db
+        .from('themes')
+        .upsert({
+          id: theme.id,
+          name: theme.name,
+          description: theme.description,
+          tokens: theme.tokens,
+          enabled: theme.enabled,
+          created_by: theme.createdBy,
+          created_at: theme.createdAt,
+          updated_at: theme.updatedAt,
+        })
+        .select('*')
+        .single(),
+    )
+    return SupabaseRepository.toCustomTheme(data)
   }
 
   // ── Platform admin ──────────────────────────────────────────────────────────

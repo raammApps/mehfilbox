@@ -36,12 +36,17 @@ export default async function PlatformPage() {
         <div>
           <h1 className="text-[24px] font-bold tracking-[-0.01em]">Platform</h1>
           <p className="mt-0.5 text-[14px] text-[var(--color-l-text-mid)]">
-            Signed in as {admin.name}. Read-only, apart from suspending a studio.
+            Signed in as {admin.name}. Read-only, apart from suspending a studio and the themes.
           </p>
         </div>
-        <Link href="/admin" className="text-[13px] underline underline-offset-4">
-          My own console
-        </Link>
+        <nav aria-label="Platform" className="flex flex-wrap gap-4 text-[13px]">
+          <Link href="/admin/platform/themes" className="underline underline-offset-4">
+            Themes
+          </Link>
+          <Link href="/admin" className="underline underline-offset-4">
+            My own console
+          </Link>
+        </nav>
       </header>
 
       <dl aria-label="At a glance" className="mb-6 grid gap-3 sm:grid-cols-3">

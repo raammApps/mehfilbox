@@ -174,4 +174,51 @@ test.describe('N-55 — is this live?', () => {
     await expect(guest.getByText(`Presented by ${draft}`)).toBeVisible()
     await guest.close()
   })
+
+  /**
+   * The theme rides in `branding`, so it is a draft like the accent (D-35): chosen in the
+   * customizer, held back until Publish, and then the whole page for every guest — the surface
+   * behind the films, not a colour on one button.
+   */
+  test('a theme reaches the couple only when it is published, and then all of it', async ({
+    page,
+    context,
+  }) => {
+    const catalogue = await openCustomizer(page)
+    const publish = page.getByRole('button', { name: /^Publish/ })
+    if (await publish.isEnabled()) await publish.click()
+    await expect(page.getByText('Guests are seeing exactly this.')).toBeVisible()
+
+    const guest = await context.newPage()
+    await openAsReturningGuest(guest, catalogue.slug)
+    const surfaceOf = () =>
+      guest.evaluate(() =>
+        getComputedStyle(document.documentElement).getPropertyValue('--color-surface-0').trim(),
+      )
+
+    await page.getByRole('button', { name: /^Branding/ }).click()
+    const branding = page.getByRole('region', { name: 'Branding' })
+    await branding.getByRole('radio', { name: /^Carnival/ }).check({ force: true })
+    await expect(page.getByText('Saved as draft').first()).toBeVisible()
+    await expect(page.getByText('Guests are still seeing the last published version.')).toBeVisible()
+
+    await guest.reload()
+    await expect(guest.locator('style[data-tenant-theme="carnival"]')).toHaveCount(0)
+
+    await page.getByRole('button', { name: 'Publish changes' }).click()
+    await expect(page.getByText('Guests are seeing exactly this.')).toBeVisible()
+
+    await guest.reload()
+    await expect(guest.locator('style[data-tenant-theme="carnival"]')).toHaveCount(1)
+    await expect.poll(surfaceOf).toBe('#1b0f2e')
+
+    // Restore the default and publish it, so later specs meet the demo wedding as seeded.
+    await branding.getByRole('radio', { name: /^Marquee/ }).check({ force: true })
+    await expect(page.getByText('Guests are still seeing the last published version.')).toBeVisible()
+    await page.getByRole('button', { name: 'Publish changes' }).click()
+    await expect(page.getByText('Guests are seeing exactly this.')).toBeVisible()
+    await guest.reload()
+    await expect.poll(surfaceOf).toBe('#0c0c0d')
+    await guest.close()
+  })
 })

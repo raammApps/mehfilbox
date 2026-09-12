@@ -21,6 +21,7 @@ import type {
   Title,
 } from '@/lib/schema'
 import type { Entitlement } from '@/lib/entitlements'
+import type { CustomTheme } from '@/themes/contract'
 import type {
   CatalogueCounts,
   CatalogueFilter,
@@ -33,6 +34,7 @@ export type Snapshot = {
   entitlements: Entitlement[]
   transfers: Transfer[]
   credentialLinks: CredentialLink[]
+  customThemes: CustomTheme[]
   orgs: Org[]
   operators: Operator[]
   catalogues: Catalogue[]
@@ -61,6 +63,7 @@ export function emptySnapshot(): Snapshot {
     entitlements: [],
     transfers: [],
     credentialLinks: [],
+    customThemes: [],
     orgs: [],
     operators: [],
     catalogues: [],
@@ -216,6 +219,24 @@ export class MemoryRepository implements Repository {
         .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
         .slice(0, options?.limit ?? 50),
     )
+  }
+
+  // ── Platform-authored themes ────────────────────────────────────────────────
+  async listCustomThemes(): Promise<CustomTheme[]> {
+    return this.clone([...(this.data.customThemes ?? [])].sort((a, b) => a.name.localeCompare(b.name)))
+  }
+
+  async getCustomTheme(id: string): Promise<CustomTheme | null> {
+    return this.clone((this.data.customThemes ?? []).find((t) => t.id === id) ?? null)
+  }
+
+  async saveCustomTheme(theme: CustomTheme): Promise<CustomTheme> {
+    this.data.customThemes ??= []
+    const index = this.data.customThemes.findIndex((t) => t.id === theme.id)
+    if (index === -1) this.data.customThemes.push(this.clone(theme))
+    else this.data.customThemes[index] = this.clone(theme)
+    this.touched()
+    return this.clone(theme)
   }
 
   // ── Platform admin ──────────────────────────────────────────────────────────

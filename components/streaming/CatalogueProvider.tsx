@@ -10,6 +10,7 @@ import {
   useState,
   type ReactNode,
 } from 'react'
+import type { PosterPaletteName } from '@/lib/poster'
 import type { Locale, PlaybackProgress } from '@/lib/schema'
 
 /**
@@ -41,6 +42,8 @@ export type CatalogueContextValue = {
   firstRowId: string | null
   /** True inside the customizer preview: navigation and history are inert. */
   preview: boolean
+  /** The theme's palette for generated art (D-35). Modules read it here, not off the theme. */
+  palette: PosterPaletteName
 }
 
 const CatalogueContext = createContext<CatalogueContextValue | null>(null)
@@ -62,6 +65,7 @@ type Props = {
   initialProgress: PlaybackProgress[]
   firstRowId: string | null
   preview?: boolean
+  palette?: PosterPaletteName
 }
 
 export function CatalogueProvider({
@@ -73,6 +77,7 @@ export function CatalogueProvider({
   initialProgress,
   firstRowId,
   preview = false,
+  palette = 'warm',
 }: Props) {
   const router = useRouter()
   const [openTitleSlug, setOpenTitleSlug] = useState<string | null>(initialTitleSlug)
@@ -169,6 +174,7 @@ export function CatalogueProvider({
       progressByTitleId: Object.fromEntries(progress.map((p) => [p.titleId, p])),
       firstRowId,
       preview,
+      palette,
     }),
     [
       locale,
@@ -183,6 +189,7 @@ export function CatalogueProvider({
       progress,
       firstRowId,
       preview,
+      palette,
     ],
   )
 

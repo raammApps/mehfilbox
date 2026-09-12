@@ -16,7 +16,7 @@ import type { BillboardConfig } from './schema'
  * half-loaded video (doc 08 `<Billboard>`).
  */
 export default function Guest({ config, ctx }: GuestProps<BillboardConfig>) {
-  const { openTitle, play } = useCatalogue()
+  const { openTitle, play, palette } = useCatalogue()
   const video = useRef<HTMLVideoElement>(null)
   const [trailerVisible, setTrailerVisible] = useState(false)
 
@@ -61,7 +61,7 @@ export default function Guest({ config, ctx }: GuestProps<BillboardConfig>) {
   const still =
     featured.posterUrl ||
     // No baked label: the hero renders its own headline, and artwork type behind it collides.
-    posterDataUri({ slug: featured.slug, label: '', width: 1600, height: 900 })
+    posterDataUri({ slug: featured.slug, label: '', width: 1600, height: 900, palette })
 
   return (
     <section className="relative isolate -mt-[var(--nav-h,64px)] min-h-[78svh] w-full overflow-hidden md:min-h-[86svh]">

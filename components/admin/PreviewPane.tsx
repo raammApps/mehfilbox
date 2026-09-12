@@ -5,6 +5,8 @@ import { useEffect, useRef, useState } from 'react'
 import { ThemeStyle } from '@/components/chrome/ThemeStyle'
 import { CatalogueShell } from '@/components/streaming/CatalogueShell'
 import type { Album, Catalogue, ModuleInstance, Photo, Title } from '@/lib/schema'
+import type { ThemeDefinition } from '@/themes/contract'
+import { themeFrom } from '@/themes/registry'
 
 const DEBOUNCE_MS = 300
 
@@ -24,6 +26,8 @@ type Props = {
   /** Instance id of the section being edited, outlined here so the two panels agree. */
   /** Live branding from the picker, so the preview shows the accent and typeface being chosen. */
   branding?: Catalogue['branding']
+  /** Every theme, so a platform-authored one previews as it will publish (D-35). */
+  themes?: readonly ThemeDefinition[]
   selectedId?: string | null
   /** Clicking a section selects it. Omit to keep the preview read-only. */
   onSelect?: (instanceId: string) => void
@@ -78,12 +82,14 @@ export function PreviewPane({
   photos,
   modules,
   branding,
+  themes,
   selectedId = null,
   onSelect,
   onEditHeading,
   onReorder,
 }: Props) {
   const [device, setDevice] = useState<'mobile' | 'desktop'>('mobile')
+  const theme = themeFrom(branding ?? catalogue.branding, themes)
   const [debounced, setDebounced] = useState(modules)
   const viewport = useRef<HTMLDivElement>(null)
 
@@ -325,9 +331,11 @@ export function PreviewPane({
       </div>
 
       <div
-        className="mx-auto overflow-hidden rounded-[var(--radius-modal)] border border-[var(--color-l-line)] bg-surface-0"
+        className="mx-auto overflow-hidden rounded-[var(--radius-modal)] border border-[var(--color-l-line)]"
         style={{
-          colorScheme: 'dark',
+          // The frame is the theme's page, not black: an ivory theme in a black frame previews wrong.
+          background: theme.tokens.surface0,
+          colorScheme: theme.tokens.colorScheme,
           width: device === 'mobile' ? 390 : '100%',
           maxWidth: '100%',
           height: device === 'mobile' ? 780 : 700,
@@ -338,7 +346,7 @@ export function PreviewPane({
           and this pane mounts the shell beneath that level. An operator picked an accent and
           the preview kept showing the default — the one place it most needed not to.
         */}
-        <ThemeStyle branding={branding ?? catalogue.branding} scope="[data-preview-theme]" />
+        <ThemeStyle branding={branding ?? catalogue.branding} theme={theme} scope="[data-preview-theme]" />
 
         <div
           ref={viewport}
@@ -361,6 +369,7 @@ export function PreviewPane({
               initialProgress={[]}
               shareBaseUrl=""
               preview
+              palette={theme.tokens.posterPalette}
             />
           )}
         </div>

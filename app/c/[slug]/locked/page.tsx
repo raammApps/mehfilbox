@@ -4,6 +4,7 @@ import { ThemeStyle } from '@/components/chrome/ThemeStyle'
 import { resolveAccess } from '@/lib/catalogue-access'
 import {createTranslator, resolveLocalised} from '@/lib/i18n'
 import { guestLocale } from '@/lib/guest-locale'
+import { resolveTheme } from '@/themes/resolve'
 import { basePathOf, requireCanonicalAddress } from '@/lib/address'
 import { challengeConfig } from '@/lib/captcha/verify'
 
@@ -27,7 +28,7 @@ export default async function LockedPage({ params }: { params: Promise<{ slug: s
 
   return (
     <>
-      <ThemeStyle branding={verdict.catalogue.branding} />
+      <ThemeStyle branding={verdict.catalogue.branding} theme={await resolveTheme(verdict.catalogue.branding)} />
       <PasscodeGate
         catalogueSlug={slug}
         basePath={basePath}

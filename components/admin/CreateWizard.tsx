@@ -4,6 +4,8 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { suggestSlug } from '@/lib/format'
 import { TEMPLATES } from '@/lib/admin/templates'
+import type { ThemeDefinition } from '@/themes/contract'
+import { ThemeCards } from './ThemeCards'
 import { FLIX_SUFFIX, type Locale, type Title } from '@/lib/schema'
 import { catalogueUrl, type TenancyMode } from '@/lib/tenant'
 import { IconCheck } from './icons'
@@ -40,6 +42,8 @@ export function CreateWizard({
   tenancyMode,
   studioSlug,
   studioLocale,
+  themes,
+  studioTheme,
 }: {
   /** Passed in rather than read here: `lib/env` is server-only, and this runs in the browser. */
   rootDomain: string
@@ -48,6 +52,10 @@ export function CreateWizard({
   studioSlug: string
   /** The studio's own language — the default this wedding starts from, not a rule (N-29c). */
   studioLocale: Locale
+  /** The themes a studio may pick from (D-35), resolved on the server. */
+  themes: readonly ThemeDefinition[]
+  /** The studio's default theme — what a wedding starts on unless the couple wants another. */
+  studioTheme: string
 }) {
   const router = useRouter()
   const [step, setStep] = useState<Step>(1)
@@ -65,6 +73,7 @@ export function CreateWizard({
     suggestion?: string
   } | null>(null)
   const [template, setTemplate] = useState(TEMPLATES[0]!.id)
+  const [theme, setTheme] = useState(studioTheme)
   /**
    * Seeded from the studio, changeable per wedding (N-29c). The studio's language is what most of
    * their couples read; it is not what all of them read, and asking here costs one line.
@@ -139,6 +148,8 @@ export function CreateWizard({
         city: city ? { en: city } : undefined,
         locale,
         template,
+        // Only the theme: the rest of the studio's branding is inherited by the route.
+        branding: { theme },
       }),
     })
 
@@ -330,6 +341,22 @@ export function CreateWizard({
                 </label>
               ))}
             </div>
+          </fieldset>
+
+          {/*
+            Chosen here, with the couple in the room (doc 16 §10), rather than discovered in the
+            customizer later: the theme is the first thing a couple has an opinion about.
+          */}
+          <fieldset className="mb-6">
+            <legend className="mb-1 block text-[14px] font-semibold">The look</legend>
+            <p className="mb-2 text-[13px] text-[var(--color-l-text-mid)]">
+              Starts on your studio&rsquo;s theme. Changeable any time in the customizer.
+            </p>
+            <ThemeCards
+              themes={themes.filter((option) => option.enabled || option.id === theme)}
+              value={theme}
+              onChange={setTheme}
+            />
           </fieldset>
 
           <ul className="mb-6 grid gap-3 sm:grid-cols-3">

@@ -3,6 +3,8 @@ import { AdminChrome } from '@/components/admin/AdminChrome'
 import { CreateWizard } from '@/components/admin/CreateWizard'
 import { getOperatorSession, getSessionOrg } from '@/lib/admin/session'
 import { env } from '@/lib/env'
+import { DEFAULT_THEME_ID } from '@/themes/registry'
+import { allThemes } from '@/themes/resolve'
 
 export const dynamic = 'force-dynamic'
 
@@ -32,6 +34,8 @@ export default async function NewCataloguePage() {
         tenancyMode={env.TENANCY_MODE}
         studioSlug={org?.slug ?? ''}
         studioLocale={org?.locale ?? 'en'}
+        themes={await allThemes()}
+        studioTheme={org?.branding.theme ?? DEFAULT_THEME_ID}
       />
     </AdminChrome>
   )

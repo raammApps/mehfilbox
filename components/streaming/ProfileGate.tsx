@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { Translator, MessageKey } from '@/lib/i18n'
 import { PROFILE_LABELS, type ProfileLabel } from '@/lib/schema'
-import { hashSlug } from '@/lib/poster'
+import { hashSlug, tileColours, type PosterPaletteName } from '@/lib/poster'
 import { useCatalogue } from './CatalogueProvider'
 import { useFocusTrap } from './useFocusTrap'
 
@@ -14,10 +14,7 @@ const LABEL_KEYS: Record<ProfileLabel, MessageKey> = {
   Family: 'profileGate.label.family',
 }
 
-/** Deterministic tile colour from the label, so the same tile is the same colour every visit. */
-const TILE_COLOURS = ['#f2933a', '#d4547e', '#3b3f8f', '#1f6b52', '#e0b155', '#8e1220']
-
-type Props = { appName: string; t: Translator }
+type Props = { appName: string; t: Translator; palette?: PosterPaletteName }
 
 /**
  * The single most recognisable streaming moment, and the frame that tells a visitor what kind
@@ -26,7 +23,10 @@ type Props = { appName: string; t: Translator }
  * The wordmark animates in over ~600ms with a scale settle before the tiles appear — that beat
  * is what sells the reference. Never accepts a free-text personal name (doc 06 §5).
  */
-export function ProfileGate({ appName, t }: Props) {
+export function ProfileGate({ appName, t, palette = 'warm' }: Props) {
+  // Deterministic tile colour from the label, so the same tile is the same colour every visit —
+  // drawn from the theme's palette (D-35).
+  const tileColourSet = tileColours(palette)
   const { catalogueSlug, profileId, setProfileId, preview } = useCatalogue()
   const panel = useRef<HTMLDivElement>(null)
   const [mounted, setMounted] = useState(false)
@@ -93,7 +93,7 @@ export function ProfileGate({ appName, t }: Props) {
         >
           {PROFILE_LABELS.map((label) => {
             const resolved = t(LABEL_KEYS[label])
-            const colour = TILE_COLOURS[hashSlug(label) % TILE_COLOURS.length]!
+            const colour = tileColourSet[hashSlug(label) % tileColourSet.length]!
             return (
               <li key={label}>
                 <button

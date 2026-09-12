@@ -116,7 +116,7 @@ graph, so there is no privilege-escalation path to get wrong; what is missing is
 | Renewal | **Missing** | `subStatus` drives a renewal screen for guests. There is no way to actually renew — no payment, no self-service, no reminder. |
 | Credentials management | **Partial** | Supabase Auth handles password reset. No in-app profile screen, no email change. |
 | Passcode management | **Built** | From `/my`, before and after the handover; changing it signs out everyone holding the old one (N-71, 12 Sept). |
-| Buy and apply a theme | **Missing** | Branding only — accent, logo, font, "presented by". No purchasable themes. See §6. |
+| Buy and apply a theme | **Partial** | Seven themes and platform-authored ones, chosen per catalogue (N-63, 12 Sept). Nothing is *bought* yet — see §6 and doc 16 §7. |
 | Hand back to the studio | **Built** | N-62, 12 Sept — as a window rather than a return: the couple opens the studio's access for seven or fourteen days from `/my`, and it closes on its own. |
 | Download everything | **Missing** | **Required before any lapse behaviour ships.** Available at any time — before expiry, in grace, and from archive. `PRICING.md` §2. |
 | Archive instead of deletion *(changed 6 Sept 2026)* | **Missing** | Lapse → 90 days' grace → archive (streaming paused, files kept, restore on payment). Automatic deletion is **removed from the product**; `deleted` is reachable only by a recorded request from the couple. N-24. |
@@ -179,8 +179,13 @@ Headroom: ~33× on function invocations at 10 weddings a month.
 
 ## 6. Skin / theme marketplace — **entirely new**
 
-**Missing, and it is the largest single item on this page.** Nothing in the codebase anticipates
-it.
+> **12 September 2026, N-63:** the *theme* half exists — seven built in, platform-authored ones
+> from `/admin/platform/themes`, chosen per catalogue in the wizard and the branding panel, the
+> whole guest surface following it (D-35). What remains open below is the *marketplace*: selling
+> one, third parties, and house styles at the studio level (N-64).
+
+**Was missing, and the largest single item on this page.** The text below is kept as the
+statement of the problem.
 
 ### What exists to build on
 
@@ -271,14 +276,14 @@ N-60 to N-75 in [`NEXT.md`](./NEXT.md).
 | Couple console `/my` | **Built** | N-62, 12 Sept. Link, share, download, guest code; letter, sections and the studio window once theirs. |
 | Studio support window after handover | **Built** | N-62, 12 Sept. Seven or fourteen days, opened by the couple, closing on its own. |
 | Delivered view — every originated catalogue with its renewal date | **Built** | N-74 with N-62, 12 Sept. On the console's list page. |
-| Themes — seven built in, chosen per catalogue | **Missing** | N-63. One surface, one theme, since Phase 0. |
-| Platform-authored themes | **Missing** | N-63. |
+| Themes — seven built in, chosen per catalogue | **Built** | N-63, 12 Sept. Wizard step 2 and the branding panel; the whole guest surface, the preview's frame and the generated posters follow it. |
+| Platform-authored themes | **Built** | N-63, 12 Sept. `/admin/platform/themes` — gated on the same contrast pairs, withdrawable without repainting a wedding. |
 | House styles — saved presets, frozen while in use | **Missing** | N-64. One studio-wide look exists (N-26). |
 | Start from blank | **Missing** | N-64. Three templates only. |
 | First publish free, second on a credit | **Missing** | N-65. Nothing gates a publish. |
 | Platform console: create a studio, credits, password links, all catalogues, extend a term | **Partial** | Suspend and quota exist (N-27, N-27b). N-66. |
 | Platform health page | **Missing** | N-67. `/api/health` reports drivers only. |
 | Custom domains with generated instructions and verification | **Partial** | Stored, never served. N-68. |
-| Five-step wizard with the couple in the room | **Partial** | Four steps; no theme, code, timezone or couple step. N-69. |
+| Five-step wizard with the couple in the room | **Partial** | Four steps; the theme is asked on step 2 (N-63). No code, timezone or couple step yet. N-69. |
 | Every console surface at 360px | **Partial** | Guest surface yes; consoles unaudited. N-70. |
 | Premiere date with a countdown | **Missing** | N-72. |

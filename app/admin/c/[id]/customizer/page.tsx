@@ -6,6 +6,7 @@ import { seedModules } from '@/lib/admin/templates'
 import { getRepository } from '@/lib/db'
 import { effectiveModules } from '@/lib/db/repository'
 import { publicUrlOf } from '@/lib/address'
+import { allThemes } from '@/themes/resolve'
 
 export const dynamic = 'force-dynamic'
 
@@ -21,10 +22,12 @@ export default async function CustomizerPage({ params }: { params: Promise<{ id:
   const repository = getRepository()
   const org = await getSessionOrg(session)
 
-  const [titles, albums, photos] = await Promise.all([
+  const [titles, albums, photos, themes] = await Promise.all([
     repository.listTitles(catalogue.id),
     repository.listAlbums(catalogue.id),
     repository.listPhotosForCatalogue(catalogue.id),
+    // All of them, not only the enabled: a wedding on a withdrawn theme previews as it publishes.
+    allThemes(),
   ])
 
   // A catalogue that has never been through the customizer starts from its template rather
@@ -56,6 +59,7 @@ export default async function CustomizerPage({ params }: { params: Promise<{ id:
         initialModules={modules}
         publicUrl={publicUrlOf(catalogue)}
         pendingContent={pending}
+        themes={themes}
       />
     </AdminChrome>
   )

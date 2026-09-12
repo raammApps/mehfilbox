@@ -61,14 +61,25 @@ describe('judgeAccent', () => {
     expect(verdict.warning).toMatch(/hard to see/i)
   })
 
-  it("rejects the planner's brand pink, where white button text fails", () => {
+  /**
+   * The planner's brand pink used to fail here on white button text. Since D-35 the ink is chosen
+   * per accent — white or near-black, whichever reads — so the pink passes with dark lettering,
+   * and the only accent that fails on its label is a mid-tone that neither ink can sit on.
+   */
+  it("accepts the planner's brand pink now that the button text can go dark", () => {
     const verdict = judgeAccent('#ff8fc7')
+    expect(verdict.ok).toBe(true)
+    expect(verdict.inkOnAccent).toBeGreaterThanOrEqual(4.5)
+  })
+
+  it('rejects a mid grey that neither white nor near-black text can read on', () => {
+    const verdict = judgeAccent('#7a7a7a')
     expect(verdict.ok).toBe(false)
-    expect(verdict.warning).toMatch(/white button text/i)
+    expect(verdict.warning).toMatch(/button text/i)
   })
 
   it('writes warnings for an operator, not a developer', () => {
-    const verdict = judgeAccent('#ff8fc7')
+    const verdict = judgeAccent('#7a7a7a')
     expect(verdict.warning).not.toMatch(/wcag|ratio|contrast ratio|4\.5/i)
   })
 })

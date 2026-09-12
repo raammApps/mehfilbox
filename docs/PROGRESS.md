@@ -1728,3 +1728,48 @@ and the old grants stop matching without anything to enumerate or revoke.
 
 Migration 0018. 15 new unit tests on where the boundaries fall; an E2E spec that walks from a
 temporary password to a wedding of their own. 573 unit and component tests.
+
+## N-63 · Themes — 12 September 2026
+
+**The near-black surface is no longer the only surface** (D-35, doc 16 §4). A theme is a validated
+token set — four surfaces, three text levels, the accent and its ink, the colour scheme, three
+radii, the display and body faces, the poster palette and the card edge — and `ThemeStyle` now
+writes the whole set rather than the accent alone. Every guest component already read its colours
+from the custom properties, so a light theme is a different set of values written to the same
+properties, not a different tree. The two places that hard-coded colour — the profile tiles and
+the nav avatar, the generated poster's gradients — read from the theme's palette instead, carried
+to the modules through `useCatalogue()` so the module contract did not widen. The scrim is
+re-emitted per theme: a scoped preview inheriting `:root`'s would put a black fade on an ivory page.
+
+**Seven built in** (`themes/registry.ts`): Marquee — everything shipped before today, and the
+default every existing catalogue is on — Feed, Bulletin, Carnival, Classic, Rainbow and Playtime,
+named for their feel and never for another company's product (D-1). Each is held to seven contrast
+pairs by `pnpm check:contrast` and by a unit test, so a value that fails a pair fails the build.
+
+**Chosen with the brand.** The theme rides in `branding.theme`, so it is a draft that reaches
+guests at Publish, previews live, and travels with the studio's default exactly as the accent does.
+The branding panel opens with theme cards painted from each theme's own tokens; the accent is
+judged against the chosen theme's page rather than against black; the headline face gains *"the
+theme's own"*, the default for a new wedding, so Classic gets its serif unless a studio insists.
+The wizard asks for the look on step 2, with the couple in the room — doc 16 §10's first step,
+ahead of N-69. The preview's frame follows the theme, because an ivory theme in a black frame
+previews wrong.
+
+**The gate chooses the ink.** `judgeAccent` takes the better of white and near-black on the
+accent, since `themeCss` picks the ink per accent: a marigold with dark lettering is a pass, and
+the planner's brand pink the contrast test has rejected since Phase 0 passes with dark text. The
+one accent that still fails on its label is a mid grey neither ink can sit on, which is what the
+test now uses.
+
+**Platform-authored themes** (`/admin/platform/themes`): a form over the tokens, a specimen
+painted by the same `themeCss` a guest page uses, the contrast verdict live beside it, and Save
+refusing what the verdict refuses — naming the pair and its ratio, because a form that says
+"invalid" teaches nothing. Stored in `themes` (migration 0019) and read through one cached list
+every guest page and picker shares, dropped on save. Withdrawing a theme hides it from pickers and
+repaints nothing: a wedding already on it keeps the look the couple was given, and its own panel
+still shows the choice. An id can never shadow a built-in, since a catalogue names its theme by
+id. The platform console's second and third writes, both recorded, both 404 to anyone else.
+
+29 new unit tests across three files; 603 unit and component tests. Two E2E tests: a theme
+repaints the preview and nothing outside it; a theme reaches the couple only when published, and
+then all of it.

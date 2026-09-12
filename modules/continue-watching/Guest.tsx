@@ -20,7 +20,7 @@ import type { ContinueWatchingConfig } from './schema'
  * rather than a heading above a blank strip.
  */
 export default function Guest({ config, ctx }: GuestProps<ContinueWatchingConfig>) {
-  const { openTitle, progressByTitleId } = useCatalogue()
+  const { openTitle, progressByTitleId, palette } = useCatalogue()
 
   const resumable = ctx.titles
     .map((title) => ({ title, progress: progressByTitleId[title.id] }))
@@ -42,6 +42,7 @@ export default function Guest({ config, ctx }: GuestProps<ContinueWatchingConfig
     key: title.slug,
     label: resolveLocalised(title.name, ctx.locale),
     posterUrl: title.posterUrl,
+    palette,
     previewUrl: `/api/poster/${title.id}?file=preview.webp`,
     durationBadge: formatDurationBadge(title.durationS),
     progress: progress!.positionS / Math.max(1, progress!.durationS),

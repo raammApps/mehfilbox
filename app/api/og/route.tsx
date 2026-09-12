@@ -4,6 +4,7 @@ import { resolveAccess } from '@/lib/catalogue-access'
 import { formatWeddingDate } from '@/lib/format'
 import { parseLocale, resolveLocalised } from '@/lib/i18n'
 import { paletteFor } from '@/lib/poster'
+import { resolveTheme } from '@/themes/resolve'
 
 export const runtime = 'nodejs'
 
@@ -29,8 +30,9 @@ export async function GET(request: Request) {
   const locale = parseLocale(url.searchParams.get('locale'))
   const coupleName = resolveLocalised(catalogue.coupleName, locale)
   const appName = resolveLocalised(catalogue.appName, locale)
-  const palette = paletteFor(catalogue.slug)
-  const accent = catalogue.branding.accent ?? '#d11a2a'
+  const theme = await resolveTheme(catalogue.branding)
+  const palette = paletteFor(catalogue.slug, theme.tokens.posterPalette)
+  const accent = catalogue.branding.accent ?? theme.tokens.accent
 
   return new ImageResponse(
     (

@@ -11,7 +11,7 @@ import type { CuratedRowConfig } from './schema'
 import { selectRowTitles } from './select'
 
 export default function Guest({ config, ctx }: GuestProps<CuratedRowConfig>) {
-  const { openTitle, progressByTitleId, firstRowId } = useCatalogue()
+  const { openTitle, progressByTitleId, firstRowId, palette } = useCatalogue()
 
   const items: RowItem[] = selectRowTitles(config, ctx.titles, ctx.consumedTitleIds).map(
     (title) => {
@@ -23,6 +23,7 @@ export default function Guest({ config, ctx }: GuestProps<CuratedRowConfig>) {
         label: resolveLocalised(title.name, ctx.locale),
         eyebrow: eyebrowFor(resolveLocalised(title.name, ctx.locale), title.category) ?? undefined,
         posterUrl: title.posterUrl,
+        palette,
         // Bunny writes an animated preview beside the poster, so the existing signed route
         // serves it — no second credential, no token juggling per card.
         previewUrl: `/api/poster/${title.id}?file=preview.webp`,

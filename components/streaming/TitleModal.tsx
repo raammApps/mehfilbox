@@ -5,7 +5,7 @@ import { useEffect, useMemo, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { formatClock, formatWeddingDate } from '@/lib/format'
 import { resolveLocalised, type Translator } from '@/lib/i18n'
-import { eyebrowFor, posterDataUri } from '@/lib/poster'
+import { eyebrowFor, posterDataUri, type PosterPaletteName } from '@/lib/poster'
 import type { Catalogue, Locale, Title } from '@/lib/schema'
 import { useCatalogue } from './CatalogueProvider'
 import { ShareButton } from './ShareButton'
@@ -18,6 +18,7 @@ type Props = {
   locale: Locale
   t: Translator
   shareBaseUrl: string
+  palette?: PosterPaletteName
 }
 
 /**
@@ -27,7 +28,7 @@ type Props = {
  * this component owns content order, sibling navigation, and the manifest prefetch that is
  * where the sub-1.5s playback target is actually won.
  */
-export function TitleModal({ catalogue, titles, locale, t, shareBaseUrl }: Props) {
+export function TitleModal({ catalogue, titles, locale, t, shareBaseUrl, palette = 'warm' }: Props) {
   const { openTitleSlug, closeTitle, openTitle, play, progressByTitleId } = useCatalogue()
   const panel = useRef<HTMLDivElement>(null)
 
@@ -80,7 +81,7 @@ export function TitleModal({ catalogue, titles, locale, t, shareBaseUrl }: Props
   const poster =
     title.posterUrl ||
     // No baked type: the modal renders the name and the category row directly below it.
-    posterDataUri({ slug: title.slug, label: '', width: 1200, height: 675 })
+    posterDataUri({ slug: title.slug, label: '', width: 1200, height: 675, palette })
   const resume = progressByTitleId[title.id]
   const shareUrl = `${shareBaseUrl}/watch/${title.slug}`
   const shareText = `${name} — ${resolveLocalised(catalogue.coupleName, locale)}`

@@ -4,6 +4,13 @@ Theme name: **Marquee** (the default). Read `12-compliance-and-risk.md §1` befo
 the accent or the wordmark — the design is deliberately full-fidelity streaming; only the
 name and the mark are ours to keep distinct.
 
+> **D-35, 12 September 2026 — Marquee is the *default* theme, no longer the only one.** The
+> values in this document are Marquee's. `themes/registry.ts` holds seven built-in token sets and
+> `16-platform-v2.md §4` is the contract every theme, built in or platform-authored, is held to.
+> §2's contrast pairs apply to each theme's own surfaces rather than to black, and the ink on the
+> accent is chosen per accent (white or near-black) rather than fixed white. Everything else here
+> — the mechanics of §1b, the type scale, the motion — is what a theme does *not* change.
+
 ## 1. Design intent
 
 **A prestige streaming service, for one couple.** Near-black surface, a single hot red accent,

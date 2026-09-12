@@ -22,6 +22,7 @@ import { Eye, EyeOff, GripVertical, Plus, Redo2, Settings2, Trash2, Undo2 } from
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { Album, Catalogue, ModuleInstance, Photo, Title } from '@/lib/schema'
+import type { ThemeDefinition } from '@/themes/contract'
 import { getModule, listModules, instantiate } from '@/modules/registry'
 import type { GuestContext } from '@/modules/contract'
 import { SectionInspector } from './SectionInspector'
@@ -43,6 +44,8 @@ type Props = {
   publicUrl: string
   /** Films and photographs waiting for the next Publish (N-57). */
   pendingContent: { titles: number; photos: number }
+  /** Every theme, withdrawn ones included, resolved on the server (D-35). */
+  themes: readonly ThemeDefinition[]
 }
 
 /**
@@ -60,6 +63,7 @@ export function CustomizerShell({
   initialModules,
   publicUrl,
   pendingContent,
+  themes,
 }: Props) {
   const [modules, setModules] = useState<ModuleInstance[]>(initialModules)
   /**
@@ -490,6 +494,7 @@ export function CustomizerShell({
 
         <PreviewPane
           branding={branding}
+          themes={themes}
           selectedId={editingId}
           onSelect={setEditingId}
           onEditHeading={editHeading}
@@ -507,7 +512,7 @@ export function CustomizerShell({
           Editing
         </h2>
         {editingId === BRANDING_SELECTION ? (
-          <ThemePicker catalogue={catalogue} onPreview={onBrandingPreview} />
+          <ThemePicker catalogue={catalogue} onPreview={onBrandingPreview} themes={themes} />
         ) : (
         <SectionInspector
           instance={editing ?? null}

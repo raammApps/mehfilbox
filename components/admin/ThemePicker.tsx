@@ -2,15 +2,21 @@
 
 import { useEffect, useState } from 'react'
 import { formatRatio, judgeAccent } from '@/lib/contrast'
-import { SaveState } from './SaveState'
 import type { Catalogue } from '@/lib/schema'
+import type { ThemeDefinition } from '@/themes/contract'
+import { FONT_STACKS, inkFor } from '@/themes/css'
+import { DEFAULT_THEME_ID, builtInThemes, themeFrom } from '@/themes/registry'
+import { SaveState } from './SaveState'
+import { ThemeCards } from './ThemeCards'
+
+type DisplayFont = NonNullable<Catalogue['branding']['displayFont']>
 
 /** Five curated presets plus a custom picker. Most operators will use a preset (doc 14 §5). */
 /** Only faces `lib/fonts.ts` actually loads; see `DISPLAY_FONTS`. */
-const FACES = [
-  { value: 'archivo' as const, label: 'Archivo', stack: "var(--font-archivo), Impact, sans-serif" },
-  { value: 'mukta' as const, label: 'Mukta', stack: "var(--font-mukta), sans-serif" },
-  { value: 'inter' as const, label: 'Inter', stack: "var(--font-inter), system-ui, sans-serif" },
+const FACES: { value: DisplayFont; label: string }[] = [
+  { value: 'archivo', label: 'Archivo' },
+  { value: 'mukta', label: 'Mukta' },
+  { value: 'inter', label: 'Inter' },
 ]
 
 const PRESETS = [
@@ -44,12 +50,19 @@ export function ThemePicker({
   catalogue,
   target,
   onPreview,
+  themes = builtInThemes(),
 }: {
   /** The values to start from. For the studio, an org's branding wrapped in a bare object. */
   catalogue: Pick<Catalogue, 'id' | 'branding' | 'draftBranding'>
   target?: BrandingTarget
   /** Called on every edit so the preview follows the picker rather than the last save. */
   onPreview?: (branding: Catalogue['branding']) => void
+  /**
+   * Every theme that exists, withdrawn ones included (D-35). The panel offers the enabled ones
+   * plus whichever this branding is already on, so a wedding on a withdrawn theme still sees its
+   * own choice rather than a silently different one.
+   */
+  themes?: readonly ThemeDefinition[]
 }) {
   /**
    * Primitives, not an object.
@@ -66,16 +79,24 @@ export function ThemePicker({
    * otherwise the panel quietly discards unpublished work every time the page reloads.
    */
   const pending = catalogue.draftBranding ?? catalogue.branding
+  const [theme, setTheme] = useState(pending.theme ?? DEFAULT_THEME_ID)
   const [accent, setAccent] = useState(pending.accent ?? '#d11a2a')
   const [presentedBy, setPresentedBy] = useState(pending.presentedBy ?? '')
   const [logoUrl, setLogoUrl] = useState(pending.logoUrl ?? '')
-  const [displayFont, setDisplayFont] = useState(pending.displayFont ?? 'archivo')
+  // `null` is "the theme's own face" (D-35): a Classic wedding gets the serif unless a studio
+  // insists on its own. Written as an absent field, so the theme decides at render time.
+  const [displayFont, setDisplayFont] = useState<DisplayFont | null>(pending.displayFont ?? null)
   // On unless switched off (D-41): absent in a row written before the field existed means on.
   const [platformCredit, setPlatformCredit] = useState(pending.platformCredit !== false)
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
   const [touched, setTouched] = useState(false)
 
-  const verdict = judgeAccent(accent)
+  const selected = themeFrom({ theme }, themes)
+  const offered = themes.filter((candidate) => candidate.enabled || candidate.id === theme)
+  // Judged against *this theme's* page, not against black: an accent that reads on Marquee can
+  // vanish on Classic's ivory, and the picker has to say so while the studio can still change it.
+  const verdict = judgeAccent(accent, selected.tokens.surface0)
+  const ink = inkFor(accent, accent === selected.tokens.accent ? selected.tokens.accentInk : '#ffffff')
 
   /**
    * Autosave, debounced — the same model the sections beside this panel already use.
@@ -108,6 +129,7 @@ export function ThemePicker({
       logoUrl: _l,
       displayFont: _d,
       platformCredit: _c,
+      theme: _t,
       ...rest
     } = pending
     return rest
@@ -119,13 +141,14 @@ export function ThemePicker({
     if (!touched) return
     onPreview?.({
       ...carriedOver,
+      theme,
       accent,
       presentedBy: presentedBy || undefined,
       logoUrl: logoUrl || undefined,
-      displayFont,
+      displayFont: displayFont ?? undefined,
       platformCredit,
     })
-  }, [accent, presentedBy, logoUrl, displayFont, platformCredit, touched, onPreview, carriedOver])
+  }, [theme, accent, presentedBy, logoUrl, displayFont, platformCredit, touched, onPreview, carriedOver])
 
   useEffect(() => {
     if (!touched) return
@@ -134,10 +157,11 @@ export function ThemePicker({
     const timer = window.setTimeout(async () => {
       try {
         const branding = {
+          theme,
           accent,
           presentedBy: presentedBy || undefined,
           logoUrl: logoUrl || undefined,
-          displayFont,
+          displayFont: displayFont ?? undefined,
           platformCredit,
         }
         const response = await fetch(
@@ -175,7 +199,7 @@ export function ThemePicker({
     }, 700)
 
     return () => window.clearTimeout(timer)
-  }, [accent, presentedBy, logoUrl, displayFont, platformCredit, touched, targetKind, targetId])
+  }, [theme, accent, presentedBy, logoUrl, displayFont, platformCredit, touched, targetKind, targetId])
 
   return (
     <section
@@ -186,9 +210,44 @@ export function ThemePicker({
         Branding
       </h2>
 
+      {/*
+        The theme first (D-35): it decides the page, the cards, the type and the poster palette,
+        and everything below sits on top of it. A studio choosing an accent before a theme would
+        be choosing it against the wrong background.
+      */}
+      <fieldset className="mb-4">
+        <legend className="mb-2 text-[13px] font-semibold">Theme</legend>
+        <ThemeCards
+          themes={offered}
+          value={theme}
+          onChange={(id) => {
+            setTheme(id)
+            setTouched(true)
+          }}
+        />
+        <p className="mt-2 text-[12px] text-[var(--color-l-text-mid)]">
+          The whole page follows it — background, cards, type and the artwork behind films with
+          no poster. Your colour and typeface below sit on top.
+        </p>
+      </fieldset>
+
       <fieldset className="mb-4">
         <legend className="mb-2 text-[13px] font-semibold">Headline typeface</legend>
         <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={() => {
+              setDisplayFont(null)
+              setTouched(true)
+            }}
+            aria-pressed={displayFont === null}
+            style={{ fontFamily: FONT_STACKS[selected.tokens.fontDisplay] }}
+            className={`h-11 rounded-[var(--radius-input)] border px-4 text-[16px] ${
+              displayFont === null ? 'border-accent ring-1 ring-accent' : 'border-[var(--color-l-line)]'
+            }`}
+          >
+            {selected.name}&rsquo;s own
+          </button>
           {FACES.map((face) => (
             <button
               key={face.value}
@@ -200,7 +259,7 @@ export function ThemePicker({
               aria-pressed={displayFont === face.value}
               // Each button is set in the face it selects, because the only question an
               // operator is really asking is "what does it look like".
-              style={{ fontFamily: face.stack }}
+              style={{ fontFamily: FONT_STACKS[face.value] }}
               className={`h-11 rounded-[var(--radius-input)] border px-4 text-[16px] ${
                 displayFont === face.value
                   ? 'border-accent ring-1 ring-accent'
@@ -253,15 +312,19 @@ export function ThemePicker({
           </label>
         </div>
 
-        <div className="mt-3 flex items-center gap-3 rounded-[var(--radius-input)] bg-[#0c0c0d] p-3">
+        {/* The sample sits on the chosen theme's page, because that is where the button will sit. */}
+        <div
+          className="mt-3 flex items-center gap-3 rounded-[var(--radius-input)] p-3"
+          style={{ background: selected.tokens.surface0 }}
+        >
           <span
-            className="inline-flex h-9 items-center rounded-[var(--radius-pill)] px-4 text-[14px] font-semibold text-white"
-            style={{ background: accent }}
+            className="inline-flex h-9 items-center rounded-[var(--radius-pill)] px-4 text-[14px] font-semibold"
+            style={{ background: accent, color: ink }}
           >
             Play
           </span>
-          <span className="text-[12px]" style={{ color: '#93939a' }}>
-            {formatRatio(verdict.onSurface)} on black · {formatRatio(verdict.inkOnAccent)} for
+          <span className="text-[12px]" style={{ color: selected.tokens.textLo }}>
+            {formatRatio(verdict.onSurface)} on the page · {formatRatio(verdict.inkOnAccent)} for
             button text
           </span>
         </div>
@@ -357,7 +420,8 @@ export function ThemePicker({
       )}
 
       <p className="mt-3 text-[12px] text-[var(--color-l-text-mid)]">
-        The near-black background is fixed across every catalogue. It is the thing being bought.
+        Every theme has been checked so its text reads on its own page. Your accent is checked
+        against the theme you chose, above.
       </p>
     </section>
   )

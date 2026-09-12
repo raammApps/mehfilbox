@@ -8,6 +8,7 @@ import { basePathOf, requireCanonicalAddress } from '@/lib/address'
 import {resolveLocalised} from '@/lib/i18n'
 import { guestLocale } from '@/lib/guest-locale'
 import { posterDataUri } from '@/lib/poster'
+import { resolveTheme } from '@/themes/resolve'
 
 /** Dynamic — every visit needs a fresh playback token (doc 05 §6). */
 export const dynamic = 'force-dynamic'
@@ -51,10 +52,11 @@ export default async function WatchPage({
   const locale = await guestLocale(verdict.catalogue)
   const name = resolveLocalised(title.name, locale)
   const startAt = timestamp ? Number.parseInt(timestamp, 10) : null
+  const theme = await resolveTheme(verdict.catalogue.branding)
 
   return (
     <>
-      <ThemeStyle branding={verdict.catalogue.branding} />
+      <ThemeStyle branding={verdict.catalogue.branding} theme={theme} />
       <WatchScreen
         catalogueSlug={verdict.catalogue.slug}
         titleSlug={title.slug}
@@ -63,7 +65,13 @@ export default async function WatchPage({
         posterUrl={
           title.posterUrl ??
           // The player's own chrome carries the title; the poster frame stays clean.
-          posterDataUri({ slug: title.slug, label: '', width: 1600, height: 900 })
+          posterDataUri({
+            slug: title.slug,
+            label: '',
+            width: 1600,
+            height: 900,
+            palette: theme.tokens.posterPalette,
+          })
         }
         locale={locale}
         startAtS={Number.isFinite(startAt) ? startAt : null}

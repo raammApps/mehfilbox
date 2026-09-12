@@ -4,6 +4,7 @@ import { requireCanonicalAddress } from '@/lib/address'
 import { buildManifest, resolveDownloadAccess } from '@/lib/downloads'
 import { guestLocale } from '@/lib/guest-locale'
 import { createTranslator, resolveLocalised } from '@/lib/i18n'
+import { resolveTheme } from '@/themes/resolve'
 
 export const dynamic = 'force-dynamic'
 
@@ -37,7 +38,7 @@ export default async function DownloadPage({ params }: { params: Promise<{ slug:
 
   return (
     <>
-      <ThemeStyle branding={catalogue.branding} />
+      <ThemeStyle branding={catalogue.branding} theme={await resolveTheme(catalogue.branding)} />
       <main className="gutter-x mx-auto max-w-[720px] py-16">
         <p className="type-label mb-4 text-accent-hi">
           {resolveLocalised(catalogue.coupleName, locale)}

@@ -100,8 +100,9 @@ Start at https://mehfilbox.com/admin/new
    `name-and-name-<year>`; typing "Meera & Arjun" gave `meera-and-arjun-2026`.
    The year is deliberate — two couples with the same names in different years do not collide.
 2. Watch the address line: it says **Available** or **taken** as you type, before you commit.
-3. **Step 2 — the shape.** Pick a language (**this is per wedding**, seeded from your studio) and a
-   template. Choose **हिंदी** to exercise §5.
+3. **Step 2 — the shape.** Pick a language (**this is per wedding**, seeded from your studio), a
+   **look** — the theme cards, starting on your studio's — and a template. Choose **हिंदी** to
+   exercise §5, and **Carnival** to exercise §4's theme row.
 4. **Create and start uploading.** It says *"exists as a draft at /… Nothing from here on can lose
    it."*
 
@@ -134,7 +135,9 @@ Publish (N-57). The customizer says how many films are waiting.
 | Check | Expect |
 |---|---|
 | The editor opens on **something** | The right-hand panel shows the first section, not "Nothing selected" |
-| **Branding** is above the suggestions | Colour, logo, typeface, "Presented by" — the thing you set every time |
+| **Branding** is above the suggestions | Theme, colour, logo, typeface, "Presented by" — the thing you set every time |
+| **Theme** cards at the top of Branding | Pick **Classic**: the preview's whole page goes ivory with a serif, its frame included, and the admin around it does not move. The accent readout now says *on the page*, judged against ivory |
+| Headline typeface | The first option is *"<theme>'s own"* and is selected for a new wedding — Classic's serif, Marquee's Archivo |
 | Reorder a section | Drag it, or use ↑ ↓, or tab to the handle and use the arrow keys — **keyboard must work** |
 | **Undo**, then **Redo** | Both enabled, both reverse each other |
 | Hide a section | It vanishes from the preview and stays in the list |
@@ -281,6 +284,8 @@ https://mehfilbox.com/admin/platform
 | A suspended studio | Its console explains why and who to email — **its delivered weddings keep playing** |
 | **Storage** | Set a quota; "Back to default" clears it rather than pinning today's number |
 | Audit trail | Every write above appears with who did it and why |
+| **Themes** (`/admin/platform/themes`) | *Start from* Carnival, name it, darken *Body text* to `#5a4a70`: the verdict line goes red, **Add this theme** disables. Put it back, add it — it is in a studio's Branding panel on the next load, marked *Yours* |
+| **Withdraw** a theme a wedding is on | Gone from the pickers; the wedding still renders with it, and its own panel still shows it as *(withdrawn)* |
 
 ✅ The one to verify deliberately: suspend a studio, then open one of its **published weddings** in
 a private window. It plays. A billing dispute must never take a couple's wedding off the air.

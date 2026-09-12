@@ -45,15 +45,21 @@ export function contrastRatio(foreground: string, background: string): number {
 
 export const SURFACE_0 = '#0c0c0d'
 export const ACCENT_INK = '#ffffff'
+/** The near-black ink a bright accent gets instead of white (`themes/css.ts` `inkFor`). */
+export const DARK_INK = '#131316'
 
 /** Minimums from doc 04 §2. UI/large text is the 3:1 bucket; body copy is 4.5:1. */
 export const MIN_UI_CONTRAST = 3
 export const MIN_TEXT_CONTRAST = 4.5
 
 export type AccentVerdict = {
-  /** Accent against the near-black page surface — governs buttons, icons, large text. */
+  /** Accent against the page surface — governs buttons, icons, large text. */
   onSurface: number
-  /** White text on the accent fill — governs the primary button's label. */
+  /**
+   * The better of white and near-black text on the accent fill — governs the primary button's
+   * label. Since D-35 the ink is chosen per accent rather than fixed white, so a marigold accent
+   * with dark lettering is a pass, not a warning.
+   */
   inkOnAccent: number
   ok: boolean
   /** Present when `ok` is false. Written for an operator, not a developer. */
@@ -62,7 +68,7 @@ export type AccentVerdict = {
 
 export function judgeAccent(accent: string, surface: string = SURFACE_0): AccentVerdict {
   const onSurface = contrastRatio(accent, surface)
-  const inkOnAccent = contrastRatio(ACCENT_INK, accent)
+  const inkOnAccent = Math.max(contrastRatio(ACCENT_INK, accent), contrastRatio(DARK_INK, accent))
 
   if (onSurface < MIN_UI_CONTRAST) {
     return {
@@ -70,7 +76,7 @@ export function judgeAccent(accent: string, surface: string = SURFACE_0): Accent
       inkOnAccent,
       ok: false,
       warning:
-        'This colour is too dark against the black background — buttons and icons will be hard to see. Try a brighter shade.',
+        'This colour is too close to the page background — buttons and icons will be hard to see. Try a stronger shade.',
     }
   }
 
@@ -80,7 +86,7 @@ export function judgeAccent(accent: string, surface: string = SURFACE_0): Accent
       inkOnAccent,
       ok: false,
       warning:
-        'White button text will be hard to read on this colour. Try a deeper shade of the same hue.',
+        'Button text will be hard to read on this colour. Try a deeper or a lighter shade of the same hue.',
     }
   }
 
@@ -89,4 +95,34 @@ export function judgeAccent(accent: string, surface: string = SURFACE_0): Accent
 
 export function formatRatio(ratio: number): string {
   return `${ratio.toFixed(1)}:1`
+}
+
+/**
+ * The pairs a theme has to clear (doc 04 §2, applied to every theme by D-35). Returned as a list
+ * rather than a boolean so a platform admin authoring a theme is told which pair failed and by
+ * how much — a form that says "invalid" teaches nothing.
+ */
+export type ThemePair = { name: string; ratio: number; min: number }
+
+export function judgeTheme(tokens: {
+  surface0: string
+  surface1: string
+  surface2: string
+  textHi: string
+  textMid: string
+  textLo: string
+  accent: string
+  accentInk: string
+}): { ok: boolean; pairs: ThemePair[]; failures: ThemePair[] } {
+  const pairs: ThemePair[] = [
+    { name: 'headings on the page', ratio: contrastRatio(tokens.textHi, tokens.surface0), min: MIN_TEXT_CONTRAST },
+    { name: 'body text on the page', ratio: contrastRatio(tokens.textMid, tokens.surface0), min: MIN_TEXT_CONTRAST },
+    { name: 'small text on the page', ratio: contrastRatio(tokens.textLo, tokens.surface0), min: MIN_TEXT_CONTRAST },
+    { name: 'headings on a card', ratio: contrastRatio(tokens.textHi, tokens.surface1), min: MIN_TEXT_CONTRAST },
+    { name: 'body text on a raised card', ratio: contrastRatio(tokens.textMid, tokens.surface2), min: MIN_TEXT_CONTRAST },
+    { name: 'button text on the accent', ratio: contrastRatio(tokens.accentInk, tokens.accent), min: MIN_TEXT_CONTRAST },
+    { name: 'the accent on the page', ratio: contrastRatio(tokens.accent, tokens.surface0), min: MIN_UI_CONTRAST },
+  ]
+  const failures = pairs.filter((pair) => pair.ratio < pair.min)
+  return { ok: failures.length === 0, pairs, failures }
 }

@@ -8,7 +8,8 @@
  */
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { contrastRatio, formatRatio, MIN_TEXT_CONTRAST, MIN_UI_CONTRAST } from '../lib/contrast'
+import { contrastRatio, formatRatio, judgeTheme, MIN_TEXT_CONTRAST, MIN_UI_CONTRAST } from '../lib/contrast'
+import { builtInThemes } from '../themes/registry'
 
 type Check = { name: string; fg: string; bg: string; min: number; note?: string }
 
@@ -62,6 +63,22 @@ for (const check of checks) {
       check.note ? `  — ${check.note}` : ''
     }`,
   )
+}
+
+/**
+ * Every built-in theme is held to the same pairs (D-35). A theme is a token set and nothing
+ * else, so this is the whole of what can go wrong with one — and it goes wrong silently, in
+ * front of a studio, if nothing here catches it.
+ */
+for (const theme of builtInThemes()) {
+  const verdict = judgeTheme(theme.tokens)
+  for (const pair of verdict.pairs) {
+    const ok = pair.ratio >= pair.min
+    if (!ok) failed += 1
+    console.log(
+      `${ok ? '✓' : '✗'} ${`${theme.id}: ${pair.name}`.padEnd(34)} ${formatRatio(pair.ratio).padStart(7)}  (min ${pair.min})`,
+    )
+  }
 }
 
 if (failed > 0) {

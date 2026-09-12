@@ -1,4 +1,5 @@
 import type { Entitlement } from '@/lib/entitlements'
+import type { CustomTheme } from '@/themes/contract'
 import type {
   Album,
   Catalogue,
@@ -117,6 +118,12 @@ export interface Repository {
   listPlatformAudit(options?: { orgId?: string; limit?: number }): Promise<PlatformAudit[]>
   /** Compensation for a half-finished registration. Not a user-facing delete. */
   deleteOrg(id: string): Promise<void>
+
+  // ── Platform-authored themes (D-35) ─────────────────────────────────────────
+  listCustomThemes(): Promise<CustomTheme[]>
+  getCustomTheme(id: string): Promise<CustomTheme | null>
+  /** Insert or replace by id. The route has already validated the tokens. */
+  saveCustomTheme(theme: CustomTheme): Promise<CustomTheme>
 
   // ── Platform admin (doc 15 §1) ──────────────────────────────────────────────
   /**

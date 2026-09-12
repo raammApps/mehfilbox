@@ -141,6 +141,12 @@ export const brandingSchema = z
      * it off in one click. Copied into a catalogue with the rest of the branding at creation.
      */
     platformCredit: z.boolean().optional(),
+    /**
+     * The theme's id (D-35) — `marquee` when absent, which is every catalogue that predates
+     * themes. In branding rather than its own column so it is a draft that reaches guests at
+     * Publish, previews live, and travels with the studio's default, exactly as the accent does.
+     */
+    theme: z.string().max(40).optional(),
   })
   .strict()
 export type Branding = z.infer<typeof brandingSchema>
