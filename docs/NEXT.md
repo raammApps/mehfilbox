@@ -49,7 +49,6 @@ depends on it. The decisions behind them are D-32 to D-41.
 
 | | Item | Doc 16 | Size |
 |---|---|---|---|
-| **N-66** | **Platform console v2** — create a studio, operators and password links, every catalogue, extend a term, dashboard | §8 | 1 session |
 | **N-67** | **Platform health** — the probes, `job_runs`, the page | §9 | half a session |
 | **N-68** | **Custom domains** — the table, generated instructions, DNS verification, the provider seam, the 301 | §1 | 1 session |
 | **N-69** | **Wizard v2** — five steps, the couple in the room | §10 | half a session |

@@ -1852,3 +1852,35 @@ and the test says so.
 7 new unit tests; 620 unit and component tests. One E2E spec: from a fresh registration, the first
 publish goes through, the second is refused with the panel, the request is sent, and the console
 says the studio is out.
+
+## N-66 · Platform console v2 — 12 September 2026
+
+**The writes doc 15 §1 said to add one at a time, added, each recorded** (D-39, doc 16 §8). The
+console is six pages on one nav — Dashboard, Studios, Couples, Catalogues, Themes, Audit — and
+every write asks why and lands on the trail the audit page reads.
+
+**Create a studio**, for the one sold over the phone: the org, its first operator, a set-password
+link queued to their inbox and shown once on the console (a mailer that is not configured must not
+strand an account), and the credits the sale included — one recorded action, through the same
+three steps and the same unwinding as self-registration, which stays open beside it. **Add a
+person** to any org and **send anyone a set-password link** are the support answers to "I can't
+get in", for a studio's second seat and for the couple who lost theirs; the platform knows the
+account exists, so it says so rather than answering with the forgot-password form's deliberate
+silence. Nobody here chooses a password for anyone: the first credential is thirty-two random
+bytes nobody sees.
+
+**The term left the studio's settings.** *Serving until* was a date field a studio could type into,
+which made the renewal date free. It is set from the catalogue's platform page now, with a reason
+on the audit row and *+ 1 year* for the common case; a lapsed wedding comes back on the air as
+`active` at once rather than waiting for the next cron. The studio's drawer shows the date and says
+a renewal moves it, and a body that still carries the field is stripped rather than refused. **Take
+offline** is for abuse and says so — status back to draft, nothing deleted — and *Put it back*
+republishes without a credit, since a wedding that was up has spent its one.
+
+Every catalogue across the platform is listed soonest-to-lapse first, searchable by couple, address
+or studio; every couple's account with its sign-in and what it can see; the dashboard counts what
+is on the platform, credits outstanding included, and shows the last ten things done.
+
+No E2E: a platform admin has no operator row and the local driver signs in by one, which is the
+isolation doc 15 §1 chose. 9 new unit tests hold every route's effect and its 404 to an operator;
+629 unit and component tests.

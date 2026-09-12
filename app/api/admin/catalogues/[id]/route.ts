@@ -60,10 +60,12 @@ const patchSchema = z.object({
     .nullable()
     .optional(),
   /**
-   * When the catalogue stops serving. Past this, guests get the renewal screen rather than a
-   * 404 — doc 01 is explicit that a lapsed wedding is never a dead link.
+   * `includedUntil` is deliberately absent (D-39). When the catalogue stops serving is what a
+   * renewal buys, and a studio setting its own date was a billing hole; the platform sets it from
+   * `/api/admin/platform/catalogues/:id/term`, with a reason on the audit row. A body that still
+   * carries the field is stripped, not refused — an old console tab saving privacy must not fail
+   * because of a field it no longer shows.
    */
-  includedUntil: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
   /** Empty string clears the passcode; anything else is hashed before it touches the row. */
   passcode: z.string().max(64).nullable().optional(),
 })

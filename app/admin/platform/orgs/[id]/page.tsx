@@ -2,6 +2,8 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { StatusPill } from '@/components/admin/AdminChrome'
 import { OrgCreditsControl } from '@/components/admin/OrgCreditsControl'
+import { AddOperatorForm, PasswordLinkButton } from '@/components/admin/OperatorControls'
+import { PlatformNav } from '@/components/admin/PlatformNav'
 import { OrgQuotaControl } from '@/components/admin/OrgQuotaControl'
 import { OrgStatusControl } from '@/components/admin/OrgStatusControl'
 import { getPlatformAdmin } from '@/lib/admin/platform'
@@ -47,19 +49,20 @@ export default async function PlatformOrgPage({ params }: { params: Promise<{ id
   return (
     <div className="mx-auto min-h-svh w-full max-w-[1100px] p-6">
       <Link
-        href="/admin/platform"
+        href={org.kind === 'couple' ? '/admin/platform/couples' : '/admin/platform/studios'}
         className="mb-3 inline-flex items-center gap-1 text-[13px] text-[var(--color-l-text-mid)] hover:text-[var(--color-l-text-hi)]"
       >
-        <span aria-hidden>←</span> All orgs
+        <span aria-hidden>←</span> {org.kind === 'couple' ? 'Couples' : 'Studios'}
       </Link>
 
-      <header className="mb-5">
+      <header className="mb-4">
         <h1 className="text-[24px] font-bold tracking-[-0.01em]">{org.name}</h1>
         <p className="mt-0.5 text-[14px] text-[var(--color-l-text-mid)]">
           {org.kind} · <code className="text-[12px]">{org.slug}</code>
           {org.status === 'suspended' ? ' · suspended' : null}
         </p>
       </header>
+      <PlatformNav />
 
       <div className="mb-6 grid gap-4 sm:grid-cols-2">
         <OrgStatusControl orgId={org.id} orgName={org.name} status={org.status} />
@@ -89,13 +92,18 @@ export default async function PlatformOrgPage({ params }: { params: Promise<{ id
           ) : (
             <ul className="flex flex-col gap-1.5">
               {operators.map((operator) => (
-                <li key={operator.id} className="text-[13px]">
+                <li key={operator.id} className="flex flex-wrap items-center gap-2 text-[13px]">
                   <span className="font-medium">{operator.email}</span>
-                  <span className="text-[var(--color-l-text-mid)]"> · {operator.role}</span>
+                  <span className="text-[var(--color-l-text-mid)]">· {operator.role}</span>
+                  {/* The support answer to "I can't get in" (D-39), recorded like every other write. */}
+                  <PasswordLinkButton operatorId={operator.id} email={operator.email} />
                 </li>
               ))}
             </ul>
           )}
+          <div className="mt-3">
+            <AddOperatorForm orgId={org.id} />
+          </div>
         </div>
       </div>
 
@@ -111,7 +119,11 @@ export default async function PlatformOrgPage({ params }: { params: Promise<{ id
               className="rounded-[var(--radius-card)] border border-[var(--color-l-line)] bg-white p-4"
             >
               <div className="mb-1 flex items-start justify-between gap-2">
-                <p className="text-[16px] font-semibold">{catalogue.coupleName.en}</p>
+                <p className="text-[16px] font-semibold">
+                  <Link href={`/admin/platform/catalogues/${catalogue.id}`} className="underline-offset-4 hover:underline">
+                    {catalogue.coupleName.en}
+                  </Link>
+                </p>
                 <StatusPill status={catalogue.status} />
               </div>
               <p className="text-[13px] text-[var(--color-l-text-mid)]">

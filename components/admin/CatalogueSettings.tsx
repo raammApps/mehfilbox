@@ -10,7 +10,6 @@ export function CatalogueSettings({ catalogue }: { catalogue: Catalogue }) {
   const [privacy, setPrivacy] = useState<Privacy>(catalogue.privacy)
   const [passcode, setPasscode] = useState('')
   const [customDomain, setCustomDomain] = useState(catalogue.customDomain ?? '')
-  const [includedUntil, setIncludedUntil] = useState(catalogue.includedUntil?.slice(0, 10) ?? '')
   const [locale, setLocale] = useState<Locale>(catalogue.locale)
   const [status, setStatus] = useState<string | null>(null)
   const [confirmName, setConfirmName] = useState('')
@@ -28,7 +27,6 @@ export function CatalogueSettings({ catalogue }: { catalogue: Catalogue }) {
         // Empty means "no custom domain", which is a real choice and must clear the field —
         // unlike the passcode, where empty means "keep the one you have".
         customDomain: customDomain.trim() ? customDomain.trim() : null,
-        ...(includedUntil ? { includedUntil } : {}),
         locale,
       }),
     })
@@ -189,18 +187,19 @@ export function CatalogueSettings({ catalogue }: { catalogue: Catalogue }) {
         </p>
       </section>
 
+      {/*
+        Read-only now (D-39). This was a date field a studio could type into, which made the
+        renewal date free. The term is what a renewal buys; it is set on our side with a reason.
+      */}
       <section className="mb-6 rounded-[var(--radius-card)] border border-[var(--color-l-line)] bg-white p-4">
         <h2 className="mb-1 text-[15px] font-semibold">Serving until</h2>
-        <p className="mb-3 text-[13px] text-[var(--color-l-text-mid)]">
-          After this date guests see a renewal screen — never a broken link, and nothing is
-          deleted.
+        <p className="text-[15px] font-semibold tabular-nums" data-testid="serving-until">
+          {catalogue.includedUntil.slice(0, 10)}
         </p>
-        <input
-          type="date"
-          value={includedUntil}
-          onChange={(event) => setIncludedUntil(event.target.value)}
-          className="h-11 rounded-[var(--radius-input)] border border-[var(--color-l-line)] px-3 text-[14px]"
-        />
+        <p className="mt-1 text-[13px] text-[var(--color-l-text-mid)]">
+          After this date guests see a renewal screen — never a broken link, and nothing is
+          deleted. A renewal extends it; the date moves when the renewal is paid.
+        </p>
       </section>
 
       {catalogue.status === 'published' ? (

@@ -1,5 +1,5 @@
-import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { PlatformNav } from '@/components/admin/PlatformNav'
 import { ThemeStudio } from '@/components/admin/ThemeStudio'
 import { getPlatformAdmin } from '@/lib/admin/platform'
 import { getRepository } from '@/lib/db'
@@ -23,14 +23,7 @@ export default async function PlatformThemesPage() {
 
   return (
     <div className="mx-auto min-h-svh w-full max-w-[1200px] p-6">
-      <Link
-        href="/admin/platform"
-        className="mb-3 inline-flex items-center gap-1 text-[13px] text-[var(--color-l-text-mid)] hover:text-[var(--color-l-text-hi)]"
-      >
-        <span aria-hidden>←</span> Platform
-      </Link>
-
-      <header className="mb-5">
+      <header className="mb-4">
         <h1 className="text-[24px] font-bold tracking-[-0.01em]">Themes</h1>
         <p className="mt-0.5 max-w-[70ch] text-[14px] text-[var(--color-l-text-mid)]">
           Seven are built in. The ones you add here appear in every studio&rsquo;s picker once
@@ -38,6 +31,7 @@ export default async function PlatformThemesPage() {
           hides it from pickers and leaves every wedding already on it exactly as it is.
         </p>
       </header>
+      <PlatformNav />
 
       <ThemeStudio builtIn={builtInThemes()} custom={custom} />
     </div>

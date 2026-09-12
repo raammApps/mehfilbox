@@ -190,7 +190,8 @@ version"* immediately — that sentence is the whole point of N-55.
 | A link actually works | `curl -I` one: `HTTP 200`, and a video content-type |
 | Nothing missing quietly | If a film could not be prepared it says so, and hands over the rest |
 
-✅ **The one that matters:** set *Serving until* to yesterday in Settings, reload the wedding — you
+✅ **The one that matters:** set *Serving until* to yesterday from the **platform console** (§11;
+it left the studio's Settings in N-66), reload the wedding — you
 get the renewal screen — then open `/download` again. **It still works.** Lapsing is a billing
 state; the wedding is not ours to withhold.
 
@@ -225,7 +226,7 @@ On the wedding's **Overview**, below the link — appears only once published.
 | **Language** | Switch it, reload the guest page — changes immediately, and touches no other wedding |
 | **Passcode** | Set one; a private window is asked for it. Five wrong tries locks the address for fifteen minutes |
 | **Their own address** | Stored but not served until the CNAME exists |
-| **Serving until** | Put it in the past → the renewal screen, never a broken link |
+| **Serving until** | Read-only here since N-66: the date and *a renewal extends it*. The platform sets it (§11) |
 | **Take offline** | Guests get a neutral "not yet available"; the films stay |
 | **Delete** | Asks you to type the couple's name |
 
@@ -297,10 +298,29 @@ On the Overview, **Hand this over to the couple**.
 
 ## 11. Platform console · needs §0
 
-https://mehfilbox.com/admin/platform
+https://mehfilbox.com/admin/platform — six pages on one nav: Dashboard, Studios, Couples,
+Catalogues, Themes, Audit. Every write asks why and lands on the audit trail.
 
 | Check | Expect |
 |---|---|
+| Dashboard | Studios, couples, catalogues (live · draft), **credits outstanding**, and the last ten things done |
+| **Studios → Create a studio** | Name, contact, email, language, opening credits, reason. It appears in the table; the set-password link is shown once and queued to the email |
+| Search | Studios by name or address; catalogues by couple, address or studio |
+| One studio | Access, storage, **credits**, **who can sign in** — each with *Send a password link* — and **Add a person** |
+| **Suspend** | Confirms, asks a reason, and the studio cannot sign in |
+| A suspended studio | Its console explains why and who to email — **its delivered weddings keep playing** |
+| **Storage** | Set a quota; "Back to default" clears it rather than pinning today's number |
+| **Credits** | Grant five with a reason: the balance updates, `credits.grant` lands in the trail, and the studio's refused wedding publishes on the next click |
+| Couples | Every couple account, its sign-in with a password-link button, its catalogues marked *theirs* or *being prepared* |
+| **Catalogues**, soonest to lapse first | Open one: **Serving until** with *+ 1 year* and a reason — a lapsed wedding comes back as *active* at once; **Take offline** for abuse, and *Put it back* republishes for free |
+| **Themes** (`/admin/platform/themes`) | *Start from* Carnival, name it, darken *Body text* to `#5a4a70`: the verdict line goes red, **Add this theme** disables. Put it back, add it — it is in a studio's Branding panel on the next load, marked *Yours* |
+| **Withdraw** a theme a wedding is on | Gone from the pickers; the wedding still renders with it, and its own panel still shows it as *(withdrawn)* |
+| Audit | Every write above, newest first, with who, the org and the reason |
+
+✅ The one to verify deliberately: suspend a studio, then open one of its **published weddings** in
+a private window. It plays. A billing dispute must never take a couple's wedding off the air.
+
+---|---|
 | Every org | Partners, couples, catalogue counts, **Access** column |
 | One org | Its catalogues, **who can sign in**, storage, and an audit trail |
 | **Suspend** | Confirms, asks a reason, and the studio cannot sign in |

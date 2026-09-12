@@ -282,7 +282,7 @@ N-60 to N-75 in [`NEXT.md`](./NEXT.md).
 | House styles — saved presets, frozen while in use | **Built** | N-64, 12 Sept. `/admin/studio/styles`; captured from a delivered wedding or typed in; the wizard offers them; a style a published wedding was made from is frozen, with *Duplicate and edit*. |
 | Start from blank | **Built** | N-64, 12 Sept. A fourth layout, in the wizard and in a style. |
 | First publish free, second on a credit | **Built** | N-65, 12 Sept. `credits` table; registration grants one; the first publish spends one; refusal is a panel with *Ask for a credit* until Razorpay (N-20). |
-| Platform console: create a studio, credits, password links, all catalogues, extend a term | **Partial** | Suspend, quota and **grant credits** exist (N-27, N-27b, N-65). N-66. |
+| Platform console: create a studio, credits, password links, all catalogues, extend a term | **Built** | N-66, 12 Sept. Dashboard, studios (create one), couples, every catalogue (term, offline), themes, audit. The term left the studio's settings. |
 | Platform health page | **Missing** | N-67. `/api/health` reports drivers only. |
 | Custom domains with generated instructions and verification | **Partial** | Stored, never served. N-68. |
 | Five-step wizard with the couple in the room | **Partial** | Four steps; step 2 asks for a house style, or a theme and a layout (N-63, N-64). No code, timezone or couple step yet. N-69. |
