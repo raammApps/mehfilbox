@@ -26,17 +26,20 @@ export class ApiError extends Error {
   readonly code: ErrorCode
   readonly fields?: FieldErrors
   readonly retryAfterS?: number
+  /** The next attempt must carry a captcha token (D-34). The form shows the widget when it sees this. */
+  readonly challenge?: boolean
 
   constructor(
     code: ErrorCode,
     message: string,
-    options?: { fields?: FieldErrors; retryAfterS?: number },
+    options?: { fields?: FieldErrors; retryAfterS?: number; challenge?: boolean },
   ) {
     super(message)
     this.name = 'ApiError'
     this.code = code
     this.fields = options?.fields
     this.retryAfterS = options?.retryAfterS
+    this.challenge = options?.challenge
   }
 
   get status(): number {
@@ -55,6 +58,7 @@ export function errorResponse(error: ApiError): NextResponse {
         // Never leak internals: 500s carry a fixed string regardless of the thrown message.
         message: error.code === 'INTERNAL' ? 'Something went wrong' : error.message,
         ...(error.fields ? { fields: error.fields } : {}),
+        ...(error.challenge ? { challenge: true } : {}),
       },
     },
     { status: error.status, headers },

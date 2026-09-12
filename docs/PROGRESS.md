@@ -1652,3 +1652,40 @@ held a `catalogue-by-slug` entry written on 8 September, before the column exist
 did nothing. Vercel's data cache persists across deployments the same way. The cache keys now
 carry a generation marker to bump when a cached row changes shape, and the Playwright harness
 clears the on-disk cache before it builds. Found by the test, not by the review.
+
+## N-61 · Two doors, one credential store — 12 September 2026
+
+`/login` with a **Studio** door and a **Couple** door (D-33). The door is a tab, not a credential:
+both post to the same session route, and where a person lands is decided by their operator row's
+org, never by the tab they clicked — a couple who picks the studio door by mistake still ends up in
+their own account. `/admin/login` redirects there, carrying the prefilled address a handover passes
+along; the console's own copy ("create a partner account") no longer greets a couple.
+
+**Forgot password is ours end to end.** A credential link — 32 random bytes, hashed at rest like a
+handover token, single use, an hour for a reset and fourteen days for a first sign-in — lands on
+`/set-password/<token>`, and only the final step touches the authenticator through the new
+`AuthProvider.setPassword`. That is what makes it identical on the local driver and on Supabase
+Auth, and independent of Supabase's own email templates and site-URL settings, which N-17 already
+paid to learn about. The forgot route answers one sentence for a known address, an unknown one and
+one asked about too often; the limits silently stop sending rather than changing the answer.
+`AuthProvider.createUser` joins it — an account made on somebody's behalf, confirmed, sending
+nothing — for the studio issuing a couple's sign-in (N-62) and the platform creating a studio's
+(N-66). `operators.must_change_password` sends a temporary password to the change-password screen
+before the console opens.
+
+**Brute force (D-34).** Sign-in is limited per address as well as per IP — five and ten in fifteen
+minutes — so a script rotating IPs meets a wall on the one account it is after, and one rotating
+addresses meets one too. After the third failure on either the next attempt has to carry a captcha
+token, and **the password is not checked until it does**: a challenged attempt without a token is
+refused before the credential is looked at or the bucket consumed, which the test suite discovered
+the hard way when the lockout tests could not reach the lockout. The guest code gains a
+per-catalogue bucket of thirty across every device, the bucket the old gate lacked. The challenge
+is Cloudflare Turnstile behind `CAPTCHA_DRIVER=none|fake|turnstile`; `none` keeps every limit and
+shows no widget, `fake` is the suite's checkbox, and an outage of the verifier is a refusal rather
+than a pass. Registration is challenged on every attempt when a driver is configured.
+
+The prototype's arithmetic puzzle was not built: a script solves it faster than a person does.
+
+29 new unit tests across three files; 558 unit and component tests. The E2E harness runs the fake
+driver so the widget's appearance after three failures is exercised, and the spec ends with a real
+sign-in on purpose — success clears the device bucket every other spec shares.

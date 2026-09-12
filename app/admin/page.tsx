@@ -29,6 +29,9 @@ export default async function CatalogueListPage() {
    * is already refused by `requireOperator`; without this screen that refusal is an unexplained
    * error toast on a console that looks fine.
    */
+  // A temporary password handed over in the room is replaced before the console opens (D-33).
+  if (session.operator.mustChangePassword) redirect('/login/change-password')
+
   if (session.orgStatus === 'suspended') {
     return (
       <div className="mx-auto flex min-h-svh w-full max-w-[560px] flex-col justify-center p-6">

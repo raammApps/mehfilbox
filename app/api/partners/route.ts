@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto'
 import { NextResponse } from 'next/server'
 import { getAuthProvider } from '@/lib/admin/auth'
+import { captchaEnabled, verifyCaptcha } from '@/lib/captcha/verify'
 import { hashSecret } from '@/lib/crypto'
 import { getRepository } from '@/lib/db'
 import { env } from '@/lib/env'
@@ -60,6 +61,12 @@ export async function POST(request: Request) {
     const repository = getRepository()
     const auth = getAuthProvider()
 
+    // Every registration, not the third attempt: an account is the one thing here worth a script's
+    // time on its first try (D-34). With no driver configured this is a no-op.
+    if (captchaEnabled() && !(await verifyCaptcha(body.captchaToken, clientIp(request)))) {
+      throw new ApiError('VALIDATION_FAILED', 'Please complete the check below', { challenge: true })
+    }
+
     /**
      * The local driver cannot register anyone against Postgres.
      *
@@ -106,6 +113,7 @@ export async function POST(request: Request) {
         email: body.email,
         name: body.contactName,
         role: 'admin',
+        mustChangePassword: false,
         // Only the local driver reads this; under Supabase Auth the credential lives there and
         // this column stays empty.
         passwordHash: auth.name === 'local' ? hashSecret(body.password) : '',

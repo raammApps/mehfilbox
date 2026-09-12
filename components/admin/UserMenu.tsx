@@ -54,7 +54,7 @@ export function UserMenu({
   const signOut = async () => {
     setBusy(true)
     await fetch('/api/admin/session', { method: 'DELETE' })
-    router.replace('/admin/login')
+    router.replace('/login')
     router.refresh()
   }
 

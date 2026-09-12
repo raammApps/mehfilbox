@@ -92,6 +92,7 @@ export async function POST(request: Request) {
         email: transfer.toEmail,
         name: body.coupleName,
         role: 'admin',
+        mustChangePassword: false,
         passwordHash: getAuthProvider().name === 'local' ? hashSecret(body.password) : '',
         createdAt: new Date().toISOString(),
       })

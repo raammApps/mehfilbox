@@ -74,6 +74,7 @@ describe('operator creation', () => {
     name: 'Priya',
     role: 'admin' as const,
     passwordHash: 'scrypt$x$y',
+    mustChangePassword: false,
     createdAt: new Date().toISOString(),
   })
 

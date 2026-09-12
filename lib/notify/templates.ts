@@ -21,6 +21,8 @@ export const TEMPLATES = [
   'archived',
   /** Addressed to us, not to a couple (N-53). */
   'ops-alert',
+  /** A set-password link — forgot password, or a first sign-in a studio issued (D-33). */
+  'credential',
 ] as const
 export type TemplateName = (typeof TEMPLATES)[number]
 

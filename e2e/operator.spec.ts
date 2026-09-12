@@ -71,7 +71,8 @@ test.describe('the operator console', () => {
     const anonymous = await browser.newContext()
     const page = await anonymous.newPage()
     await page.goto('/admin')
-    await expect(page).toHaveURL(/\/admin\/login/)
+    // The console's sign-in lives on the public site now, behind the studio door (D-33).
+    await expect(page).toHaveURL(/\/login\?door=studio/)
     await anonymous.close()
   })
 

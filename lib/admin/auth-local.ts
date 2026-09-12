@@ -2,7 +2,7 @@ import 'server-only'
 import { randomUUID } from 'node:crypto'
 import { cookies } from 'next/headers'
 import type { NextResponse } from 'next/server'
-import { cookieOptions, createSession, readSession, SESSION_COOKIE, SESSION_TTL_S, verifySecret } from '@/lib/auth'
+import { cookieOptions, createSession, hashSecret, readSession, SESSION_COOKIE, SESSION_TTL_S, verifySecret } from '@/lib/auth'
 import { getRepository } from '@/lib/db'
 import type { AuthenticatedUser, AuthProvider } from './auth-provider'
 
@@ -54,6 +54,18 @@ export class LocalAuthProvider implements AuthProvider {
     const existing = await getRepository().getOperatorByEmail(email)
     if (existing) return null
     return { id: randomUUID(), email }
+  }
+
+  /** Same as `signUp` here: the id is minted, and the hash is written with the operator row. */
+  async createUser(email: string, password: string): Promise<AuthenticatedUser | null> {
+    return this.signUp(email, password)
+  }
+
+  async setPassword(userId: string, password: string): Promise<void> {
+    await getRepository().setOperatorPassword(userId, {
+      passwordHash: hashSecret(password),
+      mustChangePassword: false,
+    })
   }
 
   async signOut(response: NextResponse): Promise<void> {

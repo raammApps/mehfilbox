@@ -245,6 +245,8 @@ export const partnerRegistrationSchema = z.object({
    * to be short.
    */
   locale: localeSchema.default('en'),
+  /** The challenge token, when a captcha driver is configured (D-34). */
+  captchaToken: z.string().max(4000).optional(),
 })
 export type PartnerRegistration = z.infer<typeof partnerRegistrationSchema>
 export type Org = z.infer<typeof orgSchema>
@@ -256,9 +258,33 @@ export const operatorSchema = z.object({
   name: z.string().min(1),
   role: z.enum(['admin', 'uploader']),
   passwordHash: z.string(),
+  /**
+   * Set when a studio handed this person a temporary password in the room (D-33). The next
+   * sign-in lands on the change-password screen before anything else; a password somebody else
+   * has seen is a password to replace, not to keep.
+   */
+  mustChangePassword: z.boolean().default(false),
   createdAt: z.string(),
 })
 export type Operator = z.infer<typeof operatorSchema>
+
+/**
+ * A single-use, expiring link that lets its holder set a password (D-33).
+ *
+ * The token itself is never here — only its hash, exactly as a handover token is stored (doc 15
+ * §2). `set-password` is a first credential; `reset` replaces one. The pages read identically;
+ * the record does not.
+ */
+export const credentialLinkSchema = z.object({
+  id: z.string().uuid(),
+  operatorId: z.string().uuid(),
+  tokenHash: z.string().min(1),
+  purpose: z.enum(['set-password', 'reset']),
+  expiresAt: z.string(),
+  usedAt: z.string().nullable().default(null),
+  createdAt: z.string(),
+})
+export type CredentialLink = z.infer<typeof credentialLinkSchema>
 
 /**
  * Whoever runs the platform (doc 15 §1).

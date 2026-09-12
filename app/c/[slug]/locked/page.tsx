@@ -5,6 +5,7 @@ import { resolveAccess } from '@/lib/catalogue-access'
 import {createTranslator, resolveLocalised} from '@/lib/i18n'
 import { guestLocale } from '@/lib/guest-locale'
 import { basePathOf, requireCanonicalAddress } from '@/lib/address'
+import { challengeConfig } from '@/lib/captcha/verify'
 
 export const dynamic = 'force-dynamic'
 
@@ -30,6 +31,7 @@ export default async function LockedPage({ params }: { params: Promise<{ slug: s
       <PasscodeGate
         catalogueSlug={slug}
         basePath={basePath}
+        challenge={challengeConfig()}
         coupleName={resolveLocalised(verdict.catalogue.coupleName, locale)}
         strings={{
           heading: t('locked.heading'),

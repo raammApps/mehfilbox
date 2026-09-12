@@ -2,6 +2,7 @@ import type { Entitlement } from '@/lib/entitlements'
 import type {
   Album,
   Catalogue,
+  CredentialLink,
   LikeCounts,
   LikeSubject,
   Notification,
@@ -175,6 +176,20 @@ export interface Repository {
   cancelTransfer(id: string): Promise<void>
   getOperatorByEmail(email: string): Promise<Operator | null>
   getOperator(id: string): Promise<Operator | null>
+
+  // ── Credentials (D-33) ───────────────────────────────────────────────────────
+  /**
+   * The local driver's password, and the flag both drivers share. `passwordHash` is omitted under
+   * Supabase Auth, where the credential lives elsewhere and this column stays empty.
+   */
+  setOperatorPassword(
+    id: string,
+    patch: { passwordHash?: string; mustChangePassword: boolean },
+  ): Promise<Operator>
+  createCredentialLink(link: CredentialLink): Promise<CredentialLink>
+  /** Looked up by hash: the plaintext token exists only in the link. */
+  getCredentialLinkByHash(hash: string): Promise<CredentialLink | null>
+  markCredentialLinkUsed(id: string): Promise<void>
 
   // ── Catalogues ──────────────────────────────────────────────────────────────
   listCatalogues(filter: CatalogueFilter): Promise<Catalogue[]>

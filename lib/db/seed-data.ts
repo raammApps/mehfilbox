@@ -340,6 +340,7 @@ export function demoSnapshot(
         name: 'Demo Operator',
         role: 'admin',
         passwordHash: hashSecret(operator.password),
+        mustChangePassword: false,
         createdAt: CREATED_AT,
       },
     ],

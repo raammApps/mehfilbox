@@ -49,7 +49,6 @@ depends on it. The decisions behind them are D-32 to D-41.
 
 | | Item | Doc 16 | Size |
 |---|---|---|---|
-| **N-61** | **Two doors, one credential store** — `/login`, forgot-password credential links, `AuthProvider.setPassword`, per-address lockout, the captcha seam | §2 | 1 session |
 | **N-62** | **Couple accounts** — created by the studio, linked before owned, handover attaches, the support window, `/my` v1 | §3, §6 | 1–2 sessions |
 | **N-63** | **Themes** — registry of seven, `ThemeStyle` writes the whole token set, picker in the customizer and wizard, contrast per theme, platform-authored themes | §4 | 1 session |
 | **N-64** | **House styles** — presets, the freeze, save-as-style, start from style / template / blank | §5, §10 | 1 session |

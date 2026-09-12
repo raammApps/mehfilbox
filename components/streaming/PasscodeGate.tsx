@@ -2,6 +2,8 @@
 
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
+import { Challenge } from '@/components/auth/Challenge'
+import { NO_CHALLENGE, type ChallengeConfig } from '@/lib/captcha/config'
 
 type Strings = {
   heading: string
@@ -18,18 +20,23 @@ export function PasscodeGate({
   coupleName,
   strings,
   basePath = '',
+  challenge = NO_CHALLENGE,
 }: {
   catalogueSlug: string
   coupleName: string
   strings: Strings
-  /** '' in subdomain mode, '/c/<slug>' in path mode. See `cataloguePath`. */
+  /** '' in subdomain mode, '/<studio>/<wedding>' in path mode. See `cataloguePath`. */
   basePath?: string
+  /** Shown after the third wrong code, when a captcha driver is configured (D-34). */
+  challenge?: ChallengeConfig
 }) {
   const router = useRouter()
   const [value, setValue] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [shake, setShake] = useState(false)
   const [busy, setBusy] = useState(false)
+  const [needChallenge, setNeedChallenge] = useState(false)
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null)
 
   const submit = async (event: React.FormEvent) => {
     event.preventDefault()
@@ -39,7 +46,11 @@ export function PasscodeGate({
     const response = await fetch('/api/passcode', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ catalogue: catalogueSlug, passcode: value }),
+      body: JSON.stringify({
+        catalogue: catalogueSlug,
+        passcode: value,
+        ...(needChallenge && captchaToken ? { captchaToken } : {}),
+      }),
     })
 
     if (response.ok) {
@@ -50,6 +61,11 @@ export function PasscodeGate({
       return
     }
 
+    const body = (await response.json().catch(() => null)) as {
+      error?: { challenge?: boolean }
+    } | null
+    if (body?.error?.challenge) setNeedChallenge(true)
+    setCaptchaToken(null)
     setError(response.status === 429 ? strings.lockedOut : strings.wrong)
     setShake(true)
     window.setTimeout(() => setShake(false), 400)
@@ -82,6 +98,8 @@ export function PasscodeGate({
           className="edge mb-3 h-12 w-full rounded-[var(--radius-input)] bg-surface-2 px-4 text-center text-text-hi"
         />
 
+        {needChallenge ? <Challenge config={challenge} onToken={setCaptchaToken} /> : null}
+
         {error ? (
           <p role="alert" className="type-body mb-3 text-error">
             {error}
@@ -90,7 +108,7 @@ export function PasscodeGate({
 
         <button
           type="submit"
-          disabled={busy || value.length === 0}
+          disabled={busy || value.length === 0 || (needChallenge && challenge.driver !== 'none' && !captchaToken)}
           className="h-12 w-full rounded-[var(--radius-pill)] bg-accent font-semibold text-accent-ink disabled:opacity-50"
         >
           {strings.submit}

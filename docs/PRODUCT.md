@@ -263,9 +263,9 @@ N-60 to N-75 in [`NEXT.md`](./NEXT.md).
 |---|---|---|
 | Tenant-path addressing `/<studio>/<wedding>` | **Built** | N-60, 12 Sept. `/c/<wedding>` is an alias that redirects to the canonical address; the studio segment is frozen on the catalogue. |
 | Share this wedding (WhatsApp) and the "Made with Mehfilbox" toggle | **Built** | N-60, 12 Sept. In the top bar; the footer line is on unless the studio switches it off in the branding panel. |
-| One sign-in with a Studio door and a Couple door | **Missing** | N-61. Today `/admin/login` with studio-only copy. |
-| Forgot password, on both doors | **Partial** | Supabase Auth's reset exists and nothing links to it. N-61. |
-| Per-address lockout and a captcha seam | **Partial** | Per-IP limits only. N-61. |
+| One sign-in with a Studio door and a Couple door | **Built** | N-61, 12 Sept. `/login`; `/admin/login` redirects. The door is a tab, the landing is decided by the org. |
+| Forgot password, on both doors | **Built** | N-61, 12 Sept. Credential links, hashed and single-use, identical on both auth drivers. |
+| Per-address lockout and a captcha seam | **Built** | N-61, 12 Sept. Per-address and per-IP buckets, a per-catalogue bucket on the guest code, Turnstile behind `CAPTCHA_DRIVER`. |
 | Studio issues the couple's credentials at creation | **Missing** | N-62. Today the couple only gets an account through handover. |
 | Couple account with many catalogues, from many studios | **Missing** | N-62. A second handover to the same address fails today. |
 | Couple console `/my` | **Missing** | N-62. A couple gets the full operator console. |

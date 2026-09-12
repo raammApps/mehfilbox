@@ -26,6 +26,8 @@ test.describe('N-29 — the studio’s language reaches the guest', () => {
         email: `hindi-${stamp}@example.test`,
         password: 'a-long-enough-password',
         locale: 'hi',
+        // The harness runs the fake captcha driver, which challenges every registration (D-34).
+        captchaToken: 'ok',
       },
     })
     expect(registered.ok(), await registered.text()).toBe(true)
@@ -82,6 +84,8 @@ test.describe('N-29 — the studio’s language reaches the guest', () => {
         email,
         password: 'a-long-enough-password',
         locale: 'hi',
+        // The harness runs the fake captcha driver, which challenges every registration (D-34).
+        captchaToken: 'ok',
       },
     })
     expect(registered.ok(), await registered.text()).toBe(true)

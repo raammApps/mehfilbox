@@ -89,7 +89,7 @@ export function ClaimForm({
              * there the operator signs in on a different host and the cookie is never sent.
              */
             await fetch('/api/admin/session', { method: 'DELETE' }).catch(() => {})
-            router.push(`/admin/login?email=${encodeURIComponent(email)}`)
+            router.push(`/login?door=couple&email=${encodeURIComponent(email)}`)
           }}
           className="mt-6 h-11 rounded-[var(--radius-pill)] bg-accent px-5 text-[14px] font-semibold text-accent-ink"
         >

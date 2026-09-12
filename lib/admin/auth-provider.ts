@@ -49,4 +49,19 @@ export interface AuthProvider {
    * never becomes an account-enumeration oracle.
    */
   signUp(email: string, password: string): Promise<AuthenticatedUser | null>
+
+  /**
+   * Create a credential on somebody's behalf — a studio issuing a couple's sign-in, the platform
+   * creating a studio's first operator (D-33). Unlike `signUp` it sends nothing and needs no
+   * confirmation: the person who asked for the account is standing next to the person it is for,
+   * or is us. Returns null when the address is already registered.
+   */
+  createUser(email: string, password: string): Promise<AuthenticatedUser | null>
+
+  /**
+   * Replace a password, for a credential link that has been redeemed or a signed-in person who
+   * typed their old one (D-33). The caller has already decided the change is allowed; this only
+   * carries it out wherever the credential lives.
+   */
+  setPassword(userId: string, password: string): Promise<void>
 }

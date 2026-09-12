@@ -140,6 +140,12 @@ export const dictionary = {
     'notify.ops-alert.html':
       '<p><strong>{kind}</strong></p><p>{detail}</p><p>Deploy <code>{version}</code>, seen at {at}.</p>',
 
+    'notify.credential.subject': 'Set your Mehfilbox password',
+    'notify.credential.text':
+      'Hello {name},\n\nUse this link to set your password:\n{url}\n\nIt works once and expires in {hours} hours. If you did not ask for it, ignore this message — nothing changes.',
+    'notify.credential.html':
+      '<p>Hello {name},</p><p><a href="{url}">Set your password</a></p><p>The link works once and expires in {hours} hours. If you did not ask for it, ignore this message — nothing changes.</p>',
+
     'notify.handover.subject': '{coupleName} is yours',
     'notify.handover.text':
       '{coupleName} is now yours to watch, download and share.\n\nSign in: {url}\n\n{studioName} still manages the plan, and it runs to {date}. Nothing is ever deleted.',
@@ -285,6 +291,12 @@ export const dictionary = {
       '{kind}\n\n{detail}\n\nडिप्लॉय: {version}\nसमय: {at}',
     'notify.ops-alert.html':
       '<p><strong>{kind}</strong></p><p>{detail}</p><p>डिप्लॉय <code>{version}</code>, समय {at}।</p>',
+
+    'notify.credential.subject': 'अपना Mehfilbox पासवर्ड सेट करें',
+    'notify.credential.text':
+      'नमस्ते {name},\n\nअपना पासवर्ड सेट करने के लिए यह लिंक खोलें:\n{url}\n\nयह एक बार काम करता है और {hours} घंटे में समाप्त हो जाता है। अगर आपने इसे नहीं माँगा था, तो इस संदेश को अनदेखा करें — कुछ नहीं बदलेगा।',
+    'notify.credential.html':
+      '<p>नमस्ते {name},</p><p><a href="{url}">अपना पासवर्ड सेट करें</a></p><p>यह लिंक एक बार काम करता है और {hours} घंटे में समाप्त हो जाता है। अगर आपने इसे नहीं माँगा था, तो इस संदेश को अनदेखा करें — कुछ नहीं बदलेगा।</p>',
 
     'notify.handover.subject': '{coupleName} अब आपका है',
     'notify.handover.text':

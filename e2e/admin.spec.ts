@@ -37,11 +37,11 @@ test.describe('the admin console', () => {
     await expect(menu).toContainText('operator@mehfilbox.test')
 
     await menu.getByRole('menuitem', { name: 'Sign out' }).click()
-    await expect(page).toHaveURL(/\/admin\/login/)
+    await expect(page).toHaveURL(/\/login/)
 
     // And the session is genuinely gone, not just navigated away from.
     await page.goto('/admin')
-    await expect(page).toHaveURL(/\/admin\/login/)
+    await expect(page).toHaveURL(/\/login/)
   })
 
   test('closes the account menu on Escape rather than trapping it open', async ({ page }) => {

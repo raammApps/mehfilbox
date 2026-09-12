@@ -167,6 +167,8 @@ Set these on the Vercel project (Production, and Preview if you want previews to
 |---|---|---|
 | `PLAYBACK_TOKEN_TTL_S` | `14400` (4h) | doc 05 §4 |
 | `DEV_OPERATOR_EMAIL` / `DEV_OPERATOR_PASSWORD` | — | Ignored under `DATA_DRIVER=supabase` |
+| `CAPTCHA_DRIVER` | `none` | `none` · `fake` · `turnstile` — the challenge after repeated sign-in and guest-code failures, and on every registration (D-34). `none` keeps the rate limits and lockouts and shows no widget. |
+| `NEXT_PUBLIC_TURNSTILE_SITE_KEY` / `TURNSTILE_SECRET_KEY` | — | Required when `CAPTCHA_DRIVER=turnstile`. From the Cloudflare dashboard → Turnstile → the widget for `mehfilbox.com`. The site key is public by design; the secret never leaves the server. |
 
 > **`CRON_SECRET` is the one people forget.** Vercel sends `Authorization: Bearer $CRON_SECRET`
 > on scheduled invocations — and **no header at all** when it is unset. The jobs then 401 and
@@ -356,3 +358,24 @@ Two related settings on the same screen worth deciding deliberately:
 Until SMTP is configured, registration works but delivery does not, and the honest summary is
 that partner sign-up is not ready for anyone outside your own testing.
 
+
+## 13. Sign-in, credential links and the challenge
+
+Since 12 September (D-33, D-34) sign-in is at `/login` with a Studio door and a Couple door;
+`/admin/login` redirects there. Forgot-password and first-sign-in links are **ours**: a hashed,
+single-use token on `/set-password/<token>`, sent through the notification queue in the recipient's
+org's language, and redeemed through `AuthProvider.setPassword` — so they behave identically under
+`AUTH_DRIVER=local` and `AUTH_DRIVER=supabase`, and never depend on Supabase's own reset emails or
+its site-URL setting. §12's SMTP still matters for Supabase's *registration confirmation*; nothing
+else sends through Supabase any more.
+
+Under `AUTH_DRIVER=supabase` the driver uses the **service-role** key for two calls only — creating
+an account on somebody's behalf and replacing a password from a redeemed link — which is why that
+key must be present (it already is: the repository needs it).
+
+**The challenge.** With `CAPTCHA_DRIVER=turnstile`, a Turnstile widget appears on sign-in and the
+guest code after the third failure and on every registration; without it, a challenged attempt is
+refused before the password is even checked. Create the widget in Cloudflare's dashboard as
+*Managed*, allow `mehfilbox.com` (and the preview hostnames if you want previews to sign in), and
+set both keys. Leave the driver at `none` until then — the per-address and per-IP lockouts apply
+regardless.

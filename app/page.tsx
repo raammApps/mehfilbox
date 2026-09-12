@@ -62,8 +62,11 @@ function MarketingNav() {
         <Link href="#pricing" className="type-meta text-text-mid underline-offset-4 hover:underline">
           Pricing
         </Link>
-        <Link href="/admin" className="type-meta text-text-mid underline-offset-4 hover:underline">
+        <Link href="/login?door=studio" className="type-meta text-text-mid underline-offset-4 hover:underline">
           Studio sign in
+        </Link>
+        <Link href="/login?door=couple" className="type-meta text-text-mid underline-offset-4 hover:underline">
+          Couple sign in
         </Link>
       </nav>
     </header>
@@ -341,8 +344,11 @@ function MarketingFooter() {
           <Link href="/terms" className="type-meta text-text-mid underline-offset-4 hover:underline">
             Terms
           </Link>
-          <Link href="/admin" className="type-meta text-text-mid underline-offset-4 hover:underline">
+          <Link href="/login?door=studio" className="type-meta text-text-mid underline-offset-4 hover:underline">
             Studio sign in
+          </Link>
+          <Link href="/login?door=couple" className="type-meta text-text-mid underline-offset-4 hover:underline">
+            Couple sign in
           </Link>
         </nav>
       </div>

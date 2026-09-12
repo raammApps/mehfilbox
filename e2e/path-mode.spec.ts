@@ -195,8 +195,9 @@ test.describe('path mode — the handover on a shared device', () => {
 
     await page.getByRole('button', { name: new RegExp(`Sign in with ${coupleEmail}`) }).click()
 
-    // The login screen, with their own address ready — never somebody else's weddings.
-    await expect(page).toHaveURL(/\/admin\/login/)
+    // The sign-in screen, on the couple's door, with their own address ready — never somebody
+    // else's weddings.
+    await expect(page).toHaveURL(/\/login\?door=couple/)
     await expect(page.getByRole('button', { name: 'Sign in', exact: true })).toBeVisible()
     await expect(page.getByRole('heading', { name: 'Catalogues' })).toHaveCount(0)
     await expect(page.getByLabel('Email')).toHaveValue(coupleEmail)

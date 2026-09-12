@@ -40,6 +40,19 @@ export function consume(key: string, limit: number, windowS: number): LimitResul
   return { allowed: bucket.count <= limit, remaining: Math.max(0, limit - bucket.count), retryAfterS }
 }
 
+/**
+ * How many times a key has been consumed in its current window, without consuming it.
+ *
+ * What decides whether a challenge is put in front of the next attempt (D-34): three failures
+ * on an address is a person who mistyped, and a script; the widget costs the first a second and
+ * the second everything.
+ */
+export function peek(key: string): number {
+  const bucket = buckets.get(key)
+  if (!bucket || bucket.resetAt <= Date.now()) return 0
+  return bucket.count
+}
+
 export function enforce(key: string, limit: number, windowS: number): void {
   const result = consume(key, limit, windowS)
   if (!result.allowed) {

@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { RegisterForm } from '@/components/admin/RegisterForm'
+import { challengeConfig } from '@/lib/captcha/verify'
 
 export const dynamic = 'force-dynamic'
 
@@ -7,5 +8,5 @@ export const dynamic = 'force-dynamic'
 export const metadata: Metadata = { title: 'Create a partner account', robots: { index: false } }
 
 export default function RegisterPage() {
-  return <RegisterForm />
+  return <RegisterForm challenge={challengeConfig()} />
 }

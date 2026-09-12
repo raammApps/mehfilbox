@@ -1,7 +1,9 @@
 import 'server-only'
 import { createServerClient } from '@supabase/ssr'
+import { createClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
 import type { NextResponse } from 'next/server'
+import { getRepository } from '@/lib/db'
 import { env } from '@/lib/env'
 import { ApiError } from '@/lib/http/errors'
 import type { AuthenticatedUser, AuthProvider } from './auth-provider'
@@ -88,6 +90,38 @@ export class SupabaseAuthProvider implements AuthProvider {
     // An existing address returns a user with no identities rather than an error.
     if (Array.isArray(data.user.identities) && data.user.identities.length === 0) return null
     return { id: data.user.id, email: data.user.email }
+  }
+
+  /**
+   * The service-role client, for the two operations a person cannot do to their own account:
+   * creating one for them and replacing their password from a link. Built per call and never
+   * bound to request cookies — it acts as us, not as anyone signed in.
+   */
+  private admin() {
+    return createClient(env.NEXT_PUBLIC_SUPABASE_URL!, env.SUPABASE_SERVICE_ROLE_KEY!, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    }).auth.admin
+  }
+
+  async createUser(email: string, password: string): Promise<AuthenticatedUser | null> {
+    // Confirmed on creation: the studio in the room, or the platform, vouches for the address,
+    // and a confirmation email nobody asked for is the first thing a couple would ignore.
+    const { data, error } = await this.admin().createUser({ email, password, email_confirm: true })
+    if (error) {
+      // An address that already exists is reported as null, exactly as `signUp` does, so the
+      // caller cannot become an enumeration oracle by accident.
+      if (/already|exists|registered/i.test(error.message)) return null
+      throw new ApiError('INTERNAL', error.message)
+    }
+    if (!data.user?.email) return null
+    return { id: data.user.id, email: data.user.email }
+  }
+
+  async setPassword(userId: string, password: string): Promise<void> {
+    const { error } = await this.admin().updateUserById(userId, { password })
+    if (error) throw new ApiError('INTERNAL', error.message)
+    // The flag lives on our row; the credential lives on theirs.
+    await getRepository().setOperatorPassword(userId, { mustChangePassword: false })
   }
 
   async signOut(response: NextResponse): Promise<void> {

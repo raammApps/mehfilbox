@@ -1,21 +1,17 @@
 import { redirect } from 'next/navigation'
-import { getOperatorSession } from '@/lib/admin/session'
-import { LoginForm } from '@/components/admin/LoginForm'
 
 export const dynamic = 'force-dynamic'
 
-export default async function LoginPage({
+/**
+ * The console's sign-in moved to the public site's `/login`, behind the Studio door (D-33).
+ * Kept as a redirect because the address is in bookmarks, in the manual-test walkthrough and in
+ * every studio's muscle memory; the prefilled address a handover passes along rides through.
+ */
+export default async function LoginRedirect({
   searchParams,
 }: {
   searchParams: Promise<{ email?: string }>
 }) {
-  if (await getOperatorSession()) redirect('/admin')
-
-  /**
-   * Prefilled after a handover (N-32 §2), so the button that said "Sign in with priya@…"
-   * actually lands on a form addressed to Priya. Only ever a convenience: it fills a field the
-   * visitor can edit, and grants nothing on its own.
-   */
   const { email } = await searchParams
-  return <LoginForm initialEmail={typeof email === 'string' ? email : ''} />
+  redirect(`/login?door=studio${typeof email === 'string' && email ? `&email=${encodeURIComponent(email)}` : ''}`)
 }

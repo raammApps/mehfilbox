@@ -3,6 +3,8 @@
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
+import { Challenge } from '@/components/auth/Challenge'
+import type { ChallengeConfig } from '@/lib/captcha/config'
 
 /**
  * Partner sign-up.
@@ -11,8 +13,9 @@ import { useState } from 'react'
  * is a reason to close the tab. Anything else we need — logo, watermark, contact number — is
  * asked for later, in the console, where there is a reason to care.
  */
-export function RegisterForm() {
+export function RegisterForm({ challenge }: { challenge: ChallengeConfig }) {
   const router = useRouter()
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [fields, setFields] = useState<Record<string, string>>({})
@@ -34,6 +37,7 @@ export function RegisterForm() {
         email: form.get('email'),
         password: form.get('password'),
         locale: form.get('locale') ?? 'en',
+        ...(captchaToken ? { captchaToken } : {}),
       }),
     })
 
@@ -63,7 +67,7 @@ export function RegisterForm() {
         </p>
         <button
           type="button"
-          onClick={() => router.push('/admin/login')}
+          onClick={() => router.push('/login?door=studio')}
           className="mt-6 h-11 rounded-[var(--radius-pill)] bg-accent px-5 text-[14px] font-semibold text-accent-ink"
         >
           Go to sign in
@@ -130,16 +134,19 @@ export function RegisterForm() {
         </div>
       </fieldset>
 
+      {/* Every registration, when a driver is configured (D-34): an account is worth a script's first try. */}
+      <Challenge config={challenge} onToken={setCaptchaToken} />
+
       <button
         type="submit"
-        disabled={busy}
+        disabled={busy || (challenge.driver !== 'none' && !captchaToken)}
         className="mt-2 h-11 w-full rounded-[var(--radius-pill)] bg-accent text-[15px] font-semibold text-accent-ink disabled:opacity-60"
       >
         {busy ? 'Creating…' : 'Create account'}
       </button>
 
       <p className="mt-4 text-[13px] text-[var(--color-l-text-mid)]">
-        Already have one? <Link href="/admin/login" className="underline">Sign in</Link>
+        Already have one? <Link href="/login?door=studio" className="underline">Sign in</Link>
       </p>
     </form>
   )

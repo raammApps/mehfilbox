@@ -5,6 +5,7 @@ import { ApiError } from '@/lib/http/errors'
 import { log } from '@/lib/log'
 import type {
   Album,
+  CredentialLink,
   LikeCounts,
   LikeSubject,
   Notification,
@@ -174,6 +175,8 @@ export class SupabaseRepository implements Repository {
       name: r.name,
       role: r.role,
       passwordHash: r.password_hash ?? '',
+      // Defaulted: 0017 adds the column, and a row read mid-rollout has no value for it.
+      mustChangePassword: r.must_change_password ?? false,
       createdAt: r.created_at,
     }
   }
@@ -367,6 +370,7 @@ export class SupabaseRepository implements Repository {
         // Null under Supabase Auth: the credential lives there, and this column exists only for
         // the self-hosted path.
         password_hash: operator.passwordHash || null,
+        must_change_password: operator.mustChangePassword ?? false,
       })
       .select()
       .single()
@@ -505,6 +509,67 @@ export class SupabaseRepository implements Repository {
   async getOperator(id: string): Promise<Operator | null> {
     const { data } = await this.db.from('operators').select('*').eq('id', id).maybeSingle()
     return data ? SupabaseRepository.toOperator(data) : null
+  }
+
+  // ── Credentials (D-33) ───────────────────────────────────────────────────────
+  async setOperatorPassword(
+    id: string,
+    patch: { passwordHash?: string; mustChangePassword: boolean },
+  ): Promise<Operator> {
+    const row: Row = { must_change_password: patch.mustChangePassword }
+    if (patch.passwordHash !== undefined) row.password_hash = patch.passwordHash
+    const data = SupabaseRepository.unwrap<Row>(
+      await this.db.from('operators').update(row).eq('id', id).select('*').maybeSingle(),
+    )
+    return SupabaseRepository.toOperator(data)
+  }
+
+  private static toCredentialLink(r: Row): CredentialLink {
+    return {
+      id: r.id,
+      operatorId: r.operator_id,
+      tokenHash: r.token_hash,
+      purpose: r.purpose,
+      expiresAt: r.expires_at,
+      usedAt: r.used_at ?? null,
+      createdAt: r.created_at,
+    }
+  }
+
+  async createCredentialLink(link: CredentialLink): Promise<CredentialLink> {
+    const data = SupabaseRepository.unwrap<Row>(
+      await this.db
+        .from('credential_links')
+        .insert({
+          id: link.id,
+          operator_id: link.operatorId,
+          token_hash: link.tokenHash,
+          purpose: link.purpose,
+          expires_at: link.expiresAt,
+          used_at: link.usedAt,
+          created_at: link.createdAt,
+        })
+        .select('*')
+        .single(),
+    )
+    return SupabaseRepository.toCredentialLink(data)
+  }
+
+  async getCredentialLinkByHash(hash: string): Promise<CredentialLink | null> {
+    const { data } = await this.db
+      .from('credential_links')
+      .select('*')
+      .eq('token_hash', hash)
+      .maybeSingle()
+    return data ? SupabaseRepository.toCredentialLink(data) : null
+  }
+
+  async markCredentialLinkUsed(id: string): Promise<void> {
+    const { error } = await this.db
+      .from('credential_links')
+      .update({ used_at: new Date().toISOString() })
+      .eq('id', id)
+    if (error) throw new ApiError('INTERNAL', error.message)
   }
 
   async listOperators(orgId: string): Promise<Operator[]> {

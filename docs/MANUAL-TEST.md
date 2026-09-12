@@ -52,12 +52,23 @@ values ('<your auth.users id>', 'you@example.com', 'Sandeep');
 
 ## Signing in
 
+Sign in is at **https://mehfilbox.com/login** — a Studio door and a Couple door (D-33); the old
+`/admin` address redirects there. Three things to try before anything else:
+
+1. Type a wrong password three times. The third refusal brings up the challenge (Turnstile in
+   production, a checkbox on a build with `CAPTCHA_DRIVER=fake`); the right password is refused
+   until it is completed.
+2. **Forgot password?** with a real address and with a made-up one. Both answer the same sentence;
+   only the real one gets an email, and that email is ours — the link lands on `/set-password/…`,
+   works once, and expires in an hour.
+3. Open the same link twice. The second time explains itself without showing a form.
+
 A studio created for this walkthrough, already email-confirmed so the broken mailer does not block
 you:
 
 | | |
 |---|---|
-| **URL** | https://mehfilbox.com/admin |
+| **URL** | https://mehfilbox.com/login?door=studio |
 | **Email** | `sandeep.bh5+walkthrough@gmail.com` |
 | **Password** | in `/tmp/wt-pw.txt` on this machine — ask, or reset it in Supabase |
 | **Studio** | Walkthrough Studio · one wedding, *Meera & Arjun* |

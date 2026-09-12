@@ -145,6 +145,17 @@ const schema = z
      */
     AUTH_DRIVER: z.enum(['local', 'supabase']).default('local'),
 
+    /**
+     * The challenge in front of sign-in, registration and the guest code after repeated failures
+     * (D-34). `none` keeps the rate limits and lockouts and shows no widget; `fake` is the suite's
+     * driver — a checkbox that yields a fixed token; `turnstile` is Cloudflare's, and needs both
+     * keys. The site key is public by nature and travels to the browser as a prop, never read
+     * from here by a client component.
+     */
+    CAPTCHA_DRIVER: z.enum(['none', 'fake', 'turnstile']).default('none'),
+    NEXT_PUBLIC_TURNSTILE_SITE_KEY: z.string().optional(),
+    TURNSTILE_SECRET_KEY: z.string().optional(),
+
     DEV_OPERATOR_EMAIL: z.string().email().default('operator@mehfilbox.test'),
     DEV_OPERATOR_PASSWORD: nonEmpty.default('mehfilbox-dev'),
 
@@ -218,6 +229,18 @@ const schema = z
         message:
           'The fake notification driver must not run against the supabase database; it records sends that never happened',
       })
+    }
+
+    if (env.CAPTCHA_DRIVER === 'turnstile') {
+      for (const key of ['NEXT_PUBLIC_TURNSTILE_SITE_KEY', 'TURNSTILE_SECRET_KEY'] as const) {
+        if (!env[key]) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: [key],
+            message: `${key} is required when CAPTCHA_DRIVER=turnstile`,
+          })
+        }
+      }
     }
 
     if (env.NOTIFY_DRIVER === 'resend' && !env.RESEND_API_KEY) {

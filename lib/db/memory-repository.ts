@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto'
 import { ApiError } from '@/lib/http/errors'
 import type {
   Album,
+  CredentialLink,
   LikeCounts,
   LikeSubject,
   Notification,
@@ -31,6 +32,7 @@ export type Snapshot = {
   platformAdmins: PlatformAdmin[]
   entitlements: Entitlement[]
   transfers: Transfer[]
+  credentialLinks: CredentialLink[]
   orgs: Org[]
   operators: Operator[]
   catalogues: Catalogue[]
@@ -58,6 +60,7 @@ export function emptySnapshot(): Snapshot {
     platformAdmins: [],
     entitlements: [],
     transfers: [],
+    credentialLinks: [],
     orgs: [],
     operators: [],
     catalogues: [],
@@ -335,6 +338,37 @@ export class MemoryRepository implements Repository {
 
   async getOperator(id: string): Promise<Operator | null> {
     return this.clone(this.data.operators.find((o) => o.id === id) ?? null)
+  }
+
+  // ── Credentials (D-33) ───────────────────────────────────────────────────────
+  async setOperatorPassword(
+    id: string,
+    patch: { passwordHash?: string; mustChangePassword: boolean },
+  ): Promise<Operator> {
+    const operator = this.data.operators.find((o) => o.id === id)
+    if (!operator) throw new ApiError('NOT_FOUND', 'Operator not found')
+    if (patch.passwordHash !== undefined) operator.passwordHash = patch.passwordHash
+    operator.mustChangePassword = patch.mustChangePassword
+    this.touched()
+    return this.clone(operator)
+  }
+
+  async createCredentialLink(link: CredentialLink): Promise<CredentialLink> {
+    // A store written before the table existed has no array to push into.
+    this.data.credentialLinks ??= []
+    this.data.credentialLinks.push(this.clone(link))
+    this.touched()
+    return this.clone(link)
+  }
+
+  async getCredentialLinkByHash(hash: string): Promise<CredentialLink | null> {
+    return this.clone((this.data.credentialLinks ?? []).find((l) => l.tokenHash === hash) ?? null)
+  }
+
+  async markCredentialLinkUsed(id: string): Promise<void> {
+    const link = (this.data.credentialLinks ?? []).find((l) => l.id === id)
+    if (link) link.usedAt = new Date().toISOString()
+    this.touched()
   }
 
   // ── Catalogues ──────────────────────────────────────────────────────────────

@@ -28,6 +28,9 @@ const SHARED_ENV = {
   // deliberately boots with NODE_ENV=production. Fixed rather than random so specs can
   // sign in without threading a secret through them.
   DEV_OPERATOR_PASSWORD: 'e2e-operator-password',
+  // The suite's challenge driver: a checkbox that yields a fixed token (D-34), so the widget's
+  // appearance after repeated failures is exercised without Cloudflare.
+  CAPTCHA_DRIVER: 'fake',
 }
 
 /**
