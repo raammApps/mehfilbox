@@ -148,9 +148,15 @@ ROOT_DOMAIN=mehfilbox.com
 |---|---|
 | Catalogue | `mehfilbox.com/kalyanam/aanya-vikram-2026` |
 | A film, deep-linked | `mehfilbox.com/kalyanam/aanya-vikram-2026/watch/the-ceremony?t=428` |
-| Legacy link | `mehfilbox.com/c/aanya-vikram-2026` → 301 to the address above |
+| Legacy link | `mehfilbox.com/c/aanya-vikram-2026` → 307 to the address above |
 | Sign in | `mehfilbox.com/login` |
 | Console | `mehfilbox.com/admin` |
+
+A legacy `/c/` link redirects temporarily, not permanently (`redirect`, not
+`permanentRedirect`, in `lib/address.ts`). Only the move to an active custom domain is permanent,
+because that one is meant to be cached forever; a studio segment is frozen on the catalogue but
+the canonicalisation itself is cheap to repeat, and a 308 in two hundred phones' caches is not
+something you can take back if the rule ever changes. Verified against production on 12 September.
 
 **DNS: the root and `www`, nothing else.** Two A records (or a CNAME on `www`) at the registrar,
 nameservers left where they are, MX records untouched. One domain, one certificate, no wildcard —
