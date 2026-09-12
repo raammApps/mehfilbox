@@ -51,6 +51,7 @@ export function makeCatalogue(overrides: Partial<Catalogue> = {}): Catalogue {
     coupleOrgId: null,
     supportAccessUntil: null,
     passcodeVersion: 1,
+    presetId: null,
     includedUntil: '2027-01-01T00:00:00.000Z',
     subStatus: 'included',
     subPlan: null,

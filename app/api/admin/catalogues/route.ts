@@ -1,8 +1,11 @@
 import { randomUUID } from 'node:crypto'
 import { z } from 'zod'
 import { requireOperator } from '@/lib/admin/session'
+import { generatePasscode } from '@/lib/admin/presets'
 import { seedModules } from '@/lib/admin/templates'
+import { hashSecret } from '@/lib/crypto'
 import { getRepository } from '@/lib/db'
+import { ApiError } from '@/lib/http/errors'
 import { noStore, readJson, route } from '@/lib/http/handler'
 import {
   appNameSchema,
@@ -33,7 +36,12 @@ const createSchema = z.object({
    * own language applies when the wizard does not ask.
    */
   locale: localeSchema.optional(),
-  template: z.string().default('keepsake'),
+  template: z.string().optional(),
+  /**
+   * A house style to start from (D-36). Its layout, branding, language and guest-code choice are
+   * copied in now and recorded on the row; the fields above still win where they are given.
+   */
+  presetId: z.string().uuid().optional(),
 })
 
 /**
@@ -64,6 +72,13 @@ export async function POST(request: Request) {
     includedUntil.setMonth(includedUntil.getMonth() + INCLUDED_MONTHS)
 
     const org = await repository.getOrg(orgId)
+    // Scoped to the org, so another studio's style is a 404 rather than a copy.
+    const preset = body.presetId ? await repository.getPreset(body.presetId, orgId) : null
+    if (body.presetId && !preset) throw new ApiError('NOT_FOUND', 'House style not found')
+
+    const template = body.template ?? preset?.templateId ?? 'keepsake'
+    // Generated once, returned once: the wizard shows it to the operator with the couple present.
+    const passcode = preset?.passcodeOn ? generatePasscode() : null
 
     const catalogue = await repository.createCatalogue({
       id: randomUUID(),
@@ -83,22 +98,24 @@ export async function POST(request: Request) {
       city: body.city,
       synopsis: body.synopsis,
       occasion: body.occasion,
-      // Org defaults are inherited, then overridden — most operators skip the branding step.
-      branding: { ...(org?.branding ?? {}), ...body.branding },
+      // Org defaults are inherited, then the style's, then overridden — most operators skip the
+      // branding step, and a style is the studio's own decision made once.
+      branding: { ...(org?.branding ?? {}), ...(preset?.branding ?? {}), ...body.branding },
       /**
        * Copied from the studio rather than read through it (N-29), so a studio changing its own
        * default later does not silently change the language of weddings already delivered.
        */
       // The operator's choice for this wedding, falling back to the studio's own (N-29c).
-      locale: body.locale ?? org?.locale ?? 'en',
+      locale: body.locale ?? preset?.locale ?? org?.locale ?? 'en',
       featuredTitleId: null,
       modules: [],
       draftModules: null,
       draftBranding: null,
-      template: body.template,
+      template,
+      presetId: preset?.id ?? null,
       status: 'draft',
-      privacy: 'unlisted',
-      passcodeHash: null,
+      privacy: passcode ? 'passcode' : 'unlisted',
+      passcodeHash: passcode ? hashSecret(passcode) : null,
       coupleOrgId: null,
       supportAccessUntil: null,
       passcodeVersion: 1,
@@ -112,11 +129,11 @@ export async function POST(request: Request) {
 
     // Seed the draft from the template. There is no content yet, so the sections come out
     // empty — the customizer fills them as titles finish uploading.
-    const modules = seedModules(body.template, catalogue, [], [])
+    const modules = seedModules(template, catalogue, [], [])
     const withModules = await repository.updateCatalogue(catalogue.id, orgId, {
       draftModules: modules,
     })
 
-    return noStore({ catalogue: withModules }, 201)
+    return noStore({ catalogue: withModules, ...(passcode ? { passcode } : {}) }, 201)
   })
 }

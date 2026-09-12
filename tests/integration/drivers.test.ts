@@ -189,6 +189,7 @@ describe.skipIf(!hasSupabase)('Supabase Postgres, for real', () => {
         coupleOrgId: null,
         supportAccessUntil: null,
         passcodeVersion: 1,
+        presetId: null,
         includedUntil: new Date(Date.now() + 90 * 864e5).toISOString(),
         subStatus: 'included',
         subPlan: null,

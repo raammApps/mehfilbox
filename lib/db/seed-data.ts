@@ -295,6 +295,7 @@ function buildCatalogue(): Catalogue {
     coupleOrgId: null,
     supportAccessUntil: null,
     passcodeVersion: 1,
+    presetId: null,
     includedUntil: '2026-10-01T00:00:00.000Z',
     subStatus: 'included',
     subPlan: null,

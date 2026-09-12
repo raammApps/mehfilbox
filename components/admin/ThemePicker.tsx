@@ -1,37 +1,17 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { formatRatio, judgeAccent } from '@/lib/contrast'
 import type { Catalogue } from '@/lib/schema'
 import type { ThemeDefinition } from '@/themes/contract'
-import { FONT_STACKS, inkFor } from '@/themes/css'
 import { DEFAULT_THEME_ID, builtInThemes, themeFrom } from '@/themes/registry'
+import { AccentField } from './AccentField'
 import { SaveState } from './SaveState'
 import { ThemeCards } from './ThemeCards'
-
-type DisplayFont = NonNullable<Catalogue['branding']['displayFont']>
-
-/** Five curated presets plus a custom picker. Most operators will use a preset (doc 14 §5). */
-/** Only faces `lib/fonts.ts` actually loads; see `DISPLAY_FONTS`. */
-const FACES: { value: DisplayFont; label: string }[] = [
-  { value: 'archivo', label: 'Archivo' },
-  { value: 'mukta', label: 'Mukta' },
-  { value: 'inter', label: 'Inter' },
-]
-
-const PRESETS = [
-  { value: '#d11a2a', label: 'Marquee red' },
-  { value: '#c2410c', label: 'Ember' },
-  { value: '#b8860b', label: 'Old gold' },
-  { value: '#9d174d', label: 'Deep rose' },
-  { value: '#1d6f5c', label: 'Emerald' },
-] as const
+import { TypefaceField, type DisplayFont } from './TypefaceField'
 
 /**
- * Contrast is validated **at pick time, in the UI** (doc 08 `<ThemePicker>`).
- *
- * A planner will hand over a brand pink that is unreadable on black. They have to be told
- * while they can still change it — not by a build log they never see.
+ * Contrast is validated **at pick time, in the UI** (doc 08 `<ThemePicker>`) — see `AccentField`,
+ * which this panel, the studio's look and a house style all share.
  */
 /**
  * Where this panel writes (N-26).
@@ -93,10 +73,6 @@ export function ThemePicker({
 
   const selected = themeFrom({ theme }, themes)
   const offered = themes.filter((candidate) => candidate.enabled || candidate.id === theme)
-  // Judged against *this theme's* page, not against black: an accent that reads on Marquee can
-  // vanish on Classic's ivory, and the picker has to say so while the studio can still change it.
-  const verdict = judgeAccent(accent, selected.tokens.surface0)
-  const ink = inkFor(accent, accent === selected.tokens.accent ? selected.tokens.accentInk : '#ffffff')
 
   /**
    * Autosave, debounced — the same model the sections beside this panel already use.
@@ -231,110 +207,23 @@ export function ThemePicker({
         </p>
       </fieldset>
 
-      <fieldset className="mb-4">
-        <legend className="mb-2 text-[13px] font-semibold">Headline typeface</legend>
-        <div className="flex flex-wrap gap-2">
-          <button
-            type="button"
-            onClick={() => {
-              setDisplayFont(null)
-              setTouched(true)
-            }}
-            aria-pressed={displayFont === null}
-            style={{ fontFamily: FONT_STACKS[selected.tokens.fontDisplay] }}
-            className={`h-11 rounded-[var(--radius-input)] border px-4 text-[16px] ${
-              displayFont === null ? 'border-accent ring-1 ring-accent' : 'border-[var(--color-l-line)]'
-            }`}
-          >
-            {selected.name}&rsquo;s own
-          </button>
-          {FACES.map((face) => (
-            <button
-              key={face.value}
-              type="button"
-              onClick={() => {
-                setDisplayFont(face.value)
-                setTouched(true)
-              }}
-              aria-pressed={displayFont === face.value}
-              // Each button is set in the face it selects, because the only question an
-              // operator is really asking is "what does it look like".
-              style={{ fontFamily: FONT_STACKS[face.value] }}
-              className={`h-11 rounded-[var(--radius-input)] border px-4 text-[16px] ${
-                displayFont === face.value
-                  ? 'border-accent ring-1 ring-accent'
-                  : 'border-[var(--color-l-line)]'
-              }`}
-            >
-              {face.label}
-            </button>
-          ))}
-        </div>
-        <p className="mt-2 text-[12px] text-[var(--color-l-text-mid)]">
-          Used for the couple’s name, section headings and the wordmark. Body text stays as it is
-          — it has to be readable on a phone at arm’s length.
-        </p>
-      </fieldset>
+      <TypefaceField
+        value={displayFont}
+        theme={selected}
+        onChange={(face) => {
+          setDisplayFont(face)
+          setTouched(true)
+        }}
+      />
 
-      <fieldset className="mb-3">
-        <legend className="mb-2 text-[13px] font-semibold">Accent colour</legend>
-        <div className="flex flex-wrap items-center gap-2">
-          {PRESETS.map((preset) => (
-            <button
-              key={preset.value}
-              type="button"
-              onClick={() => {
-                setAccent(preset.value)
-                setTouched(true)
-              }}
-              aria-label={preset.label}
-              aria-pressed={accent.toLowerCase() === preset.value}
-              className={`h-9 w-9 rounded-full border-2 ${
-                accent.toLowerCase() === preset.value
-                  ? 'border-[var(--color-l-text-hi)]'
-                  : 'border-transparent'
-              }`}
-              style={{ background: preset.value }}
-            />
-          ))}
-
-          <label className="ms-2 inline-flex items-center gap-2 text-[13px]">
-            Custom
-            <input
-              type="color"
-              value={accent}
-              onChange={(event) => {
-                setAccent(event.target.value)
-                setTouched(true)
-              }}
-              className="h-9 w-12 cursor-pointer rounded border border-[var(--color-l-line)]"
-            />
-          </label>
-        </div>
-
-        {/* The sample sits on the chosen theme's page, because that is where the button will sit. */}
-        <div
-          className="mt-3 flex items-center gap-3 rounded-[var(--radius-input)] p-3"
-          style={{ background: selected.tokens.surface0 }}
-        >
-          <span
-            className="inline-flex h-9 items-center rounded-[var(--radius-pill)] px-4 text-[14px] font-semibold"
-            style={{ background: accent, color: ink }}
-          >
-            Play
-          </span>
-          <span className="text-[12px]" style={{ color: selected.tokens.textLo }}>
-            {formatRatio(verdict.onSurface)} on the page · {formatRatio(verdict.inkOnAccent)} for
-            button text
-          </span>
-        </div>
-
-        {verdict.warning ? (
-          <p role="alert" className="mt-2 text-[13px] text-[#a15c00]">
-            {verdict.warning}
-          </p>
-        ) : null}
-      </fieldset>
+      <AccentField
+        accent={accent}
+        theme={selected}
+        onChange={(hex) => {
+          setAccent(hex)
+          setTouched(true)
+        }}
+      />
 
       <label className="mb-1 block text-[13px] font-semibold" htmlFor="presented-by">
         Presented by

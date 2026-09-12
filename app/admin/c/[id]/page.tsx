@@ -6,6 +6,7 @@ import { CatalogueAnalytics } from '@/components/admin/CatalogueAnalytics'
 import { CoupleAccountPanel } from '@/components/admin/CoupleAccountPanel'
 import { HandoverPanel } from '@/components/admin/HandoverPanel'
 import { PublicLink } from '@/components/admin/PublicLink'
+import { SaveAsStyle } from '@/components/admin/SaveAsStyle'
 import { SendToCouple } from '@/components/admin/SendToCouple'
 import { SetupChecklist } from '@/components/admin/SetupChecklist'
 import { getEditableCatalogue, getSessionOrg } from '@/lib/admin/session'
@@ -215,6 +216,12 @@ export default async function CatalogueOverviewPage({
           {canHandOver ? (
             <div className="mt-4">
               <CoupleAccountPanel catalogueId={catalogue.id} linked={linkedCouple} />
+            </div>
+          ) : null}
+
+          {canHandOver ? (
+            <div className="mt-4">
+              <SaveAsStyle catalogueId={catalogue.id} published={catalogue.status === 'published'} />
             </div>
           ) : null}
 

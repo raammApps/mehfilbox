@@ -100,9 +100,12 @@ Start at https://mehfilbox.com/admin/new
    `name-and-name-<year>`; typing "Meera & Arjun" gave `meera-and-arjun-2026`.
    The year is deliberate — two couples with the same names in different years do not collide.
 2. Watch the address line: it says **Available** or **taken** as you type, before you commit.
-3. **Step 2 — the shape.** Pick a language (**this is per wedding**, seeded from your studio), a
-   **look** — the theme cards, starting on your studio's — and a template. Choose **हिंदी** to
-   exercise §5, and **Carnival** to exercise §4's theme row.
+3. **Step 2 — the shape.** If the studio has house styles, **Start from** lists them with the
+   default preselected and a *Choose myself* card; a style hides the theme and template cards
+   because it has answered them. Otherwise pick a language (**this is per wedding**, seeded from
+   your studio), a **look** — the theme cards, starting on your studio's — and a template, which
+   now includes **Blank**. Choose **हिंदी** to exercise §5, and **Carnival** to exercise §4's
+   theme row. A style with the guest code on shows the six-digit code **once**, on step 3.
 4. **Create and start uploading.** It says *"exists as a draft at /… Nothing from here on can lose
    it."*
 
@@ -237,6 +240,24 @@ https://mehfilbox.com/admin/studio
 2. Create a **new** wedding — it starts from those.
 3. Open a wedding you already delivered — **unchanged**. Changing the studio default is not a
    retroactive repaint.
+
+---
+
+## 9a. House styles · N-64
+
+https://mehfilbox.com/admin/studio/styles
+
+| Check | Expect |
+|---|---|
+| **Keep this look** on a *published* wedding's overview | Name it, save: it appears here with the wedding's theme, layout, language and code choice. On a draft the field is disabled and says why |
+| **New house style** | Theme cards, four layouts including Blank, the branding fields with the contrast readout, language, *start with a guest code*, *the default for new weddings* |
+| Two defaults | Make a second style the default: the first loses the badge in the same save |
+| The wizard | Step 2 starts on the default style; *Choose myself* brings the theme and layout cards back |
+| **The freeze** | Publish a wedding made from a style, then open the style: a banner names the count, the look is disabled, **Duplicate and edit** opens a copy that is not. Rename and *make default* still save. Delete is refused on the list |
+| Delete a style a *draft* was made from | Allowed — nobody was given that look yet |
+
+✅ Edit a style a delivered wedding used, by way of the duplicate, and reload the wedding's guest
+page. **Nothing moved.** That is the whole promise.
 
 ---
 

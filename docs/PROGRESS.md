@@ -1782,3 +1782,39 @@ selected, and `CSS` does not exist on the server. Every server render of the pag
 `CSS is not defined`, and React rendered the tree again in the browser — so nothing was visibly
 wrong, every test passed, and the error log had one line per open. Escaped by hand when the
 browser API is absent. One function, three call sites.
+
+## N-64 · House styles — 12 September 2026
+
+**A studio's look, in the plural** (D-36, doc 16 §5). A house style is the five decisions a studio
+makes the same way every time — theme, layout, branding, language, whether a guest code is on —
+saved under a name. `presets` (migration 0020) holds them; `catalogues.preset_id` records which
+one a wedding was made from. The theme rides inside `branding.theme`, so a style and a
+catalogue's look are one shape and copy across in a line.
+
+**Three ways one comes to exist,** and they are one route: typed in at `/admin/studio/styles/new`;
+captured from a delivered wedding's overview with *Keep this look* — published only, because a
+style is a record of what a couple was given; or duplicated from a frozen one. One default per
+studio, kept true in the same write. The wizard's second step starts on the default style and
+offers *Choose myself*; a style hides the theme and layout cards because it has answered them,
+and the fields the wizard still asks — language above all — win over the style's. A style with the
+code on generates a six-digit code at creation, hashed on the row and returned exactly once, which
+the wizard shows on the upload step with the couple present. Six digits rather than four because
+the per-catalogue bucket (D-34) allows thirty guesses before it closes.
+
+**The freeze.** Values are copied into a wedding at creation, so editing a style never repaints a
+delivered page. A style a **published** wedding was made from is frozen: its look — layout,
+branding, language, the code — is refused with `FROZEN` (409) and the count, and it cannot be
+deleted; the editor shows the same sentence up front, disables the look, and offers *Duplicate and
+edit*. Renaming and choosing the default touch no wedding and always go through. A draft freezes
+nothing — nobody was given that look yet. Sending the same look back is not a change.
+
+**Blank is a layout** (doc 16 §10): a fourth template with no sections, in the wizard and in a
+style. The customizer already handled an empty page; the Add menu is the whole editor for one.
+
+**One colour picker, still.** The accent field with its contrast gate and the typeface field came
+out of the branding panel into `AccentField` and `TypefaceField`, shared by the wedding's panel,
+the studio's look and a house style — a second copy of a picker with a gate in it is how one of
+them quietly stops checking contrast (N-26).
+
+10 new unit tests; 613 unit and component tests. One E2E test: a wedding made from a style starts
+in it, code and all.

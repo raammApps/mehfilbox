@@ -13,6 +13,8 @@ export const ERROR_CODES = {
   CATALOGUE_NOT_FOUND: 404,
   NOT_FOUND: 404,
   TITLE_NOT_READY: 409,
+  /** The record is in use and the edit would rewrite history; the client offers a duplicate (D-36). */
+  FROZEN: 409,
   UPLOAD_LIMIT: 413,
   RATE_LIMITED: 429,
   INTERNAL: 500,

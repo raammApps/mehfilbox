@@ -4,7 +4,9 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { suggestSlug } from '@/lib/format'
 import { TEMPLATES } from '@/lib/admin/templates'
+import type { Preset } from '@/lib/schema'
 import type { ThemeDefinition } from '@/themes/contract'
+import { themeFrom } from '@/themes/registry'
 import { ThemeCards } from './ThemeCards'
 import { FLIX_SUFFIX, type Locale, type Title } from '@/lib/schema'
 import { catalogueUrl, type TenancyMode } from '@/lib/tenant'
@@ -44,6 +46,7 @@ export function CreateWizard({
   studioLocale,
   themes,
   studioTheme,
+  styles,
 }: {
   /** Passed in rather than read here: `lib/env` is server-only, and this runs in the browser. */
   rootDomain: string
@@ -56,6 +59,8 @@ export function CreateWizard({
   themes: readonly ThemeDefinition[]
   /** The studio's default theme — what a wedding starts on unless the couple wants another. */
   studioTheme: string
+  /** The studio's house styles (D-36); the default one is preselected. */
+  styles: Preset[]
 }) {
   const router = useRouter()
   const [step, setStep] = useState<Step>(1)
@@ -74,6 +79,24 @@ export function CreateWizard({
   } | null>(null)
   const [template, setTemplate] = useState(TEMPLATES[0]!.id)
   const [theme, setTheme] = useState(studioTheme)
+  /**
+   * A house style, or "choose myself" (doc 16 §10). The default style is preselected because it
+   * is the studio's own answer to this step; picking one fills the language too, since a style
+   * carries it — the couple can still change it here.
+   */
+  const [styleId, setStyleId] = useState<string | null>(
+    styles.find((style) => style.isDefault)?.id ?? null,
+  )
+  /** Generated at creation when the style asks for a code; shown once, on the next step. */
+  const [passcode, setPasscode] = useState<string | null>(null)
+  const chooseStyle = (id: string | null) => {
+    setStyleId(id)
+    const style = styles.find((candidate) => candidate.id === id)
+    if (!style) return
+    setLocale(style.locale)
+    setTheme(style.branding.theme ?? studioTheme)
+    setTemplate(style.templateId as typeof template)
+  }
   /**
    * Seeded from the studio, changeable per wedding (N-29c). The studio's language is what most of
    * their couples read; it is not what all of them read, and asking here costs one line.
@@ -147,9 +170,9 @@ export function CreateWizard({
         slug,
         city: city ? { en: city } : undefined,
         locale,
-        template,
-        // Only the theme: the rest of the studio's branding is inherited by the route.
-        branding: { theme },
+        // From a style, the route copies its layout and branding; otherwise only the theme is
+        // sent and the rest of the studio's branding is inherited.
+        ...(styleId ? { presetId: styleId } : { template, branding: { theme } }),
       }),
     })
 
@@ -162,7 +185,8 @@ export function CreateWizard({
       return
     }
 
-    const body = (await response.json()) as { catalogue: { id: string } }
+    const body = (await response.json()) as { catalogue: { id: string }; passcode?: string }
+    setPasscode(body.passcode ?? null)
     window.localStorage.removeItem(DRAFT_KEY)
 
     /**
@@ -343,6 +367,78 @@ export function CreateWizard({
             </div>
           </fieldset>
 
+          {styles.length > 0 ? (
+            <fieldset className="mb-6">
+              <legend className="mb-1 block text-[14px] font-semibold">Start from</legend>
+              <p className="mb-2 text-[13px] text-[var(--color-l-text-mid)]">
+                A house style sets the theme, layout, branding, language and guest code in one go.
+              </p>
+              <ul className="grid gap-2 sm:grid-cols-2">
+                {styles.map((style) => {
+                  const chosen = styleId === style.id
+                  const styleTheme = themeFrom(style.branding, themes)
+                  return (
+                    <li key={style.id}>
+                      <label
+                        className={`flex h-full cursor-pointer flex-col rounded-[var(--radius-card)] border-2 bg-white p-3 transition-colors ${
+                          chosen
+                            ? 'border-[var(--color-accent)]'
+                            : 'border-[var(--color-l-line)] hover:border-[var(--color-l-text-mid)]'
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          name="style"
+                          value={style.id}
+                          checked={chosen}
+                          onChange={() => chooseStyle(style.id)}
+                          className="sr-only"
+                        />
+                        <span className="flex items-center gap-1.5 text-[15px] font-semibold">
+                          {style.name}
+                          {style.isDefault ? (
+                            <span className="rounded-[var(--radius-pill)] bg-[var(--color-l-surface-2)] px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-[0.06em] text-[var(--color-l-text-mid)]">
+                              Default
+                            </span>
+                          ) : null}
+                        </span>
+                        <span className="mt-1 text-[13px] text-[var(--color-l-text-mid)]">
+                          {styleTheme.name} · {TEMPLATES.find((t) => t.id === style.templateId)?.label ?? style.templateId} ·{' '}
+                          {style.locale === 'hi' ? 'हिंदी' : 'English'} ·{' '}
+                          {style.passcodeOn ? 'guest code' : 'no code'}
+                        </span>
+                      </label>
+                    </li>
+                  )
+                })}
+                <li>
+                  <label
+                    className={`flex h-full cursor-pointer flex-col justify-center rounded-[var(--radius-card)] border-2 border-dashed bg-white p-3 transition-colors ${
+                      styleId === null
+                        ? 'border-[var(--color-accent)]'
+                        : 'border-[var(--color-l-line)] hover:border-[var(--color-l-text-mid)]'
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="style"
+                      value=""
+                      checked={styleId === null}
+                      onChange={() => chooseStyle(null)}
+                      className="sr-only"
+                    />
+                    <span className="text-[15px] font-semibold">Choose myself</span>
+                    <span className="mt-1 text-[13px] text-[var(--color-l-text-mid)]">
+                      Pick a theme and a layout below.
+                    </span>
+                  </label>
+                </li>
+              </ul>
+            </fieldset>
+          ) : null}
+
+          {styleId === null ? (
+          <>
           {/*
             Chosen here, with the couple in the room (doc 16 §10), rather than discovered in the
             customizer later: the theme is the first thing a couple has an opinion about.
@@ -393,13 +489,15 @@ export function CreateWizard({
                       {option.description}
                     </span>
                     <span className="mt-2 text-[12px] text-[var(--color-l-text-mid)]">
-                      {option.sections.length} sections
+                      {option.sections.length === 0 ? 'Empty page' : `${option.sections.length} sections`}
                     </span>
                   </label>
                 </li>
               )
             })}
           </ul>
+          </>
+          ) : null}
 
           {errors._ ? (
             <p role="alert" className="mb-3 text-[14px] text-[var(--color-error)]">
@@ -418,6 +516,17 @@ export function CreateWizard({
 
       {step === 3 && catalogueId ? (
         <section>
+          {passcode ? (
+            /* Shown once, here, with the couple present — it is not sent anywhere. Settings can
+               change it later, which is where it is if this screen is gone. */
+            <p
+              role="status"
+              className="mb-4 rounded-[var(--radius-card)] border border-[var(--color-l-line)] bg-white px-4 py-3 text-[14px]"
+            >
+              Guest code <strong className="font-mono text-[16px] font-bold">{passcode}</strong> —
+              guests will need it to open the page. Write it down now; you can change it in Settings.
+            </p>
+          ) : null}
           <p className="mb-3 text-[14px] text-[var(--color-l-text-mid)]">
             Drop the films in. They keep uploading while you title them on the next step, and
             while you work anywhere else in the admin.

@@ -117,6 +117,7 @@ describe('operator creation', () => {
       coupleOrgId: null,
       supportAccessUntil: null,
       passcodeVersion: 1,
+      presetId: null,
       includedUntil: '2027-12-01',
       subStatus: 'included',
       subPlan: null,

@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { AdminChrome } from '@/components/admin/AdminChrome'
 import { CreateWizard } from '@/components/admin/CreateWizard'
 import { getOperatorSession, getSessionOrg } from '@/lib/admin/session'
+import { getRepository } from '@/lib/db'
 import { env } from '@/lib/env'
 import { DEFAULT_THEME_ID } from '@/themes/registry'
 import { allThemes } from '@/themes/resolve'
@@ -13,6 +14,7 @@ export default async function NewCataloguePage() {
   if (!session) redirect('/admin/login')
 
   const org = await getSessionOrg(session)
+  const styles = org ? await getRepository().listPresets(org.id) : []
 
   return (
     <AdminChrome
@@ -36,6 +38,7 @@ export default async function NewCataloguePage() {
         studioLocale={org?.locale ?? 'en'}
         themes={await allThemes()}
         studioTheme={org?.branding.theme ?? DEFAULT_THEME_ID}
+        styles={styles}
       />
     </AdminChrome>
   )

@@ -19,6 +19,7 @@ import type {
   Photo,
   Profile,
   Title,
+  Preset,
 } from '@/lib/schema'
 import type { Entitlement } from '@/lib/entitlements'
 import type { CustomTheme } from '@/themes/contract'
@@ -35,6 +36,7 @@ export type Snapshot = {
   transfers: Transfer[]
   credentialLinks: CredentialLink[]
   customThemes: CustomTheme[]
+  presets: Preset[]
   orgs: Org[]
   operators: Operator[]
   catalogues: Catalogue[]
@@ -64,6 +66,7 @@ export function emptySnapshot(): Snapshot {
     transfers: [],
     credentialLinks: [],
     customThemes: [],
+    presets: [],
     orgs: [],
     operators: [],
     catalogues: [],
@@ -222,6 +225,48 @@ export class MemoryRepository implements Repository {
   }
 
   // ── Platform-authored themes ────────────────────────────────────────────────
+  // ── House styles (D-36) ───────────────────────────────────────────────────
+  async listPresets(orgId: string): Promise<Preset[]> {
+    return this.clone(
+      (this.data.presets ?? [])
+        .filter((preset) => preset.orgId === orgId)
+        // The default first, then by name: the order the wizard shows them in.
+        .sort((a, b) => Number(b.isDefault) - Number(a.isDefault) || a.name.localeCompare(b.name)),
+    )
+  }
+
+  async getPreset(id: string, orgId: string): Promise<Preset | null> {
+    return this.clone(
+      (this.data.presets ?? []).find((preset) => preset.id === id && preset.orgId === orgId) ?? null,
+    )
+  }
+
+  async savePreset(preset: Preset): Promise<Preset> {
+    this.data.presets ??= []
+    if (preset.isDefault) {
+      for (const other of this.data.presets) {
+        if (other.orgId === preset.orgId && other.id !== preset.id) other.isDefault = false
+      }
+    }
+    const index = this.data.presets.findIndex((candidate) => candidate.id === preset.id)
+    if (index === -1) this.data.presets.push(this.clone(preset))
+    else this.data.presets[index] = this.clone(preset)
+    this.touched()
+    return this.clone(preset)
+  }
+
+  async deletePreset(id: string, orgId: string): Promise<void> {
+    this.data.presets = (this.data.presets ?? []).filter(
+      (preset) => !(preset.id === id && preset.orgId === orgId),
+    )
+    this.touched()
+  }
+
+  async countPublishedCataloguesOnPreset(presetId: string): Promise<number> {
+    return this.data.catalogues.filter((c) => c.presetId === presetId && c.status === 'published')
+      .length
+  }
+
   async listCustomThemes(): Promise<CustomTheme[]> {
     return this.clone([...(this.data.customThemes ?? [])].sort((a, b) => a.name.localeCompare(b.name)))
   }

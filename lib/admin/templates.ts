@@ -9,7 +9,7 @@ import { instantiate } from '@/modules/registry'
  * empty list will take an hour and produce something worse.
  */
 
-export type TemplateId = 'keepsake' | 'films-only' | 'anniversary'
+export type TemplateId = 'keepsake' | 'films-only' | 'anniversary' | 'blank'
 
 export type Template = {
   id: TemplateId
@@ -52,6 +52,17 @@ export const TEMPLATES: Template[] = [
       { type: 'curated_row', heading: { en: 'The films', hi: 'फ़िल्में' } },
       { type: 'photo_row', heading: { en: 'That week', hi: 'वह हफ़्ता' } },
     ],
+  },
+  /**
+   * Nothing pre-placed (doc 16 §10). A blank layout is an empty module list, which the customizer
+   * already handles — the Add menu is the whole editor for a page that starts this way. Last in
+   * the list, because the thirty-minute target depends on most studios not choosing it.
+   */
+  {
+    id: 'blank',
+    label: 'Blank',
+    description: 'Nothing pre-placed. Build the page section by section in the customizer.',
+    sections: [],
   },
 ]
 

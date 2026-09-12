@@ -214,6 +214,30 @@ export const platformAuditSchema = z.object({
 export type PlatformAudit = z.infer<typeof platformAuditSchema>
 
 /**
+ * A house style (D-36, doc 16 §5): what a studio's new weddings start from, by name.
+ *
+ * Theme, layout, branding, language and whether a guest code is on — the five things a studio
+ * decides the same way every time. The theme rides inside `branding.theme`, exactly as it does on
+ * a catalogue, so a style and a catalogue's look are the same shape and copy across in one line.
+ */
+export const presetSchema = z.object({
+  id: z.string().uuid(),
+  orgId: z.string().uuid(),
+  name: z.string().trim().min(1).max(60),
+  /** One per studio; the wizard preselects it. */
+  isDefault: z.boolean().default(false),
+  /** A template id, or `blank` — an empty page the customizer fills section by section. */
+  templateId: z.string().min(1).default('keepsake'),
+  branding: brandingSchema.default({}),
+  locale: localeSchema.default('en'),
+  /** Whether a wedding created from this starts with a guest code, generated at creation. */
+  passcodeOn: z.boolean().default(false),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+})
+export type Preset = z.infer<typeof presetSchema>
+
+/**
  * A catalogue mid-handover.
  *
  * The token itself is never in here — only its hash reaches the database, and the plaintext is
@@ -444,6 +468,11 @@ export const catalogueSchema = z.object({
    */
   locale: localeSchema.default('en'),
   template: z.string().nullable().default(null),
+  /**
+   * The house style this catalogue was created from (D-36), if any. A record, not a link: the
+   * values were copied at creation and the style may since have been renamed or deleted.
+   */
+  presetId: z.string().uuid().nullable().default(null),
 
   /**
    * The couple's account, linked from the moment the studio creates it (D-37). Until the

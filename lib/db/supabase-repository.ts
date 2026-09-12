@@ -21,6 +21,7 @@ import type {
   Photo,
   Profile,
   Title,
+  Preset,
 } from '@/lib/schema'
 import type { Entitlement } from '@/lib/entitlements'
 import type { CustomTheme } from '@/themes/contract'
@@ -210,6 +211,8 @@ export class SupabaseRepository implements Repository {
       // Defaulted: 0013 adds the column, and a row read mid-rollout has no value for it.
       locale: r.locale ?? 'en',
       template: r.template,
+      // Defaulted: 0020 adds the column, and a row read mid-rollout has no value for it.
+      presetId: r.preset_id ?? null,
       status: r.status,
       privacy: r.privacy,
       passcodeHash: r.passcode_hash,
@@ -247,6 +250,7 @@ export class SupabaseRepository implements Repository {
       draftBranding: 'draft_branding',
       locale: 'locale',
       template: 'template',
+      presetId: 'preset_id',
       status: 'status',
       privacy: 'privacy',
       passcodeHash: 'passcode_hash',
@@ -578,6 +582,90 @@ export class SupabaseRepository implements Repository {
       .update({ used_at: new Date().toISOString() })
       .eq('id', id)
     if (error) throw new ApiError('INTERNAL', error.message)
+  }
+
+  // ── House styles (D-36) ───────────────────────────────────────────────────
+  private static toPreset(r: Row): Preset {
+    return {
+      id: r.id,
+      orgId: r.org_id,
+      name: r.name,
+      isDefault: r.is_default ?? false,
+      templateId: r.template_id ?? 'keepsake',
+      branding: r.branding ?? {},
+      locale: r.locale ?? 'en',
+      passcodeOn: r.passcode_on ?? false,
+      createdAt: r.created_at,
+      updatedAt: r.updated_at,
+    }
+  }
+
+  private static fromPreset(preset: Preset): Row {
+    return {
+      id: preset.id,
+      org_id: preset.orgId,
+      name: preset.name,
+      is_default: preset.isDefault,
+      template_id: preset.templateId,
+      branding: preset.branding,
+      locale: preset.locale,
+      passcode_on: preset.passcodeOn,
+      created_at: preset.createdAt,
+      updated_at: preset.updatedAt,
+    }
+  }
+
+  async listPresets(orgId: string): Promise<Preset[]> {
+    const { data, error } = await this.db
+      .from('presets')
+      .select('*')
+      .eq('org_id', orgId)
+      .order('is_default', { ascending: false })
+      .order('name')
+    if (error) throw new ApiError('INTERNAL', error.message)
+    return (data ?? []).map(SupabaseRepository.toPreset)
+  }
+
+  async getPreset(id: string, orgId: string): Promise<Preset | null> {
+    const { data } = await this.db
+      .from('presets')
+      .select('*')
+      .eq('id', id)
+      .eq('org_id', orgId)
+      .maybeSingle()
+    return data ? SupabaseRepository.toPreset(data) : null
+  }
+
+  async savePreset(preset: Preset): Promise<Preset> {
+    // One default per studio, kept true in the same write rather than by a constraint the form
+    // would have to explain.
+    if (preset.isDefault) {
+      const { error } = await this.db
+        .from('presets')
+        .update({ is_default: false })
+        .eq('org_id', preset.orgId)
+        .neq('id', preset.id)
+      if (error) throw new ApiError('INTERNAL', error.message)
+    }
+    const data = SupabaseRepository.unwrap<Row>(
+      await this.db.from('presets').upsert(SupabaseRepository.fromPreset(preset)).select('*').single(),
+    )
+    return SupabaseRepository.toPreset(data)
+  }
+
+  async deletePreset(id: string, orgId: string): Promise<void> {
+    const { error } = await this.db.from('presets').delete().eq('id', id).eq('org_id', orgId)
+    if (error) throw new ApiError('INTERNAL', error.message)
+  }
+
+  async countPublishedCataloguesOnPreset(presetId: string): Promise<number> {
+    const { count, error } = await this.db
+      .from('catalogues')
+      .select('id', { count: 'exact', head: true })
+      .eq('preset_id', presetId)
+      .eq('status', 'published')
+    if (error) throw new ApiError('INTERNAL', error.message)
+    return count ?? 0
   }
 
   async listOperators(orgId: string): Promise<Operator[]> {

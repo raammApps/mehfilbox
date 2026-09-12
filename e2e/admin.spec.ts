@@ -160,6 +160,67 @@ test.describe('the admin console', () => {
     await expect(page.getByText(couple)).toBeVisible()
   })
 
+  /**
+   * D-36 — a house style is the studio's answer to the wizard's second step, made once.
+   *
+   * The style is made through the API here; in practice most studios will make their first from
+   * a delivered wedding's overview. What the wizard has to do is offer it, and what the route has
+   * to do is copy it — layout, theme, code — onto the row and hand the code over exactly once.
+   */
+  test('a wedding made from a house style starts in it, code and all', async ({ page }) => {
+    const style = await page.evaluate(async () => {
+      const response = await fetch('/api/admin/presets', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          name: 'E2E Carnival',
+          templateId: 'films-only',
+          branding: { theme: 'carnival' },
+          locale: 'en',
+          passcodeOn: true,
+        }),
+      })
+      if (!response.ok) throw new Error(`style failed: ${response.status}`)
+      return (await response.json()) as { preset: { id: string } }
+    })
+
+    const slug = `e2e-style-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`
+    await page.getByRole('link', { name: 'New catalogue' }).first().click()
+    await page.getByLabel('Couple').fill('Style & Wizard')
+    await page.getByLabel('Wedding date').fill('2026-12-01')
+    await page.getByLabel('Web address').fill(slug)
+    await expect(page.getByText('Available')).toBeVisible()
+    await page.getByRole('button', { name: 'Continue' }).click()
+
+    await page.getByRole('radio', { name: /^E2E Carnival/ }).check({ force: true })
+    // Picking a style hides the theme and layout cards: the style has answered them.
+    await expect(page.getByRole('radio', { name: /^The Keepsake/ })).toHaveCount(0)
+    await page.getByRole('button', { name: 'Create and start uploading' }).click()
+
+    // The code, shown once, with the couple present.
+    await expect(page.getByRole('status').filter({ hasText: 'Guest code' })).toContainText(/\d{6}/)
+
+    const created = await page.evaluate(async (wanted) => {
+      const response = await fetch('/api/admin/catalogues')
+      const { catalogues } = (await response.json()) as {
+        catalogues: { slug: string; template: string; privacy: string; presetId: string | null; branding: { theme?: string } }[]
+      }
+      return catalogues.find((c) => c.slug === wanted) ?? null
+    }, slug)
+    expect(created).toMatchObject({
+      template: 'films-only',
+      privacy: 'passcode',
+      presetId: style.preset.id,
+      branding: { theme: 'carnival' },
+    })
+
+    // The wedding is a draft, so the style is not frozen and can go — leaving the wizard as the
+    // other specs expect to find it.
+    await page.evaluate(async (id) => {
+      await fetch(`/api/admin/presets/${id}`, { method: 'DELETE' })
+    }, style.preset.id)
+  })
+
   test('a taken address is refused before anything is created', async ({ page }) => {
     await page.getByRole('link', { name: 'New catalogue' }).first().click()
 

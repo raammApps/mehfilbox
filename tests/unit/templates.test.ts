@@ -85,3 +85,9 @@ describe('seedModules and the featured film', () => {
     }
   })
 })
+
+describe('the blank layout (doc 16 §10)', () => {
+  it('seeds nothing whatever the content — the Add menu is the whole editor for it', () => {
+    expect(seedModules('blank', catalogue(), films(4), [])).toEqual([])
+  })
+})

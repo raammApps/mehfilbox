@@ -19,6 +19,7 @@ import type {
   Photo,
   Profile,
   Title,
+  Preset,
 } from '@/lib/schema'
 
 /**
@@ -120,6 +121,15 @@ export interface Repository {
   deleteOrg(id: string): Promise<void>
 
   // ── Platform-authored themes (D-35) ─────────────────────────────────────────
+  // ── House styles (D-36) ─────────────────────────────────────────────────
+  listPresets(orgId: string): Promise<Preset[]>
+  getPreset(id: string, orgId: string): Promise<Preset | null>
+  /** Upsert. Marking one default clears the org's previous default in the same write. */
+  savePreset(preset: Preset): Promise<Preset>
+  deletePreset(id: string, orgId: string): Promise<void>
+  /** Published catalogues created from this style — the number that freezes it. */
+  countPublishedCataloguesOnPreset(presetId: string): Promise<number>
+
   listCustomThemes(): Promise<CustomTheme[]>
   getCustomTheme(id: string): Promise<CustomTheme | null>
   /** Insert or replace by id. The route has already validated the tokens. */
