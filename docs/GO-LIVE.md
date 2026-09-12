@@ -386,3 +386,62 @@ went unnoticed on the first domain. Reading the message is the check; the dashbo
 The same four as the first launch, plus one: **`heirloomfilms.in` must still resolve and redirect
 to `mehfilbox.com`.** Every link already sent to a guest points at it, and a wedding page that
 404s because the company changed its name is the one failure this product cannot explain away.
+
+---
+
+# The second pass, before it can be deployed — 12 September 2026
+
+N-60 to N-76 changed the schema and added configuration. The code is committed and green; the
+live environment is not ready for it yet. Two of the three prerequisites are done.
+
+| | |
+|---|---|
+| Vercel configuration | ✅ `DOMAIN_DRIVER`, `DOMAIN_CNAME_TARGET`, `DOMAIN_A_RECORD`, `DOMAIN_NAMESERVERS`, `CAPTCHA_DRIVER`, `VERCEL_PROJECT_ID`, `VERCEL_TEAM_ID` set on Production |
+| Platform owner | ✅ `sandeep.bh5+platform@gmail.com`, auth account and `platform_admins` row; password in `.env.platform.local` |
+| **Migrations 0016–0025** | ❌ **yours** — the SQL editor, once |
+
+## 1. The migrations — the only blocker
+
+The live project is at **0015**: `credential_links`, `themes`, `presets`, `credits`, `job_runs`
+and `domains` do not exist, and `catalogues` is missing `tenant_slug`, `served_at`, `premiere_at`
+and five more columns. **Deploying the new code before they are applied breaks the console**, not
+just the new surfaces — the catalogue list reads columns that are not there.
+
+Supabase → SQL Editor → paste the bundle → Run. It is one transaction, every statement is
+re-runnable, and the query at the end lists the six new tables as proof. Generate it again any
+time with:
+
+```bash
+cat supabase/migrations/00{16..25}_*.sql
+```
+
+## 2. What is set, and what is deliberately not
+
+`DOMAIN_DRIVER=none` and `CAPTCHA_DRIVER=none` are **working defaults, not placeholders**. Neither
+disables anything that existed: sign-in rate limits and lockouts are unconditional, and a custom
+domain still verifies its DNS from the server. What `none` means is the last step is manual —
+a verified domain waits on the Domains page until you add it to the Vercel project and press
+*Mark attached*, and no challenge widget is shown after repeated failures.
+
+Two upgrades need a credential only you can mint:
+
+| To turn on | Get | Then |
+|---|---|---|
+| Domains attaching themselves | A Vercel token at vercel.com/account/tokens | `VERCEL_API_TOKEN`, then `DOMAIN_DRIVER=vercel` |
+| The challenge after repeated failures | A Cloudflare Turnstile widget for `mehfilbox.com` | `NEXT_PUBLIC_TURNSTILE_SITE_KEY` + `TURNSTILE_SECRET_KEY`, then `CAPTCHA_DRIVER=turnstile` |
+
+`lib/env.ts` refuses to boot if either driver is switched on without its keys, so a half-done
+upgrade fails at deploy rather than on somebody's first sign-in.
+
+`DOMAIN_CNAME_TARGET` is `cname.vercel-dns.com` — Vercel's own target, so a studio pointing
+`films.kalyanam.in` at us needs no record on our side. The default in `lib/env.ts`
+(`cname.mehfilbox.com`) would have needed one, and it does not exist.
+
+## 3. Signing in to the platform console
+
+`/admin/platform` stays a 404 for everybody without a `platform_admins` row — including every
+studio operator, and including your own studio account. Sign in at `/login` with the platform
+address above and you land there.
+
+**This only works from the N-76 deploy onward.** Until then the sign-in route refuses an account
+with no operator row, which is every platform admin; the row exists but is unreachable.
