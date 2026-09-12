@@ -155,4 +155,56 @@ h3 {
 `,
 )
 
-console.log(`built ${OUT}`)
+// ── README ────────────────────────────────────────────────────────────────────
+/**
+ * The README is the one artifact a design agent reads as prose: `readmeHeader` (the human-authored
+ * conventions) is prepended, then a deterministic index of exactly what shipped — every token and
+ * class name, read back out of the files just emitted so the index can never disagree with the
+ * bundle. Without this step the header lives only in a source file the agent never sees.
+ */
+const config = JSON.parse(readFileSync(join(ROOT, '.design-sync/config.json'), 'utf8'))
+const header = readFileSync(join(ROOT, config.readmeHeader), 'utf8').trimEnd()
+
+const emittedCss = ['tokens/theme.css', 'tokens/surface.css', 'fonts/fonts.css']
+  .map((f) => readFileSync(join(OUT, f), 'utf8'))
+  .join('\n')
+const utilCss = readFileSync(join(OUT, '_ds_bundle.css'), 'utf8')
+
+const stripComments = (s) => s.replace(/\/\*[\s\S]*?\*\//g, '')
+const uniqSorted = (matches) => [...new Set(matches)].sort()
+// Custom properties: `--name:` at a declaration, never inside a `var(--name)` reference.
+const tokens = uniqSorted((stripComments(emittedCss).match(/--[\w-]+(?=\s*:)/g) || []))
+// Class selectors only: a `.name` in selector position (line start or after a combinator/comma),
+// so paths and URLs left in the CSS (`build-tokens.mjs`, `w3.org`) can't masquerade as classes.
+const classes = uniqSorted(
+  [...stripComments(utilCss).matchAll(/(?:^|[\s,>+~(])\.([a-z][\w-]*)/gim)].map((m) => m[1]),
+)
+
+const index = `
+
+---
+
+## What ships — generated index
+
+Extracted from the emitted CSS by \`.design-sync/build-tokens.mjs\`; it cannot disagree with the
+bundle. Everything below is reachable from \`styles.css\`'s \`@import\` closure — the only files a
+design receives. Read those files for values; the names are the contract.
+
+### Custom properties (${tokens.length})
+
+${tokens.map((t) => `\`${t}\``).join(', ')}
+
+### Utility classes (${classes.length})
+
+${classes.map((c) => `\`.${c}\``).join(', ')}
+
+### Self-hosted faces
+
+Archivo (800–900, Latin), Inter (400–600, Latin), Mukta (400/700, Latin + Devanagari) — woff2,
+SIL OFL 1.1 (see \`fonts/LICENSES.md\`). Put \`lang="hi"\` on Devanagari content so Mukta and its
+extra leading apply.
+`
+
+writeFileSync(join(OUT, 'README.md'), `${header}\n${index}`)
+
+console.log(`built ${OUT} — README carries readmeHeader + ${tokens.length} tokens, ${classes.length} classes`)
