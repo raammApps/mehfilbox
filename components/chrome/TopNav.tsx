@@ -6,12 +6,16 @@ import { useCatalogue } from '@/components/streaming/CatalogueProvider'
 import { LOCALE_LABELS, type Translator } from '@/lib/i18n'
 import { hashSlug } from '@/lib/poster'
 import { LOCALES, type Locale } from '@/lib/schema'
+import { ShareButton } from '@/components/streaming/ShareButton'
 
 type Props = {
   appName: string
   logoUrl: string | null
   locale: Locale
   t: Translator
+  /** The whole wedding's address and the text that travels with it (D-41). Omit to hide the control. */
+  shareUrl?: string
+  shareText?: string
 }
 
 const AVATAR_COLOURS = ['#f2933a', '#d4547e', '#3b3f8f', '#1f6b52', '#e0b155', '#8e1220']
@@ -25,7 +29,7 @@ const AVATAR_COLOURS = ['#f2933a', '#d4547e', '#3b3f8f', '#1f6b52', '#e0b155', '
  * untappable. doc 02 §4 specifies an avatar here, and the avatar is also what makes the
  * row fit.
  */
-export function TopNav({ appName, logoUrl, locale, t }: Props) {
+export function TopNav({ appName, logoUrl, locale, t, shareUrl, shareText }: Props) {
   const { setProfileId, preview, basePath } = useCatalogue()
   const [solid, setSolid] = useState(false)
 
@@ -67,6 +71,14 @@ export function TopNav({ appName, logoUrl, locale, t }: Props) {
 
         <div className="flex shrink-0 items-center gap-1">
           <LanguageToggle locale={locale} t={t} />
+
+          {/*
+            Share the wedding, not a film — the control that turns a guest into the next
+            couple's referral (D-41). Inert in the customizer preview like the profile switcher.
+          */}
+          {shareUrl && !preview ? (
+            <ShareButton url={shareUrl} text={shareText ?? appName} t={t} nav />
+          ) : null}
 
           {!preview ? (
             <button

@@ -95,7 +95,13 @@ export default defineConfig({
 
   webServer: [
     {
-      command: 'pnpm build && pnpm start',
+      /**
+       * The data cache under `.next/cache` survives between runs, and `unstable_cache` serves a
+       * stale entry while it revalidates — so a row cached by last week's build, missing a column
+       * added since, is what the first request of this run sees. Cleared before the build, once,
+       * because the second server's build below starts after this one is listening.
+       */
+      command: 'rm -rf .next/cache/fetch-cache && pnpm build && pnpm start',
       url: `${BASE_URL}/api/health`,
       reuseExistingServer: !process.env.CI,
       // A cold `next build` on a loaded machine exceeds three minutes. The suite itself runs in
@@ -105,6 +111,12 @@ export default defineConfig({
       env: {
         ...SHARED_ENV,
         PORT: String(PORT),
+        /**
+         * The retired mode, requested explicitly (D-32). Rendering is identical between the
+         * modes, and a catalogue at a host root is still the cheapest way to drive the guest
+         * suites; only addressing differs, and the path-mode project below covers that.
+         */
+        TENANCY_MODE: 'subdomain',
         /**
          * The port has to match the one the server is actually on.
          *

@@ -85,7 +85,22 @@ export class MemoryRepository implements Repository {
   protected data: Snapshot
 
   constructor(snapshot: Snapshot = emptySnapshot()) {
-    this.data = snapshot
+    this.data = MemoryRepository.withTenantSlugs(snapshot)
+  }
+
+  /**
+   * Fill `tenantSlug` on catalogues that predate it (D-32) — the file driver's store from August,
+   * and every fixture that builds a catalogue without naming its studio segment. Derived exactly
+   * as migration 0016 derives it: the originating org's slug, else the owner's. A catalogue whose
+   * org is not in the snapshot keeps '' and addresses through the legacy `/c/<slug>` form.
+   */
+  private static withTenantSlugs(snapshot: Snapshot): Snapshot {
+    const orgSlug = new Map(snapshot.orgs.map((o) => [o.id, o.slug]))
+    for (const catalogue of snapshot.catalogues) {
+      if (catalogue.tenantSlug) continue
+      catalogue.tenantSlug = orgSlug.get(catalogue.originOrgId ?? '') ?? orgSlug.get(catalogue.orgId) ?? ''
+    }
+    return snapshot
   }
 
   /** Structured-clone on the way out so callers cannot mutate the store by accident. */

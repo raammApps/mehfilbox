@@ -269,6 +269,8 @@ function buildCatalogue(): Catalogue {
     orgId: ORG_ID,
     originOrgId: ORG_ID,
     slug: 'aanya-vikram',
+    // The studio segment of the address (D-32): `/kalyanam/aanya-vikram`.
+    tenantSlug: 'kalyanam',
     customDomain: null,
     coupleName: { en: 'Aanya & Vikram', hi: 'आन्या और विक्रम' },
     // Not "AanyaVikramFlix" — doc 12 §1 rule 3, and the schema rejects it anyway.

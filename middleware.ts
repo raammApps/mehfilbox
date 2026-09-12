@@ -1,27 +1,44 @@
 import { NextResponse, type NextRequest } from 'next/server'
-import { resolveTenant } from '@/lib/tenant'
+import { parseTenantPath, resolveTenant } from '@/lib/tenant'
 
 /**
- * Host → route rewrite (doc 05 §5).
+ * Host and path → route rewrite (doc 05 §5, D-32).
  *
- * `resolveTenant` is a pure function tested exhaustively in `tests/unit/tenant.test.ts`; this
- * file only translates its verdict into a rewrite, so the routing logic itself is testable
- * without spinning up a server.
+ * `resolveTenant` and `parseTenantPath` are pure functions tested exhaustively in
+ * `tests/unit/tenant.test.ts`; this file only translates their verdicts into rewrites, so the
+ * routing logic itself is testable without spinning up a server.
  */
 export const config = {
   matcher: ['/((?!_next/static|_next/image|favicon.ico|fonts/|media/|api/health).*)'],
 }
+
+/** Set on every rewrite onto a catalogue route, so the page can tell a canonical arrival from a legacy one. */
+const TENANT_HEADER = 'x-mehfilbox-tenant'
+const CATALOGUE_HEADER = 'x-mehfilbox-catalogue'
 
 export function middleware(request: NextRequest) {
   const url = request.nextUrl.clone()
   const rootDomain = process.env.ROOT_DOMAIN ?? 'lvh.me:3000'
 
   /**
-   * Path mode needs no host inspection at all: `/c/<slug>` and `/admin` are already the real
-   * routes, and subdomain mode only exists to rewrite onto them. So the whole of this file is
-   * a no-op here — which is the point, and why switching modes cannot break routing.
+   * Path mode — what production runs (D-32). `/<studio>/<wedding>[/…]` is rewritten onto the
+   * internal `/c/<wedding>[/…]` route and marked with the studio segment; everything else — the
+   * consoles, the API, a legacy `/c/` link — passes straight through. A legacy link is answered by
+   * the page with a redirect to its canonical address, because only the page knows which studio a
+   * wedding belongs to and middleware must not query the database.
    */
-  if ((process.env.TENANCY_MODE ?? 'subdomain') === 'path') return NextResponse.next()
+  // The fallback matches `lib/env.ts`'s default, which middleware cannot import (it is server-only
+  // and validates the whole environment at load).
+  if ((process.env.TENANCY_MODE ?? 'path') === 'path') {
+    const tenantPath = parseTenantPath(url.pathname)
+    if (!tenantPath) return NextResponse.next()
+
+    url.pathname = `/c/${tenantPath.slug}${tenantPath.rest}`
+    const response = NextResponse.rewrite(url)
+    response.headers.set(TENANT_HEADER, tenantPath.tenant)
+    response.headers.set(CATALOGUE_HEADER, tenantPath.slug)
+    return response
+  }
 
   const resolution = resolveTenant(request.headers.get('host'), rootDomain)
 
@@ -52,12 +69,12 @@ export function middleware(request: NextRequest) {
     case 'catalogue': {
       if (url.pathname.startsWith('/api') || url.pathname.startsWith('/admin')) {
         const response = NextResponse.next()
-        response.headers.set('x-mehfilbox-catalogue', resolution.slug)
+        response.headers.set(CATALOGUE_HEADER, resolution.slug)
         return response
       }
       url.pathname = `/c/${resolution.slug}${url.pathname === '/' ? '' : url.pathname}`
       const response = NextResponse.rewrite(url)
-      response.headers.set('x-mehfilbox-catalogue', resolution.slug)
+      response.headers.set(CATALOGUE_HEADER, resolution.slug)
       return response
     }
 

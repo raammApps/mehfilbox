@@ -70,6 +70,8 @@ export function ThemePicker({
   const [presentedBy, setPresentedBy] = useState(pending.presentedBy ?? '')
   const [logoUrl, setLogoUrl] = useState(pending.logoUrl ?? '')
   const [displayFont, setDisplayFont] = useState(pending.displayFont ?? 'archivo')
+  // On unless switched off (D-41): absent in a row written before the field existed means on.
+  const [platformCredit, setPlatformCredit] = useState(pending.platformCredit !== false)
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
   const [touched, setTouched] = useState(false)
 
@@ -100,7 +102,14 @@ export function ThemePicker({
    * them once is both correct and the only stable option.
    */
   const [carriedOver] = useState(() => {
-    const { accent: _a, presentedBy: _p, logoUrl: _l, displayFont: _d, ...rest } = pending
+    const {
+      accent: _a,
+      presentedBy: _p,
+      logoUrl: _l,
+      displayFont: _d,
+      platformCredit: _c,
+      ...rest
+    } = pending
     return rest
   })
 
@@ -114,8 +123,9 @@ export function ThemePicker({
       presentedBy: presentedBy || undefined,
       logoUrl: logoUrl || undefined,
       displayFont,
+      platformCredit,
     })
-  }, [accent, presentedBy, logoUrl, displayFont, touched, onPreview, carriedOver])
+  }, [accent, presentedBy, logoUrl, displayFont, platformCredit, touched, onPreview, carriedOver])
 
   useEffect(() => {
     if (!touched) return
@@ -128,6 +138,7 @@ export function ThemePicker({
           presentedBy: presentedBy || undefined,
           logoUrl: logoUrl || undefined,
           displayFont,
+          platformCredit,
         }
         const response = await fetch(
           targetKind === 'studio' ? '/api/admin/studio' : `/api/admin/catalogues/${targetId}`,
@@ -164,7 +175,7 @@ export function ThemePicker({
     }, 700)
 
     return () => window.clearTimeout(timer)
-  }, [accent, presentedBy, logoUrl, displayFont, touched, targetKind, targetId])
+  }, [accent, presentedBy, logoUrl, displayFont, platformCredit, touched, targetKind, targetId])
 
   return (
     <section
@@ -291,6 +302,30 @@ export function ThemePicker({
         }}
         className="mb-4 w-full rounded-[var(--radius-input)] border border-[var(--color-l-line)] px-3 py-2 text-[15px]"
       />
+
+      {/*
+        The one place the product may name itself in front of a guest (D-41). On by default; a
+        studio reselling to a client who must not see a supplier turns it off here, once, and every
+        wedding created afterwards inherits the choice like the rest of the branding.
+      */}
+      <label className="mb-4 flex cursor-pointer items-start gap-3 rounded-[var(--radius-input)] border border-[var(--color-l-line)] px-3 py-2.5">
+        <input
+          type="checkbox"
+          checked={platformCredit}
+          onChange={(event) => {
+            setPlatformCredit(event.target.checked)
+            setTouched(true)
+          }}
+          className="mt-1 h-4 w-4 accent-[var(--color-accent)]"
+        />
+        <span className="text-[14px]">
+          Show &ldquo;Made with Mehfilbox&rdquo; in the footer
+          <span className="block text-[12px] text-[var(--color-l-text-mid)]">
+            A small line at the foot of the page, linking back to us. Turn it off if your client
+            should not see a supplier&rsquo;s name.
+          </span>
+        </span>
+      </label>
 
       {/*
         No button: branding saves itself, like the sections beside it. A button here implied the

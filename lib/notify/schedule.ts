@@ -1,11 +1,10 @@
 import 'server-only'
 import { getRepository } from '@/lib/db'
-import { env } from '@/lib/env'
 import { formatWeddingDate } from '@/lib/format'
 import { resolveLocalised } from '@/lib/i18n'
 import { log } from '@/lib/log'
 import type { Catalogue } from '@/lib/schema'
-import { catalogueUrl } from '@/lib/tenant'
+import { publicUrlOf } from '@/lib/address'
 import { enqueue } from './send'
 
 /**
@@ -91,7 +90,7 @@ export async function queueDueWarnings(now: Date = new Date()): Promise<Schedule
     const params = {
       coupleName: resolveLocalised(catalogue.coupleName, catalogue.locale),
       studioName: catalogue.branding.presentedBy ?? 'your studio',
-      url: catalogueUrl(catalogue.slug, env.ROOT_DOMAIN, '/', env.TENANCY_MODE),
+      url: publicUrlOf(catalogue),
       date: formatWeddingDate(catalogue.includedUntil, catalogue.locale),
       days: milestone.day,
     }

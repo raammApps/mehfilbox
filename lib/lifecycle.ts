@@ -1,12 +1,11 @@
 import 'server-only'
 import { getRepository } from '@/lib/db'
-import { env } from '@/lib/env'
 import { formatWeddingDate } from '@/lib/format'
 import { resolveLocalised } from '@/lib/i18n'
 import { log } from '@/lib/log'
 import { enqueue } from '@/lib/notify/send'
 import type { Catalogue, SubStatus } from '@/lib/schema'
-import { catalogueUrl } from '@/lib/tenant'
+import { publicUrlOf } from '@/lib/address'
 
 /**
  * The lapse ladder (N-24, `PRICING.md` §2).
@@ -122,7 +121,7 @@ async function tell(catalogue: Catalogue, next: SubStatus): Promise<void> {
   const params = {
     coupleName: resolveLocalised(catalogue.coupleName, catalogue.locale),
     studioName: catalogue.branding.presentedBy ?? 'your studio',
-    url: catalogueUrl(catalogue.slug, env.ROOT_DOMAIN, '/', env.TENANCY_MODE),
+    url: publicUrlOf(catalogue),
     date: formatWeddingDate(catalogue.includedUntil, catalogue.locale),
   }
 

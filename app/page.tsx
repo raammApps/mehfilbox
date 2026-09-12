@@ -275,7 +275,7 @@ function Faq() {
     ],
     [
       'Whose brand does the couple see?',
-      'Yours. Your logo, your colour, your domain if you want one. Mehfilbox is not mentioned on the page the couple opens.',
+      'Yours. Your logo, your colour, your domain if you want one. A small "Made with Mehfilbox" line sits in the footer unless you switch it off in your studio settings — one click, and we are gone from the page.',
     ],
     [
       'Do we lose the client to you?',

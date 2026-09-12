@@ -98,67 +98,41 @@ Verify: `pnpm preflight` shows the schema and the first org. `pnpm test:integrat
 > If the integration run fails immediately after applying the DDL with `PGRST205`, wait thirty
 > seconds. PostgREST caches the schema and takes a moment to notice new tables.
 
-## 5. DNS and addressing — pick a mode first
+## 5. DNS and addressing
 
-`TENANCY_MODE` decides how a catalogue is addressed, and it decides your DNS. Both modes are
-configuration; moving between them is an environment variable and a redeploy, never a code
-change.
-
-### Mode A — `path` (start here)
+`TENANCY_MODE=path` is the product (D-32, 12 September 2026). A catalogue's address is
+`mehfilbox.com/<studio>/<wedding>` — the studio segment is the originating org's slug, frozen on
+the catalogue at creation — and the console is `mehfilbox.com/admin`.
 
 ```
 TENANCY_MODE=path
-ROOT_DOMAIN=marquee.raammcorp.in
+ROOT_DOMAIN=mehfilbox.com
 ```
 
 | Surface | URL |
 |---|---|
-| Catalogue | `marquee.raammcorp.in/c/aanya-vikram` |
-| Admin | `marquee.raammcorp.in/admin` |
+| Catalogue | `mehfilbox.com/kalyanam/aanya-vikram-2026` |
+| A film, deep-linked | `mehfilbox.com/kalyanam/aanya-vikram-2026/watch/the-ceremony?t=428` |
+| Legacy link | `mehfilbox.com/c/aanya-vikram-2026` → 301 to the address above |
+| Sign in | `mehfilbox.com/login` |
+| Console | `mehfilbox.com/admin` |
 
-**DNS: one record.**
+**DNS: the root and `www`, nothing else.** Two A records (or a CNAME on `www`) at the registrar,
+nameservers left where they are, MX records untouched. One domain, one certificate, no wildcard —
+which is the reason for the mode. `GO-LIVE.md` §4 has the exact records for the live domains.
 
-| Record | Type | Value |
-|---|---|---|
-| `marquee` | CNAME | the value Vercel shows for the domain |
+Reserved first segments (`admin`, `api`, `c`, `d`, `claim`, `my`, `login`, `register`,
+`set-password`, `privacy`, `terms`, `og`, `_next`, `fonts`, `media`, plus every reserved
+subdomain label) can never be a studio slug; `lib/tenant.ts` lists them and registration refuses
+them.
 
-Nothing else about `raammcorp.in` changes — its nameservers stay at GoDaddy, and any email on
-the domain is untouched. This is the right starting point while the name and the domain are
-still moving.
+### `subdomain` — retired, kept for the harness
 
-### Mode B — `subdomain` (what the product wants)
-
-```
-TENANCY_MODE=subdomain
-ROOT_DOMAIN=raammcorp.in
-```
-
-| Surface | URL |
-|---|---|
-| Catalogue | `aanya-vikram.raammcorp.in` |
-| Admin | `admin.raammcorp.in` |
-
-This is what doc 02 §1 specifies and what the product is actually for — a couple's link that
-reads as *their* site is a large part of the double-take doc 01 §2 is selling. A guest seeing
-`/c/aanya-vikram` in the address bar is on someone's platform; a guest seeing
-`aanya-vikram.…` is on the couple's.
-
-**The cost:** Vercel's docs are explicit that a wildcard domain *"must use the nameservers
-method for verification"*. Adding `*.raammcorp.in` therefore means pointing GoDaddy's
-nameservers at Vercel, after which **all** DNS for `raammcorp.in` is managed at Vercel — every
-existing record, MX included, has to be recreated there first. On a corp domain that carries
-email, do this deliberately, not on a Friday.
-
-A middle path: delegate a *subdomain* instead. Point `marquee.raammcorp.in`'s nameservers at
-Vercel (GoDaddy supports NS records on a subdomain), set
-`ROOT_DOMAIN=marquee.raammcorp.in`, and catalogues become
-`aanya-vikram.marquee.raammcorp.in`. Wildcard behaviour, apex DNS untouched. `resolveTenant`
-handles a root that is itself a subdomain — there is a test for exactly this.
-
-Reserved labels (`www`, `admin`, `api`, `app`, `cdn`, `demo`, `staging`, …) can never be
-catalogue slugs; `lib/schema.ts` rejects them at creation.
-
-> Hobby plan: 50 custom domains per project. Fine for either mode — in `path` mode you use one.
+`TENANCY_MODE=subdomain` still works — `<wedding>.<root>` and `admin.<root>` — because the
+Playwright suite boots one server this way and nothing about *rendering* differs between the
+modes. It is not sold and no document describes it as an address any more. It needs a wildcard
+record, which on Vercel means delegating the whole domain's nameservers; that cost is why it was
+retired.
 
 ## 6. Environment variables
 

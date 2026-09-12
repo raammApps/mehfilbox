@@ -35,11 +35,12 @@ const schema = z
     ROOT_DOMAIN: nonEmpty.default('lvh.me:3000'),
 
     /**
-     * How a catalogue is addressed. `subdomain` is what doc 02 §1 specifies and what production
-     * wants; `path` needs only one CNAME rather than a wildcard, which on Vercel would mean
+     * How a catalogue is addressed. `path` — `<root>/<studio>/<wedding>` — is the product (D-32):
+     * one domain, one certificate, no wildcard. `subdomain` is retired and kept only because the
+     * Playwright harness boots one server that way; it needs wildcard DNS, which on Vercel means
      * delegating the whole domain's nameservers.
      */
-    TENANCY_MODE: z.enum(['subdomain', 'path']).default('subdomain'),
+    TENANCY_MODE: z.enum(['subdomain', 'path']).default('path'),
 
     /** Shown to a couple whose subscription lapsed. Not a code constant. */
     SUPPORT_EMAIL: z.string().email().default('hello@example.com'),

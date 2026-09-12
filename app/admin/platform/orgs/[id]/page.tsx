@@ -6,9 +6,8 @@ import { OrgStatusControl } from '@/components/admin/OrgStatusControl'
 import { getPlatformAdmin } from '@/lib/admin/platform'
 import { getRepository } from '@/lib/db'
 import { DEFAULT_LIMITS } from '@/lib/entitlements'
-import { env } from '@/lib/env'
 import { formatWeddingDate } from '@/lib/format'
-import { catalogueUrl } from '@/lib/tenant'
+import { publicUrlOf } from '@/lib/address'
 
 export const dynamic = 'force-dynamic'
 
@@ -117,7 +116,7 @@ export default async function PlatformOrgPage({ params }: { params: Promise<{ id
               <p className="mt-2">
                 {/* The guest page, which is what a partner is usually describing. */}
                 <a
-                  href={catalogueUrl(catalogue.slug, env.ROOT_DOMAIN, '/', env.TENANCY_MODE)}
+                  href={publicUrlOf(catalogue)}
                   target="_blank"
                   rel="noreferrer"
                   className="font-mono text-[12px] underline underline-offset-4"

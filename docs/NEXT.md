@@ -49,7 +49,6 @@ depends on it. The decisions behind them are D-32 to D-41.
 
 | | Item | Doc 16 | Size |
 |---|---|---|---|
-| **N-60** | **Tenant-path addressing** — `/<studio>/<wedding>`, canonical redirects, `/c/` alias, share-this-wedding, the platform credit toggle | §1, §11 | 1 session |
 | **N-61** | **Two doors, one credential store** — `/login`, forgot-password credential links, `AuthProvider.setPassword`, per-address lockout, the captcha seam | §2 | 1 session |
 | **N-62** | **Couple accounts** — created by the studio, linked before owned, handover attaches, the support window, `/my` v1 | §3, §6 | 1–2 sessions |
 | **N-63** | **Themes** — registry of seven, `ThemeStyle` writes the whole token set, picker in the customizer and wizard, contrast per theme, platform-authored themes | §4 | 1 session |

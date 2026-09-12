@@ -12,11 +12,10 @@ import { catalogueAttention } from '@/lib/admin/catalogue-health'
 import { setupChecklist } from '@/lib/admin/setup-checklist'
 import { hoursFor, resolveLimits, storageUsage } from '@/lib/entitlements'
 import { getRepository } from '@/lib/db'
-import { env } from '@/lib/env'
 import { formatWeddingDate } from '@/lib/format'
 import { resolveLocalised } from '@/lib/i18n'
 import { render } from '@/lib/notify/templates'
-import { catalogueUrl } from '@/lib/tenant'
+import { publicUrlOf } from '@/lib/address'
 
 export const dynamic = 'force-dynamic'
 
@@ -61,7 +60,7 @@ export default async function CatalogueOverviewPage({
     counts,
     includedUntil: catalogue.includedUntil,
   })
-  const url = catalogueUrl(catalogue.slug, env.ROOT_DOMAIN, '/', env.TENANCY_MODE)
+  const url = publicUrlOf(catalogue)
 
   // A couple owns exactly one wedding — their own — and has nobody to hand it to. Showing them
   // the panel would only invite them to give their own catalogue away.

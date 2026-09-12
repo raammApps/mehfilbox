@@ -12,6 +12,8 @@ export const dictionary = {
     'nav.profile': 'Profile',
     'nav.switchProfile': 'Switch profile',
     'nav.language': 'Language',
+    // The whole wedding, shared from the top bar (D-41). `{couple}` is the couple's name.
+    'share.catalogue': '{couple} — the wedding, streaming here',
 
     'profileGate.heading': "Who's joining?",
     'profileGate.hint': 'Pick one so we can remember where you stopped watching.',
@@ -76,6 +78,7 @@ export const dictionary = {
     'randomiser.waiting': '{count} to choose from',
 
     'footer.presentedBy': 'Presented by {name}',
+    'footer.madeWith': 'Made with {name}',
     'footer.privacy': 'Privacy',
     'footer.renew': 'Renew',
 
@@ -174,6 +177,7 @@ export const dictionary = {
     'nav.profile': 'प्रोफ़ाइल',
     'nav.switchProfile': 'प्रोफ़ाइल बदलें',
     'nav.language': 'भाषा',
+    'share.catalogue': '{couple} — शादी की फ़िल्में, यहाँ देखें',
 
     'profileGate.heading': 'कौन देख रहा है?',
     'profileGate.hint': 'एक चुनें ताकि हम याद रख सकें आपने कहाँ छोड़ा था।',
@@ -236,6 +240,7 @@ export const dictionary = {
     'randomiser.waiting': '{count} में से एक',
 
     'footer.presentedBy': 'प्रस्तुति: {name}',
+    'footer.madeWith': '{name} पर बनाया गया',
     'footer.privacy': 'गोपनीयता',
     'footer.renew': 'नवीनीकरण',
 

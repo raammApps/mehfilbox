@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation'
 import { ThemeStyle } from '@/components/chrome/ThemeStyle'
+import { requireCanonicalAddress } from '@/lib/address'
 import { buildManifest, resolveDownloadAccess } from '@/lib/downloads'
 import { guestLocale } from '@/lib/guest-locale'
 import { createTranslator, resolveLocalised } from '@/lib/i18n'
@@ -26,6 +27,7 @@ export default async function DownloadPage({ params }: { params: Promise<{ slug:
   if (verdict.kind !== 'ok') notFound()
 
   const { catalogue } = verdict
+  await requireCanonicalAddress(catalogue, '/download')
   const locale = await guestLocale(catalogue)
   const t = createTranslator(locale)
   const manifest = await buildManifest(catalogue)

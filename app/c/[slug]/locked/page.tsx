@@ -4,8 +4,7 @@ import { ThemeStyle } from '@/components/chrome/ThemeStyle'
 import { resolveAccess } from '@/lib/catalogue-access'
 import {createTranslator, resolveLocalised} from '@/lib/i18n'
 import { guestLocale } from '@/lib/guest-locale'
-import { cataloguePath } from '@/lib/tenant'
-import { env } from '@/lib/env'
+import { basePathOf, requireCanonicalAddress } from '@/lib/address'
 
 export const dynamic = 'force-dynamic'
 
@@ -13,12 +12,14 @@ export default async function LockedPage({ params }: { params: Promise<{ slug: s
   const { slug } = await params
   const verdict = await resolveAccess(slug)
 
-  const basePath = cataloguePath(slug, env.TENANCY_MODE)
-
   if (verdict.kind === 'missing') notFound()
+
+  const basePath = basePathOf(verdict.catalogue)
+
   // Already satisfied, or never needed: do not strand a guest on a gate they have passed — and
   // in path mode '/' is the marketing page, not this catalogue.
   if (verdict.kind === 'ok') redirect(basePath || '/')
+  await requireCanonicalAddress(verdict.catalogue, '/locked')
 
   const locale = await guestLocale(verdict.catalogue)
   const t = createTranslator(locale)

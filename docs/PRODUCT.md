@@ -91,7 +91,7 @@ graph, so there is no privilege-escalation path to get wrong; what is missing is
 | Language — **chosen at account creation** | **Missing** | **New requirement.** `orgSchema` has no locale field, so a tenant cannot set the language for their account and have new catalogues inherit it. Today the guest toggles and the default is always English. |
 | Language — admin console | **Missing** | The console is English-only. A Hindi-first studio operates it in English regardless of what their guests see. |
 | Account handover | **Built** | Single-use link, 14 days, hash-stored, one live transfer per catalogue, cancellable. Partner loses access entirely; credit survives. |
-| Custom domain | **Partial** | Stored and validated. **Not served** — needs a CNAME plus the domain added to the hosting project, and nothing automates or verifies either. |
+| Custom domain | **Partial** | Stored and validated. **Not served** — N-68 builds the table, the generated instructions and the verification. |
 | Passcode | **Built** | Optional, five wrong tries locks the address for fifteen minutes. |
 | Add storage | **Missing** | `entitlements` supports per-catalogue grants with expiry. No purchase flow, no UI, no proration. |
 | See what a plan holds | **Missing** | Nothing shows "this plan holds about 9 hours" at purchase, or warns at 80% used. **Required by the pricing** — see `PRICING.md` §6. |
@@ -261,8 +261,8 @@ N-60 to N-75 in [`NEXT.md`](./NEXT.md).
 
 | | Status | Where it stands |
 |---|---|---|
-| Tenant-path addressing `/<studio>/<wedding>` | **Missing** | N-60. `/c/<wedding>` becomes an alias that redirects. |
-| Share this wedding (WhatsApp) and the "Made with Mehfilbox" toggle | **Missing** | N-60. Per-film and per-photograph share exist. |
+| Tenant-path addressing `/<studio>/<wedding>` | **Built** | N-60, 12 Sept. `/c/<wedding>` is an alias that redirects to the canonical address; the studio segment is frozen on the catalogue. |
+| Share this wedding (WhatsApp) and the "Made with Mehfilbox" toggle | **Built** | N-60, 12 Sept. In the top bar; the footer line is on unless the studio switches it off in the branding panel. |
 | One sign-in with a Studio door and a Couple door | **Missing** | N-61. Today `/admin/login` with studio-only copy. |
 | Forgot password, on both doors | **Partial** | Supabase Auth's reset exists and nothing links to it. N-61. |
 | Per-address lockout and a captcha seam | **Partial** | Per-IP limits only. N-61. |

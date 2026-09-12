@@ -6,6 +6,8 @@ import {
   catalogueUrl,
   isLocalDomain,
   normaliseHost,
+  parseTenantPath,
+  RESERVED_PATH_ROOTS,
   resolveTenant,
 } from '@/lib/tenant'
 
@@ -96,60 +98,124 @@ describe('normaliseHost', () => {
 })
 
 describe('catalogueUrl', () => {
+  const wedding = { slug: 'aanya-vikram', tenant: 'kalyanam' }
+
   it('uses https in production and http for a localhost root', () => {
-    expect(catalogueUrl('aanya-vikram', 'mehfilbox.app')).toBe('https://aanya-vikram.mehfilbox.app/')
-    expect(catalogueUrl('aanya-vikram', 'mehfilbox.localhost:3000')).toBe(
+    expect(catalogueUrl(wedding, 'mehfilbox.app')).toBe('https://aanya-vikram.mehfilbox.app/')
+    expect(catalogueUrl(wedding, 'mehfilbox.localhost:3000')).toBe(
       'http://aanya-vikram.mehfilbox.localhost:3000/',
     )
   })
 
   /**
-   * The domain and the addressing strategy are both configuration. Nothing downstream may
-   * assume either — a move from a wildcard to a single CNAME must not reach a component.
+   * The product address (D-32): the studio segment first, then the wedding. The domain and the
+   * addressing strategy are both configuration; nothing downstream may assume either.
    */
-  it('addresses a catalogue by path when the mode says so', () => {
-    expect(catalogueUrl('aanya-vikram', 'raammcorp.in', '/', 'path')).toBe(
-      'https://raammcorp.in/c/aanya-vikram',
+  it('puts the studio in the path when the mode says so', () => {
+    expect(catalogueUrl(wedding, 'mehfilbox.com', '/', 'path')).toBe(
+      'https://mehfilbox.com/kalyanam/aanya-vikram',
     )
-    expect(catalogueUrl('aanya-vikram', 'marquee.raammcorp.in', '/watch/x', 'path')).toBe(
-      'https://marquee.raammcorp.in/c/aanya-vikram/watch/x',
+    expect(catalogueUrl(wedding, 'mehfilbox.com', '/watch/x', 'path')).toBe(
+      'https://mehfilbox.com/kalyanam/aanya-vikram/watch/x',
+    )
+  })
+
+  /**
+   * A row written before the column existed has no studio segment yet. It still gets a link that
+   * opens — the legacy form — rather than `//aanya-vikram`, which opens nothing.
+   */
+  it('falls back to the legacy /c/ form when the studio segment is unknown', () => {
+    expect(catalogueUrl({ slug: 'aanya-vikram' }, 'mehfilbox.com', '/', 'path')).toBe(
+      'https://mehfilbox.com/c/aanya-vikram',
+    )
+    expect(catalogueUrl({ slug: 'aanya-vikram', tenant: null }, 'mehfilbox.com', '/', 'path')).toBe(
+      'https://mehfilbox.com/c/aanya-vikram',
     )
   })
 
   it('keeps the subdomain shape when the mode says so', () => {
-    expect(catalogueUrl('aanya-vikram', 'raammcorp.in', '/watch/x', 'subdomain')).toBe(
+    expect(catalogueUrl(wedding, 'raammcorp.in', '/watch/x', 'subdomain')).toBe(
       'https://aanya-vikram.raammcorp.in/watch/x',
     )
   })
 
   it('works for any domain, which is the whole point', () => {
     for (const domain of ['mehfilbox.app', 'raammcorp.in', 'marquee.film', 'example.co.uk']) {
-      expect(catalogueUrl('couple', domain)).toBe(`https://couple.${domain}/`)
-      expect(catalogueUrl('couple', domain, '/', 'path')).toBe(`https://${domain}/c/couple`)
+      expect(catalogueUrl({ slug: 'couple', tenant: 'studio' }, domain)).toBe(`https://couple.${domain}/`)
+      expect(catalogueUrl({ slug: 'couple', tenant: 'studio' }, domain, '/', 'path')).toBe(
+        `https://${domain}/studio/couple`,
+      )
     }
   })
 })
 
 describe('cataloguePath', () => {
+  const wedding = { slug: 'aanya-vikram', tenant: 'kalyanam' }
+
   /**
    * The relative counterpart of `catalogueUrl`, and the fix for a bug that made the player
    * unreachable in path mode: components pushed `/watch/<slug>`, which is the catalogue root
    * only when the catalogue *is* the site root. In path mode that is the marketing page.
    */
   it('is empty in subdomain mode, where the catalogue is already the root', () => {
-    expect(cataloguePath('aanya-vikram', 'subdomain')).toBe('')
-    expect(cataloguePath('aanya-vikram')).toBe('')
+    expect(cataloguePath(wedding, 'subdomain')).toBe('')
+    expect(cataloguePath(wedding)).toBe('')
   })
 
-  it('prefixes every guest route in path mode', () => {
-    expect(cataloguePath('aanya-vikram', 'path')).toBe('/c/aanya-vikram')
+  it('prefixes every guest route with the studio and the wedding in path mode', () => {
+    expect(cataloguePath(wedding, 'path')).toBe('/kalyanam/aanya-vikram')
+    expect(cataloguePath({ slug: 'aanya-vikram' }, 'path')).toBe('/c/aanya-vikram')
   })
 
   it('composes into the same place `catalogueUrl` points at, in both modes', () => {
     for (const mode of ['subdomain', 'path'] as const) {
-      const absolute = catalogueUrl('aanya-vikram', 'raammcorp.in', '/watch/the-ceremony', mode)
-      const relative = `${cataloguePath('aanya-vikram', mode)}/watch/the-ceremony`
+      const absolute = catalogueUrl(wedding, 'raammcorp.in', '/watch/the-ceremony', mode)
+      const relative = `${cataloguePath(wedding, mode)}/watch/the-ceremony`
       expect(absolute.endsWith(relative)).toBe(true)
+    }
+  })
+})
+
+/**
+ * What middleware does on every request in path mode (D-32). A false positive here is a broken
+ * console; a false negative is a wedding that 404s — so every shape gets its own case.
+ */
+describe('parseTenantPath', () => {
+  it('splits a studio and a wedding, keeping whatever follows', () => {
+    expect(parseTenantPath('/kalyanam/aanya-vikram')).toEqual({
+      tenant: 'kalyanam',
+      slug: 'aanya-vikram',
+      rest: '',
+    })
+    expect(parseTenantPath('/kalyanam/aanya-vikram/watch/the-ceremony')).toEqual({
+      tenant: 'kalyanam',
+      slug: 'aanya-vikram',
+      rest: '/watch/the-ceremony',
+    })
+    expect(parseTenantPath('/kalyanam/aanya-vikram/')).toEqual({
+      tenant: 'kalyanam',
+      slug: 'aanya-vikram',
+      rest: '/',
+    })
+  })
+
+  it.each(['/', '/kalyanam', '/admin', '/admin/c/123', '/api/health', '/c/aanya-vikram', '/my/account', '/login', '/claim/abc', '/privacy', '/_next/static/x.js'])(
+    'leaves %s to the application',
+    (pathname) => {
+      expect(parseTenantPath(pathname)).toBeNull()
+    },
+  )
+
+  it.each(['/Kalyanam/aanya-vikram', '/kal_yanam/aanya', '/kalyanam/aanya vikram', '/-kalyanam/aanya', '/kalyanam/aanya-'])(
+    'refuses a segment that is not slug-shaped (%s)',
+    (pathname) => {
+      expect(parseTenantPath(pathname)).toBeNull()
+    },
+  )
+
+  it('never treats a reserved word as a studio, even one a studio could try to register', () => {
+    for (const root of RESERVED_PATH_ROOTS) {
+      expect(parseTenantPath(`/${root}/aanya-vikram`), root).toBeNull()
     }
   })
 })

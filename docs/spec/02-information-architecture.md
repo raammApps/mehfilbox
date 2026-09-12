@@ -5,6 +5,12 @@ Two applications sharing one codebase: the **catalogue** (guests, unauthenticate
 
 ## 1. Sitemap
 
+> **Superseded — addressing (12 September 2026, D-32).** A catalogue lives at
+> `mehfilbox.com/<studio>/<wedding>`, not on a subdomain; the console at `/admin`, the couple's
+> account at `/my`, sign-in at `/login`. `docs/spec/16-platform-v2.md` §1 is current. The tree
+> below is kept for the *pages* it lists, which are unchanged.
+
+
 ```
 CATALOGUE — <slug>.heirloomfilms.app   (guests, no login)
 ├── /                       Browse: profile gate → billboard → rows

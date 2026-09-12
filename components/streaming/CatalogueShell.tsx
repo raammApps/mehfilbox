@@ -18,10 +18,16 @@ type Props = {
   initialTitleSlug: string | null
   initialProgress: PlaybackProgress[]
   shareBaseUrl: string
-  /** '' in subdomain mode, '/c/<slug>' in path mode. See `cataloguePath`. */
+  /** The catalogue's own address, exactly as printed — what "share this wedding" sends (D-41). */
+  publicUrl?: string
+  /** '' in subdomain mode, '/<studio>/<wedding>' in path mode. See `cataloguePath`. */
   basePath?: string
   /** Set inside the customizer's preview pane: navigation, history and the gate go inert. */
   preview?: boolean
+  /** Whether the footer says "Made with Mehfilbox" — a studio setting, on unless turned off (D-41). */
+  platformCredit?: boolean
+  /** Where that line points: the marketing site, carrying the studio that sent the guest. */
+  platformHref?: string
 }
 
 /**
@@ -42,8 +48,11 @@ export function CatalogueShell({
   initialTitleSlug,
   initialProgress,
   shareBaseUrl,
+  publicUrl,
   basePath = '',
   preview = false,
+  platformCredit = true,
+  platformHref,
 }: Props) {
   const { catalogue, titles, albums, photos } = bundle
   /**
@@ -64,6 +73,7 @@ export function CatalogueShell({
   const t = createTranslator(locale)
   const appName = resolveLocalised(catalogue.appName, locale)
   const presentedBy = catalogue.branding.presentedBy ?? null
+  const coupleName = resolveLocalised(catalogue.coupleName, locale)
 
   return (
     <CatalogueProvider
@@ -83,7 +93,15 @@ export function CatalogueShell({
       </a>
 
       <ProfileGate appName={appName} t={t} />
-      <TopNav appName={appName} logoUrl={catalogue.branding.logoUrl || null} locale={locale} t={t} />
+      <TopNav
+        appName={appName}
+        logoUrl={catalogue.branding.logoUrl || null}
+        locale={locale}
+        t={t}
+        // The whole wedding, not one film: the share that brings the next studio in (D-41).
+        shareUrl={publicUrl ?? `${shareBaseUrl}/`}
+        shareText={t('share.catalogue', { couple: coupleName })}
+      />
 
       <main id="content">
         {titles.length === 0 && photos.length === 0 ? (
@@ -104,7 +122,11 @@ export function CatalogueShell({
       <SiteFooter
         presentedBy={presentedBy}
         t={t}
-        downloadHref={`/c/${catalogue.slug}/download`}
+        // Off the catalogue's own base: `/c/…` was only right in path mode, and only until the
+        // address moved (D-32).
+        downloadHref={`${basePath}/download`}
+        platformCredit={platformCredit}
+        platformHref={platformHref ?? null}
       />
 
       <TitleModal

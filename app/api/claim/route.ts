@@ -7,12 +7,11 @@ import { getRepository } from '@/lib/db'
 import { ApiError } from '@/lib/http/errors'
 import { readJson, route } from '@/lib/http/handler'
 import { clientIp, consume } from '@/lib/http/rate-limit'
-import { env } from '@/lib/env'
 import { formatWeddingDate } from '@/lib/format'
 import { resolveLocalised } from '@/lib/i18n'
 import { log } from '@/lib/log'
 import { enqueue } from '@/lib/notify/send'
-import { catalogueUrl } from '@/lib/tenant'
+import { publicUrlOf } from '@/lib/address'
 import { suggestOrgSlug } from '@/lib/format'
 import { claimSchema, orgSchema } from '@/lib/schema'
 
@@ -153,7 +152,7 @@ export async function POST(request: Request) {
         params: {
           coupleName: resolveLocalised(catalogue.coupleName, catalogue.locale),
           studioName: partner?.name ?? 'your studio',
-          url: catalogueUrl(catalogue.slug, env.ROOT_DOMAIN, '/', env.TENANCY_MODE),
+          url: publicUrlOf(catalogue),
           date: formatWeddingDate(catalogue.includedUntil, catalogue.locale),
         },
       })

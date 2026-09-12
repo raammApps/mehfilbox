@@ -16,21 +16,54 @@ import { expect, test } from '@playwright/test'
  * identical between the modes; addressing is the whole difference.
  */
 const CATALOGUE = 'aanya-vikram'
+/** The demo studio's slug — the segment every address of its weddings starts with (D-32). */
+const STUDIO = 'kalyanam'
+const BASE = `/${STUDIO}/${CATALOGUE}`
 
 /** A returning guest, so the profile gate never races an assertion. */
 async function openBrowse(page: import('@playwright/test').Page, path = ''): Promise<void> {
   await page.addInitScript((slug) => {
     window.localStorage.setItem(`mehfilbox.profile.${slug}`, 'skipped')
   }, CATALOGUE)
-  await page.goto(`/c/${CATALOGUE}${path}`)
+  await page.goto(`${BASE}${path}`)
   await expect(page.getByTestId('profile-gate')).toHaveCount(0)
 }
 
 test.describe('path mode — the configuration production actually runs', () => {
-  test('the catalogue is served from /c/<slug> with no subdomain at all', async ({ page }) => {
+  test('the catalogue is served from /<studio>/<wedding> with no subdomain at all', async ({
+    page,
+  }) => {
     await openBrowse(page)
     await expect(page.locator('[data-module-id]').first()).toBeVisible()
-    await expect(page).toHaveURL(new RegExp(`/c/${CATALOGUE}$`))
+    await expect(page).toHaveURL(new RegExp(`${BASE}$`))
+  })
+
+  /**
+   * D-32 — one address per wedding, and it is the one the product prints. A link sent before the
+   * studio segment existed, or a typo in it, lands on the canonical form rather than on a second
+   * copy of the page with different OG tags.
+   */
+  test('a legacy /c/ link and a wrong studio segment both land on the canonical address', async ({
+    page,
+  }) => {
+    await page.addInitScript((slug) => {
+      window.localStorage.setItem(`mehfilbox.profile.${slug}`, 'skipped')
+    }, CATALOGUE)
+
+    await page.goto(`/c/${CATALOGUE}?title=the-ceremony`)
+    await expect(page).toHaveURL(new RegExp(`${BASE}\\?title=the-ceremony$`))
+    await expect(page.getByRole('dialog')).toBeVisible()
+
+    await page.goto(`/some-other-studio/${CATALOGUE}`)
+    await expect(page).toHaveURL(new RegExp(`${BASE}$`))
+    await expect(page.locator('[data-module-id]').first()).toBeVisible()
+  })
+
+  test('the top bar offers to share the whole wedding', async ({ page }) => {
+    await openBrowse(page)
+    await expect(page.getByRole('banner').getByRole('button', { name: 'Share' })).toBeVisible()
+    // The referral line, on by default (D-41).
+    await expect(page.getByTestId('platform-credit')).toHaveAttribute('href', /ref=kalyanam/)
   })
 
   /**
@@ -44,7 +77,7 @@ test.describe('path mode — the configuration production actually runs', () => 
     // Scoped to the modal: the billboard has a Play button of its own.
     await page.getByRole('dialog').getByRole('button', { name: 'Play' }).click()
 
-    await expect(page).toHaveURL(new RegExp(`/c/${CATALOGUE}/watch/`))
+    await expect(page).toHaveURL(new RegExp(`${BASE}/watch/`))
     await expect(page.getByTestId('player')).toBeVisible()
   })
 
@@ -59,7 +92,7 @@ test.describe('path mode — the configuration production actually runs', () => 
     await expect(page.getByTestId('player')).toBeVisible()
 
     await page.goBack()
-    await expect(page).toHaveURL(new RegExp(`/c/${CATALOGUE}`))
+    await expect(page).toHaveURL(new RegExp(BASE))
   })
 
   test('a deep link into a film resolves directly, the way a forwarded link does', async ({
@@ -98,8 +131,8 @@ test.describe('path mode — the configuration production actually runs', () => 
     const href = await link.getAttribute('href')
     expect(href).toBeTruthy()
 
-    // It must carry the path prefix rather than a subdomain that does not exist here.
-    expect(href).toContain(`/c/${CATALOGUE}`)
+    // It must carry the studio and the wedding rather than a subdomain that does not exist here.
+    expect(href).toContain(BASE)
 
     // Opened as a guest would: a fresh context with no operator session.
     const anonymous = await browser.newContext()

@@ -5,8 +5,7 @@ import { getOperatorSession } from '@/lib/admin/session'
 import { seedModules } from '@/lib/admin/templates'
 import { getRepository } from '@/lib/db'
 import { effectiveModules } from '@/lib/db/repository'
-import { env } from '@/lib/env'
-import { catalogueUrl } from '@/lib/tenant'
+import { publicUrlOf } from '@/lib/address'
 
 export const dynamic = 'force-dynamic'
 
@@ -49,7 +48,7 @@ export default async function CustomizerPage({ params }: { params: Promise<{ id:
         albums={albums}
         photos={photos}
         initialModules={modules}
-        publicUrl={catalogueUrl(catalogue.slug, env.ROOT_DOMAIN, '/', env.TENANCY_MODE)}
+        publicUrl={publicUrlOf(catalogue)}
         pendingContent={pending}
       />
     </AdminChrome>

@@ -73,6 +73,9 @@ export async function POST(request: Request) {
       // credit them, since they lose every other trace of ownership.
       originOrgId: orgId,
       slug: body.slug,
+      // The studio segment of the address, frozen now (D-32). `org` is null only for a session
+      // whose org vanished mid-request; the fallback keeps the row valid and the link legacy-shaped.
+      tenantSlug: org?.slug ?? '',
       customDomain: null,
       coupleName: body.coupleName,
       appName: body.appName,

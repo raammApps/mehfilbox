@@ -135,9 +135,20 @@ export const brandingSchema = z
     logoUrl: z.string().url().or(z.literal('')).optional(),
     presentedBy: z.string().max(80).optional(),
     displayFont: z.enum(DISPLAY_FONTS).optional(),
+    /**
+     * Whether the guest footer carries "Made with Mehfilbox" (D-41). Absent means **on** — the
+     * default is the platform's, and a studio that would rather its client saw no supplier turns
+     * it off in one click. Copied into a catalogue with the rest of the branding at creation.
+     */
+    platformCredit: z.boolean().optional(),
   })
   .strict()
 export type Branding = z.infer<typeof brandingSchema>
+
+/** The footer credit is on unless a studio switched it off. One place, so the two footers agree. */
+export function showsPlatformCredit(branding: Pick<Branding, 'platformCredit'>): boolean {
+  return branding.platformCredit !== false
+}
 
 // ── Module instances (doc 14 §3) ──────────────────────────────────────────────
 export const moduleInstanceSchema = z.object({
@@ -352,6 +363,16 @@ export const catalogueSchema = z.object({
   id: z.string().uuid(),
   orgId: z.string().uuid(),
   slug: slugSchema,
+  /**
+   * The studio segment of the public address — `mehfilbox.com/<tenantSlug>/<slug>` (D-32).
+   *
+   * Frozen at creation from the originating org's slug and never rewritten: the address is in
+   * two hundred phones the day it is sent, and a handover or a studio rename must not move it.
+   * Defaulted to '' rather than required so fixtures and stores written before the column existed
+   * still parse; every driver fills an empty value from the org on the way out, and `cataloguePath`
+   * falls back to the legacy `/c/<slug>` form rather than ever printing `//<slug>`.
+   */
+  tenantSlug: z.string().default(''),
   customDomain: z.string().nullable().default(null),
   /**
    * The partner who built this, kept permanently — including after a handover moves `orgId` to

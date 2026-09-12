@@ -26,6 +26,18 @@ export function catalogueTag(slug: string): string {
 }
 
 /**
+ * Bump when the shape of a cached row changes.
+ *
+ * The data cache outlives the process: on disk under `.next/cache` between local runs, and on
+ * Vercel across deployments. An entry written before a column existed is served
+ * stale-while-revalidating by the first request after a deploy, and a page that reads the new
+ * field off it sees `undefined` — which is how the tenant-path redirect (D-32) silently did nothing
+ * on a legacy link, with every unit test green and the row itself correct. Part of the key rather
+ * than a tag, because a tag can only be invalidated from a running process that knows to.
+ */
+const CACHE_GENERATION = 'g2'
+
+/**
  * An hour is the backstop, not the mechanism.
  *
  * Every path that changes what a guest sees calls `revalidateCatalogue`, so the timer only
@@ -37,7 +49,7 @@ const MAX_AGE_S = 3600
 export const getCachedCatalogueBySlug = (slug: string): Promise<Catalogue | null> =>
   unstable_cache(
     async () => getRepository().getCatalogueBySlug(slug),
-    ['catalogue-by-slug', slug],
+    ['catalogue-by-slug', CACHE_GENERATION, slug],
     { tags: [catalogueTag(slug)], revalidate: MAX_AGE_S },
   )()
 
@@ -56,7 +68,7 @@ export const getCachedBundle = (catalogue: Catalogue): Promise<CatalogueBundle> 
       // already read it fresh enough to have made an access decision against it.
       return { catalogue, titles, albums, photos }
     },
-    ['catalogue-bundle', catalogue.id],
+    ['catalogue-bundle', CACHE_GENERATION, catalogue.id],
     { tags: [catalogueTag(catalogue.slug)], revalidate: MAX_AGE_S },
   )()
 

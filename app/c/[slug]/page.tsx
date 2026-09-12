@@ -3,14 +3,15 @@ import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { ThemeStyle } from '@/components/chrome/ThemeStyle'
 import { CatalogueShell } from '@/components/streaming/CatalogueShell'
+import { basePathOf, ogImageUrlOf, publicUrlOf, requireCanonicalAddress } from '@/lib/address'
 import { loadBundle, resolveAccess } from '@/lib/catalogue-access'
 import { getRepository } from '@/lib/db'
 import { env } from '@/lib/env'
 import { createTranslator, parseLocale, resolveLocalised } from '@/lib/i18n'
 import { guestLocale } from '@/lib/guest-locale'
-import { cataloguePath, catalogueUrl } from '@/lib/tenant'
+import { rootUrl } from '@/lib/tenant'
 import { effectiveModules } from '@/lib/db/repository'
-import type { PlaybackProgress } from '@/lib/schema'
+import { showsPlatformCredit, type PlaybackProgress } from '@/lib/schema'
 
 /**
  * The browse page. ISR — revalidated explicitly on publish (doc 05 §6), not on a timer, so a
@@ -35,11 +36,12 @@ export async function generateMetadata({
   const locale = await guestLocale(catalogue)
   const coupleName = resolveLocalised(catalogue.coupleName, locale)
   const description = resolveLocalised(catalogue.synopsis, locale) || `${coupleName} — the films.`
-  const url = catalogueUrl(catalogue.slug, env.ROOT_DOMAIN, '/', env.TENANCY_MODE)
+  const url = publicUrlOf(catalogue)
 
-  // The WhatsApp preview is a P0 feature, not polish (CLAUDE.md constraint 3). `?v=` is a
-  // cache-buster the pre-handover runbook relies on — WhatsApp caches previews for days.
-  const ogImage = `${url}api/og?v=${encodeURIComponent(catalogue.publishedAt ?? catalogue.createdAt)}`
+  // The WhatsApp preview is a P0 feature, not polish (CLAUDE.md constraint 3). The image is
+  // served off the root host with the catalogue named in the query (see `ogImageUrlOf`); `v=` is
+  // a cache-buster the pre-handover runbook relies on — WhatsApp caches previews for days.
+  const ogImage = ogImageUrlOf(catalogue)
 
   return {
     title: coupleName,
@@ -74,18 +76,26 @@ export default async function CataloguePage({
     case 'draft':
       return <NotAvailable slug={slug} draft />
     case 'locked':
-      // Both of these are catalogue-scoped pages. Absolute paths are only correct in subdomain
-      // mode, where the catalogue is the site root; in path mode they land on the marketing
-      // page and 404 — so switching a catalogue to "invitation code" made it unreachable, with
-      // nowhere for a guest to type the code they were given.
-      redirect(`${cataloguePath(slug, env.TENANCY_MODE)}/locked`)
+      // Both of these are catalogue-scoped pages, so they hang off the catalogue's own base —
+      // which in path mode is `/<studio>/<wedding>` and in subdomain mode is the root. A bare
+      // `/locked` in path mode lands on the marketing site with nowhere to type the code.
+      redirect(`${basePathOf(verdict.catalogue)}/locked`)
     case 'lapsed':
-      redirect(`${cataloguePath(slug, env.TENANCY_MODE)}/renew`)
+      redirect(`${basePathOf(verdict.catalogue)}/renew`)
     case 'ok':
       break
   }
 
   const { catalogue } = verdict
+
+  // A legacy `/c/<wedding>` link, or a wrong studio segment, is sent to the one address the
+  // product prints (D-32). The deep-link query rides along so `?title=` survives the hop.
+  const query = new URLSearchParams()
+  if (titleParam) query.set('title', titleParam)
+  if (profileParam) query.set('profile', profileParam)
+  const search = [...query.keys()].length > 0 ? `?${query.toString()}` : ''
+  await requireCanonicalAddress(catalogue, '', search)
+
   const bundle = await loadBundle(catalogue)
   const locale = await guestLocale(catalogue)
 
@@ -99,6 +109,8 @@ export default async function CataloguePage({
     }
   }
 
+  const publicUrl = publicUrlOf(catalogue)
+
   return (
     <>
       <ThemeStyle branding={catalogue.branding} />
@@ -108,8 +120,13 @@ export default async function CataloguePage({
         locale={locale}
         initialTitleSlug={titleParam ?? null}
         initialProgress={progress}
-        shareBaseUrl={catalogueUrl(catalogue.slug, env.ROOT_DOMAIN, '', env.TENANCY_MODE).replace(/\/$/, '')}
-        basePath={cataloguePath(catalogue.slug, env.TENANCY_MODE)}
+        shareBaseUrl={publicUrl.replace(/\/$/, '')}
+        publicUrl={publicUrl}
+        basePath={basePathOf(catalogue)}
+        platformCredit={showsPlatformCredit(catalogue.branding)}
+        // The referral carries the studio segment, so a studio that keeps the line on gets the
+        // enquiry it brought in (D-13, D-41).
+        platformHref={rootUrl(env.ROOT_DOMAIN, `/?ref=${encodeURIComponent(catalogue.tenantSlug || catalogue.slug)}`)}
       />
     </>
   )

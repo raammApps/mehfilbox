@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation'
 import { ThemeStyle } from '@/components/chrome/ThemeStyle'
+import { basePathOf, requireCanonicalAddress } from '@/lib/address'
 import { resolveAccess } from '@/lib/catalogue-access'
 import { getRepository } from '@/lib/db'
 import { env } from '@/lib/env'
@@ -19,6 +20,7 @@ export default async function RenewPage({ params }: { params: Promise<{ slug: st
   const { slug } = await params
   const verdict = await resolveAccess(slug)
   if (verdict.kind === 'missing') notFound()
+  await requireCanonicalAddress(verdict.catalogue, '/renew')
 
   const locale = await guestLocale(verdict.catalogue)
   const t = createTranslator(locale)
@@ -55,7 +57,7 @@ export default async function RenewPage({ params }: { params: Promise<{ slug: st
             downloadable. If that is true anywhere, it has to be true here.
           */}
           <a
-            href={`/c/${verdict.catalogue.slug}/download`}
+            href={`${basePathOf(verdict.catalogue)}/download`}
             className="inline-flex h-12 w-fit items-center rounded-[var(--radius-pill)] border border-surface-3 px-6 font-semibold text-text-hi"
           >
             {t('download.all')}

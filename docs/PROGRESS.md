@@ -1616,3 +1616,39 @@ making the archive silent failed two.
 What remains is N-24b, and all of it needs money to change hands: the renewal path, the
 restore-on-payment screen, the twelve-months-at-our-cost rule, and the `studio_gone` predicate —
 which is deliberately **not** built yet, because on its own it is a boolean nobody can act on.
+
+## N-60 · The tenant is in the path — 12 September 2026
+
+`mehfilbox.com/<studio>/<wedding>` is the address (D-32). The studio segment is frozen on the
+catalogue at creation (`catalogues.tenant_slug`, migration 0016 backfills it from the originating
+org) rather than joined at render time, because the address is in two hundred phones the day it is
+sent and must survive a handover and a studio rename alike. `/c/<wedding>` stays as the internal
+route and a legacy alias: middleware rewrites the tenant path onto it and marks the request, and a
+page that finds no mark — or the wrong studio — redirects to the one address the product prints,
+carrying `?title=` and `?t=` across the hop so a forwarded deep link still lands.
+
+**The OG image had been broken in path mode since the mode existed.** `${url}api/og` composed
+`/c/<wedding>api/og` — a 404 — and `/api/og` on the root host had no catalogue to draw. Every
+WhatsApp preview in production was a grey box, and every test passed, because the gate checks
+`/api/og?catalogue=` directly. It now comes off the root host with the catalogue in the query,
+which is right in both modes. Found by moving the address, not by looking for it.
+
+Two smaller things landed with it because they are about what a guest sends onward (D-41): a
+**share-this-wedding** control in the top bar — the WhatsApp share sheet on a phone, a popover
+with `wa.me` and copy-link elsewhere, icon-only below `sm` because the header is a fixed 64px — and
+a **"Made with Mehfilbox"** line in the footer, on unless a studio turns it off in the branding
+panel, linking home with the studio segment as the referral. The landing FAQ stopped claiming we
+never appear.
+
+`catalogueUrl` and `cataloguePath` take an address (`{ slug, tenant }`) now, and every caller was
+touched; the wizard's address preview shows the studio segment live. 529 unit and component tests
+(up from 505); the path-mode E2E project asserts the canonical redirect from both a legacy link and
+a wrong studio segment.
+
+**The data cache outlives the deploy, and it bit on the first run.** The path-mode E2E passed the
+canonical page and failed the legacy redirect, and the row was correct the whole time: `.next/cache`
+held a `catalogue-by-slug` entry written on 8 September, before the column existed, and
+`unstable_cache` served it stale-while-revalidating — so the page read `tenantSlug: undefined` and
+did nothing. Vercel's data cache persists across deployments the same way. The cache keys now
+carry a generation marker to bump when a cached row changes shape, and the Playwright harness
+clears the on-disk cache before it builds. Found by the test, not by the review.

@@ -6,7 +6,7 @@ import { getOperatorSession, getSessionOrg } from '@/lib/admin/session'
 import { getRepository } from '@/lib/db'
 import { env } from '@/lib/env'
 import { formatWeddingDate } from '@/lib/format'
-import { catalogueUrl } from '@/lib/tenant'
+import { publicUrlOf } from '@/lib/address'
 
 export const dynamic = 'force-dynamic'
 
@@ -60,7 +60,7 @@ export default async function CatalogueListPage() {
     id: catalogue.id,
     name: catalogue.coupleName.en,
     slug: catalogue.slug,
-    url: catalogueUrl(catalogue.slug, env.ROOT_DOMAIN, '/', env.TENANCY_MODE),
+    url: publicUrlOf(catalogue),
     status: catalogue.status,
     subStatus: catalogue.subStatus,
     weddingDate: catalogue.weddingDate,

@@ -4,8 +4,7 @@ import { ThemeStyle } from '@/components/chrome/ThemeStyle'
 import { WatchScreen } from '@/components/streaming/WatchScreen'
 import { resolveAccess } from '@/lib/catalogue-access'
 import { getRepository } from '@/lib/db'
-import { env } from '@/lib/env'
-import { cataloguePath } from '@/lib/tenant'
+import { basePathOf, requireCanonicalAddress } from '@/lib/address'
 import {resolveLocalised} from '@/lib/i18n'
 import { guestLocale } from '@/lib/guest-locale'
 import { posterDataUri } from '@/lib/poster'
@@ -35,10 +34,16 @@ export default async function WatchPage({
 
   const verdict = await resolveAccess(slug)
   // Catalogue-scoped, so they need the base path — see the note in the browse page.
-  const basePath = cataloguePath(slug, env.TENANCY_MODE)
-  if (verdict.kind === 'locked') redirect(`${basePath}/locked`)
-  if (verdict.kind === 'lapsed') redirect(`${basePath}/renew`)
+  if (verdict.kind === 'locked') redirect(`${basePathOf(verdict.catalogue)}/locked`)
+  if (verdict.kind === 'lapsed') redirect(`${basePathOf(verdict.catalogue)}/renew`)
   if (verdict.kind !== 'ok') notFound()
+
+  // A forwarded deep link keeps its `?t=` across the redirect to the canonical address (D-32).
+  await requireCanonicalAddress(
+    verdict.catalogue,
+    `/watch/${encodeURIComponent(titleSlug)}`,
+    timestamp ? `?t=${encodeURIComponent(timestamp)}` : '',
+  )
 
   const title = await getRepository().getTitleBySlug(verdict.catalogue.id, titleSlug)
   if (!title || !title.published) notFound()

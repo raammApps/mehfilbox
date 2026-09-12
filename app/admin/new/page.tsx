@@ -29,6 +29,7 @@ export default async function NewCataloguePage() {
       <CreateWizard
         rootDomain={env.ROOT_DOMAIN}
         tenancyMode={env.TENANCY_MODE}
+        studioSlug={org?.slug ?? ''}
         studioLocale={org?.locale ?? 'en'}
       />
     </AdminChrome>

@@ -170,6 +170,7 @@ describe.skipIf(!hasSupabase)('Supabase Postgres, for real', () => {
         orgId,
         slug,
         originOrgId: null,
+        tenantSlug: 'integration-studio',
     customDomain: null,
         coupleName: { en: 'Integration & Test' },
         appName: { en: 'Integration Originals' },

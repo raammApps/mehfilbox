@@ -183,6 +183,8 @@ export class SupabaseRepository implements Repository {
       id: r.id,
       orgId: r.org_id,
       slug: r.slug,
+      // Defaulted: 0016 adds the column, and a row read mid-rollout has no value for it.
+      tenantSlug: r.tenant_slug ?? '',
       customDomain: r.custom_domain,
       originOrgId: r.origin_org_id ?? null,
       coupleName: r.couple_name,
@@ -218,6 +220,7 @@ export class SupabaseRepository implements Repository {
       id: 'id',
       orgId: 'org_id',
       slug: 'slug',
+      tenantSlug: 'tenant_slug',
       customDomain: 'custom_domain',
       originOrgId: 'origin_org_id',
       coupleName: 'couple_name',

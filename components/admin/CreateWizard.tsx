@@ -38,11 +38,14 @@ const DRAFT_KEY = 'mehfilbox.wizard.draft'
 export function CreateWizard({
   rootDomain,
   tenancyMode,
+  studioSlug,
   studioLocale,
 }: {
   /** Passed in rather than read here: `lib/env` is server-only, and this runs in the browser. */
   rootDomain: string
   tenancyMode: TenancyMode
+  /** The studio segment of every address this studio creates (D-32) — `/<studioSlug>/<wedding>`. */
+  studioSlug: string
   /** The studio's own language — the default this wedding starts from, not a rule (N-29c). */
   studioLocale: Locale
 }) {
@@ -227,7 +230,12 @@ export function CreateWizard({
             */}
             <p className="-mt-2 mb-4 flex flex-wrap items-center gap-2 text-[13px]">
               <code className="rounded bg-[var(--color-l-surface-2)] px-2 py-1 text-[12px] text-[var(--color-l-text-mid)]">
-                {catalogueUrl(slug || 'your-couple', rootDomain, '/', tenancyMode).replace(
+                {catalogueUrl(
+                  { slug: slug || 'your-couple', tenant: studioSlug || null },
+                  rootDomain,
+                  '/',
+                  tenancyMode,
+                ).replace(
                   /^https?:\/\//,
                   '',
                 )}

@@ -1,13 +1,12 @@
 import { z } from 'zod'
 import { requireOwnedCatalogue } from '@/lib/admin/session'
-import { env } from '@/lib/env'
 import { formatWeddingDate } from '@/lib/format'
 import { ApiError } from '@/lib/http/errors'
 import { noStore, route } from '@/lib/http/handler'
 import { resolveLocalised } from '@/lib/i18n'
 import { log } from '@/lib/log'
 import { enqueue } from '@/lib/notify/send'
-import { catalogueUrl } from '@/lib/tenant'
+import { publicUrlOf } from '@/lib/address'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -49,7 +48,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       params: {
         coupleName: resolveLocalised(catalogue.coupleName, catalogue.locale),
         studioName: catalogue.branding.presentedBy ?? 'your studio',
-        url: catalogueUrl(catalogue.slug, env.ROOT_DOMAIN, '/', env.TENANCY_MODE),
+        url: publicUrlOf(catalogue),
         date: formatWeddingDate(catalogue.includedUntil, catalogue.locale),
       },
     })
