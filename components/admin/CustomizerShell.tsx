@@ -426,7 +426,8 @@ export function CustomizerShell({
         {advisories.length > 0 ? <Advisories notes={advisories} /> : null}
       </section>
 
-      <section aria-label="Preview" className="min-w-0">
+      {/* Below `lg` the three panes stack, preview first (doc 16 §12): on a phone the page is the point. */}
+      <section aria-label="Preview" className="order-first min-w-0 lg:order-none">
         <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
           <div className="min-w-0">
             <SaveState status={saveState} savedLabel="Saved as draft" />

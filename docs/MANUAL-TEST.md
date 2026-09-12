@@ -379,6 +379,20 @@ the platform's **Health** page shows each one's last run and outcome.
 
 ---
 
+## 12b. On a phone · N-70
+
+Open the console at 360px wide — a real phone, or the browser's device toolbar.
+
+| Check | Expect |
+|---|---|
+| Any studio page | Nothing scrolls sideways; the rail becomes a top bar |
+| The customizer | Three panes stacked, **the preview first**, then the sections, then the editor |
+| Platform tables | Scroll inside their own box; the page itself does not |
+
+✅ `pnpm test:e2e` runs this audit on every studio page in the mobile project.
+
+---
+
 ## 13. What to look at when something is wrong
 
 ```bash
