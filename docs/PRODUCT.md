@@ -289,3 +289,25 @@ N-60 to N-75 in [`NEXT.md`](./NEXT.md).
 | Every console surface at 360px | **Built** | N-70, 12 Sept. `e2e/responsive.spec.ts` opens every studio surface at 360×800 and fails on a sideways scroll; the customizer stacks with the preview first; platform tables scroll inside their region. |
 | Premiere date with a countdown | **Built** | N-72, 12 Sept. Set in the couple's zone in the wizard or settings; the link shows a countdown until then and opens into the wedding after. |
 | Couple-created catalogues from `/my` | **Built** | N-73, 12 Sept. *Start a catalogue of your own* opens the same wizard in its couple shape — occasion first (baby shower and naming day added), no house styles, no sign-in card. A draft until a credit is added by the studio or us. |
+
+## 9. The gaps of 13 September 2026
+
+Sandeep's brainstorm after the second pass went live, each item checked against the code and, where
+it mattered, against production. Decided as D-42 to D-44; scheduled as N-77 to N-88 in
+[`NEXT.md`](./NEXT.md) Tier 1c. The order here is the order raised, not the order to build.
+
+| Raised | Status | Where it stands |
+|---|---|---|
+| The catalogue's owner can reset the passcode | **Built**, one button short | Both the studio's settings screen and the client's `GuestCodePanel` take a new code and sign out every holder of the old one (N-71). Neither has *generate one for me*; the wizard does. N-77. |
+| Studio signup | **Built** — decision open | Public at `/admin/register`, linked from the login form, captcha-ready, three per IP per hour, one credit granted. No approval step: D-39 chose suspend-after over approve-before, and the platform console can create a studio directly. Whether to gate it is Sandeep's call (`NEXT.md`, decisions). |
+| What "who is watching" is for | **Built** — answered, not ticketed | The profile gate is labels, not people (Bride's side · Groom's side · Friends · Family), which keeps personal data off the guest path. It is (a) the streaming moment that says what kind of thing was opened, (b) the key that Continue Watching resumes on — progress is per profile, so two phones on one code each keep their place — and (c) the seed for likes. It is **not** a sign-in and it feeds **no dashboard yet**; "who watched", for the client and the studio, is N-37 and N-38. |
+| Client login shows every catalogue for that email | **Built** | `/my` lists every catalogue linked to the signed-in address, from any studio (N-62). |
+| "Couple login" becomes "client login" | **Not built** — D-42 | Outward copy only: the door, the platform list, the register page's "partner account", the account-addressed emails, the guide. "The couple" stays where it means the couple. N-78. |
+| Buy add-on space | **Not built** — blocked | The quota exists and refuses (N-27b); the price exists (`PRICING-MODEL.md` §3). Buying is N-20's checkout. Interim *Ask for more space*, like the credit request: N-79. |
+| Tiered plans by storage | **Proposed** — D-44 | Light 5 · Medium 50 · Heavy 100 · Custom 100–300 GB. Conflicts with the duration-priced ladder in `PRICING.md` §1; recorded there as a proposal. `plans` stays empty until it is decided. N-80. |
+| What the platform can support | **Analysed**, not measured | `SCALE-PLAN.md` §3: Vercel function invocations bind first at ~333 weddings/month; Supabase's 8 GB holds ~2,900; Bunny has no ceiling; concurrent viewers are Bunny's problem, not ours. No cap exists on catalogues or studios, only on storage. Reasoned numbers — N-81 measures them after real weddings. |
+| Costs | **Modelled**, not billed | `SCALE-PLAN.md` §1: ₹55,474 infrastructure against ₹3,30,000 revenue over six months, 83% margin, storage-never-deleted the risk. A live cost line on the platform dashboard is N-82, with N-25b. |
+| Security — is media reachable without the passcode? | **Photographs: yes.** Video: no. | **Verified live, 13 Sept.** The photo pull zone has no token auth, so a copied photo URL works forever for anyone; keys are UUIDs, so it cannot be guessed, only leaked. Video is signed and dies within hours. N-83. The "real filename in the URL" is the film's slug, set from the upload filename and kept after renaming — a metadata leak, not access: N-84. Lockouts are per Vercel instance and Turnstile is off: N-86. Security headers are present; CSP is not. Guest pages are `noindex`. |
+| The passcode is view-only; downloading needs the account | **Not built** — D-43 | Today the guest code grants `/download`, originals included. N-85 makes it the client's or the studio's sign-in. |
+| A staging environment | **Not built** | CI is hermetic; Vercel Preview has no variables and cannot boot against real services; everything real is tested in production. N-87. |
+| Studio- and client-facing documentation | **Exists, stale, unpublished** | `docs/USAGE-GUIDE.md` predates the second pass and lives only in the repo. N-88 splits it by reader, publishes both at `/help`, and makes updating it part of the ship ritual. |

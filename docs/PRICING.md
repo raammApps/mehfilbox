@@ -11,6 +11,14 @@ All prices **exclude 18% GST** (SAC 998314).
 
 ## The plans
 
+> **Proposed 13 September 2026, not yet decided (D-44).** A storage ladder — **Light** 5 GB ·
+> **Medium** 50 GB · **Heavy** 100 GB · **Custom** 100–300 GB — with Light sized for a single
+> performance (a fashion show, a recital) and grown later with add-on space (`PRICING-MODEL.md` §3).
+> It prices on *storage*; the ladder below prices on *duration and 4K minutes* with storage a
+> constant. They can coexist — a tier for the occasion, a plan for how long it is kept — but that is
+> the decision, and until it is made `plans` stays empty (N-27c, N-80). Whether the quota moves from
+> the studio to the catalogue is part of the same call.
+
 > **Revised 6 September 2026.** Highlights is gone; **Deliver** replaces it. The ladder is now
 > shaped like viddrop's (the per-wedding competitor `COMPETITORS.md` §1 added in September) and
 > priced in rupees for the Indian studio. Originals are kept for the paid term. The decisions and

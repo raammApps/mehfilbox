@@ -653,3 +653,36 @@ uptime monitors. Doc 16 §9.
 the studio that wants it and costs nothing for the studio that does not; Sandeep wants the share
 to bring the next studio in. A share-this-wedding control joins the per-film and per-photograph
 share. Doc 16 §11.
+
+## D-42 · The account is the "client"; the couple is the couple (13 Sept 2026)
+
+**Was:** doc 16 §3 and N-61/N-62 — a *Couple* door on the sign-in page, a *Couples* list in the
+platform console, "partner account" on the register page: three words for two things.
+
+**Decided (Sandeep):** the person who signs in to keep a catalogue is the **client**, on every
+surface that names the account — the door, the console list, the emails that address the account.
+"The couple" stays wherever it means the people in the wedding, which is the guest surface and the
+handover copy. The database value `orgKind = 'couple'` does not change; nobody reads it as a
+word. The reason is the occasions: a naming day or a fashion show has a client and no couple, and
+the door was already wrong for two of the seven occasions the wizard offers. N-78.
+
+## D-43 · A passcode views; an account downloads (13 Sept 2026)
+
+**Was:** N-22 — `/download` is granted to anyone holding the guest code, originals included.
+
+**Decided (Sandeep):** the guest code is **view-only**. Downloading — the film originals, the
+photographs, the whole wedding — needs a signed-in account that owns or originated the catalogue:
+the client, or the studio. A guest with the code watches; the people who paid for it keep it. The
+share button on a film stays, because a share is a link to the player, not to a file. N-85; N-22b
+inherits the rule.
+
+## D-44 · Plan tiers by storage — **proposed, not decided** (13 Sept 2026)
+
+**Was:** `PRICING.md` §1 — Deliver / Keep / Cinema, priced on duration and 4K minutes, storage a
+constant 100–200 GB.
+
+**Proposed (Sandeep):** Light 5 GB · Medium 50 GB · Heavy 100 GB · Custom 100–300 GB, with Light
+sized for a single performance and extended by add-on space. Recorded here so it is not lost, and
+in `PRICING.md` as a proposal next to the ladder it would replace or sit under. Not built until the
+pricing is settled — `plans` is empty on purpose (N-27c), and seeding it from a proposal would make
+the console show a price list nobody has agreed. N-80.

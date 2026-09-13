@@ -24,9 +24,11 @@ registry, and the partner/handover model. All six doc 10 §2 journeys run, plus 
 a first-load JS budget and a zero-axe-violations gate. The second pass of 12 September (doc 16)
 is built on top of it: the tenant path, two sign-in doors, couple accounts, themes and house
 styles, credits, the platform console with health, custom domains, the five-step wizard and the
-premiere. **656 unit and component tests, 157 E2E, all green.**
+premiere, all deployed to production on 12 September. **659 unit and component tests; 156 E2E
+passing, 56 skipped by design.**
 
-**Live on `https://heirloomfilms.in`** with `DATA_DRIVER=supabase` + `VIDEO_DRIVER=bunny`: an
+**Live on `https://mehfilbox.com`** (`heirloomfilms.in` redirects) with `DATA_DRIVER=supabase` +
+`VIDEO_DRIVER=bunny`: an
 operator signs in against real Postgres, and create → publish → guest page works. Registration
 sends a confirmation through Resend and the link resolves back to the domain — verified by reading
 the delivered message, not by trusting the dashboards. `pnpm verify:upload` proves a real TUS
@@ -56,6 +58,202 @@ where it belongs (Razorpay for credits, N-20; the ops account, N-53b).
 
 Empty. The three things doc 09 called out as schedule risk — the video provider, the database,
 and resumable upload — have all now run against the real services.
+
+---
+
+## Tier 1c — the gaps of 13 September 2026
+
+Sandeep's brainstorm, each item checked against the codebase and against production before it was
+written down. **Four of the twelve turned out to exist already**; they are answered in
+[`PRODUCT.md`](./PRODUCT.md) §9 rather than ticketed. The rest are below, risk first — the first
+three came out of the security pass and two of them were verified live, not inferred.
+
+Three decisions are Sandeep's to make before their tickets can be taken up; each is marked.
+
+### N-83 · Photographs are public once the URL is known  ·  ~half a session + one dashboard step  ·  **security**
+
+**Verified against production on 13 September.** The photo pull zone (`mehfilbox-photos.b-cdn.net`)
+has no token authentication; a photograph's URL, copied out of a passcode-protected wedding, returns
+`200` to anyone, forever. The passcode protects the *page*. The video path is different and right:
+Bunny Stream token authentication is on, the playback token needs a servable catalogue, and a
+copied `.m3u8` dies within hours (US-5). Nothing equivalent stands in front of the stills.
+
+What softens it: keys are `c/<catalogue uuid>/<photo uuid>-<width>.<ext>` — nothing guessable and
+no filename in them — so the exposure is *a URL that leaked*, not *a URL that can be found*. What
+does not soften it: guests forward things, and a photograph is the thing most likely to be
+forwarded.
+
+The fix is the one the video already uses. Turn token authentication **on** for the photo pull
+zone (dashboard, like §3 of `DEPLOYMENT.md`), then sign every photo URL at render with a TTL longer
+than the guest page's ISR window — 24h is plenty, and a copied link is dead by tomorrow. `srcset`
+means every width is signed; `lqip` is inline and needs nothing. The download page signs its
+originals the same way. `pnpm preflight` gains the same three checks it runs on the video zone,
+because a photo zone with token auth off looks exactly like a working one.
+
+**Decide first**: whether unsigned photographs are acceptable for *unlisted* catalogues (no
+passcode) — a share preview and WhatsApp's own image fetch both want a plain URL. The honest
+default is: sign when the catalogue has a passcode, leave plain when it does not, and say so on the
+privacy setting.
+
+### N-86 · Lockouts that hold across instances  ·  ~2h  ·  **security**
+
+`lib/http/rate-limit.ts` is process memory, and says so. On one warm Vercel instance the guest-code
+budget is 5 per device and 30 per catalogue per fifteen minutes; on *N* instances it is *N* times
+that, and a lockout on one instance is unknown to the others. Ten routes lean on it: sign-in,
+registration, forgot-password, the guest code, the playback token, profiles. With
+`CAPTCHA_DRIVER=none` in production, this is the only thing standing between a script and a
+four-digit code.
+
+Two halves, and the cheap one first:
+
+1. **Turn Turnstile on** — an operator step, not code: a widget for `mehfilbox.com`, two keys, and
+   `CAPTCHA_DRIVER=turnstile` (`GO-LIVE.md`, second pass §2). The challenge after three failures is
+   what makes the per-instance arithmetic irrelevant.
+2. **A durable store behind `consume`.** A `rate_limits` table with `(key, count, reset_at)` and an
+   `upsert … returning` is one round-trip and needs no new vendor; Upstash is the alternative if a
+   Postgres call per attempt ever shows up in latency. The call sites do not change — that was the
+   point of the comment in the file.
+
+Add a `Content-Security-Policy` while in `next.config.ts`: the other five headers are there, this
+one is not, and hls.js plus Bunny's hosts are a known list.
+
+### N-85 · A passcode views; an account downloads  ·  ~2h  ·  **D-43**
+
+Today `resolveDownloadAccess` grants `/download` — originals, six-hour signed links, everything —
+to anyone holding the guest code. Sandeep's rule (D-43): **the passcode is view-only; downloading
+needs the client's sign-in.** A guest who has the code watches; the couple who own the wedding, and
+the studio that made it, download.
+
+The pieces exist: `getOperatorSession` says who is signed in, `couple_org_id` and `origin_org_id`
+say who may claim the wedding, and the download page already reads a verdict. The change is the
+verdict — `ok` only when the signed-in account owns or originated the catalogue — and the guest
+page's download link becoming a sign-in prompt for everyone else. Per-film download (N-22b) inherits
+the rule when it lands. Nothing to migrate.
+
+### N-84 · The film's address is the upload's filename  ·  ~1h
+
+`/watch/whatsapp-video-2026-08-12-at-02-07-21` is a film the operator renamed *Sangeet*. The slug is
+set once, from the filename, at upload (`app/api/admin/uploads/route.ts`), and renaming the title
+never touches it. Not an access problem — the film behind it is gated — but it puts the upload's
+metadata in every shared link and reads as a bug to anyone who notices.
+
+Re-derive the slug from the title's name on the first rename after upload (keep it stable after
+that, since links are in phones), and let the operator edit it in the film list with the same
+uniqueness check the catalogue slug has. Existing rows: a one-off `pnpm` script that re-slugs
+titles whose slug still matches the filename pattern, with the old slug kept as a redirect for 90
+days — the deep-link spec (path-mode E2E) is the test that this did not break forwarded links.
+
+### N-77 · Generate a guest code, on both panels  ·  ~1h
+
+Changing the code is built on both sides — the studio's settings screen and the couple's
+`GuestCodePanel` both take a new code and bump `passcodeVersion`, which signs out every holder of
+the old one (N-71). What both lack is the button the wizard has: *generate one for me*
+(`generatePasscode`, six digits, no ambiguous characters), shown once with a copy control. A
+"reset" in the sense of *I forgot it* is the same button, since the owner sets the code rather than
+recovering it — say that on the panel.
+
+### N-78 · "Client", not "Couple"  ·  ~2h  ·  **D-42**
+
+`/my` already shows every catalogue linked to the signed-in address, from any studio (N-62), so the
+substance of this gap is built. What changes is the word. "Couple" is the people in the wedding;
+the *account* is the client, and the moment a studio delivers a fashion show or a naming day the
+old word is wrong on the door.
+
+Outward copy only: the login form's door and heading, two lines on the landing page, `Couples` in
+the platform nav, `/admin/platform/couples`, the register page's "partner account" (the third word
+for the same thing), the handover and credential emails where they address the account rather than
+the people, and the usage guide. **Not** the guest surface — "the couple" stays wherever it means
+the couple — and not `orgKind = 'couple'`, which is a database value nobody sees. Hindi keys
+alongside, or `i18n.test.ts` fails.
+
+### N-88 · A studio guide and a client guide, kept current  ·  ~1 session
+
+`docs/USAGE-GUIDE.md` exists and is the right shape, and it describes the product before the second
+pass — `heirloomfilms.in`, `/c/` addresses, one door, no themes, credits, house styles, premiere,
+domains or client accounts. Nothing is published where a studio or a client could read it.
+
+Split it in two, one per reader, and publish both at `/help/studio` and `/help/client` from
+markdown in the repo, so the guide deploys with the change that made it true. Then make it a rule
+rather than an intention: the `next-item` and `ship` skills gain a line — *if `PRODUCT.md` changed,
+the guide changed* — and the ship checklist refuses to call a ticket done otherwise. A test that
+diffs the two is tempting and would be theatre; the skill is where the ritual already lives.
+
+### N-87 · A staging environment  ·  ~half a session + two accounts  ·  **debt that is costing us**
+
+Everything real is tested in production, and 12 September proved why that is a problem: applying
+migrations broke catalogue creation for the minutes before the deploy, and there was nowhere to
+find that out first. CI is deliberately hermetic (memory + fake); Vercel Preview has **zero**
+variables and `lib/env.ts` refuses a production build on an ephemeral driver, so preview
+deployments cannot boot against anything real and none exist.
+
+Staging is: a second Supabase project (free tier, seeded from the demo fixture), a second Bunny
+library and photo zone (pennies), the Preview environment on Vercel carrying that set of variables,
+and `staging.mehfilbox.com` pointed at the preview branch. Then the ritual changes: migrations and
+`deploy-vercel.sh` run against staging first, the E2E suite gets a `--base-url` so it can walk
+staging, and production only ever sees what staging survived. The variables file is the pattern
+already — `.env.staging.local` next to `.env.vercel.local`, both gitignored.
+
+### N-79 · Buying storage  ·  **blocked by N-20**; an interim step is ~1h
+
+The quota exists per org (`entitlements.storageGb`, N-27b), the console refuses an upload past it,
+and the platform can raise it by hand. `PRICING-MODEL.md` §3 already prices the add-on — ₹25/GB
+per month, co-terminus with the plan, small top-ups cheap and big ones pushed to the next tier. What
+does not exist is a way for a client to *buy* it, which is N-20's checkout.
+
+The interim step is the one credits already have: an **Ask for more space** control where the
+refusal is shown, which emails `SUPPORT_EMAIL` with the org, the current quota and what was tried,
+and lands in the platform console next to the quota control. When N-20 lands, the same control
+takes a payment instead. Note the seam: quota is *per org* today and Sandeep's tiers are *per
+catalogue*; N-80 decides which, and this follows it.
+
+### N-80 · Plan tiers by storage  ·  **decision first — Sandeep's**  ·  then ~half a session
+
+Proposed 13 September: **Light** (5 GB), **Medium** (50 GB), **Heavy** (100 GB), **Custom**
+(100–300 GB), with Light sized for a single performance — a fashion show, a recital — and extended
+later with add-on space. Recorded in `PRICING.md` as a proposal, because it is not what the price
+list says today: `PRICING.md` §1 sells Deliver (100 GB, 90 days), Keep (100 GB, 12 months) and
+Cinema (200 GB), priced on *duration and 4K minutes*, with storage a constant. The proposal prices
+on *storage*. Both can be true — a tier for the occasion, and a duration for the plan — but that is
+a pricing decision and it is not the agent's.
+
+Once decided, the build is N-27c's: seed `plans`, make `resolveLimits` read the plan rather than a
+bare `storage_gb`, move quota to the catalogue if the tiers are per catalogue, and give the wizard
+a tier step. `OCCASIONS` also wants `performance` and `event` alongside the seven it has, or Light
+has nothing to be for.
+
+### N-81 · Measure the limits  ·  ~2h  ·  **after three real weddings**
+
+`SCALE-PLAN.md` §3 already answers the question as far as reasoning can: the binding constraint is
+Vercel function invocations at roughly 333 weddings a month, Supabase's 8 GB holds ~2,900 weddings,
+Bunny has no ceiling, and 300 guests on one link mostly hit the edge cache because the guest page is
+ISR. Concurrent viewers are bounded by Bunny, not by us — video never touches the application.
+**Every number in that table is reasoned, not measured**, and the document says so.
+
+What closes it: read the Vercel dashboard after three or four real weddings and correct §3; run one
+load test of the guest page and `/api/playback/token` at 300 concurrent from a phone-shaped client;
+and note the two limits the code has none of — there is no cap on catalogues per studio or on
+studios, only on storage, which is deliberate and should be written down as such.
+
+### N-82 · The cost line  ·  ~2h  ·  **with N-25b**
+
+`SCALE-PLAN.md` §1 costs 60 weddings at ₹55,474 of infrastructure over six months against
+₹3,30,000 of revenue — 83% gross margin — and names the thing that will actually hurt: storage that
+is never deleted. That is a model. What is missing is the bill: a line on the platform dashboard
+that reads live GB from the Bunny statistics API × the storage rate, delivery GB × the delivery
+rate, plus the two fixed subscriptions, and shows this month's cost next to this month's credits.
+N-25b reconciles the per-catalogue estimate against the same bill; build them together.
+
+---
+
+## Decisions Sandeep owns, from the same list
+
+- **Should studio signup need approval?** Registration is public (`/admin/register`, linked from
+  the login form, captcha-ready, three per IP per hour, one credit granted). D-39 chose *suspend
+  after* over *approve before*, and the platform console can also create a studio directly. An
+  approval queue is ~2h if wanted; it costs every honest studio a wait.
+- **Plan tiers** (N-80) — the storage ladder, and whether quota is per catalogue.
+- **Unlisted catalogues' photographs** (N-83) — signed like the passcoded ones, or left plain for
+  the share preview.
 
 ---
 
@@ -304,14 +502,13 @@ would fail too. It worked on 7 September; it has been revoked or rotated since. 
 put it in **both** `.env.vercel.local` (then deploy) **and** Supabase's SMTP settings — they are
 separate, and both are needed. `docs/MANUAL-TEST.md` §0 has the verification command.
 
-**Insert yourself into `platform_admins`** if you want the platform console. It is built and
-gated (N-16), and the table is empty, so today nobody can reach it — which is the correct default.
-`id` must be your Supabase `auth.users` id:
+> 13 September: the key in `.env.vercel.local` answers Resend's `/domains` with `400`, which is
+> what a *restricted, sending-only* key returns — an invalid key returns `401`. So this may already
+> be fixed and the paragraph stale; the only honest check is §0's, which sends a message.
 
-```sql
-insert into platform_admins (id, email, name)
-values ('<your auth.users id>', 'you@example.com', 'Sandeep');
-```
+~~**Insert yourself into `platform_admins`.**~~ **Done, 12 September** — `pnpm platform:admin`
+created the account and the row together, and the sign-in route reads the row since N-76. The
+console is reachable; the password is in `.env.platform.local`.
 
 **No migration is outstanding.** `0008_likes.sql` was applied on 7 September with RLS enabled, and
 verified end to end against production: a like round-trips, a second guest key sees the count and
@@ -352,7 +549,7 @@ regenerate without invalidating, so the revocation is the half worth checking.
 
 - **Credentials** live in `.env.local` (gitignored, verified). Both services are fully
   configured; `pnpm preflight` is all green.
-- **Supabase**: schema applied through `0009_notifications.sql`. Five orgs exist, and the operator
+- **Supabase**: schema applied through `0025_occasions.sql` (12 September). Six orgs exist, and the operator
   rows are, read from the database on 7 September rather than remembered:
 
   | org | operator |
