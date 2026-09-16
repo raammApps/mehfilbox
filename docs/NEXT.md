@@ -19,9 +19,12 @@ Update this file as items land — move them out, do not leave them ticked.
 
 **17 September 2026:** the review Sandeep asked for on 15 September is in
 [`15-sep-finding/`](./15-sep-finding/00-README.md). It proposes decisions D-45 to D-53 and tickets
-N-89 to N-111 (`06-what-changes-next.md`), none of which is applied to this file until he decides;
-the one item it says not to wait on is N-89, the titles half of the publish-gate bug whose photo
-half was fixed and deployed on 16 September.
+N-89 to N-111 (`06-what-changes-next.md`), none of which is applied to this file until he decides.
+Same day, his follow-on message decided six more (D-54 to D-59, Tier 1d below) rather than
+proposing them — a paid registration for both studios and direct clients, quota from the org's
+plan, a theme store split between studios and clients, a payment-gateway seam (built), and a
+redesign direction (not yet buildable — see N-116). N-89's list-gate half is fixed; its
+playback-gate half is still open, above in Tier 1b.
 
 ## Where things stand, in one paragraph
 
@@ -62,8 +65,22 @@ where it belongs (Razorpay for credits, N-20; the ops account, N-53b).
 
 ## Tier 1b — unretired risk
 
-Empty. The three things doc 09 called out as schedule risk — the video provider, the database,
-and resumable upload — have all now run against the real services.
+### N-89 · Close the publish gate on the two paths that still leak  ·  2h, then half a day  ·  **security, part fixed**
+
+The photo bug's twin, same driver, same class. `listTitles({ publishedOnly })` on the Supabase
+driver gated on `published` — the operator's intent — instead of `live_at` — whether a Publish
+actually carried a film to guests — so a ticked-but-never-published film was already on the guest
+list read. **Part (a), the list gate, was fixed 17 September 2026**
+(`lib/db/supabase-repository.ts`, matching the memory driver's `live_at`-only predicate since
+N-57; pinned by `tests/unit/supabase-query-shape.test.ts`).
+
+**Part (b), the playback gate, is still open.** `app/api/playback/token/route.ts:35-41` refuses a
+title on `!title.published` alone and never reads `live_at`, so a ticked-but-unpublished film can
+still mint a working, TTL'd playback URL to anyone who knows its slug — and a slug is frozen to
+the upload filename forever (N-84), so it is guessable from a forwarded file. The half-day is a
+decision, not the line: the customizer's own preview mounts the real guest components and calls
+this same endpoint, so the fix needs a way to tell an operator's preview from a guest holding the
+passcode before it can gate on `live_at` here too. Do this before anything else in Tier 1c/1d.
 
 ---
 
@@ -260,6 +277,65 @@ N-25b reconciles the per-catalogue estimate against the same bill; build them to
 - **Plan tiers** (N-80) — the storage ladder, and whether quota is per catalogue.
 - **Unlisted catalogues' photographs** (N-83) — signed like the passcoded ones, or left plain for
   the share preview.
+
+---
+
+## Tier 1d — the monetization decisions of 17 September 2026
+
+Sandeep's follow-on to the 15 September review, decided rather than proposed: D-54 to D-59 in
+`docs/reference/00-decision-log.md`. N-89(a) above is the one urgent item that came out of the same
+message; the rest is real scope and is sequenced here, cheapest and most foundational first.
+
+### N-112 · A PaymentProvider seam  ·  **done, 17 September**  ·  D-58
+
+`lib/payments/` (interface, a `fake` driver, `PAYMENT_DRIVER` in `lib/env.ts`), matching
+`VideoProvider`/`DomainProvider` exactly: `createPayment` starts a charge, `verifyWebhook` confirms
+one from a raw signed body, `none` is the state production is in today. No real gateway is
+implemented — Razorpay, Cashfree and PhonePe are all still options — so `getPaymentProvider()`
+throws on any driver name that has no class yet, rather than silently granting nothing while a
+deploy believes it is charging someone. 5 new unit tests.
+
+### N-113 · Paid registration, both doors  ·  ~1 session  ·  **needs N-20/a chosen gateway**  ·  D-55, D-56
+
+The identity fields (business or individual name, logo, a contact photo, email, address, mobile,
+PAN), the configurable fee (`platform_settings` or an env value — no config store exists yet,
+build the smaller of the two), and the 2-credit/100 GB grant on confirmed payment. Registration
+already lets an unpaid account build a whole wedding before meeting `CREDIT_REQUIRED` at Publish
+(`app/api/admin/catalogues/[id]/publish/route.ts`); this ticket removes the free registration
+credit (`grantRegistrationCredit`, D-38) and replaces it with a payment that grants the same shape
+of thing. The direct-client variant is the identical flow on `orgKind = 'couple'` — build once.
+Blocked on N-112's `none` becoming a real driver, which is blocked on the business bank account
+(`docs/15-sep-finding/04-startup-india.md`).
+
+### N-114 · Storage quota from the org's plan  ·  ~2h now, more with N-80  ·  D-54
+
+`resolveLimits`'s per-org override (`lib/entitlements.ts:84-87`) already wins over the flat 20 GB
+default — this ticket is mostly naming that the override is the mechanism, tightening
+`OrgQuotaControl`'s copy so it reads as "this org's plan" rather than "an exception," and writing
+the override automatically at the point a paid registration (N-113) or a plan purchase (N-80)
+happens, instead of a platform admin typing a number in by hand.
+
+### N-115 · The theme store  ·  ~1 session  ·  **needs N-113 for the client half**  ·  D-57
+
+Two halves, buildable separately. **Studio half:** extend house styles' `duplicateOf` (N-64,
+`app/api/admin/presets/route.ts:23-44`) to accept a platform theme id as its source, so "make a
+copy, edit, save as new" works from `/admin/platform/themes` the same way it already works from a
+saved house style — no new schema. **Client half:** a `tier` column on `themes`
+(`supabase/migrations/0019_themes.sql` has none today), a catalogue-scoped entitlement write (the
+seam `lib/entitlements.ts` was built to support and nothing has ever used, per `map-commerce.md`
+§7), a "locked until bought" state in the customizer picker, and the purchase itself, which is
+N-113/N-112's payment flow. Basic five free; everything past that priced and gated.
+
+### N-116 · The redesign, once it can actually be looked at  ·  **blocked on real reference material**  ·  D-59
+
+The direction is recorded in D-59; the design itself is not. Three of the four reference URLs
+returned unrendered lazy-loaded placeholders, checked by screenshot; the fourth (saasinterface.com)
+rendered and gave one real data point — a dark hero, serif display type over sans body text, a
+gradient pill CTA, a card-grid gallery — not a survey. Two ways to unblock: retry the fetch with a longer render wait or a different capture
+path, or Sandeep sends screenshots directly. Either way, do the marketing site
+(`app/page.tsx`, one file, no auth surface at risk) before the three admin consoles — it is the
+cheapest place to prove the direction looks right on the existing token system before touching
+`components/admin/` (13,326 lines) or the guest-dark token set, which nothing here asks to change.
 
 ---
 

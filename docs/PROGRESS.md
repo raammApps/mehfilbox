@@ -2070,3 +2070,33 @@ and 1,869 lines of it can drift from the memory driver without anything noticing
 15 September assessment as a remediation item, not a one-line patch.
 
 2 new unit tests; 661 unit and component tests.
+
+## The titles half of the publish gate, and a payment seam — 17 September 2026
+
+**N-89(a).** The Supabase driver's `listTitles({ publishedOnly })` gated on `published` — the
+operator's tick — instead of `live_at` — whether a Publish actually carried the film to guests.
+Same class as the photo bug fixed the day before, same driver, same fix shape: match the memory
+driver's `live_at`-only predicate, which has been right since N-57. A ticked-but-unpublished film
+was reachable on the guest list read; production had no such film outstanding when this landed.
+The playback-token route has the identical gap and is not fixed here — it needs a way to tell an
+operator's own customizer preview from a guest holding the passcode before it can gate on
+`live_at` too, tracked as N-89(b).
+
+**N-112.** A `PaymentProvider` seam (D-58): `lib/payments/provider.ts`'s interface, a `fake`
+driver for the suite, `PAYMENT_DRIVER` in `lib/env.ts`. Built the same day Sandeep confirmed the
+gateway is still undecided among Razorpay, Cashfree and PhonePe — the seam makes that an env
+value and one driver class later, not a rewrite of registration, theme purchase or credit top-up
+now. No real gateway is implemented; `getPaymentProvider()` throws on an unimplemented driver name
+rather than falling back to `none`, so a misconfigured deploy fails at boot instead of quietly
+charging nobody.
+
+**D-54 to D-59** recorded in `docs/reference/00-decision-log.md`: storage quota reads the org's
+plan; both studio and direct-client registration become paid, in exchange for credits, with
+browsing staying open unpaid; the theme store splits free-and-editable-for-studios from
+paid-for-clients; the payment gateway is genuinely undecided; and a redesign direction is set for
+the three consoles and the marketing site, though not yet designed — this session's fetch of the
+four reference URLs returned unrendered placeholders, confirmed by screenshot rather than assumed,
+so the direction rests on the existing token architecture and known conventions rather than an
+actual visual inspection.
+
+7 new unit tests; 668 unit and component tests.

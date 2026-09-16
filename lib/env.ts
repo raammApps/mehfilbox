@@ -133,6 +133,22 @@ const schema = z
     VERCEL_TEAM_ID: z.string().optional(),
 
     /**
+     * Collecting money (N-20, decided 17 Sept 2026: a paid registration fee for both studio and
+     * direct-client signup, and a theme purchase for a client). `none` is where the product is
+     * today — every credit so far was granted by a platform admin, by hand, after money moved
+     * somewhere else — and `getPaymentProvider()` returns null for it, the same shape as an
+     * unconfigured `DomainProvider`: callers that would charge someone have to say so rather than
+     * silently succeed. `fake` is the suite's and marks an intent paid at once.
+     *
+     * `razorpay` / `cashfree` / `phonepe` are **not implemented** — real integration needs a
+     * business bank account and KYC, which need the company `docs/15-sep-finding/04-startup-india.md`
+     * describes incorporating first. Add the enum value and the driver class together when one is
+     * chosen; `getPaymentProvider()` throws rather than falling back to `none` for an unimplemented
+     * name, so a misconfigured deploy fails at boot instead of quietly granting nothing.
+     */
+    PAYMENT_DRIVER: z.enum(['none', 'fake']).default('none'),
+
+    /**
      * How long a title may sit in a non-terminal state before reconcile asks the provider what
      * actually happened. Two hours by default so the job never races a healthy webhook.
      *

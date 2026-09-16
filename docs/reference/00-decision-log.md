@@ -686,3 +686,94 @@ sized for a single performance and extended by add-on space. Recorded here so it
 in `PRICING.md` as a proposal next to the ladder it would replace or sit under. Not built until the
 pricing is settled — `plans` is empty on purpose (N-27c), and seeding it from a proposal would make
 the console show a price list nobody has agreed. N-80.
+
+## D-54 · Storage quota follows the org's plan, not a flat default (17 Sept 2026)
+
+**Was:** `lib/entitlements.ts:29-30` — every org resolves to `storageGb: 20` unless a platform
+admin has typed a different number into the console's quota control (D-27b).
+
+**Decided (Sandeep):** the quota an org gets is whatever it purchased, not a number that applies
+to everyone until someone overrides it. This is less of a change than it sounds: the per-org
+override already exists and already wins (`resolveLimits`'s `pick`, `lib/entitlements.ts:84-87`),
+so the flat 20 GB only ever applies to an org nobody has set — which today is every org, because
+nothing writes the override automatically. Once `plans` has real tiers (D-44/N-80, still a
+proposal), a plan purchase should write that override itself, so quota tracks what was bought
+without a platform admin typing it in by hand (N-27c).
+
+## D-55 · Studio registration becomes paid, in exchange for credits; browsing stays open (17 Sept 2026)
+
+**Was:** N-61/D-38 — registration collects a business name, a contact name, an email and a
+password; is free; and grants one publish credit automatically. A studio can already build a whole
+wedding for nothing — create, upload, title, customize — and only meets `CREDIT_REQUIRED` at first
+Publish.
+
+**Decided (Sandeep):** registration collects the invoice's worth of identity — business name,
+logo, a contact photo, email, address, mobile number, PAN — and grants nothing on its own. Paying a
+fee (**configurable, default ₹4,999**) grants **2 credits** sized for the 100 GB plan. An account
+that has not paid can still sign in and build everything up to Publish, exactly as today; what
+changes is that the free registration credit is removed and payment, not a form, is what grants
+credits. Needs D-58's payment seam wired to a real gateway before it can be enforced; the identity
+fields and the fee-gated credit grant are N-113.
+
+## D-56 · A direct client channel, confirmed (17 Sept 2026)
+
+**Was:** `05-market-and-differentiation.md` (15 Sept) argued hybrid-gated-sequenced and recommended
+holding a public client door until the studio-safety rules and a payment rail exist; the "should we
+build this at all" question was left to Sandeep.
+
+**Decided (Sandeep):** yes — digital marketing will target studios and individuals directly, so the
+channel exists whether or not the product is ready for it. This confirms 05's open question; it
+does **not** by itself override 05's sequencing (attribution locked, a couple's money requests
+routed to their studio, Razorpay live, before the door opens) — that remains the recommendation
+unless Sandeep says to launch ahead of it. Shape: the same as D-55 — identity fields, the
+configurable fee, 2 credits for 100 GB. The studio-safety mechanism is D-57's theme split, not
+withholding the channel.
+
+## D-57 · The theme store: free and editable for a studio, paid for a client (17 Sept 2026)
+
+**Was:** `05-market-and-differentiation.md`'s proposal — every theme free to everyone, with a small
+curated "Advanced" tier gated on Studio-plan membership once ten direct signups exist.
+
+**Decided (Sandeep), refining 05:** every platform theme is free to a studio, **including
+duplicating any one into an editable copy** — "make a copy, edit, save as new." This is the house
+style mechanic house styles already have (`duplicateOf`, `fromCatalogueId`, N-64,
+`app/api/admin/presets/route.ts:23-44`), extended from "duplicate a saved house style" to
+"duplicate any platform theme into a house style." A client or couple gets a **basic five** free;
+anything past that is a purchase. This is the studio-safety differentiator D-56 needed: a studio
+never sees an individual client get the same free depth a studio gets, which is the justification
+Sandeep asked this decision to carry.
+
+## D-58 · A payment seam, gateway undecided among Razorpay, Cashfree and PhonePe (17 Sept 2026)
+
+**Was:** N-20 named "Razorpay" throughout `docs/NEXT.md` and `docs/PRICING.md`, as if the gateway
+were already chosen.
+
+**Decided (Sandeep):** it is not — Razorpay, Cashfree and PhonePe are all under evaluation.
+Scaffolded the same day as a provider seam, `lib/payments/` behind `PAYMENT_DRIVER`, matching every
+other integration in the codebase (`VideoProvider`, `DomainProvider`, `AuthProvider`): the choice
+becomes an env value and one driver class, not a rewrite of registration, theme purchase or credit
+top-up. `none` and a `fake` for the suite are implemented; a real driver needs the business bank
+account, which needs incorporation (`docs/15-sep-finding/04-startup-india.md`) first. This is the
+concrete architecture N-20 was missing, not new scope.
+
+## D-59 · A visual redesign of the three admin consoles and the marketing site — direction set, not designed (17 Sept 2026)
+
+**Was:** the product's look is functional rather than deliberately contemporary — a light token set
+for the three consoles, a near-black one for the guest surface, built to CLAUDE.md's definition of
+done rather than to a visual reference.
+
+**Decided (Sandeep):** redesign toward the genre shown in SaaSUI.design's Leadpages and CommandBar
+galleries and SaaSInterface.com — sidebar navigation, card-based layout, soft elevation, one
+accent colour, generous whitespace — kept on the existing CSS custom-property token architecture so
+it stays cheap to change later, per Sandeep's own condition. The marketing site (`mehfilbox.com`)
+gets a pricing comparison, an onboarding walkthrough and a feature showcase closer to a
+product-marketing template, in the shape of SaaSUI.design's CommandBar marketing example.
+
+**Recorded, not designed.** Three of the four reference URLs (both SaaSUI.design gallery pages,
+the CommandBar example) returned lazy-loaded placeholder thumbnails that never rendered, confirmed
+by screenshot rather than assumed. The fourth, saasinterface.com's own landing page, did render:
+a dark hero with a serif display headline over sans-serif body text, a gradient pill CTA, and a
+card-grid gallery below the fold — one real data point for "the genre," not a survey of it. The
+direction above still rests mainly on the token system and well-known conventions for these named
+products. A real design pass needs either a successful re-fetch of the gallery pages or
+screenshots Sandeep supplies directly. N-116.

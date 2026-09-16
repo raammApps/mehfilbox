@@ -1389,7 +1389,20 @@ export class SupabaseRepository implements Repository {
   // ── Titles ──────────────────────────────────────────────────────────────────
   async listTitles(catalogueId: string, options?: { publishedOnly?: boolean }): Promise<Title[]> {
     let query = this.db.from('titles').select('*').eq('catalogue_id', catalogueId)
-    if (options?.publishedOnly) query = query.eq('published', true).eq('status', 'ready')
+    /**
+     * `live_at`, not `published` (N-57) — the photo bug's twin (N-89a), same driver, same class.
+     * `published` is the operator's intent; `live_at` is whether a Publish has actually carried
+     * the film out to guests, and checking both was tried first and broke withdrawal: un-ticking
+     * a film hid it the instant it changed, which is exactly the live-effect Publish exists to
+     * remove. The memory driver has gated on `liveAt` alone since N-57
+     * (`lib/db/memory-repository.ts:758`); this driver still gated on `published`, so a ticked but
+     * never-published film was already reachable on the guest list read — confirmed 16 September
+     * 2026, fixed here. `status='ready'` stays, deliberately asymmetric with `live_at`: a film
+     * gone back to encoding would render a broken player, which is a fault rather than a change.
+     * `tests/unit/supabase-query-shape.test.ts` pins the filter, for the reason `liveOnly` on
+     * photographs did: no behavioural test runs against this driver.
+     */
+    if (options?.publishedOnly) query = query.eq('status', 'ready').not('live_at', 'is', null)
     const { data, error } = await query.order('sort_order', { ascending: true })
     if (error) throw new ApiError('INTERNAL', error.message)
     return (data ?? []).map(SupabaseRepository.toTitle)
