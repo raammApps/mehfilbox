@@ -102,14 +102,19 @@ Measure before deciding. Full cost model and triggers to revisit:
 
 ### 4. Startup India, under a new company?
 
-**Yes — incorporate a Private Limited Company and apply for DPIIT recognition immediately; treat
-the grant money as a parallel, uncertain project, not this quarter's funding plan.** Nothing is
-incorporated today; the only registered asset is the `heirloomfilms.in` domain. DPIIT recognition
-and Udyam (MSME) registration are both free with no downside, and together they save **₹9,000** on
-the "Mehfilbox" trademark filing. The one item with real cash attached, the SISFS seed grant of
-**up to ₹20 lakh**, is genuinely uncertain: **we do not know whether the current application cycle
-is even open** — several sources say it closed 31 May 2026, and the live portal could not be read
-directly to confirm. Full 90-day plan, with dates: [04-startup-india.md](04-startup-india.md).
+**Yes to DPIIT recognition — but not through what is registered today.** This answer was written
+assuming nothing existed; **17 September correction: Sandeep has a proprietorship, Raamm Group
+Enterprises (Udyam `UDYAM-MP-10-0138268`), owned by Asha Sharma, and is weighing whether to use it.
+A proprietorship cannot get DPIIT recognition, the 80-IAC tax holiday, or the SISFS seed grant —
+none of DPIIT's eligible entity types include one.** Udyam (MSME) registration and DPIIT Startup
+Recognition are different systems; having the first says nothing about the second, which is worth
+being direct about since the two are easy to conflate. Three paths are open and none is chosen —
+see [04 §2.1](04-startup-india.md#21-private-limited-llp-or-opc) and decision **D-52a**. The rest
+of the original answer still stands once a path is picked: DPIIT recognition is free, saves
+**₹9,000** on the "Mehfilbox" trademark filing alongside it, and the SISFS seed grant of **up to
+₹20 lakh** is genuinely uncertain regardless — **we do not know whether the current application
+cycle is even open**, and the live portal could not be read directly to confirm. Full plan, with
+dates: [04-startup-india.md](04-startup-india.md).
 
 ### 5. A master project file, documenting every workflow
 
@@ -174,7 +179,7 @@ has the full reasoning and file paths behind every one.
 | D-49 — Hold the direct-client door until the studio-safety fixes and Razorpay ship? | **Yes** |
 | D-50 — Direct-client price: test at ₹3,499, floored at the ₹1,999 studio wholesale price, once the door opens? | **Yes** — and not printed "excl. GST" until the registration question below is answered |
 | D-51 — Themes stay free for every studio; a paid tier waits for ten direct signups? | **Yes** |
-| D-52 — Incorporate as a Private Limited Company, registered office provisionally Karnataka? | **Yes — but confirm Sandeep's actual base first; this is genuinely unconfirmed.** Karnataka's case is the hiring pool, office convenience and patent reimbursement — **not** ELEVATE's ₹50 lakh, which Mehfilbox does not qualify for |
+| D-52 — Incorporate as a Private Limited Company, registered office provisionally Karnataka? | **Superseded by D-52a, 17 Sept.** A proprietorship (Raamm Group Enterprises) already exists; whether to use it, convert it, or incorporate fresh alongside it is open, and it decides the state question too — Madhya Pradesh, where that entity sits, has never been researched against Karnataka |
 | D-53 — Set an 8-week stop date (11 November 2026) on the codebase remediation effort? | **Yes** |
 | Buy Vercel Pro now ($20/month, about ₹1,900) to get off the GitHub Actions scheduler? | **Yes — buy it now, rather than build a workaround** |
 | Stand up staging (N-87) right after the bug fixes, before the next schema migration? | **Yes — one day and two free accounts; the conformance work everything else rests on cannot start without it** |

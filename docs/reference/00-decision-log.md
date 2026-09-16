@@ -777,3 +777,25 @@ card-grid gallery below the fold — one real data point for "the genre," not a 
 direction above still rests mainly on the token system and well-known conventions for these named
 products. A real design pass needs either a successful re-fetch of the gallery pages or
 screenshots Sandeep supplies directly. N-116.
+
+## D-52a · The existing entity is a proprietorship, and cannot carry D-52 · **open** (17 Sept 2026)
+
+**Was:** `06-what-changes-next.md`'s D-52 assumed nothing was registered and proposed incorporating
+a fresh Private Limited Company, registered office provisionally Karnataka, pending confirmation of
+where Sandeep is actually based.
+
+**Found:** Sandeep has an existing registered entity, **Raamm Group Enterprises** — Udyam
+`UDYAM-MP-10-0138268`, a **sole proprietorship** owned by Asha Sharma (not Sandeep), incorporated
+12 August 2025 in Bhopal, Madhya Pradesh, not GST-registered, classified under fund management,
+real estate and management-consultancy NIC codes — and is considering using it for Mehfilbox.
+
+**Not decided:** a sole proprietorship is outside DPIIT's eligible-entity list (Private Limited
+Company, registered Partnership, or LLP only), so it cannot carry DPIIT recognition, Section 80-IAC
+or the SISFS seed grant under any circumstance — the exact benefits D-52 was written to chase.
+Three paths are open (incorporate a fresh Pvt Ltd and leave this proprietorship alone; convert it
+into a Pvt Ltd; or use it as-is and give up DPIIT/80-IAC/SISFS for Mehfilbox), and none is chosen.
+See the full reasoning and a fourth open question — who Asha Sharma is, and whether Mehfilbox
+should sit under her personal PAN and personal liability — in
+`docs/15-sep-finding/04-startup-india.md` §2.1. D-52's Karnataka-vs-actual-base question is now
+secondary to this one: it only matters once a Pvt Ltd path is chosen, and even then Madhya Pradesh
+(§6) has never been researched as an alternative.

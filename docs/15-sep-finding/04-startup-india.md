@@ -85,6 +85,64 @@ reaches the same three schemes but becomes an awkward fit the moment equity is o
 is out from the first eligibility gate. Keep the first authorised capital at or under ₹15 lakh to
 keep the MCA filing fee nil.
 
+> **17 September 2026 — read this before acting on the recommendation above.** Sandeep shared two
+> certificates for an entity called **Raamm Group Enterprises**: a Udyam (MSME) registration
+> certificate and a Madhya Pradesh Shop & Establishment (Gumasta) certificate. What they actually
+> show:
+>
+> | | |
+> |---|---|
+> | Type of organisation | **Proprietary** — a sole proprietorship, not a company |
+> | Owner | **Asha Sharma** (PAN `BZSPS1955C`) — not Sandeep; the contact email on file is `sandeep.mummy.bh5@gmail.com`, which reads as a family member's address he manages, most likely his mother's, going by the pattern and the father's/husband's name on file (Ram Gopal Sharma) — **unconfirmed, worth stating plainly rather than guessing further** |
+> | GST | Not registered (`Do you have GSTIN: No`) |
+> | Registered office | Bhopal, **Madhya Pradesh** — a state this document's §6 never researched |
+> | Business activity (NIC codes) | 66309 fund management, 68100 real estate, 70200 management consultancy — **no software, media or IT services code**, which is what Mehfilbox actually is |
+> | Age, at 17 Sept 2026 | About five weeks old (incorporated 12 Aug 2025); Udyam registration followed 29 Oct 2025 |
+> | Financials on file | Zero turnover, zero investment (FY2023-24 row, filed as a placeholder before the entity existed) |
+>
+> **The one fact that overrides everything else in this section: a sole proprietorship is not on
+> DPIIT's eligible-entity list.** DPIIT Startup Recognition, Section 80-IAC and SISFS all require a
+> Private Limited Company, a registered Partnership Firm, or an LLP (§3, §4, §5) — a proprietorship
+> gets none of them, no matter how it is used. **MSME/Udyam registration and DPIIT Startup
+> Recognition are separate systems that happen to share an acronym-adjacent name and nothing
+> else** — Udyam is about lending priority, delayed-payment protection under the MSMED Act, and
+> tender set-asides; DPIIT recognition is the tax-and-equity track this whole document is about.
+> Having one says nothing about eligibility for the other, and this is worth being direct about
+> because the phrasing "already have an MSME registered company... planning to use it for this"
+> reads as if it might unlock what DPIIT recognition unlocks. It does not.
+>
+> Three real paths, not a recommendation yet — this is Sandeep's call, and the decision log records
+> it as open (D-52a):
+>
+> 1. **Incorporate a fresh Private Limited Company for Mehfilbox**, and leave Raamm Group
+>    Enterprises as whatever else it is for. Given the proprietorship is five weeks old with zero
+>    turnover and zero assets, there is nothing of substance to lose by not reusing it, and this is
+>    the only path that keeps every recommendation in the rest of this document intact.
+> 2. **Convert Raamm Group Enterprises into a Private Limited Company** — a legal Part IX
+>    conversion, with more paperwork and cost than fresh incorporation, and Asha Sharma becoming a
+>    shareholder of the resulting company for her prior proprietorship interest. Given how new and
+>    empty the proprietorship is, there is very little history actually worth preserving through a
+>    conversion.
+> 3. **Use Raamm Group Enterprises as it stands**, invoice through it, and accept that DPIIT
+>    recognition, the 80-IAC tax holiday and the SISFS seed grant are permanently unavailable to
+>    Mehfilbox under this entity. Cheapest if the goal was only ever a GST-registered billing
+>    vehicle, not the grant and tax track this document was written to chase.
+>
+> Whichever path, three follow-ups do not wait on the choice: **confirm who Asha Sharma is and
+> whether operating Mehfilbox under her personal PAN and unlimited proprietor's liability is
+> intended** (a proprietorship has no separate legal personality — every liability is hers
+> personally); **the NIC codes need correcting to an IT/software/media classification** regardless
+> of which path is chosen, since state IT-sector schemes and even a future company's own Udyam
+> registration should describe what the business actually does; and **§6's state-scheme table has
+> no Madhya Pradesh row** — it was never researched, and should be before treating Bhopal as
+> settled either way.
+
+> **Correction, 17 September 2026.** The paragraph below was written assuming nothing was
+> registered. That was wrong: Sandeep has a sole proprietorship, **Raamm Group Enterprises**
+> (Udyam `UDYAM-MP-10-0138268`, incorporated 12 Aug 2025, Bhopal, Madhya Pradesh — from the two
+> certificates he shared), and is considering using it for Mehfilbox. It changes §2.1's
+> recommendation materially, not just §2.2's mechanics — see the box at the end of §2.1.
+
 ### 2.2 Moving the existing code into the company
 
 Nobody legally owns Mehfilbox today except Sandeep personally. As noted above, nothing in `docs/`
