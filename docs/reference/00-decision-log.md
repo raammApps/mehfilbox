@@ -843,3 +843,33 @@ and the entity already carries GST, a TAN and fifteen months of (dormant) histor
 
 No decision recorded here. `docs/15-sep-finding/04-startup-india.md` §2.1 is not yet updated with
 this entity — wait for Sandeep's answer on ownership before writing it in, so it is written once.
+
+## D-52c · Pvt Ltd is not mandatory for the actual near-term need — recommendation re-scoped (17 Sept 2026)
+
+**Was:** D-52a decided a fresh Private Limited Company, framed entirely around DPIIT recognition,
+80-IAC and SISFS — the grant-and-tax track `docs/15-sep-finding/04-startup-india.md` was written to
+chase.
+
+**Sandeep clarified:** no fundraising is planned; the near-term need is an entity that can accept
+payment, register for GST and issue invoices — nothing more.
+
+**Corrected:** a Private Limited Company is **not** required for that. Any legal entity — a
+proprietorship, an OPC, an LLP, a partnership — can register for GST and invoice; entity type gates
+DPIIT/80-IAC/SISFS eligibility and the ability to issue priced equity, neither of which this need
+touches. **Kalaakarni Couture (OPC) Private Limited already has GST registered** (D-52b) — of the
+two entities Sandeep has shown, it is the closer fit to what he actually asked for just now, once
+its NIC/business-activity classification is corrected from fashion design to software/media
+services, which is a Udyam edit and likely an MOA objects-clause amendment (a special resolution +
+MGT-14), not a new incorporation.
+
+**Recommendation, not yet confirmed:** use the OPC for GST-registered invoicing now; treat
+incorporating fresh (D-52a) or converting the OPC (D-52b) as optional and deferred, revisited only
+if the DPIIT/grant track becomes worth pursuing — which costs nothing to defer, since OPC-to-Pvt-Ltd
+conversion has no waiting period. This narrows D-52a's scope rather than reversing it: a fresh Pvt
+Ltd remains the right vehicle *if and when* DPIIT recognition is pursued; it is no longer the
+recommended immediate next step.
+
+**Open, and practical rather than legal:** an OPC has one legal signatory. If Sandeep is not a
+shareholder or director, someone else must operate the bank account and sign GST returns and
+invoices day to day — worth naming, since "just for invoicing" still needs a person authorised to
+invoice.
