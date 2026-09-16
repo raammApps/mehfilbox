@@ -803,3 +803,43 @@ has still never been researched against Karnataka in `docs/15-sep-finding/04-sta
 The 90-day plan's first step — confirm the actual base — still stands and now has a concrete
 reason behind it: Bhopal is a real, evidenced candidate, not a guess, and deserves the same
 research Karnataka and Kerala got before either is chosen.
+
+## D-52b · A second existing entity, an OPC — more workable than the proprietorship, still open (17 Sept 2026)
+
+**Found:** Sandeep shared incorporation and Udyam documents for **Kalaakarni Couture (OPC) Private
+Limited** — CIN `U74101MP2024OPC071673`, incorporated 12 June 2024, Sehore, Madhya Pradesh, GST
+already registered, PAN `AALCK0887H`, essentially dormant (one employee, zero turnover on file).
+He described it as his mother-in-law's company and asked whether it can be reused instead of
+incorporating fresh (D-52a).
+
+**Verified against the official page directly, 17 Sept 2026** (`startupindia.gov.in`, fetched live,
+last-updated banner reads 14-Sep-2026): DPIIT's eligible entity types are Private Limited Company,
+Partnership Firm, LLP, or Cooperative Society. **An OPC is still not on the list**, even on a page
+otherwise current for the 2026 framework (turnover cap raised to ₹200 crore, the Deep Tech
+category). Several SEO/consultancy blog posts claim OPCs became DPIIT-eligible under the 2026
+notification; the primary source does not support that, and the claim is not acted on here — flag
+it to the CA to confirm independently before relying on it either way.
+
+**Genuinely more workable than the proprietorship, if it is used at all.** An OPC converts into a
+Private Limited Company voluntarily at any time — the 2021 amendment removed the old two-year
+wait — by adding at least one shareholder and one director, a special resolution, Form MGT-14, then
+Form INC-6, about 15–30 working days, no asset-transfer or stamp-duty event because it is the same
+legal entity continuing. That is materially lighter than the proprietorship's Part IX conversion,
+and the entity already carries GST, a TAN and fifteen months of (dormant) history.
+
+**Two things are open, not decided:**
+
+1. **Ownership.** An OPC has exactly one member today. Converting it is the natural, no-extra-cost
+   moment to add Sandeep as a shareholder or director — the conversion filing already requires
+   adding at least one of each — but only if he wants that. He said "I don't want a company on my
+   name anyway," which this asks him to reconcile with a concrete consequence: without being added,
+   the business he builds belongs entirely, in law, to whoever the current sole member is. Who that
+   is is not established from the documents shared — the Udyam contact is Arshi Rathore; the
+   incorporation mailing address is C/O Mohan Rathore.
+2. **Business activity.** Registered for NIC 74101 — fashion design — not software or media. Fixing
+   Udyam is a form; the company's own MOA object clause likely needs a special resolution and an
+   MGT-14 filing before it can lawfully carry on a streaming SaaS business, which is a real step,
+   not paperwork tidying.
+
+No decision recorded here. `docs/15-sep-finding/04-startup-india.md` §2.1 is not yet updated with
+this entity — wait for Sandeep's answer on ownership before writing it in, so it is written once.
