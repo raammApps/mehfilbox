@@ -1622,12 +1622,24 @@ export class SupabaseRepository implements Repository {
     return (data ?? []).map(SupabaseRepository.toPhoto)
   }
 
-  async listPhotosForCatalogue(catalogueId: string): Promise<Photo[]> {
-    const { data } = await this.db
+  async listPhotosForCatalogue(
+    catalogueId: string,
+    options?: { liveOnly?: boolean },
+  ): Promise<Photo[]> {
+    let query = this.db
       .from('photos')
       .select('*, albums!inner(catalogue_id)')
       .eq('albums.catalogue_id', catalogueId)
-      .order('sort_order')
+    /**
+     * `liveOnly` is the guest's view (N-57): a photograph reaches the couple when a Publish
+     * stamps `live_at`, not when it is uploaded. The memory driver has honoured this since N-57;
+     * this driver silently accepted the option and ignored it, so production guests saw every
+     * photograph in the album the moment it was uploaded — found in the 15 September review,
+     * confirmed by two reviewers independently. `tests/unit/supabase-query-shape.test.ts` now
+     * pins the filter, because no behavioural test runs against this driver.
+     */
+    if (options?.liveOnly) query = query.not('live_at', 'is', null)
+    const { data } = await query.order('sort_order')
     return (data ?? []).map(SupabaseRepository.toPhoto)
   }
 

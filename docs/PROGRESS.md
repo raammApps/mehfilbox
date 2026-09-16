@@ -2048,3 +2048,25 @@ broken. `DEPLOYMENT.md` §4 gains that step and the one above it — how to appl
 project that is already live, and how to tell which have run when there is no ledger.
 
 3 new unit tests; 659 unit and component tests.
+
+## Guests saw unpublished photographs on the Supabase driver — 16 September 2026
+
+**Found by the 15 September review, by two reviewers independently, and confirmed in the code.**
+`listPhotosForCatalogue` on `SupabaseRepository` took no options: the guest path has asked it for
+`{ liveOnly: true }` since N-57, the memory driver has honoured that since N-57, and the
+production driver accepted the argument and ignored it. Every photograph in an album reached
+guests the moment it was uploaded, which is precisely the promise N-57 exists to keep. No
+behavioural test could see it, because every test — unit, component, E2E — runs against the
+memory driver; the two drivers are only ever compared by production.
+
+The fix is one filter, `.not('live_at', 'is', null)`, applied when `liveOnly` is set. Publish has
+always stamped `live_at` on this driver, so nothing already published disappears.
+`tests/unit/supabase-query-shape.test.ts` pins the query's shape through a recording stand-in for
+the Supabase client — the same idea as the column-map test: it cannot prove the query against
+Postgres, but it can prove the filter is there, and it fails the moment someone removes it.
+
+The wider finding stands and is not fixed here: the Supabase driver has no execution under test,
+and 1,869 lines of it can drift from the memory driver without anything noticing. That is in the
+15 September assessment as a remediation item, not a one-line patch.
+
+2 new unit tests; 661 unit and component tests.
