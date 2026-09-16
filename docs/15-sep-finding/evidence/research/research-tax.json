@@ -1,0 +1,195 @@
+{
+  "topic": "Tax benefits for DPIIT-recognised startups as of September 2026 — Section 80-IAC/new Section 140, Section 54GB, angel tax (Section 56(2)(viib)), Section 79 loss carry-forward, and GST for an 18%-rated SaaS company — with implications for Mehfilbox",
+  "summary": "Government sites (incometaxindia.gov.in, pib.gov.in, indiabudget.gov.in, dpiit.gov.in) blocked automated fetches (HTTP 403) on every attempt in this session bar one partial success on startupindia.gov.in, so almost everything below rests on converging secondary sources rather than a directly-quoted primary text — flagged per-fact. Core, well-corroborated picture: Budget 2025 (Finance Act 2025) extended Section 80-IAC's incorporation window by five years to 1 April 2016–31 March 2030 (100% profit deduction for any 3 of the first 10 years, DPIIT-recognised Pvt Ltd/LLP, turnover under a cap, Inter-Ministerial Board certificate required); Budget 2024 abolished angel tax (Section 56(2)(viib)) for share premium received by ANY closely-held Indian company (not just DPIIT-recognised ones) from 1 April 2025 onward; Section 79 gives 'eligible start-ups' a lighter loss-carry-forward test than ordinary closely-held companies, reportedly extended from a 7-year to a 10-year window by Budget 2025; Section 54GB is a narrow, personal (individual/HUF) capital-gains relief for someone who sells a house and invests in a startup's fresh equity — not a company-level benefit — and its own sunset date could not be pinned down with confidence (see disagreement below). The most consequential and least-obvious finding for Mehfilbox is on GST: interstate supply of services (studios in other states) does NOT by itself force early registration, but reverse-charge liability on services imported from foreign vendors DOES force compulsory registration under Section 24(iii) CGST Act, with no turnover threshold at all — and Mehfilbox's own docs already identify Bunny/Vercel/Supabase as 'imports of service' (docs/PRICING.md:337) while leaving registration as an undecided question for 'an accountant' (docs/PRICING.md:333-338, docs/REQUIREMENTS.md:214, docs/ROADMAP.md:269). Two live disagreements between sources could not be resolved and are reported as such rather than guessed: whether a 2026 amendment raised the startup-deduction turnover ceiling from ₹100 crore to ₹300 crore, and Section 54GB's true current sunset date (31 March 2022 per the traceable chain of Finance Act extensions, vs one source titled 'upto 31.03.2026'). A companion file in this same scratchpad, research-dpiit.json, covers the DPIIT recognition process itself (NSWS filing, timelines, IPR/labour-law benefits, SISFS mechanics) in more depth and should be read alongside this one — it independently confirms via a direct startupindia.gov.in fetch that DPIIT recognition's own turnover cap is now ₹200 crore (₹300 crore for a new 'Deep Tech' category) under a February 2026 notification, a different test from the income-tax turnover cap discussed here.",
+  "facts": [
+    {
+      "claim": "Section 80-IAC: an eligible start-up (DPIIT-recognised Private Limited Company or LLP) can deduct 100% of the profits and gains of its eligible business for any 3 consecutive years out of the first 10 years from incorporation.",
+      "source_url": "https://www.startupindia.gov.in/content/sih/en/form80iac.html",
+      "as_of": "2026-09-16",
+      "confidence": "official"
+    },
+    {
+      "claim": "Baseline Section 80-IAC eligibility on the same page: incorporated on or after 1 April 2016, must be less than 10 years old, annual turnover under ₹100 crore in any financial year, working toward innovation/a scalable business model, not formed by splitting or reconstructing an existing business.",
+      "source_url": "https://www.startupindia.gov.in/content/sih/en/form80iac.html",
+      "as_of": "2026-09-16",
+      "confidence": "official"
+    },
+    {
+      "claim": "Budget 2025-26 (announced 1 February 2025) extended the Section 80-IAC incorporation-eligibility window by five years: startups incorporated before 1 April 2030 (previously the cut-off was 31 March/1 April 2025) can now apply.",
+      "source_url": "https://www.business-standard.com/budget/news/budget-2025-govt-proposes-to-extend-startup-incorporation-till-2030-125020101430_1.html",
+      "as_of": "2026-09-16",
+      "confidence": "secondary"
+    },
+    {
+      "claim": "DPIIT introduced a revised Inter-Ministerial Board (IMB) evaluation framework in which complete Section 80-IAC applications are reviewed within 120 days; 187 startups were cleared at the reported 80th IMB meeting (30 April 2025), taking cumulative approvals to over 3,700 since the scheme began in 2016.",
+      "source_url": "https://www.pib.gov.in/PressReleasePage.aspx?PRID=2128860&reg=48&lang=2",
+      "as_of": "2026-09-16",
+      "confidence": "secondary"
+    },
+    {
+      "claim": "The application route for the 80-IAC certificate is Form-1 to DPIIT, assessed by the Inter-Ministerial Board of Certification — a separate step from DPIIT recognition itself, and only a small fraction of DPIIT-recognised startups (one aggregator states roughly 3,700 of over 197,000 recognised, i.e. under 2%) have actually obtained an 80-IAC/Section 140 certificate.",
+      "source_url": "https://indiapolicyhub.in/2026/06/19/income-tax-exemption-startups-india-80-iac-eligibility-2026-2030/",
+      "as_of": "2026-09-16",
+      "confidence": "unverified"
+    },
+    {
+      "claim": "The Income-tax Act, 2025 (a full renumbering of the 1961 Act) took effect 1 April 2026. In it, the eligible start-up deduction sits at Section 140, specifically sub-section (16): the incorporation window (1 April 2016 to before 1 April 2030), the 100%-for-3-of-10-years deduction, and the Inter-Ministerial Board certificate requirement are reproduced in materially the same terms as old Section 80-IAC.",
+      "source_url": "https://eztax.in/income-tax-act-2025/section-140",
+      "as_of": "2026-09-16",
+      "confidence": "secondary"
+    },
+    {
+      "claim": "DISPUTED: several secondary sources report that a Finance Act 2026 amendment made during the Bill's passage (not present in the Bill as introduced) raised the Section 140 turnover ceiling from ₹100 crore to ₹300 crore, aligning it with DPIIT's separate February-2026 recognition-turnover change. However, eztax.in's own reproduction of Section 140's text (fetched directly) still reads 'one hundred crore rupees'. This could not be resolved from public sources and needs confirmation against the enacted Finance Act 2026 text or a practitioner before being relied on.",
+      "source_url": "https://bvaca.com/blog/dpiit-recognition-section-140-startup-tax-holiday",
+      "as_of": "2026-09-16",
+      "confidence": "unverified"
+    },
+    {
+      "claim": "DPIIT's own recognition test (a separate instrument from the income-tax deduction) is a rolling age test — under 10 years old (20 years for a new 'Deep Tech Startup' sub-category) — not a fixed incorporation calendar window, per a Gazette notification reported as G.S.R. 108(E) dated 4 February 2026 that raised the general turnover cap from ₹100 crore to ₹200 crore and set a ₹300 crore cap for Deep Tech. This is a different test from Section 80-IAC/140's fixed 2016–2030 incorporation window, and no evidence was found in this search of Budget 2026 moving that fixed income-tax window any further.",
+      "source_url": "https://treelife.in/startups/indias-revised-startup-recognition-framework-2026/",
+      "as_of": "2026-09-16",
+      "confidence": "secondary"
+    },
+    {
+      "claim": "Section 56(2)(viib) ('angel tax') — which taxed a closely-held company's share-premium receipts above fair market value as the company's own income — was made inapplicable with effect from 1 April 2025 (AY 2025-26 onward), via the Finance (No. 2) Act 2024 (announced in the July 2024 Budget, presidential assent 16 August 2024).",
+      "source_url": "https://www.india-briefing.com/news/abolishing-the-angel-tax-in-india-applicable-for-fy-2025-26-35289.html/",
+      "as_of": "2026-09-16",
+      "confidence": "secondary"
+    },
+    {
+      "claim": "The abolition applies to every closely-held Indian company issuing shares at a premium, for investment from any class of investor (resident or non-resident) — it is not limited to DPIIT-recognised startups, and no DPIIT Section 56 exemption certificate is needed for this purpose any more.",
+      "source_url": "https://beaconfiling.com/glossary/angel-tax",
+      "as_of": "2026-09-16",
+      "confidence": "secondary"
+    },
+    {
+      "claim": "Section 54GB lets an individual or HUF exempt long-term capital gains from selling a residential house/plot if the net sale proceeds are subscribed as equity in an 'eligible company' — a category that has included an 'eligible start-up' since 1 April 2017 — and the company spends the money on new plant and machinery within one year of the share subscription. This is a personal (investor-side) relief, not a benefit the startup company itself claims.",
+      "source_url": "https://www.taxbuddy.com/blog/tax-exemption-under-section-54gb-invest-in-startups",
+      "as_of": "2026-09-16",
+      "confidence": "secondary"
+    },
+    {
+      "claim": "The new shares and the plant/machinery bought with the proceeds must be held for 5 years (3 years if the start-up is in a 'technology-driven' business) or the exemption is reversed and taxed in the year of the breach.",
+      "source_url": "https://tax2win.in/guide/exemption-under-section-54gb-of-income-tax-act-1961",
+      "as_of": "2026-09-16",
+      "confidence": "secondary"
+    },
+    {
+      "claim": "DISPUTED / UNVERIFIED: the last date by which the residential-property transfer must occur to qualify under Section 54GB has been extended multiple times by successive Finance Acts (Finance Act 2017 to 31 March 2019, Finance Act 2019 to 31 March 2021, Finance Act 2021 to 31 March 2022); no source found in this search documents a further extension past 31 March 2022, meaning the provision reads as expired for new investments today. One other source's page title references '[Upto 31.03.2026]' for 'Old Section 54GB', which conflicts with the above and could not be reconciled — treat the current sunset date as unverified pending a direct check of the bare Act text or a CA.",
+      "source_url": "https://carajput.com/blog/tax-benefit-on-investment-in-startups-u-s-54gb/",
+      "as_of": "2026-09-16",
+      "confidence": "unverified"
+    },
+    {
+      "claim": "Section 79 (ordinary rule, closely-held companies): a company can carry forward and set off a year's business losses only if the persons holding at least 51% of its voting power on the last day of the loss year still hold at least 51% on the last day of the year the loss is set off — otherwise the carried-forward loss lapses.",
+      "source_url": "https://www.indiafilings.com/learn/income-tax-section-79",
+      "as_of": "2026-09-16",
+      "confidence": "secondary"
+    },
+    {
+      "claim": "Section 79 relaxation for an 'eligible start-up' (as referred to in Section 80-IAC): the 51% test is replaced by a lighter one — losses may still be carried forward and set off as long as all shareholders who held voting shares on the last day of the loss year continue to hold those same shares on the last day of the set-off year. New investors diluting the founders below 51% does not break this, provided no original shareholder exits entirely.",
+      "source_url": "https://taxguru.in/income-tax/section-79-carry-set-loss-case-ofeligible-startups-condition-relaxed.html",
+      "as_of": "2026-09-16",
+      "confidence": "secondary"
+    },
+    {
+      "claim": "This start-up relaxation under Section 79 originally covered losses incurred within 7 years of incorporation; Budget 2025 is reported to have extended this to 10 years, aligning it with the 80-IAC/Section 140 window.",
+      "source_url": "https://www.argus-p.com/updates/updates/extended-set-off-and-carry-forward-period-under-section-79-of-the-it-act/",
+      "as_of": "2026-09-16",
+      "confidence": "secondary"
+    },
+    {
+      "claim": "Section 79's shareholding-change test (both the general 51% rule and the start-up relaxation) does not apply where the change is caused by a shareholder's death, a gift of shares to a relative, an amalgamation or demerger, an approved Insolvency and Bankruptcy Code resolution plan, or a Tribunal-approved plan after the Board is suspended.",
+      "source_url": "https://www.patronaccounting.com/blog/section-79-carry-forward-losses-shareholding-change",
+      "as_of": "2026-09-16",
+      "confidence": "secondary"
+    },
+    {
+      "claim": "GST registration threshold: ₹20 lakh aggregate turnover in a financial year for a supplier of services (₹10 lakh in 'special category states'); the ₹40 lakh threshold is for suppliers of goods and does not apply to a services business like Mehfilbox.",
+      "source_url": "https://www.jordensky.com/blog/gst-registration-threshold-limits-for-services",
+      "as_of": "2026-09-16",
+      "confidence": "secondary"
+    },
+    {
+      "claim": "Unlike interstate supply of goods (which forces compulsory GST registration under Section 24(i) CGST Act regardless of turnover), a person making only interstate supplies of services stays exempt from that specific compulsory-registration trigger up to the normal ₹20 lakh/₹10 lakh threshold, per the proviso to Section 24(i) read with Notification No. 10/2017-Central Tax. Selling to studios in other Indian states does not, by itself, force early GST registration.",
+      "source_url": "https://www.taxwink.com/blog/gst-on-inter-state-supply-of-services",
+      "as_of": "2026-09-16",
+      "confidence": "secondary"
+    },
+    {
+      "claim": "Separately, Section 24(iii) CGST Act makes GST registration compulsory — irrespective of the ₹20 lakh/₹40 lakh turnover threshold, with no lower limit at all — for 'persons who are required to pay tax under reverse charge'. A person in India paying a supplier located outside India for a service (import of service) is liable to IGST under reverse charge per Notification No. 10/2017-Integrated Tax (Rate), which in turn triggers this compulsory-registration clause.",
+      "source_url": "https://www.taxscan.in/top-stories/reverse-charge-liability-triggers-mandatory-gst-registration-even-below-threshold-section-24-explained-1445161",
+      "as_of": "2026-09-16",
+      "confidence": "secondary"
+    },
+    {
+      "claim": "A supply only qualifies as a zero-rated 'export of service' under Section 16 IGST Act if all five conditions of Section 2(6) IGST Act are met: supplier located in India, recipient located outside India, place of supply outside India, payment received in convertible foreign exchange (or INR via an RBI-permitted route such as a Special Rupee Vostro Account), and supplier and recipient are not merely establishments of the same legal person.",
+      "source_url": "https://razorpay.com/blog/export-services-gst-conditions-guide/",
+      "as_of": "2026-09-16",
+      "confidence": "secondary"
+    },
+    {
+      "claim": "To export services without charging IGST, a registered person files a Letter of Undertaking (Form GST RFD-11); export proceeds must be realised within 1 year of the invoice date; input tax credit on inputs used for the zero-rated export remains claimable, and any accumulated, unutilised credit is refundable.",
+      "source_url": "https://vakilsearch.com/article/lut-under-gst-export-of-services-india/",
+      "as_of": "2026-09-16",
+      "confidence": "secondary"
+    },
+    {
+      "claim": "SAC 998314 (broadly 'information technology design and development / consulting and support services') is commonly used for SaaS platforms and carries 18% GST; SAC 997331 ('licensing services for the right to use intellectual property and similar products', e.g. packaged-software licences) also carries 18%. Both codes attract the same rate, so the choice mainly affects invoice/return classification, not the tax amount.",
+      "source_url": "https://munimo.in/tools/hsn-sac-code-finder/998314",
+      "as_of": "2026-09-16",
+      "confidence": "secondary"
+    },
+    {
+      "claim": "Startup India Seed Fund Scheme (SISFS): up to ₹20 lakh as a milestone-based grant for validation/proof-of-concept, plus up to ₹50 lakh via convertible debentures for market entry/scaling, disbursed through DPIIT-empanelled incubators; eligibility requires the applicant to be incorporated not more than 2 years before the date of application, and total prior funding under ₹10 crore.",
+      "source_url": "https://www.pedalstart.com/blog/startup-india-seed-fund-scheme-complete-application-guide",
+      "as_of": "2026-09-16",
+      "confidence": "secondary"
+    },
+    {
+      "claim": "One aggregator reports the current SISFS application cycle's deadline as 31 May 2026 — already past as of this research date (16 September 2026) — with incubator-level selection due by 30 June 2026. This could not be confirmed on the official seedfund.startupindia.gov.in portal, which returned no readable content to this research tool (likely a JavaScript-rendered page); the live status of the next application window needs a direct, human check of the portal.",
+      "source_url": "https://seedfund.startupindia.gov.in/",
+      "as_of": "2026-09-16",
+      "confidence": "unverified"
+    },
+    {
+      "claim": "Mehfilbox's own pricing document prices every plan exclusive of 18% GST under SAC 998314, and separately records, as an open and undecided question, that its Bunny/Vercel/Supabase bills 'attract reverse-charge GST, reclaimable as input credit only if registered' — deferring the registration decision to 'an accountant... before quoting'.",
+      "source_url": "docs/PRICING.md:8,333-338",
+      "as_of": "2026-09-16",
+      "confidence": "official"
+    },
+    {
+      "claim": "GST registration is independently listed as an open item in two other repo documents: docs/REQUIREMENTS.md:214 ('GST registration, with the accountant') and docs/ROADMAP.md:269 ('GST registration — decided before the first self-service invoice... registration is the accountant's'). docs/spec/15-partners-and-scale.md (around line 136) separately notes Razorpay integration needs 'an Indian entity'.",
+      "source_url": "docs/REQUIREMENTS.md:214; docs/ROADMAP.md:269; docs/spec/15-partners-and-scale.md:~136",
+      "as_of": "2026-09-16",
+      "confidence": "official"
+    },
+    {
+      "claim": "At Mehfilbox's modelled 60-weddings/6-month volume, projected revenue is ₹3,30,000 against ₹55,474 of infrastructure cost (16.8% of revenue) — well under the ₹20 lakh GST services-registration threshold on domestic turnover alone, before accounting for the separate reverse-charge trigger discussed above.",
+      "source_url": "docs/SCALE-PLAN.md:28-37",
+      "as_of": "2026-09-16",
+      "confidence": "official"
+    }
+  ],
+  "open_questions": [
+    "Section 140's current turnover ceiling: ₹100 crore (per eztax.in's direct reproduction of the statutory text) or ₹300 crore (per several secondary sources describing a Finance Act 2026 in-passage amendment)? Immaterial to Mehfilbox at its current scale either way, but needs a practitioner's confirmation before it is cited in any filing.",
+    "Did any 2026 amendment move the Section 140 incorporation cut-off itself beyond 1 April 2030? No evidence of this was found, but absence of evidence in a search is not proof of absence — worth a direct check nearer the date Mehfilbox actually files for the certificate.",
+    "Section 54GB's true current sunset date is unresolved (31 March 2022 per the traceable Finance Act chain vs a conflicting '31.03.2026' reference in one source). Matters only if Sandeep personally plans to sell a residential property and reinvest the gain into fresh Mehfilbox equity — a personal, not company, tax question.",
+    "Does any legal entity for this business exist today, and if so, since when? Not stated in docs/PRICING.md, docs/SCALE-PLAN.md, docs/COMPETITORS.md or docs/PRODUCT.md; docs/REQUIREMENTS.md:214 and docs/ROADMAP.md:269 treat GST registration as still pending 'the accountant', and the task's own framing lists 'a new company registration' among things Sandeep is 'considering' — consistent with no company existing yet, but not directly confirmed by any single line read. This gates how urgent the GST/reverse-charge finding below actually is (a sole proprietor can still be liable under RCM using a personal PAN, so incorporation status doesn't remove the obligation, but it changes who is responsible for registering).",
+    "Do Bunny, Vercel and Supabase actually bill Mehfilbox from an entity with no Indian GST registration of its own (the fact pattern that makes their charges 'import of service' under reverse charge)? docs/PRICING.md:337 already asserts this; this research builds on that premise rather than re-verifying each vendor's billing entity independently.",
+    "What is the live status of the Startup India Seed Fund Scheme's next application window? The official portal did not return readable content to this tool; needs a direct human check of seedfund.startupindia.gov.in.",
+    "This research did not verify DPIIT recognition's own application mechanics, turnaround time, or state-level startup policy stacking (e.g. a state's own incentives on top of DPIIT recognition) — see the companion file research-dpiit.json in this same scratchpad directory, which covers that ground independently and in more depth, including a direct official fetch confirming DPIIT recognition's turnover cap is now ₹200 crore (a different, non-fixed-date test from the Section 140 income-tax cap discussed here)."
+  ],
+  "actions_for_mehfilbox": [
+    "1. Get a GST practitioner to confirm, this month and independent of revenue size: because Mehfilbox already pays foreign vendors (Bunny, Vercel, Supabase) for services used in the business, Section 24(iii) CGST Act likely already makes GST registration compulsory under reverse charge on those import-of-service payments — with no ₹20 lakh threshold exemption at all. This directly answers the question docs/PRICING.md:333-338, docs/REQUIREMENTS.md:214 and docs/ROADMAP.md:269 all defer to 'the accountant', and it means registration may not be something to defer until 'the first self-service invoice' (docs/ROADMAP.md:269) — the reverse-charge liability does not wait for Mehfilbox's own outward billing to start.",
+    "2. Sequence any new-company-registration decision around that GST finding: whether Sandeep incorporates a fresh Private Limited Company or not, the reverse-charge GST registration question in action 1 applies either way (a sole proprietorship can register too) — don't let the bigger 'should I incorporate' decision stall the narrower, seemingly more urgent compliance question.",
+    "3. Before spending money on the 'Mehfilbox' name anywhere expensive, run the trademark search in classes 41 and 42 that docs/PRODUCT.md:54-60, docs/REQUIREMENTS.md:215 and docs/ROADMAP.md:271 all still list as outstanding — this also gates whether a new company's name will clear at incorporation, so it belongs before, not after, filing for incorporation under that name.",
+    "4. If proceeding with a new Private Limited Company, incorporate as soon as the name clears, then apply for DPIIT recognition promptly after — both the Startup India Seed Fund Scheme's 'incorporated ≤2 years before application' eligibility and, more loosely, the fixed 10-year window for claiming the Section 80-IAC/Section 140 profit deduction start counting from the incorporation date, so delay only shortens both clocks. See research-dpiit.json (this scratchpad) for the recognition process itself.",
+    "5. Separately from recognition, file Form-1 for the Section 80-IAC/Section 140 Inter-Ministerial Board certificate, but set expectations correctly: secondary sources suggest well under half of applicants (some put it under 2% of all DPIIT-recognised startups) actually hold this certificate, and the benefit — 3 tax-free years within the first 10 — is worth nothing until Mehfilbox is actually profitable. Treat it as paperwork to start early, not a near-term cash benefit, and don't let it compete for attention with action 1.",
+    "6. Check seedfund.startupindia.gov.in directly before assuming the Seed Fund Scheme (up to ₹20 lakh grant plus ₹50 lakh convertible debt) is a near-term funding source — the reported 31 May 2026 deadline for the current cycle has already passed and this tool could not confirm the next window. If closed, it's a reason to incorporate sooner (to stay inside the 2-year eligibility clock for whenever the next cycle opens), not a reason to wait.",
+    "7. Angel tax being abolished (Section 56(2)(viib), from FY2025-26, for every company not just DPIIT-recognised ones) removes the old tax objection to raising a friends-and-family or angel round at a premium — if Sandeep is weighing outside capital against self-funding the infra/team build-out this move implies, factor that in now rather than treating it as a separate later decision.",
+    "8. Once GST-registered, have the same practitioner confirm the SAC code on Deliver/Keep/Cinema/Studio-plan invoices — docs/PRICING.md:8 currently uses 998314; 997331 is the narrower 'software licensing' code. Both carry 18%, so this is a low-urgency invoice-classification clean-up, not a tax-rate risk.",
+    "9. The Go/Java port and in-house transcoding ideas carry no material tax benefit found in this research. In-house transcoding would reduce, but not eliminate, the reverse-charge exposure in action 1, since Vercel and Supabase remain foreign vendors regardless — don't let either engineering decision be framed as solving the GST registration question, and don't let the GST question block or justify either engineering decision.",
+    "10. If direct-to-client onboarding or the paid-advanced-themes idea ever reaches overseas/NRI couples or studios paying in foreign currency for events held outside India, revisit GST treatment for that slice specifically at that time — it may qualify as a zero-rated 'export of service' (Section 2(6) IGST Act, LUT via Form RFD-11, no output GST, refundable input credit) rather than the standard 18% domestic charge. This does not apply to the current India-first, INR-billed, studio-facing model, so it is a 'when it happens', not a 'now', item."
+  ]
+}

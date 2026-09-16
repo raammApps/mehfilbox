@@ -1,0 +1,151 @@
+{
+  "topic": "DPIIT Startup Recognition (Startup India) — eligibility, process, benefits, 2025–2026 changes, and implications for Mehfilbox",
+  "summary": "DPIIT Startup Recognition is free, filed on the National Single Window System (not startupindia.gov.in directly), and is reportedly decided within days — but it is a status, not a grant: self-certification, IPR fee rebates, GeM access and fast-track winding-up follow automatically from recognition, while the two benefits founders usually mean by 'Startup India for grants' — the Section 80-IAC tax holiday and the Seed Fund Scheme (SISFS) — each need a separate application on top of recognition. A DPIIT notification (G.S.R. 108(E), reported 4 February 2026 by one direct source and 6 February 2026 by another — unresolved) overhauled the definition this year: the turnover cap rose from Rs 100 crore to Rs 200 crore, a new 'Deep Tech Startup' category allows up to 20 years of age and Rs 300 crore turnover, and Multi-State/State Cooperative Societies became eligible entity types alongside Private Limited Companies, LLPs and Partnership Firms. The core numbers were confirmed independently by fetching startupindia.gov.in itself, which is treated as official; the notification number, exact date and 'supersedes G.S.R. 127(E) of 2019' detail rest on consistent secondary (law-firm) reporting because the Gazette/PIB primary text could not be reached directly (403 and an unreadable PDF). Angel tax (Section 56(2)(viib)) is now abolished for every company, not only recognised startups, from FY2024-25 onward, so it is no longer a reason to seek recognition. For Mehfilbox specifically: the codebase shows no registered company entity yet — GST registration is an explicitly open item (docs/REQUIREMENTS.md:214, docs/ROADMAP.md:269) and Razorpay integration is blocked on 'an Indian entity' (docs/spec/15-partners-and-scale.md:136) with payments themselves marked Missing (docs/PRODUCT.md:141) — so incorporation, not DPIIT recognition, is the real prerequisite Sandeep is missing; recognition is a same-week, free add-on once that exists. At Mehfilbox's modelled scale (Rs 3.3 lakh over six months at 60 weddings, docs/SCALE-PLAN.md:14-38) the turnover and age caps are not a constraint under either the old or new numbers. The nearest concrete payoff from recognition is the 50% trademark-fee rebate plus a free IP facilitator against the 'Mehfilbox' classes 41/42 trademark search that is already outstanding (docs/PRODUCT.md:56-60); GeM/procurement relaxations and the 6-law labour self-certification have close to zero near-term value for a solo, WhatsApp-distributed, studio-facing product with no government buyers and effectively no employees yet. This research stayed scoped to the DPIIT topic assigned and did not evaluate Sandeep's other open considerations (a Go/Java port, in-house transcoding, direct-to-client onboarding, a theme store).",
+  "facts": [
+    {
+      "claim": "Eligible entity types for DPIIT Startup Recognition: Private Limited Company, Partnership Firm, Limited Liability Partnership, or Cooperative Society (the 2026 framework further specifies Multi-State and State Cooperative Societies).",
+      "source_url": "https://www.startupindia.gov.in/content/sih/en/startupgov/startup_recognition_page.html",
+      "as_of": "2026-09-16",
+      "confidence": "official"
+    },
+    {
+      "claim": "Age limit: an entity is considered a startup for up to 10 years from the date of incorporation/registration; 20 years for the new Deep Tech Startup category.",
+      "source_url": "https://www.startupindia.gov.in/content/sih/en/startupgov/startup_recognition_page.html",
+      "as_of": "2026-09-16",
+      "confidence": "official"
+    },
+    {
+      "claim": "Turnover cap: less than Rs 200 crore in any financial year since incorporation for a general startup; less than Rs 300 crore for a Deep Tech Startup. This is a rise from the prior Rs 100 crore general cap.",
+      "source_url": "https://www.startupindia.gov.in/content/sih/en/startupgov/startup_recognition_page.html",
+      "as_of": "2026-09-16",
+      "confidence": "official"
+    },
+    {
+      "claim": "Innovation/scalability test: the entity must be working towards innovation, development or improvement of products, processes or services, or have a scalable business model with high potential for employment generation or wealth creation; entities formed by splitting up or reconstructing an existing business are excluded.",
+      "source_url": "https://www.startupindia.gov.in/content/sih/en/startupgov/startup_recognition_page.html",
+      "as_of": "2026-09-16",
+      "confidence": "official"
+    },
+    {
+      "claim": "The revised framework stems from DPIIT Notification G.S.R. 108(E) dated 4 February 2026 (a second, independent secondary summary instead reports 6 February 2026 — the two disagree and neither could be checked against the Gazette/PIB text directly), which supersedes the 2019 notification G.S.R. 127(E) dated 19 February 2019 and for the first time formally defines 'Deep Tech Startup'.",
+      "source_url": "https://ksandk.com/newsletter/dpiit-revamps-startup-rules-deep-tech-gets-boost/",
+      "as_of": "2026-09-16",
+      "confidence": "secondary"
+    },
+    {
+      "claim": "Deep Tech Startup criteria: solutions based on new or emerging scientific/engineering knowledge, significant R&D investment relative to revenue/funding, meaningful IP creation (e.g. patents), and long, technically complex development cycles with an identifiable commercialisation plan.",
+      "source_url": "https://www.mhcolaw.com/updates/legal-update-dpiit-notification-on-deep-tech-startups-2026/208",
+      "as_of": "2026-09-16",
+      "confidence": "secondary"
+    },
+    {
+      "claim": "Recognition is applied for on the National Single Window System (NSWS), not directly on startupindia.gov.in: create an NSWS account and add the form 'StartUp Recognition by DPIIT' under 'Central Approvals'.",
+      "source_url": "https://www.startupindia.gov.in/content/sih/en/recognition-page.html",
+      "as_of": "2026-09-16",
+      "confidence": "official"
+    },
+    {
+      "claim": "The Ministry of Commerce and Industry charges no fee for the DPIIT 'Certificate of Recognition' or 'Certificate of Eligibility'; the application is filed by the startup itself using its own details.",
+      "source_url": "https://www.startupindia.gov.in/content/sih/en/recognition-application-detail.html",
+      "as_of": "2026-09-16",
+      "confidence": "official"
+    },
+    {
+      "claim": "Typical documents requested: Certificate of Incorporation/Registration, PAN, and a write-up, pitch deck or website/product link evidencing innovation; optional supporting material includes patent/IP filings and awards. No official checklist page could be extracted directly; this is drawn from consistent secondary guides.",
+      "source_url": "https://incubateer.com/guides/dpiit-startup-recognition",
+      "as_of": "2026-09-16",
+      "confidence": "secondary"
+    },
+    {
+      "claim": "Processing time is commonly reported as roughly 2–10 working days for a complete application (some sources claim approvals within 24–72 hours); no official SLA was found published on the startupindia.gov.in or NSWS pages that could be fetched.",
+      "source_url": "https://www.setindiabiz.com/blog/dpiit-startup-recognition-complete-guide",
+      "as_of": "2026-09-16",
+      "confidence": "secondary"
+    },
+    {
+      "claim": "DPIIT-recognised startups can self-certify compliance under 6 labour laws and 3 environmental laws. For the labour laws, no inspections occur for 3–5 years unless a credible, verifiable, written complaint is filed and approved by an officer at least one level senior to the inspector. For the environmental laws, only startups in the Central Pollution Control Board's 'white category' can self-certify, with random checks only.",
+      "source_url": "https://www.startupindia.gov.in/content/sih/en/startup-scheme.html",
+      "as_of": "2026-09-16",
+      "confidence": "official"
+    },
+    {
+      "claim": "The 6 self-certifiable labour laws are commonly listed as: the Contract Labour (Regulation and Abolition) Act 1970; the EPF and Miscellaneous Provisions Act 1952; the Employees' State Insurance Act 1948; the Payment of Gratuity Act 1972; the Building and Other Construction Workers Act 1996; and the Inter-State Migrant Workmen Act 1979.",
+      "source_url": "https://blog.ipleaders.in/labour-law-compliances-for-indian-startups/",
+      "as_of": "2026-09-16",
+      "confidence": "secondary"
+    },
+    {
+      "claim": "IPR benefits: 80% rebate on patent filing fees with fast-track examination, and 50% rebate on trademark filing fees. The Central Government pays the empanelled facilitator's (IP Mitra) professional fee for any number of patent/trademark/design filings; the startup pays only the statutory fee.",
+      "source_url": "https://www.startupindia.gov.in/content/sih/en/startup-scheme.html",
+      "as_of": "2026-09-16",
+      "confidence": "official"
+    },
+    {
+      "claim": "Public procurement: DPIIT-recognised startups can register as sellers on the Government e-Marketplace (GeM); manufacturing-sector startups are exempted from 'prior experience and turnover' bid criteria (subject to quality/technical standards); recognised startups are exempted from Earnest Money Deposit/bid security on government tenders.",
+      "source_url": "https://www.mondaq.com/india/tax-authorities/1824000/startup-india-scheme-legal-benefits-and-compliance-guide",
+      "as_of": "2026-09-16",
+      "confidence": "secondary"
+    },
+    {
+      "claim": "Eligible startups can wind up within 90 days under the Insolvency and Bankruptcy Code 2016 (the 'fast track firm' route), instead of the standard timeline.",
+      "source_url": "https://www.startupindia.gov.in/content/sih/en/startup-scheme.html",
+      "as_of": "2026-09-16",
+      "confidence": "official"
+    },
+    {
+      "claim": "Section 80-IAC income-tax holiday (100% profit deduction for any 3 consecutive years within the first 10 years) is NOT automatic from DPIIT recognition — it requires a separate Form-1 application to DPIIT's Inter-Ministerial Board (IMB) and carries its own turnover ceiling of Rs 100 crore in the claim year (distinct from the new Rs 200 crore DPIIT recognition cap). The incorporation window for 80-IAC eligibility was extended to 1 April 2016–31 March 2030 by the Finance Act 2025, effective 1 April 2025.",
+      "source_url": "https://x.com/FinMinIndia/status/2013484292534608330",
+      "as_of": "2026-09-16",
+      "confidence": "official"
+    },
+    {
+      "claim": "Angel tax under Section 56(2)(viib) of the Income Tax Act is abolished for ALL companies (not only DPIIT-recognised ones) for share premium received on or after 1 April 2025 (FY2024-25/AY2025-26 onward), via the Finance Act 2024; the new Income Tax Act 2025 does not carry the provision forward. Assessments for AY2023-24 and AY2024-25 predating this remain under the old provisions.",
+      "source_url": "https://ksandk.com/tax/angel-tax-gone-startup-fundraising-india/",
+      "as_of": "2026-09-16",
+      "confidence": "secondary"
+    },
+    {
+      "claim": "Startup India Fund of Funds 2.0: an additional Rs 10,000 crore corpus was approved (on top of the original Rs 10,000 crore FoF, which mobilised over Rs 91,000 crore in AIF commitments). This money flows to startups indirectly through Alternate Investment Funds/VCs, not as a direct-to-founder grant.",
+      "source_url": "https://www.business-standard.com/amp/india-news/cabinet-approves-startup-india-fund-of-funds-2-0-with-rs-10-000-cr-corpus-126021400757_1.html",
+      "as_of": "2026-09-16",
+      "confidence": "secondary"
+    },
+    {
+      "claim": "Startup India Seed Fund Scheme (SISFS): a Rs 945 crore scheme offering eligible startups up to Rs 20 lakh as a milestone-based grant for proof-of-concept/prototype work, plus up to Rs 50 lakh via convertible debentures/debt for market entry, disbursed through roughly 300 DPIIT-empanelled incubators to about 3,600 startups. Eligibility requires DPIIT recognition, incorporation less than 2 years prior to application, at least 51% Indian promoter shareholding, and less than Rs 10 lakh of prior government support (with some exemptions).",
+      "source_url": "https://www.cashfree.com/blog/startup-india-seed-fund-scheme-sisfs-eligibility-how-to-apply/",
+      "as_of": "2026-09-16",
+      "confidence": "secondary"
+    },
+    {
+      "claim": "The current SISFS application cycle for startups is reported closed as of 31 May 2026 (an extended deadline), with incubator-level selection due by 30 June 2026 and disbursals to already-selected startups continuing. This could not be confirmed directly on the official seedfund.startupindia.gov.in portal, which did not return extractable page content when fetched.",
+      "source_url": "https://startupflora.com/blog/sisfs-last-date-to-apply-2026-deadline-extended",
+      "as_of": "2026-09-16",
+      "confidence": "unverified"
+    },
+    {
+      "claim": "The DPIIT recognition certificate's validity period runs from the date of incorporation stated on the Certificate of Incorporation, not from the date the recognition certificate itself is issued — e.g. a company incorporated 15 March 2020 remains recognition-eligible only until 14 March 2030, regardless of when in that window it actually applied.",
+      "source_url": "https://www.khuranaandkhurana.com/2025/01/29/dpiit-startup-registration",
+      "as_of": "2026-09-16",
+      "confidence": "secondary"
+    }
+  ],
+  "open_questions": [
+    "Does any legal entity (sole proprietorship, Private Limited Company, or LLP) already exist for this business? The docs confirm the heirloomfilms.in domain was registered 14 August 2026 (docs/PRODUCT.md:41) and that GST registration and a Razorpay-ready 'Indian entity' are both still open items (docs/REQUIREMENTS.md:214, docs/ROADMAP.md:269, docs/spec/15-partners-and-scale.md:136), but no document in the repo confirms a company has actually been incorporated. This gates the entire ordering of actions below.",
+    "Which state is Sandeep registering/operating from? Not stated anywhere in the docs read. State-level startup policies (e.g. Karnataka, Telangana, Maharashtra) stack on top of DPIIT recognition with their own incentives and were not researched here.",
+    "Private Limited vs LLP — the docs record no preference. Both qualify equally for DPIIT recognition; the choice should turn on whether Sandeep expects to raise equity, add an equity co-founder, or apply to SISFS (which fits a Pvt Ltd more naturally), none of which the docs address.",
+    "Is the intended 'new company registration' a fresh incorporation, or does it need to absorb or convert an existing proprietorship, or contracts already signed under 'Heirloom Films'? That transition mechanic is outside DPIIT and wasn't researched here.",
+    "The exact date of the 2026 DPIIT notification is reported inconsistently across secondary sources (4 February vs 6 February 2026), and the primary Gazette/PIB text could not be reached directly (403 on PIB; the linked PDF returned unreadable image content) to settle it. Doesn't change Mehfilbox's eligibility either way, but worth a CA or company secretary confirming the primary text before citing the notification number in any filing.",
+    "Whether the current SISFS application window is genuinely closed, and when the next one opens, could not be confirmed on the official seedfund.startupindia.gov.in portal itself — only via secondary aggregator sites. Worth checking the portal directly before timing anything around it."
+  ],
+  "actions_for_mehfilbox": [
+    "1. Incorporate the company now — this, not DPIIT recognition, is the actual blocker already visible in the codebase. GST registration is an explicitly open item (docs/REQUIREMENTS.md:214, docs/ROADMAP.md:269) and Razorpay integration explicitly needs 'an Indian entity' (docs/spec/15-partners-and-scale.md:136) before payments can ship (Payment is 'Missing', docs/PRODUCT.md:141). Default to a Private Limited Company unless Sandeep is certain he will never raise equity, add an equity co-founder, or apply to SISFS — an LLP is cheaper to run but is the wrong instrument if any of those stay live options; both qualify equally for DPIIT recognition itself.",
+    "2. Before the company name is locked, run the classes 41/42 trademark search for 'Mehfilbox' and register mehfilbox.in / .com — both are already flagged as outstanding in docs/PRODUCT.md:56-60, and both are far cheaper to fix before the name is on an incorporation certificate than after.",
+    "3. Register for GST immediately after incorporation — already an open item (docs/REQUIREMENTS.md:214), needed before the first self-service invoice (docs/ROADMAP.md:269), and needed to reclaim input credit on the reverse-charge GST the Bunny/Vercel/Supabase bills already attract as imported services (docs/PRICING.md, GST section).",
+    "4. Apply for DPIIT Startup Recognition on the National Single Window System (nsws.gov.in, form 'StartUp Recognition by DPIIT') as soon as incorporation is done. It's free and reportedly decided within days, and the recognition window runs from the incorporation date regardless of when the application is filed, so there is no benefit to delaying. Turnover (modelled at roughly Rs 3.3-6.6 lakh over six to twelve months, docs/SCALE-PLAN.md:14-28) is nowhere near either the old Rs 100 crore or new Rs 200 crore cap, so eligibility is not in question — the write-up just needs to describe the white-label, India-first, WhatsApp-native streaming product honestly as a scalable tech product.",
+    "5. Once recognised, use the 50% trademark-fee rebate and the free IP facilitator (IP Mitra) to actually file the classes 41/42 'Mehfilbox' application from step 2 — this is the one DPIIT benefit that pays down something already on the list, rather than being a nice-to-have.",
+    "6. Deprioritise GeM/procurement relaxations, the 90-day fast-track winding-up, and the 6-law labour self-certification for now — Mehfilbox sells to studios and couples over WhatsApp, not to government buyers, and is close to a solo operation, so none of these save meaningful money or time yet. Revisit labour self-certification only once there are employees the underlying Acts actually cover.",
+    "7. Do not register in pursuit of Section 80-IAC or the angel-tax exemption. Angel tax is abolished for every company since FY2024-25 regardless of DPIIT status, and 80-IAC needs a separate Inter-Ministerial Board certificate, carries its own Rs 100 crore turnover ceiling, and only matters once there is taxable profit to shelter — billing/payments don't exist yet (docs/PRODUCT.md:141). Park it; revisit once profitable or once an investor asks for it in diligence.",
+    "8. Treat DPIIT recognition as free optionality for the Seed Fund Scheme (SISFS: up to Rs 20 lakh grant plus Rs 50 lakh convertible debt via an incubator) rather than a funding plan for this quarter — this cycle's window is reported closed, and SISFS also requires the company to be under 2 years old at application, so incorporating soon (step 1) keeps that option open once the next window is confirmed directly on seedfund.startupindia.gov.in.",
+    "9. Once the state of incorporation is decided, separately check that state's own startup policy portal (e.g. Startup Karnataka, T-Hub/Telangana, Maharashtra) for incentives that stack on top of DPIIT recognition — not covered by this research."
+  ]
+}

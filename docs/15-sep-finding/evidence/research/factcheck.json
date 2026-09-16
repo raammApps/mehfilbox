@@ -1,0 +1,149 @@
+{
+  "checks": [
+    {
+      "claim": "Eligible entity types for DPIIT Startup Recognition: Private Limited Company, Partnership Firm, Limited Liability Partnership, or Cooperative Society (the 2026 framework further specifies Multi-State and State Cooperative Societies).",
+      "verdict": "confirmed",
+      "correct_value": "G.S.R. 108(E) para 1(a)(i): 'incorporated or registered in India as a private limited company (as defined in the Companies Act, 2013) or registered as a partnership firm (registered under section 59 of the Partnership Act, 1932) or a limited liability partnership (under the Limited Liability Partnership Act, 2008) or a Multi-State Cooperative Society registered with the Central Registrar of Cooperative Societies (under the Multi-State Cooperative Societies Act, 2002) or a Cooperative Society registered under any State or Union Territory Cooperative Societies Act'. The Startup India portal summary matches, abbreviated to 'Cooperative Society'.",
+      "source_url": "https://www.dpiit.gov.in/static/uploads/2026/02/119e52e2a36f652215a32c3ccc5f9c66.pdf"
+    },
+    {
+      "claim": "Age limit: an entity is considered a startup for up to 10 years from the date of incorporation/registration; 20 years for the new Deep Tech Startup category.",
+      "verdict": "confirmed",
+      "correct_value": "G.S.R. 108(E) para 1(a)(ii) plus the Deep Tech proviso (a): ten years generally, 'up to twenty years from the date of its incorporation or registration' for a recognised Deep Tech Startup. Portal page states the same.",
+      "source_url": "https://www.dpiit.gov.in/static/uploads/2026/02/119e52e2a36f652215a32c3ccc5f9c66.pdf"
+    },
+    {
+      "claim": "Turnover cap: less than Rs 200 crore in any financial year since incorporation for a general startup; less than Rs 300 crore for a Deep Tech Startup. This is a rise from the prior Rs 100 crore general cap.",
+      "verdict": "confirmed",
+      "correct_value": "Gazette wording is 'not exceeding two hundred crore rupees' (i.e. up to and including Rs 200 crore) and 'three hundred crore rupees' for Deep Tech; the Startup India portal paraphrases this as 'less than INR 200 Crores / INR 300 Crores'. The superseded 2019 notification G.S.R. 127(E) used Rs 100 crore, so the rise is real.",
+      "source_url": "https://www.dpiit.gov.in/static/uploads/2026/02/119e52e2a36f652215a32c3ccc5f9c66.pdf"
+    },
+    {
+      "claim": "The revised framework stems from DPIIT Notification G.S.R. 108(E) dated 4 February 2026 (a second, independent secondary summary instead reports 6 February 2026 - the two disagree and neither could be checked against the Gazette/PIB text directly), which supersedes the 2019 notification G.S.R. 127(E) dated 19 February 2019 and for the first time formally defines 'Deep Tech Startup'.",
+      "verdict": "confirmed",
+      "correct_value": "4 February 2026 is correct and the 6 February 2026 variant is wrong. The Gazette of India Extraordinary Part II Sec 3(i) No. 102, CG-DL-E-05022026-269843, is dated 'NEW DELHI, WEDNESDAY, FEBRUARY 4, 2026 / MAGHA 15, 1947'; the notification reads 'G.S.R. 108(E). - This notification is being issued in supersession of the Gazette Notification No. G.S.R. 127(E) dated February 19, 2019.' Para 1(dh) defines 'Deep Tech Startup' (novel scientific/engineering knowledge, relatively high R&D spend as a share of total income/funding, ownership of or steps toward significant novel IP with commercialisation, extended timelines and high technical/scientific uncertainty). File no. P-38015/19/2025-Startup India.",
+      "source_url": "https://www.dpiit.gov.in/static/uploads/2026/02/119e52e2a36f652215a32c3ccc5f9c66.pdf"
+    },
+    {
+      "claim": "Section 80-IAC: an eligible start-up (DPIIT-recognised Pvt Ltd or LLP) can deduct 100% of profits and gains of its eligible business for any 3 consecutive years out of the first 10 years from incorporation.",
+      "verdict": "confirmed",
+      "correct_value": "Official page: 'Eligible startups can avail of a 100% tax deduction for three consecutive financial years within their first ten years of incorporation' and 'Incorporated as a Private Limited Company or LLP'. The statute says 'three consecutive assessment years out of ten years, beginning from the year of incorporation, at the option of the assessee' - assessment years, not financial years, which shifts the window by one year in practice.",
+      "source_url": "https://www.startupindia.gov.in/content/sih/en/form80iac.html"
+    },
+    {
+      "claim": "Baseline 80-IAC eligibility: incorporated on/after 1 April 2016, less than 10 years old, annual turnover under Rs 100 crore in any FY, innovation/scalable-business-model test, not formed by splitting/reconstructing an existing business.",
+      "verdict": "confirmed",
+      "correct_value": "Verbatim on the page: 'Incorporated as a Private Limited Company or LLP. Should be incorporated on or after 1st April 2016. Must be less than 10 years old. Annual turnover should be less than Rs 100 crore in any financial year. Should be working towards innovation, improvement of products/processes/services, or scalable business models with high potential for employment or wealth creation. Should not be formed by splitting or reconstructing an existing business.' Material omission on the official page itself: it never states the outer incorporation cut-off of 1 April 2030 that the statute imposes.",
+      "source_url": "https://www.startupindia.gov.in/content/sih/en/form80iac.html"
+    },
+    {
+      "claim": "Budget 2025-26 (1 Feb 2025) extended the 80-IAC incorporation window by five years: startups incorporated before 1 April 2030 (previously ~31 March/1 April 2025) can now apply.",
+      "verdict": "confirmed",
+      "correct_value": "Memorandum to the Finance Bill 2025, item IX 'Extension of timeline for tax benefits to start-ups': the pre-amendment condition was 'it is incorporated on or after the 1st day of April, 2016 but before the 1st day of April, 2025'; 'It is proposed to amend the above section so as to extend the benefit for another period of five years, i.e. the benefit will be available to eligible start-ups incorporated before 01.04.2030. This amendment will take effect from the 1st day of April 2025.' [Clause 18]. Still current: the Finance Bill 2026 memorandum contains no start-up provisions at all.",
+      "source_url": "https://www.indiabudget.gov.in/budget2025-26/doc/memo.pdf"
+    },
+    {
+      "claim": "DPIIT's revised IMB framework reviews complete 80-IAC applications within 120 days; 187 startups were cleared at the reported 80th IMB meeting (30 April 2025), taking cumulative approvals past 3,700 since the scheme began in 2016.",
+      "verdict": "corrected",
+      "correct_value": "The 120-day review and the 'over 3,700' cumulative figure are confirmed, but the 187 figure is misattributed. PIB release 2128860 (15 May 2025): 'DPIIT has approved 187 startups for income tax exemption ... the decision came during the 80th meeting of the Inter-Ministerial Board (IMB), held on 30th April 2025 ... Of the total approvals, 75 startups were cleared during the 79th IMB meeting and 112 during 80th such meeting.' So 112 were cleared at the 80th meeting; 187 is the two-meeting total. 'Complete applications are now reviewed within 120 days.' 'With this, over 3,700 startups have now been granted exemptions since the scheme's inception.'",
+      "source_url": "https://www.pib.gov.in/PressReleasePage.aspx?PRID=2128860&reg=48&lang=2"
+    },
+    {
+      "claim": "SISFS grant: up to Rs 20 lakh disbursed in milestone-based installments for 'validation of Proof of Concept, or prototype development, or product trials' (Guidelines Sec 8.1.1).",
+      "verdict": "confirmed",
+      "correct_value": "Guidelines para 8.1(1): 'Up to Rs. 20 Lakhs as grant for validation of Proof of Concept, or prototype development, or product trials. The grant shall be disbursed in milestone-based installments.' (Numbered 8.1(1) in the PDF, not '8.1.1'.)",
+      "source_url": "https://www.startupindia.gov.in/content/dam/invest-india/Templates/public/Guidelines%20for%20Startup%20India%20Seed%20Fund%20Scheme.pdf"
+    },
+    {
+      "claim": "SISFS debt/convertible tranche: up to Rs 50 lakh 'for market entry, commercialization, or scaling up through convertible debentures or debt or debt-linked instruments' (Guidelines Sec 8.1.2). Interest capped at prevailing repo rate, tenure max 60 months (5 years), moratorium up to 12 months allowed, unsecured with no promoter or third-party guarantee required (Sec 8.3).",
+      "verdict": "confirmed",
+      "correct_value": "Para 8.1(2) and para 8.3 verbatim: 'funds shall be provided at a rate of interest of not more than prevailing repo rate. The tenure should be fixed at the time of sanctioning the loan by the incubator, which shall be not more than 60 months (5 years). A moratorium of up to 12 months may be provided for the startups. Because of the early stage of the startups, this shall be unsecured and no guarantee from promoter or third-party will be required.'",
+      "source_url": "https://www.startupindia.gov.in/content/dam/invest-india/Templates/public/Guidelines%20for%20Startup%20India%20Seed%20Fund%20Scheme.pdf"
+    },
+    {
+      "claim": "SISFS-specific eligibility (narrower than general DPIIT recognition): startup 'recognized by DPIIT, incorporated not more than 2 years ago at the time of application' (Sec 3.1.1); shareholding by Indian promoters at least 51% at time of application to the incubator (Sec 3.1.6); must not have received more than Rs 10 lakh of monetary support under any other Central or State scheme, excluding prize money, subsidized space, founder allowance, or lab/prototyping access (Sec 3.1.5); a startup can receive the grant and the debt tranche once each, not more (Sec 3.1.7).",
+      "verdict": "confirmed",
+      "correct_value": "Para 3.1 items 1, 5, 6 and 7 match verbatim, including 'Shareholding by Indian promoters in the startup should be at least 51% at the time of application to incubator for the scheme, as per Companies Act, 2013 and SEBI (ICDR) Regulations, 2018' and 'Any startup will not receive seed support more than once each as per provisions of para 8.1 (i) and 8.1 (ii) respectively'.",
+      "source_url": "https://www.startupindia.gov.in/content/dam/invest-india/Templates/public/Guidelines%20for%20Startup%20India%20Seed%20Fund%20Scheme.pdf"
+    },
+    {
+      "claim": "Application route: a startup can apply to up to three empanelled incubators simultaneously, in order of preference (Sec 7.2.ii); each incubator's ISMC evaluates on weighted criteria including market need, feasibility, potential impact, novelty/IP, team strength, and fund-utilization plan, and must select startups within 45 days of receiving the application (Sec 7.2.v, vii); a rejected applicant may reapply (Sec 7.2.xii). First grant installment must be released within 60 days of the incubator receiving the startup's application (Sec 8.7). No startup is ever charged a fee for selection, disbursement, incubation, or monitoring (Sec 8.9, 5.12).",
+      "verdict": "confirmed",
+      "correct_value": "7.2(ii) 'Applicants can apply for seed fund to any three incubators selected as disbursing partners for this scheme in order of their preference'; 7.2(v) weighted table (need for the idea, feasibility, potential impact, novelty, team, fund utilization plan, additional parameters, presentation); 7.2(vii) 'ISMC shall evaluate applicants ... and select startups for Seed Fund within 45 days of receipt of application'; 7.2(xii) 'An applicant, if rejected once, may apply afresh'; 8.7 'For grants, the first installment to any selected startup shall be released not more than 60 days from receipt of application from the startup'; 8.9 and 5.12 confirm the no-fee rule.",
+      "source_url": "https://www.startupindia.gov.in/content/dam/invest-india/Templates/public/Guidelines%20for%20Startup%20India%20Seed%20Fund%20Scheme.pdf"
+    },
+    {
+      "claim": "Karnataka's current flagship is the Karnataka Startup Policy 2025-30 (successor to the 2022-2027 policy); the working application/registration portal is K-Tech's registration system, not the older 'startup.karnataka.gov.in' address that recurs in secondary write-ups and no longer resolves.",
+      "verdict": "corrected",
+      "correct_value": "Two of three parts hold; the portal attribution does not. Confirmed: the current policy is the 'Karnataka Startup Policy 2025-30' (named in the site navigation and on the policy page), and startup.karnataka.gov.in no longer resolves (DNS NXDOMAIN as of 16 Sep 2026). Wrong: the working portal is the Department of Electronics, IT & Bt's own Startup Karnataka section at https://eitbt.karnataka.gov.in/startup/public/ - its nav carries 'Register with Startup Karnataka (no registration fee)', 'Dashboard - Startup Application status', 'SOP for Startup Registration' and 'Startup Registration - SAKALA'. The K-Tech host k-tech.karnataka.gov.in is NOT usable in a browser: its TLS certificate (CN=k-tech.karnataka.gov.in, O=KITS- K-Tech) expired 7 September 2025, so HTTPS fails; the content is only reachable with certificate verification disabled.",
+      "source_url": "https://eitbt.karnataka.gov.in/startup/public/"
+    },
+    {
+      "claim": "Karnataka Startup Policy 2025-30 general eligibility: incorporated within 10 years of registration, and turnover in any financial year since incorporation not exceeding Rs 200 crore.",
+      "verdict": "confirmed",
+      "correct_value": "Policy page verbatim: 'The startup must be within a period of ten years from the date of its incorporation or registration.' and 'The entity has a turnover for any of the financial years since incorporation or registration not exceeding two hundred crore rupees.' Karnataka has adopted the Feb 2026 central definition wholesale, including Multi-State/State Cooperative Societies and the 'scalable business model' limb.",
+      "source_url": "https://eitbt.karnataka.gov.in/startup/public/policy/en"
+    },
+    {
+      "claim": "Karnataka's patent-cost reimbursement under the current policy is up to Rs 15 lakh per year, covering both domestic and international filings (exact split not stated on the fetched page).",
+      "verdict": "confirmed",
+      "correct_value": "Policy page verbatim: 'Patent Subsidy: Financial support of up to INR 15 lakhs per year, covering both domestic and international patent filings.' No domestic/international split is given on that page.",
+      "source_url": "https://eitbt.karnataka.gov.in/startup/public/policy/en"
+    },
+    {
+      "claim": "Karnataka's headline non-dilutive scheme is ELEVATE (Idea2PoC): a one-time grant-in-aid of up to Rs 50 lakh, milestone-based in two tranches, for early-stage startups building a proof-of-concept, run by K-Tech / Dept. of Electronics, IT, BT & S&T. Scheme-specific eligibility: incorporated as Pvt Ltd/OPC/registered partnership/LLP/state or multi-state co-operative society, up to 10 years old, turnover not exceeding Rs 100 crore in any FY (narrower than the general policy's Rs 200 crore recognition threshold).",
+      "verdict": "corrected",
+      "correct_value": "Amount, age, turnover and department are right; the tranche structure and the co-operative-society entity type are not, and the 'headline' framing is now incomplete. Official page verbatim: 'A one-time grant of up to Rs. 50 Lakhs is given to encourage innovators who may need early-stage funding to develop a prototype, market development and scale-up' - no two-tranche structure is stated anywhere on the page. Eligibility verbatim: 'Should be an entity (Pvt. Ltd/ OPC/ LLP/ Partnership Firms) Registered or Incorporated in Karnataka' - cooperative societies, state or multi-state, are NOT listed. 'Total revenue generated in terms of turnover from the date of incorporation should be less than INR 100 Crore'; 'Startups should not have crossed 10 years from the DATE of INCORPORATION/ REGISTRATION Certificate as of cut-off date announced before each call.' Run by the Department of Electronics, IT, Bt and S&T (K-Tech is that department's brand, not a separate body). Also note: as of 2026 the larger grant is ELEVATE NxT 2026 under the LEAP programme - up to Rs 1 crore in grant-in-aid, milestone-based - but it is DeepTech-only (20 years / Rs 300 crore eligibility), so it would not fit a wedding-streaming SaaS.",
+      "source_url": "https://eitbt.karnataka.gov.in/101/elevate/en"
+    },
+    {
+      "claim": "DPIIT recognition age/turnover conditions (as stated on the official page): an entity is considered a startup for up to 10 years from incorporation (20 years for DeepTech startups), and turnover must be less than INR 200 crore in any of the previous financial years (INR 300 crore for DeepTech startups). An entity formed by splitting up or reconstructing an existing business is not eligible.",
+      "verdict": "confirmed",
+      "correct_value": "Page verbatim: 'Turnover should be less than INR 200 Crores (INR 300 Crores for DeepTech startups) in any of the previous financial years. An entity shall be considered a startup for up to 10 years (20 years for DeepTech startups) from the date of its incorporation. ... An entity formed by splitting up or reconstruction of an existing business shall not be considered a \"Startup\".'",
+      "source_url": "https://www.startupindia.gov.in/content/sih/en/startupgov/startup_recognition_page.html"
+    },
+    {
+      "claim": "Section 80-IAC income tax exemption eligibility (official page): must be a Private Limited Company or LLP (not a partnership firm or OPC), incorporated on or after 1 April 2016, less than 10 years old, annual turnover under INR 100 crore in any financial year, and must already hold DPIIT recognition. Note this turnover ceiling (INR 100 crore) differs from the DPIIT recognition page's own ceiling (INR 200/300 crore) - the two official pages are not obviously harmonized, so don't assume either figure applies to the other scheme.",
+      "verdict": "confirmed",
+      "correct_value": "Both pages verified and the divergence is real: form80iac.html says 'A DPIIT-recognized startup that meets the following criteria: Incorporated as a Private Limited Company or LLP ... Annual turnover should be less than Rs 100 crore in any financial year', while the recognition page says INR 200/300 crore. The divergence is not an error - the Rs 100 crore figure is the Income-tax Act's own condition for the deduction, untouched by the DPIIT notification, and it was left unchanged by both the Finance Act 2025 and the Finance Bill 2026. The recognition page also restates the Pvt Ltd/LLP-only limit for 80-IAC.",
+      "source_url": "https://www.startupindia.gov.in/content/sih/en/form80iac.html"
+    },
+    {
+      "claim": "The Section 80-IAC benefit is a 100% deduction of profits for any 3 consecutive financial years chosen within the startup's first 10 years of incorporation.",
+      "verdict": "confirmed",
+      "correct_value": "Page verbatim: 'Eligible startups can avail of a 100% tax deduction for three consecutive financial years within their first ten years of incorporation.' Statutory wording is 'three consecutive assessment years out of ten years, beginning from the year of incorporation, at the option of the assessee' - assessment years, so the portal's 'financial years' is a loose paraphrase.",
+      "source_url": "https://www.startupindia.gov.in/content/sih/en/form80iac.html"
+    },
+    {
+      "claim": "Startup India Seed Fund Scheme (SISFS) eligibility: Private Limited Company, registered Partnership Firm, or LLP; sole proprietorships and public limited companies are not eligible. Must hold DPIIT recognition and have been incorporated not more than 2 years before the date of application. Indian promoters must hold at least 51% shareholding at the time of application. The startup must not have received more than Rs 10 lakh of monetary support under any other Central or State Government scheme.",
+      "verdict": "corrected",
+      "correct_value": "Everything after the entity list is confirmed against the official guidelines (para 3.1 items 1, 5, 6). The entity list is not in the guidelines at all and is now out of date. The official SISFS guidelines enumerate no entity types; para 3.1(1) requires only 'A startup, recognized by DPIIT, incorporated not more than 2 years ago at the time of application', so the entity test is whatever DPIIT recognition allows. Since G.S.R. 108(E) of 4 February 2026 that list is: private limited company, registered partnership firm, LLP, Multi-State Cooperative Society, and State/UT Cooperative Society. Sole proprietorships and public limited companies remain outside it, so that half of the claim survives, but 'Private Limited Company, registered Partnership Firm, or LLP' is now an incomplete list. Prefer the primary guidelines over the secondary blog cited here.",
+      "source_url": "https://www.startupindia.gov.in/content/dam/invest-india/Templates/public/Guidelines%20for%20Startup%20India%20Seed%20Fund%20Scheme.pdf"
+    },
+    {
+      "claim": "DPIIT recognition requires incorporation as a Private Limited Company, registered Partnership Firm, LLP or Cooperative Society; turnover under Rs 200 crore (Rs 300 crore for DeepTech) in any FY since incorporation; age under 10 years (20 for DeepTech) from incorporation; and self-certification of 'working towards innovation or improvement of existing products, services, and processes' with potential to generate employment or wealth. The page does not separately define 'scalability' as its own test, and formation by splitting/reconstructing an existing business is explicitly excluded.",
+      "verdict": "confirmed",
+      "correct_value": "Accurate as a description of the portal page, including the observation about scalability - the page says only 'working towards innovation or improvement of existing products, services, and processes, and should have the potential to generate employment or create wealth'. But do not rely on that reading of the law: the gazette the page links to, G.S.R. 108(E) para 1(a)(iv), states the test disjunctively - 'is working towards innovation, development or improvement of products or processes or services, OR is a scalable business model with a high potential of employment generation or wealth creation'. A scalable business model is an independent qualifying limb in the notification; the portal summary drops it.",
+      "source_url": "https://www.dpiit.gov.in/static/uploads/2026/02/119e52e2a36f652215a32c3ccc5f9c66.pdf"
+    },
+    {
+      "claim": "Recognition is free and unlocks two adjacent tax benefits it does not itself grant: a 3-consecutive-year tax holiday under Section 80-IAC and an exemption under Section 56 (angel tax) - both Private Limited/LLP only, and 80-IAC only for entities incorporated after 1 April 2016.",
+      "verdict": "corrected",
+      "correct_value": "Recognition being free is confirmed - the page's own disclaimer reads 'Ministry of Commerce and Industry does not charge any fee for DPIIT \"Certificate of Recognition\" or \"Certificate of Eligibility\" for startups.' The Section 56 half is stale and the entity-type generalisation is wrong. (1) Angel tax was abolished: Finance (No. 2) Act 2024 provided that section 56(2)(viib) 'shall not apply on or after the 1st day of April, 2025', i.e. from AY 2025-26, for all classes of investors. As of September 2026 there is no angel-tax charge left to be exempted from, and the Income-tax Act, 2025 (in force 1 April 2026) carries no counterpart. The Startup India page still advertises an 'Exemption under Section 56 ... (Angel Tax)' application link - the portal is out of date, not the law. (2) The Private Limited/LLP restriction is stated by DPIIT for 80-IAC only; section 56(2)(viib) applied to closely held companies issuing shares above fair value and never applied to LLPs at all. (3) 80-IAC also has an outer limit the claim omits: incorporation before 1 April 2030. (4) Note also that from 1 April 2026 the 80-IAC deduction is re-enacted as section 140 of the Income-tax Act, 2025 - the gazette notification's own footnotes flag the changeover.",
+      "source_url": "https://www.incometaxindia.gov.in/w/exemption-from-angel-tax-section-56-2-viib-"
+    },
+    {
+      "claim": "SISFS eligibility for a startup (Guidelines para 3.1): DPIIT-recognised and incorporated not more than 2 years before the application; a product/service idea with market fit, viable commercialisation and 'scope of scaling'; use of technology in the core product, service, business model, distribution model or methodology; must not have received more than Rs 10 lakh of monetary support from any other Central/State government scheme; and at least 51% Indian-promoter shareholding at the time of application to the incubator.",
+      "verdict": "confirmed",
+      "correct_value": "Para 3.1 items 1-3, 5 and 6 verbatim, including 'Startup must have a business idea to develop a product or a service with market fit, viable commercialization, and scope of scaling' and 'Startup should be using technology in its core product or service, or business model, or distribution model, or methodology to solve the problem being targeted'. The Rs 10 lakh test excludes 'prize money from competitions and grand challenges, subsidized working space, founder monthly allowance, access to labs, or access to prototyping facility'.",
+      "source_url": "https://www.startupindia.gov.in/content/dam/invest-india/Templates/public/Guidelines%20for%20Startup%20India%20Seed%20Fund%20Scheme.pdf"
+    },
+    {
+      "claim": "Seed funding is disbursed as up to Rs 20 lakh grant (milestone-based installments) for PoC/prototype/product trials, plus up to Rs 50 lakh via convertible debentures or debt/debt-linked instruments (interest capped at the prevailing repo rate, tenure up to 60 months, up to 12 months' moratorium, unsecured, no promoter/third-party guarantee) for market entry, commercialisation or scaling (para 8.1). 'Seed fund shall strictly not be used by startups for creation of any facilities and shall be utilized for the purpose it has been granted for' (para 8.1.3).",
+      "verdict": "confirmed",
+      "correct_value": "Para 8.1(1), 8.1(2), 8.1(3) and 8.3 all match, and the quoted sentence is verbatim from 8.1(3). One drafting detail the claim glosses: the repo-rate, tenure, moratorium and unsecured terms live in para 8.3, not inside 8.1. Related constraint worth knowing: para 8.2 caps grants at 'not more than 20% of the total grant to an incubator', and para 8.6 says 'Startups will receive the funds in their company bank accounts'.",
+      "source_url": "https://www.startupindia.gov.in/content/dam/invest-india/Templates/public/Guidelines%20for%20Startup%20India%20Seed%20Fund%20Scheme.pdf"
+    }
+  ],
+  "notes": "24 claims checked, 19 confirmed and 5 corrected; none unverifiable. Every claim was checked against a primary source: the Gazette of India notification G.S.R. 108(E) PDF on dpiit.gov.in, the Startup India recognition and 80-IAC pages, the SISFS guidelines PDF, the PIB release, the Budget 2025-26 and Finance Bill 2026 memoranda on indiabudget.gov.in, and the Karnataka Dept of Electronics/IT/Bt pages. Two secondary sources cited in the claim set (ksandk.com, cashfree.com) were replaced with primary ones. incometaxindia.gov.in and pib.gov.in both return 403 to WebFetch; PIB was retrieved with a browser user agent, incometaxindia blocks that too and its content was corroborated via the Budget memoranda and search-indexed official text instead. Five date/currency issues drive the corrections. (1) The 187-startup figure is a two-meeting total: 112 were cleared at the 80th IMB meeting of 30 April 2025 and 75 at the 79th. (2) Angel tax is gone - section 56(2)(viib) ceased to apply on and after 1 April 2025 under Finance (No. 2) Act 2024, yet the Startup India recognition page still advertises applying for the exemption; treat that page as stale on this point. (3) The 80-IAC incorporation window now closes 1 April 2030, not 1 April 2025, and the official form80iac page never mentions the outer limit at all. (4) From 1 April 2026 the Income-tax Act, 2025 replaced the 1961 Act; the 80-IAC deduction is re-enacted there as section 140, and the gazette notification footnotes the changeover - anything written as 'section 80-IAC' now needs that translation. (5) Karnataka's k-tech.karnataka.gov.in has had an expired TLS certificate since 7 September 2025 and is unusable in a browser; the live registration path is the department's own Startup Karnataka section at eitbt.karnataka.gov.in/startup/public, and startup.karnataka.gov.in no longer resolves in DNS at all. For Mehfilbox specifically: on the Feb 2026 framework a white-label wedding-streaming SaaS qualifies for DPIIT recognition on the ordinary 10-year/Rs 200 crore track, not the Deep Tech track (no novel scientific IP, no long gestation), so the 20-year and Rs 300 crore figures and Karnataka's Rs 1 crore ELEVATE NxT grant are not reachable. SISFS is the tighter constraint: the two-year-from-incorporation window in para 3.1(1) means the entity must be incorporated before applying and applied for early, and the Rs 10 lakh cap on other Central/State support has to be tracked from day one. No file under app/, lib/, components/, modules/, themes/, tests/, e2e/, scripts/, supabase/ or docs/ was read or modified; all working files were written to the scratchpad at /private/tmp/claude-501/-Users-sandeepsharma-san-claude-heirloomfilms/863b65ac-9d65-4340-87cb-bca849b38003/scratchpad/15-sep/ (factcheck.json, gsr108e.pdf, sisfs.txt, memo2025.txt, memo2026.txt, and cached HTML)."
+}

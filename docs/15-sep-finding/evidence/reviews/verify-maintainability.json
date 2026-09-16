@@ -1,0 +1,90 @@
+{
+  "lens": "maintainability",
+  "verdicts": [
+    {
+      "title": "The Supabase driver is never executed by any test, and has already drifted from the memory driver — unpublished photographs are served to guests in production",
+      "real": true,
+      "matters_next_12_months": true,
+      "reason": "Verified in full. lib/db/supabase-repository.ts:1391 gates publishedOnly on `.eq('published', true).eq('status','ready')` with no live_at check, while lib/db/memory-repository.ts:757 gates on `t.status === 'ready' && t.liveAt !== null` under a 12-line comment saying the published check 'was the first attempt and it broke withdrawal'. lib/db/supabase-repository.ts:1625 declares `listPhotosForCatalogue(catalogueId: string)` with no options parameter against the interface at lib/db/repository.ts:343, so the `{ liveOnly: true }` passed at lib/catalogue-cache.ts:65 is dropped; the memory driver honours it at lib/db/memory-repository.ts:924. photoSchema defaults liveAt to null (lib/schema.ts:491) and app/api/admin/catalogues/[id]/photos/route.ts:188-199 parses without setting it, so every new photograph is live-at-null and still served. The publish/withdraw machinery on the Supabase side is fully correct (lib/db/supabase-repository.ts:940-986), which makes the read side the only broken half. Test isolation confirmed: playwright.config.ts:21 sets DATA_DRIVER 'memory', lib/db/index.ts:20 selects SupabaseRepository only on DATA_DRIVER=supabase, and the only automated contact is tests/unit/supabase-mapping.test.ts (column maps only) plus the opt-in tests/integration/drivers.test.ts. Two guest-visible defects at once — unpublished content leaks, and a withdrawal that should wait for Publish takes effect instantly — on the driver production runs.",
+      "corrected_evidence": "Line numbers are accurate within one line (the listTitles predicate is at :1391, not :1390-1396). One addition the reviewer missed: the photo route never writes liveAt explicitly — photoSchema's `.default(null)` at lib/schema.ts:491 supplies it — so the finding holds for photos uploaded through app/api/admin/catalogues/[id]/photos/route.ts as well as the film path at app/api/admin/uploads/route.ts:107.",
+      "corrected_severity": "high"
+    },
+    {
+      "title": "Only 2 of ~20 Supabase field-to-column maps are held to their schema; the most-edited entity's map is a private inline object with no test, and one doc comment claims a test that does not exist",
+      "real": true,
+      "matters_next_12_months": true,
+      "reason": "Structure verified: TITLE_COLUMNS (lib/db/supabase-repository.ts:67) and PHOTO_COLUMNS (:97) are the only exported maps, and tests/unit/supabase-mapping.test.ts:2 imports exactly those two. The comment at lib/db/supabase-repository.ts:111 claiming NOTIFICATION_COLUMNS is 'held to the schema by tests/unit/supabase-mapping.test.ts' is false. The catalogue map is a private inline literal inside fromCatalogue at :239-275 with a separate hand-written reader at :192-237, and toTitle at :285 is hand-written on the read side. But I checked the maps themselves and there is no live defect today: the catalogue literal carries all 35 fields of catalogueSchema (lib/schema.ts:503+) exactly, and NOTIFICATION_COLUMNS covers all 18 fields of notificationSchema. So the risk is preventive — the same class as the size_bytes incident the file header describes at :52-65 — not a bug sitting in production. That downgrades it from high to medium: worth the 1-day fix, but nothing is currently being dropped.",
+      "corrected_evidence": "The reviewer implies a live exposure ('a draftBranding or passcodeVersion that never writes'). I diffed both maps against their schemas: the catalogue map's 35 keys are exactly catalogueSchema's 35 fields, and NOTIFICATION_COLUMNS matches notificationSchema field-for-field. Nothing is dropped today; the gap is that nothing would notice the next added field.",
+      "corrected_severity": "medium"
+    },
+    {
+      "title": "`pnpm lint` does not lint middleware.ts, modules/ or themes/ — `pnpm verify` is greener than the codebase, and the first rule in CLAUDE.md's enforced table is currently broken in four places",
+      "real": true,
+      "matters_next_12_months": true,
+      "reason": "Reproduced exactly. `npx next lint` prints 'No ESLint warnings or errors' plus the Next 16 removal warning; `npx eslint middleware.ts modules themes` prints 4 no-restricted-properties errors at middleware.ts:23:22, :34:8, :74:5 and :74:46. .eslintrc.json:27 exempts lib/env.ts, lib/log.ts, configs, scripts, e2e and tests, and middleware.ts is not among them, so the exemption is purely an artefact of next lint's default directory set. tests/unit/registry.test.ts:152-154 walks only app/, components/ and lib/, confirming the shared blind spot. The reads in middleware are legitimate (lib/env.ts is server-only and middleware imports only lib/tenant.ts at middleware.ts:2). The code is fine; the enforcement claim in CLAUDE.md is not, and the blind spot covers modules/ and themes/ — where an agent writes code weekly.",
+      "corrected_severity": "medium"
+    },
+    {
+      "title": "13,326 lines of UI at 17% line coverage — the four biggest components, including the customizer and the create wizard, have no component test at all",
+      "real": true,
+      "matters_next_12_months": true,
+      "reason": "Every coverage number checks out against coverage/coverage-summary.json: total lines 37.42%, components/admin 602/3564 (17%), components/chrome 0/110, components/streaming 587/1680 (35%), modules/timeline 40/215, modules/checklist 34/182, modules/letter 28/127. tests/component holds 7 files totalling 801 lines. CreateWizard.tsx is 1,006 lines, CustomizerShell.tsx 765, ThemeStudio.tsx 613, PreviewPane.tsx 472, none with a component test. The isMobile skips are real at e2e/admin.spec.ts:12, operator.spec.ts:11, upload.spec.ts:23, publish-state.spec.ts:16, credits.spec.ts:13, domains.spec.ts:12, locale.spec.ts:12 (plus couple.spec.ts:10 and three in gates.spec.ts). Materially this is the right diagnosis for a one-founder-plus-agent team: the customizer is the demo in CLAUDE.md's definition of done and it is verified by hand.",
+      "corrected_evidence": "The line/component totals are slightly off: components/ holds 70 .tsx files totalling 12,745 lines (88 files / 14,018 lines counting modules/), not 75 components / 13,326 lines. Also coverage/coverage-summary.json is dated 7 Sept, so the percentages are a week stale — directionally right, not current.",
+      "corrected_severity": "medium"
+    },
+    {
+      "title": "CreateWizard is 1,006 lines with 29 useState hooks and a 70-line create() that performs two sequenced network calls with inline response casts",
+      "real": true,
+      "matters_next_12_months": true,
+      "reason": "Verified: components/admin/CreateWizard.tsx is 1,006 lines, the exported component runs from :55 to ~:810, create() spans :190-262 with two sequenced fetches, router.refresh() and four inline `as { ... }` casts, and chooseStyle at :122-131 sets five other pieces of state including `style.templateId as typeof template`. The draft mirror is the sharp part and it is exactly as described: the restore at :141-153 and the write at :156-162 both handle only coupleName, appName, weddingDate, city, slug — occasion, locale, privacy, timezone, premiere and the couple's email are silently lost on a reload, with no test covering it. Medium is right; this is velocity tax plus one small silent data loss, not a guest-facing fault.",
+      "corrected_evidence": "'29 useState hooks' counts the file, not the component: 26 useState calls sit in CreateWizard itself (:86-:138), two more belong to the separate StepTitles component at :884-885, and the 29th match is the import on line 4. Also the draft is cleared once the catalogue exists (:216), so the silent loss happens on a reload at step 1 or 2, not at step 3 as stated.",
+      "corrected_severity": "medium"
+    },
+    {
+      "title": "catalogueCounts and the platform console fetch unbounded row sets to compute numbers — the exact cost the Repository interface's own comment set out to avoid",
+      "real": true,
+      "matters_next_12_months": false,
+      "reason": "The code is as described: lib/db/supabase-repository.ts:1091-1141 selects every title row, every album row and every photo row for the org and counts in JavaScript, and app/admin/platform/couples/page.tsx:21-26 awaits listOperators and listCataloguesForCouple per couple org inside Promise.all, with app/admin/platform/studios/page.tsx:27 doing creditBalance per studio. But the severity is overstated for this product. The counts query selects two narrow columns (catalogue_id, status, published) and one (album_id), not whole rows — the code comment at :1085-1090 says so and is accurate. At ~10 weddings a month, the largest studio reaches roughly 120 catalogues only after a decade, and the platform couples page is an internal support screen seen by one person with six orgs in it. This is a real future cost with no 12-month bite.",
+      "corrected_evidence": "'selects every title row … and then every photo row' overstates it: lib/db/supabase-repository.ts:1103 selects `catalogue_id, status, published` and :1131 selects `album_id` only. The row count is unbounded; the payload per row is three columns. The 36,000-row scenario also assumes a studio at 120 catalogues, which is a decade of the stated ~10/month rate at one studio.",
+      "corrected_severity": "low"
+    },
+    {
+      "title": "The org-scoping rule is the only rule in CLAUDE.md's enforced table with no automated check — it currently holds perfectly, which is the best moment to pin it",
+      "real": true,
+      "matters_next_12_months": true,
+      "reason": "The underlying gap is real: nothing in tests/ or scripts/ asserts org scoping — the only filesystem-walking tests are tests/setup.ts and tests/unit/registry.test.ts — while lib/admin/session.ts:7-13 makes the 'visibly unscoped' claim. I re-ran the audit and every route.ts under app/api/admin/ does call one of the guards, and all 10 pages under app/admin/platform/ call getPlatformAdmin. Given that a miss here is a cross-tenant leak between two studios' weddings, and that the discipline is currently 100%, the 2-hour test is well priced.",
+      "corrected_evidence": "The counts and the proposed matcher are both wrong. There are 34 route.ts files under app/api/admin/ (11 of them platform), carrying 46 exported method handlers — not '49 non-platform plus 11 platform'. More importantly, the guard list in the fix would fail on day one for pages: 11 page.tsx files under app/admin/ match none of requireOperator|requireOwnedCatalogue|requireEditableCatalogue|requirePlatformAdmin|getPlatformAdmin, because the page-level guards are getOperatorSession, getSessionOrg and getEditableCatalogue (e.g. app/admin/c/[id]/page.tsx:29, app/admin/studio/page.tsx:21), and app/admin/login, /register and /new are deliberately unauthenticated. The test must cover those three names and start with an allowlist of the public pages.",
+      "corrected_severity": "medium"
+    },
+    {
+      "title": "The module registry's own helper switches on the string 'billboard' instead of the meta.shape field that exists for exactly this purpose",
+      "real": true,
+      "matters_next_12_months": false,
+      "reason": "Confirmed verbatim: modules/registry.ts:94 reads `.find((entry) => entry.instance.type !== 'billboard')`, modules/contract.ts:39 declares shape, and billboard is the only module declaring shape:'hero' (modules/billboard/index.ts:19; the other eight are row, grid or prose). tests/unit/registry.test.ts:152-154 walks only app/, components/ and lib/, so modules/ is outside the net. It is a 20-minute fix and worth taking. It does not matter in the next 12 months: a second hero-shaped module is speculative, and the cost when it lands is two poster images loaded eagerly.",
+      "corrected_evidence": "Worth noting a second, pre-existing mismatch the finding does not mention: the function is named firstRowInstanceId and documented as 'the first row-shaped section', but `!== 'billboard'` also matches prose and grid modules. Switching the predicate to `meta.shape !== 'hero'` preserves that behaviour exactly rather than correcting it — if the intent is genuinely row-shaped, the predicate should be `shape === 'row'`, which is a behaviour change and needs its own decision.",
+      "corrected_severity": "low"
+    },
+    {
+      "title": "Three HTTP header names form the middleware-to-page contract and are defined five times across three files, one of them as a bare string literal",
+      "real": true,
+      "matters_next_12_months": false,
+      "reason": "Exact: middleware.ts:16, :17, :19 declare the three locally; lib/address.ts:25 and :27 export TENANT_HEADER and HOST_HEADER with the same values; app/api/og/route.tsx:22 reads 'x-mehfilbox-catalogue' as a literal. A grep for x-mehfilbox- across app/, lib/ and middleware.ts returns exactly those six sites. The duplication is partly forced — lib/address.ts is `server-only` and cannot be imported into edge middleware — but the suggested home, lib/tenant.ts, is already imported by middleware.ts:2, so the 30-minute fix is available. Low materiality: one author, no reason to rename these strings, and the breakage would be caught by the e2e tenant specs rather than silently.",
+      "corrected_severity": "low"
+    },
+    {
+      "title": "Comment rot has started in the 404-line Repository interface — two JSDoc blocks are attached to the wrong member and one section header has nothing under it",
+      "real": true,
+      "matters_next_12_months": false,
+      "reason": "All four specifics check out. lib/db/repository.ts:102-103 (the platform-audit block) and :104-108 (the notification de-duplication block) both sit immediately above publishCatalogueContent at :116; recordPlatformAudit is at :123 and countNotificationsSince at :121, both undocumented. The header '// Platform-authored themes (D-35)' at :128 is directly followed by '// Custom domains (doc 16 §1)' at :129, and listCustomThemes/getCustomTheme/saveCustomTheme sit at :166-169. lib/i18n.ts:5 does claim 'Every user-visible string in the product comes from here' while only 2 of 44 files in components/admin import it. Real but cosmetic; the comment moves are a 15-minute fix and should be taken, the proposed three-way split of repository.ts is a separate and much larger change that should not ride along with it.",
+      "corrected_severity": "low"
+    },
+    {
+      "title": "Naming is layered rather than drifting, but two terms are genuinely inconsistent inside the same layer — and one is in a public URL",
+      "real": true,
+      "matters_next_12_months": false,
+      "reason": "Confirmed: app/api/partners/route.ts and app/api/admin/studio/route.ts both exist, orgKindSchema is z.enum(['partner','couple']) at lib/schema.ts:184, and app/api/partners/route.ts:43 falls back to the literal 'studio' when deriving a slug. Ratio check: 546 'studio' against 91 'partner' across app/, components/, lib/ and modules/. The layering argument is right and the two genuine inconsistencies are right. Materiality is low by the reviewer's own reasoning — six orgs, one author — and the route rename is cheap whenever it is wanted.",
+      "corrected_evidence": "'nothing outside components/admin/RegisterForm.tsx calls it' is wrong: /api/partners is also called from e2e/locale.spec.ts:22 and :80, e2e/credits.spec.ts:19, and the route is imported directly in tests/unit/login-security.test.ts:193. The rename touches four files, not one. The occurrence count is 546 for 'studio', not 533.",
+      "corrected_severity": "low"
+    }
+  ]
+}

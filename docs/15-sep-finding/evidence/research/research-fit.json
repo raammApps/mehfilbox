@@ -1,0 +1,163 @@
+{
+  "topic": "DPIIT recognition and the Startup India Seed Fund Scheme (SISFS) fit for Mehfilbox — a pre-revenue, India-first white-label wedding-streaming SaaS",
+  "summary": "DPIIT recognition itself is a free, self-certified status, not a scored competition: the entity must be a Pvt Ltd / registered partnership / LLP / cooperative society, under 10 years old and under ₹200 crore turnover, and must self-certify it is 'working towards innovation or improvement of existing products, services, and processes' with potential to generate employment or wealth (startupindia.gov.in, page last updated 14 Sept 2026). The page does not define 'scalability' as a separate numeric test — it is folded into the same sentence as innovation. Rejections at this stage, per several compliance-firm write-ups (not DPIIT itself, so treated as secondary), most often trace to a generic innovation paragraph ('we use the latest technology') rather than a specific claim; there is no cap on reapplying, and the process runs through the National Single Window System (nsws.gov.in), typically decided in single-digit to low-double-digit working days per secondary sources.\n\nSISFS is a real, scored process, and the official Guidelines document (Ministry of Commerce and Industry / DPIIT PDF, fetched and read in full) gives the exact rubric: eligibility requires DPIIT recognition, incorporation ≤ 2 years before application, ≥51% Indian promoter shareholding, ≤₹10 lakh prior government support, and 'a business idea to develop a product or service with market fit, viable commercialization, and scope of scaling' (§3.1). Each empanelled incubator's Incubator Seed Management Committee (ISMC) then scores applications on eight weighted criteria it sets the weights for itself (§7.2.v): need/market gap, feasibility of technical claims, potential impact, novelty (USP and associated IP), team strength, fund-utilization plan, incubator-specific extras, and presentation. Before that scoring, applicants are asked for team profile, problem statement, product/service overview, business model, customer profile, market size, funds needed, and a utilization plan (§7.2.iv) — that field list is the closest official answer to 'what should the one-pager contain.' Funding is ≤₹20 lakh grant (milestone installments, PoC/prototype/trials) plus ≤₹50 lakh via convertible debentures/debt for market entry and scaling; the guideline explicitly says the fund 'shall strictly not be used... for creation of any facilities' (§8.1.3). ISMC must decide within 45 days of application, and a selected grant's first tranche must land within 60 days (§7.2.vii, §8.7).\n\nOn 'does building our own video pipeline help': no, and this is worth stating plainly rather than softening. Novelty is scored on IP and technical claims, not on vendor-versus-build choices, and transcoding-pipeline engineering is commodity work (Bunny itself gives it away free) rather than defensible IP. The guideline separately bars using the seed grant for 'creation of any facilities' — an in-house pipeline is exactly that. And Mehfilbox's own code treats this as settled already: lib/video/provider.ts's own docstring calls the Bunny driver a default, not a lock-in ('Switching from Bunny to Cloudflare is a new implementation of this interface and one line'), and SCALE-PLAN.md's cost analysis independently argues against ever proxying video through the app. The innovation that IS real and evidenced in this repo's own competitor analysis — 10–15-hour multi-function wedding capacity no competitor's plan holds, a browsable catalogue instead of a password-gated grid, and the archive-not-delete 'wedding survives the studio' guarantee — has nothing to do with who encodes the video.\n\nRealistic timeline, chaining the officially-sourced stage lengths: incorporation if not already done (secondary sources put MCA SPICe+ at ~7–15 working days) → DPIIT recognition (secondary sources: days, not weeks; no formal SLA found on DPIIT's own page) → SISFS application to up to three incubators at once (§7.2.ii, official) → ≤45 days to a decision → ≤60 days to the first grant tranche from the startup's application date. Chained end to end that is a realistic 3–5 month floor from a standing start to money in the bank, and the binding constraints in practice (per secondary accounts, unverified in specifics) are an incubator's own EAC-approved funding cap being exhausted and the quality of the fund-utilization narrative, not the official SLAs themselves.\n\nOn incubators by city: verified directly rather than trusted from listicles, T-Hub (Hyderabad) is the strongest match found — its own site names 'SaaS & Enterprise-tech' and 'Media-tech' as explicit sectoral focus areas and names SISFS as a channel it runs. NSRCEL (IIM Bangalore), commonly listed by secondary 'best-for-SaaS' roundups, foregrounds fintech, climate, healthcare and impact on its own site with no SISFS mention — the listicle claim does not hold up against the primary source and should be reverified before applying there specifically for SISFS. CIIE.CO (IIM Ahmedabad)'s dedicated seed fund targets financial-inclusion/livelihood/health for low-and-middle-income customers — a loose thematic fit at best. GUSEC (Ahmedabad) is reported (secondary, not independently fetched) as SISFS-empanelled and sector-agnostic. The empanelled-incubator roster itself is large (a 2025 secondary count put it at 250+ across 31 states/UTs) and changes; the live list on seedfund.startupindia.gov.in is the source of truth, and that page would not render as readable text through this session's fetch tool (it is a JS single-page app), so it should be checked directly in a browser before finalizing a preference order.",
+  "facts": [
+    {
+      "claim": "DPIIT recognition requires incorporation as a Private Limited Company, registered Partnership Firm, LLP or Cooperative Society; turnover under ₹200 crore (₹300 crore for DeepTech) in any FY since incorporation; age under 10 years (20 for DeepTech) from incorporation; and self-certification of 'working towards innovation or improvement of existing products, services, and processes' with potential to generate employment or wealth. The page does not separately define 'scalability' as its own test, and formation by splitting/reconstructing an existing business is explicitly excluded.",
+      "source_url": "https://www.startupindia.gov.in/content/sih/en/startupgov/startup_recognition_page.html",
+      "as_of": "2026-09-14",
+      "confidence": "official"
+    },
+    {
+      "claim": "Recognition is free and unlocks two adjacent tax benefits it does not itself grant: a 3-consecutive-year tax holiday under Section 80-IAC and an exemption under Section 56 (angel tax) — both Private Limited/LLP only, and 80-IAC only for entities incorporated after 1 April 2016.",
+      "source_url": "https://www.startupindia.gov.in/content/sih/en/startupgov/startup_recognition_page.html",
+      "as_of": "2026-09-14",
+      "confidence": "official"
+    },
+    {
+      "claim": "SISFS eligibility for a startup (Guidelines §3.1): DPIIT-recognised and incorporated not more than 2 years before the application; a product/service idea with market fit, viable commercialisation and 'scope of scaling'; use of technology in the core product, service, business model, distribution model or methodology; must not have received more than ₹10 lakh of monetary support from any other Central/State government scheme; and at least 51% Indian-promoter shareholding at the time of application to the incubator.",
+      "source_url": "https://www.startupindia.gov.in/content/dam/invest-india/Templates/public/Guidelines%20for%20Startup%20India%20Seed%20Fund%20Scheme.pdf",
+      "as_of": "2026-09-16",
+      "confidence": "official"
+    },
+    {
+      "claim": "The guideline states preference (not exclusivity) for sectors including social impact, waste/water management, financial inclusion, education, agriculture, food processing, biotechnology, healthcare, energy, mobility, defence, space, railways, oil and gas, and textiles (§3.1.4). Consumer/creator media-streaming SaaS is not named in this preference list, though the list is stated as a preference rather than a restriction, and 'using technology... to solve the problem being targeted' (§3.1.3) is the operative eligibility test.",
+      "source_url": "https://www.startupindia.gov.in/content/dam/invest-india/Templates/public/Guidelines%20for%20Startup%20India%20Seed%20Fund%20Scheme.pdf",
+      "as_of": "2026-09-16",
+      "confidence": "official"
+    },
+    {
+      "claim": "The Incubator Seed Management Committee (ISMC) scores each eligible application on eight criteria, with weights set by each incubator itself (§7.2.v): (1) 'Is there a need for this idea?' — market size and real-world problem fit; (2) Feasibility — reasonability of technical claims and PoC roadmap; (3) Potential Impact — customer demographic and the technology's effect on them, national importance if any; (4) Novelty — 'USP of the technology, associated IP'; (5) Team — technical and business strength; (6) Fund Utilization Plan; (7) Additional Parameters at the incubator's discretion; (8) Presentation — overall assessment.",
+      "source_url": "https://www.startupindia.gov.in/content/dam/invest-india/Templates/public/Guidelines%20for%20Startup%20India%20Seed%20Fund%20Scheme.pdf",
+      "as_of": "2026-09-16",
+      "confidence": "official"
+    },
+    {
+      "claim": "Before scoring, applicants 'may be asked to submit details on team profile, problem statement, product/service overview, business model, customer profile, market size, quantum of funds needed, projected utilization plan for funds, etc.' (§7.2.iv) — the closest official specification of what a SISFS one-pager/pitch deck should contain.",
+      "source_url": "https://www.startupindia.gov.in/content/dam/invest-india/Templates/public/Guidelines%20for%20Startup%20India%20Seed%20Fund%20Scheme.pdf",
+      "as_of": "2026-09-16",
+      "confidence": "official"
+    },
+    {
+      "claim": "Seed funding is disbursed as up to ₹20 lakh grant (milestone-based installments) for PoC/prototype/product trials, plus up to ₹50 lakh via convertible debentures or debt/debt-linked instruments (interest capped at the prevailing repo rate, tenure up to 60 months, up to 12 months' moratorium, unsecured, no promoter/third-party guarantee) for market entry, commercialisation or scaling (§8.1). 'Seed fund shall strictly not be used by startups for creation of any facilities and shall be utilized for the purpose it has been granted for' (§8.1.3).",
+      "source_url": "https://www.startupindia.gov.in/content/dam/invest-india/Templates/public/Guidelines%20for%20Startup%20India%20Seed%20Fund%20Scheme.pdf",
+      "as_of": "2026-09-16",
+      "confidence": "official"
+    },
+    {
+      "claim": "The ISMC must evaluate and select (or not select) startups within 45 days of receipt of application (§7.2.vii); for a grant, the first installment to a selected startup must be released not more than 60 days from receipt of the startup's application (§8.7); subsequent grant installments follow within 30 days of proof of milestone achievement once the incubator's cash-in-hand drops below 10% of its EAC commitment (§5.5).",
+      "source_url": "https://www.startupindia.gov.in/content/dam/invest-india/Templates/public/Guidelines%20for%20Startup%20India%20Seed%20Fund%20Scheme.pdf",
+      "as_of": "2026-09-16",
+      "confidence": "official"
+    },
+    {
+      "claim": "Rejected applicants are notified by email and explicitly 'may apply afresh' with no stated limit or cooldown period (§7.2.xi-xii); a startup may apply to up to three empanelled incubators at once, ranked by preference, and is funded by the highest-preference incubator among those that select it (§7.2.ii, ix). No fee may be charged to a startup at any stage (§5.12, §8.9).",
+      "source_url": "https://www.startupindia.gov.in/content/dam/invest-india/Templates/public/Guidelines%20for%20Startup%20India%20Seed%20Fund%20Scheme.pdf",
+      "as_of": "2026-09-16",
+      "confidence": "official"
+    },
+    {
+      "claim": "To be SISFS-empanelled, an incubator must itself be an operational legal entity (society/trust/company/statutory body) for at least 2 years, seat at least 25 people, have at least 5 startups physically in incubation, and — if it has not previously been assisted by Central/State government — be operational 3+ years with 10+ startups and 2 years of audited annual reports (§3.2).",
+      "source_url": "https://www.startupindia.gov.in/content/dam/invest-india/Templates/public/Guidelines%20for%20Startup%20India%20Seed%20Fund%20Scheme.pdf",
+      "as_of": "2026-09-16",
+      "confidence": "official"
+    },
+    {
+      "claim": "Startup India's own post-recognition guidance (published as a blog on startupindia.gov.in) sequences the first 100 days as: review 80-IAC/angel-tax/GeM/patent-fee-rebate benefits, strengthen 'financial documentation, pitch deck and future projections' specifically to access the Seed Fund Scheme and state-level funding, and engage incubators/accelerators via the Startup India Hub — it frames the Seed Fund Scheme, not the tax benefits, as the immediate next step after recognition.",
+      "source_url": "https://www.startupindia.gov.in/content/sih/en/bloglist/blogs/your-firs-100-days-after-DPIIT-recognition.html",
+      "as_of": "2026-09-14",
+      "confidence": "official"
+    },
+    {
+      "claim": "Multiple compliance-firm sources (not DPIIT itself) describe a vague or generic innovation description — e.g. 'we use the latest technology' without naming the specific novelty — as the most common cause of a DPIIT rejection or clarification request, and describe unlimited free re-applications after strengthening the narrative; no official DPIIT statistics on rejection reasons were located in this session.",
+      "source_url": "https://www.patronaccounting.com/blog/dpiit-startup-recognition-what-it-is-who-qualifies-how-to-apply",
+      "as_of": "2026-09-16",
+      "confidence": "secondary"
+    },
+    {
+      "claim": "Secondary sources (not the official guideline) claim SISFS applications most often fail on eligibility technicalities — ineligible entity type (sole proprietorship/OPC/HUF), more than 2 years since incorporation, under 51% Indian promoter holding, or an incubator's own EAC-approved funding cap already exhausted — and separately on a fund-utilization plan founders cannot defend line by line. A specific claim that 'over 70% of applications are rejected at the first gate' appears in blog sources with no cited primary data and should be treated as unverified.",
+      "source_url": "https://growthgurukul.in/sisfs-ready-in-60-minutes-the-10-point-checklist-before-you-hit-apply/",
+      "as_of": "2026-09-16",
+      "confidence": "unverified"
+    },
+    {
+      "claim": "Section 80-IAC's 3-year tax holiday requires a second, separate certification from the Inter-Ministerial Board (IMB) after DPIIT recognition — they are not the same approval. Secondary reporting puts cumulative IMB certifications at roughly 3,700 against over 1.97 lakh DPIIT-recognised startups (a low single-digit percentage); treat the exact current ratio as secondary, not independently confirmed against an official IMB count.",
+      "source_url": "https://www.dugainadvisors.com/post/section-80-iac-in-july-2026-what-s-changed-who-still-qualifies-and-why-only-1-8-get-it",
+      "as_of": "2026-07",
+      "confidence": "secondary"
+    },
+    {
+      "claim": "Press Information Bureau material (direct fetch in this session returned HTTP 403; this is drawn from an indexed snippet of the .gov.in release, not a page I read in full) describes SISFS as a ₹945 crore corpus scheme running since April 2021; secondary aggregators citing PIB put empanelled incubators at roughly 250–300+ and startups supported above 3,000 as of 2025 reporting, with both figures still rising — re-check current counts on seedfund.startupindia.gov.in directly before quoting a number.",
+      "source_url": "https://www.pib.gov.in/PressReleaseIframePage.aspx?PRID=2004641",
+      "as_of": "2026-09-16",
+      "confidence": "secondary"
+    },
+    {
+      "claim": "T-Hub's own site (fetched directly) lists 'SaaS & Enterprise-tech' and 'Media-tech' among its explicit sectoral focus areas, alongside 13 other named sectors, and names SISFS alongside SIDBI IDEX and state schemes as funding routes it channels to startups — the strongest directly-verified sector match for a wedding-media SaaS among the incubators checked in this session.",
+      "source_url": "https://www.t-hub.co/startups",
+      "as_of": "2026-09-16",
+      "confidence": "secondary"
+    },
+    {
+      "claim": "Several 'best incubators for SaaS' secondary roundups name NSRCEL (IIM Bangalore), but NSRCEL's own site (fetched directly) currently foregrounds fintech, climate, healthcare and women's/impact programs, with no mention of SISFS on the page — the roundup recommendation is not corroborated by the incubator's own current stated focus and should be re-verified directly before applying there specifically for SISFS.",
+      "source_url": "https://nsrcel.org/about-us/",
+      "as_of": "2026-09-16",
+      "confidence": "secondary"
+    },
+    {
+      "claim": "CIIE.CO (IIM Ahmedabad)'s dedicated Bharat Inclusion seed fund targets startups serving low-and-middle-income customers in financial inclusion, livelihood, education and health — a loose thematic fit for an India-first, Tier-2/3-leaning product, but not a named consumer-SaaS/media focus; whether SISFS specifically runs through this fund or a separate CIIE incubation track was not confirmed in this session.",
+      "source_url": "https://www.iima.ac.in/news/iim-ahmedabads-ciie-launches-25-million-bharat-inclusion-initiative",
+      "as_of": "2026-09-16",
+      "confidence": "secondary"
+    },
+    {
+      "claim": "GUSEC (Gujarat University Startup & Entrepreneurship Council, Ahmedabad) is reported as SISFS-empanelled by DPIIT with zero-cost incubation and seed support up to ₹50 lakh, sector-agnostic — this was not independently fetched from gusec.edu.in in this session and should be treated as secondary pending direct verification.",
+      "source_url": "https://gusec.edu.in/",
+      "as_of": "2026-09-16",
+      "confidence": "secondary"
+    },
+    {
+      "claim": "Secondary compliance-firm sources put MCA SPICe+ private-limited incorporation (via the MCA V3 portal) at roughly 7–15 working days end-to-end for a clean application (name reservation ~1–3 days, DSC ~1–2 days, ROC review ~2–10 days); mca.gov.in's own stated SLA was not independently fetched in this session.",
+      "source_url": "https://legalsuvidha.com/blog/spicespice-plus-mca-form-for-company-registration",
+      "as_of": "2026-09-16",
+      "confidence": "secondary"
+    },
+    {
+      "claim": "Secondary sources put the GST registration threshold for services at ₹20 lakh aggregate turnover in most states (₹10 lakh in Manipur, Mizoram, Nagaland, Tripura); Mehfilbox's own docs/PRICING.md §6 already flags GST registration as needed regardless of this threshold, to reclaim input credit on Bunny/Vercel/Supabase's reverse-charge import-of-service GST. cbic-gst.gov.in's own page was not independently fetched in this session.",
+      "source_url": "https://cleartax.in/s/gst-registration-limits-increased",
+      "as_of": "2026-09-16",
+      "confidence": "secondary"
+    },
+    {
+      "claim": "Mehfilbox's own repository has no record of the company's current legal entity status: a search of docs/REQUIREMENTS.md, docs/NEXT.md, docs/PROGRESS.md, docs/PRODUCT.md and docs/ROADMAP.md for 'private limited', 'LLP', 'sole proprietor', 'incorporated', 'company registration', 'ROC' and 'MCA' returned no matches, while docs/REQUIREMENTS.md does list 'GST registration, with the accountant' as still open. Only a domain registration date (heirloomfilms.in, 14 August 2026) is recorded, which is not evidence of company incorporation.",
+      "source_url": "file:///Users/sandeepsharma/san-claude/heirloomfilms/docs/REQUIREMENTS.md",
+      "as_of": "2026-09-16",
+      "confidence": "official"
+    },
+    {
+      "claim": "Mehfilbox's video backend is Bunny Stream behind a swappable interface, not an in-house pipeline: lib/video/provider.ts's own docstring states 'Switching from Bunny to Cloudflare is a new implementation of this interface and one line in lib/video/index.ts — the decision in doc 05 is explicitly a default, not a lock-in.' docs/SCALE-PLAN.md independently argues against building one: Bunny gives 'free transcoding' with commercial alternatives '3–5x the cost for identical output,' and warns 'if you ever find yourself proxying video bytes through Vercel, stop.'",
+      "source_url": "file:///Users/sandeepsharma/san-claude/heirloomfilms/lib/video/provider.ts",
+      "as_of": "2026-09-16",
+      "confidence": "official"
+    }
+  ],
+  "actions_for_mehfilbox": [
+    "1. Resolve and document the entity question first, before anything else on this list. Nothing in docs/ records whether Mehfilbox/Heirloom Films is already incorporated, or as what (Pvt Ltd, LLP, registered partnership, or still unincorporated/sole-proprietor) — confirmed by grepping docs/REQUIREMENTS.md, NEXT.md, PROGRESS.md, PRODUCT.md and ROADMAP.md. Both DPIIT recognition and SISFS require a Private Limited Company, registered Partnership Firm, LLP or Cooperative Society — a sole proprietorship does not qualify for either. Add the answer to docs/NEXT.md's open-decisions list alongside the other items already waiting on Sandeep.",
+    "2. If not yet incorporated, incorporate as a Private Limited Company (not LLP) via the MCA V3 portal's SPICe+ form — secondary sources put this at roughly 7–15 working days clean. Pvt Ltd keeps the SISFS ₹50 lakh convertible-debenture tranche and any future priced equity round straightforward, and lets GST registration and the still-open Razorpay/payment-gateway KYC (blocked on N-20 per docs/PRODUCT.md) key off one settled entity instead of migrating later.",
+    "3. Apply for DPIIT recognition on the National Single Window System (nsws.gov.in) as soon as the entity exists — it is free, self-certified, and decided in days per secondary sources. Do not wait for revenue, for the theme store, or for any infrastructure decision. Write the innovation paragraph around what is already true and evidenced in docs/COMPETITORS.md: 10–15-hour, multi-function Indian-wedding capacity that no competitor's plan holds (Pixieset tops out at 5 hours; OurStoria caps 10–15 files per project), a browsable catalogue instead of a password-gated file grid, and the archive-not-delete 'wedding survives the studio' guarantee — not around technology stack or vendor choices.",
+    "4. In parallel, register for GST with an accountant — already flagged as open in docs/REQUIREMENTS.md. This is what lets Mehfilbox reclaim input credit on Bunny/Vercel/Supabase's reverse-charge import-of-service GST (docs/PRICING.md §6) and is a precondition for invoicing the Studio plan at scale.",
+    "5. Do not build an in-house video transcoding pipeline as part of this fundraising motion, and do not frame it as an innovation claim if built for other reasons. Three independent grounds, all already in this repository: the SISFS guideline explicitly bars using the seed grant for 'creation of any facilities' (§8.1.3); the Novelty criterion (§7.2.v) scores IP, not vendor-versus-build choices, and transcoding is commodity engineering Bunny already gives away free; and Mehfilbox's own code (lib/video/provider.ts) and docs/SCALE-PLAN.md already treat the Bunny driver as an interchangeable default whose replacement would be a regression, not progress, on the architecture's documented economics.",
+    "6. Build the SISFS one-pager around the guideline's own required fields verbatim (§7.2.iv): team profile, problem statement, product/service overview, business model, customer profile, market size, funds needed, and a milestone-based utilization plan. Self-score it against the official 8-criteria rubric (§7.2.v) before submitting — need/market gap, feasibility, potential impact, novelty/IP, team, fund-utilization plan, additional parameters, presentation. Lift the modelled economics straight from docs/SCALE-PLAN.md (83% gross margin at 60 weddings, infrastructure a near-fixed ~17% of revenue, 30–80x headroom to 300–500 weddings/month) for 'potential impact' and 'feasibility', but keep that document's own hedges ('reasoned, not measured') — an overclaimed number a reviewer can poke a hole in costs more on 'feasibility' than a modest, honest one.",
+    "7. Once recognition is in hand and the one-pager is ready, apply to SISFS at up to three empanelled incubators at once, ranked by preference (§7.2.ii) — do not wait for more traction; the 2-year eligibility clock from incorporation is the binding constraint, and Mehfilbox is pre-revenue with effectively one live catalogue today (docs/COMPETITORS.md). Lead with T-Hub, Hyderabad — the only incubator in this research whose own site (verified directly) names both 'SaaS & Enterprise-tech' and 'Media-tech' as explicit sector focus areas and names SISFS as a channel it runs. Treat NSRCEL and CIIE.CO as backups only after re-checking their live sector priorities yourself — NSRCEL's own site currently foregrounds fintech/climate/healthcare with no SISFS mention, and CIIE's named seed fund targets financial-inclusion/livelihood/health, neither a confirmed match the way T-Hub is. Check GUSEC (Ahmedabad, reported SISFS-empanelled, sector-agnostic) as a third preference, and browse the live roster at seedfund.startupindia.gov.in yourself before finalizing the order, since it lists 250+ incubators and changes.",
+    "8. Use direct-to-client (couple) onboarding and the theme store as evidence inside the application, not as separate work to finish first. The 'scope of scaling' eligibility test and the 'Potential Impact' scoring criterion reward a second distribution channel and a second revenue line on one product, and both already exist in the architecture — couple-created catalogues from /my (N-73) and the seven-theme branding system (N-63/64), per docs/PRODUCT.md §1.3 and §6. Describe them in the fund-utilization plan as the near-term roadmap the grant helps fund, rather than delaying the SISFS application until they are commercialized.",
+    "9. Keep the Go/Java port out of the SISFS narrative and off the critical path to it — no DPIIT/SISFS eligibility, evaluation or rejection-reason material found in this research mentions implementation language, and a large rewrite competes for the same founder-hours the application, GST registration and N-20 (payment gateway) need first. If it happens, let it happen after the grant decision, not before.",
+    "10. Treat Section 80-IAC and Section 56 (angel tax) as later, lower-priority items, not part of the immediate Startup India motion. 80-IAC needs a second, separate Inter-Ministerial Board certification beyond DPIIT recognition (secondary reporting: roughly 3,700 IMB certifications exist against 1.97 lakh DPIIT-recognised startups), and it exempts profit Mehfilbox does not yet have; angel tax exemption only matters once raising priced equity, which is not the current ask. Revisit both after the first SISFS tranche or the first priced round, whichever comes first."
+  ],
+  "open_questions": [
+    "Is Mehfilbox (or Heirloom Films Pvt Ltd / LLP / etc.) currently incorporated, and as what entity? This is undocumented anywhere in docs/ and gates every other step in the actions list above — confirm and record it before applying for DPIIT recognition.",
+    "Which city is Sandeep based in or planning to incorporate in? SISFS incubators generally expect a startup to engage with a physical facility (the incubator itself must seat ≥25 people per the guideline), so the practical shortlist narrows once a home city is known — this research could not find that fact anywhere in the repo or the provided context.",
+    "What is the actual current status of GST registration — has an accountant been engaged, as docs/REQUIREMENTS.md's open item implies is still pending?",
+    "What are the 'three decisions' flagged as waiting on Sandeep in this session's own memory (gaps-13-sept.md)? Their content was not available to this research; worth checking whether any bear on entity type or registration timing before locking a SISFS application date.",
+    "Is Sandeep the sole promoter/shareholder today, and will that structure still satisfy SISFS's ≥51%-Indian-promoter-shareholding test after any co-founder, ESOP pool, or outside angel money is added before application?"
+  ]
+}

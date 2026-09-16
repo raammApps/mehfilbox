@@ -17,6 +17,12 @@ Update this file as items land — move them out, do not leave them ticked.
 
 ---
 
+**17 September 2026:** the review Sandeep asked for on 15 September is in
+[`15-sep-finding/`](./15-sep-finding/00-README.md). It proposes decisions D-45 to D-53 and tickets
+N-89 to N-111 (`06-what-changes-next.md`), none of which is applied to this file until he decides;
+the one item it says not to wait on is N-89, the titles half of the publish-gate bug whose photo
+half was fixed and deployed on 16 September.
+
 ## Where things stand, in one paragraph
 
 Phase 0 is built and deployed: guest catalogue, player, admin console, customizer, the module

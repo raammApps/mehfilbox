@@ -1,0 +1,255 @@
+{
+  "topic": "Entity and compliance choices for a new Indian software startup seeking Startup India grants and later investors (Private Limited vs LLP vs OPC, DPIIT/80-IAC/SISFS eligibility, SPICe+ incorporation cost and time, mandatory compliances, GST for SaaS, MSME/Udyam, trademark filing and the SIPP rebate, and pre-incorporation IP assignment) — applied to Mehfilbox",
+  "summary": "For a founder who wants both Startup India grants and later VC/ESOP investment, the entity choice is not close: Private Limited Company is the only structure that reaches every scheme researched here (DPIIT recognition, 80-IAC tax holiday, SISFS seed funding) AND is what investors and ESOP pools need. LLP is also eligible for DPIIT/80-IAC/SISFS (officially, the entity types are Private Limited Company, registered Partnership Firm, or LLP), but LLPs have no share capital, so VCs avoid them and they cannot grant conventional ESOPs. OPC is excluded from DPIIT, 80-IAC and SISFS outright, and separately, by definition (Companies Act) an OPC can only ever have one shareholder — it must convert to a Pvt Ltd before taking even a single outside investor — so it is not a real option for a founder planning to raise money. Incorporation via MCA SPICe+ is cheap and quick for a small company: the MCA's own government filing fee is nil for authorised capital up to Rs 15 lakh, and total out-of-pocket cost (DSC, name reservation, state stamp duty) commonly runs Rs 7,000-25,000 over roughly 7-15 working days. The recurring cost is compliance, not incorporation: a Pvt Ltd needs a statutory audit every year regardless of turnover, plus ROC annual filings (AOC-4, MGT-7/7A), director KYC and ITR, commonly quoted around Rs 25,000-55,000/year for a small company; an LLP's annual filing is lighter (only Forms 8 and 11) and its audit only triggers above Rs 40 lakh turnover or Rs 25 lakh capital contribution. On GST: the general registration threshold for a services business is Rs 20 lakh turnover, and a verified government notification (10/2017-Integrated Tax) confirms inter-state supply of SERVICES does not force immediate registration the way inter-state supply of goods does under Section 24 of the CGST Act — the Rs 20 lakh runway survives selling to customers in other states. But a business that already pays foreign SaaS/infra vendors is reverse-charge liable on those payments, and professional opinion is genuinely split on whether Section 24(iii)'s compulsory-registration-for-reverse-charge rule overrides that Rs 20 lakh exemption in practice — this needs a specific answer from a CA, not a general one. On moving founder-owned code into the new company: the mechanics are cheaper and less tax-risky than older guides suggest. Copyright assignment deeds are generally stamp-duty exempt (Copyright Act 1957 s.19 / Indian Stamp Act s.23, with state exceptions), and critically, the angel-tax provision that used to make issuing shares against non-cash IP consideration a valuation trap (Section 56(2)(viib)) was abolished outright by the Finance Act 2024 for every share issuance from 1 April 2025 onward — a registered-valuer report is still mandatory to price such a share allotment (Companies Act s.62(1)(c)), but the old tax exposure on that valuation is gone. If an entire existing business (not just the IP) is being moved in, a 'transfer of a going concern' is GST-exempt under Notification 12/2017-Central Tax (Rate), though 'going concern' is undefined in GST law and disputed at the edges. On IP protection specifically: verify before budgeting around it. The SIPP scheme, while active, gave DPIIT-recognised startups an 80% rebate on patent filing and 50% on trademark filing fees with government paying the facilitator's entire professional fee — but multiple legal-press sources (not the official Startup India page, which shows stale statistics) report the notified scheme lapsed 31 March 2026 with no confirmed renewal as of the most recent reporting found, and today is 16 September 2026. The separate Rs 4,500/class (vs Rs 9,000/class) concessional government filing fee for a DPIIT-recognised startup, Udyam-registered MSME, or individual applicant is a different, still-standing benefit under the Trade Marks Rules 2017 and does not depend on SIPP. For Mehfilbox specifically: nothing in the codebase or docs shows a registered legal entity today — only a domain (heirloomfilms.in, registered 14 August 2026, docs/PRODUCT.md:41) and the brand name Mehfilbox (decided 7 September 2026, docs/PRODUCT.md:30). Every scheme in this research requires incorporation first; it is the first move, not a parallel one, and it should happen before the trademark filing and GST registration that docs/REQUIREMENTS.md:214-215 already lists as open items.",
+  "facts": [
+    {
+      "claim": "DPIIT Startup Recognition is open to a Private Limited Company, a registered Partnership Firm, an LLP, or a Cooperative Society. Sole proprietorships and One Person Companies (OPC) are not listed as eligible entity types on the official recognition page.",
+      "source_url": "https://www.startupindia.gov.in/content/sih/en/startupgov/startup_recognition_page.html",
+      "as_of": "2026-09-16",
+      "confidence": "official"
+    },
+    {
+      "claim": "Multiple independent secondary/legal sources state DPIIT recognition is limited to Private Limited Company, registered Partnership Firm, or LLP, and explicitly exclude sole proprietorships and OPCs — consistent with the official page except that none of them mention Cooperative Society as a fourth eligible type, which is worth confirming directly if relevant.",
+      "source_url": "https://www.taxmann.com/post/blog/faqs-dpiit-recognition-for-start-ups/",
+      "as_of": "2026-09-16",
+      "confidence": "secondary"
+    },
+    {
+      "claim": "DPIIT recognition age/turnover conditions (as stated on the official page): an entity is considered a startup for up to 10 years from incorporation (20 years for DeepTech startups), and turnover must be less than INR 200 crore in any of the previous financial years (INR 300 crore for DeepTech startups). An entity formed by splitting up or reconstructing an existing business is not eligible.",
+      "source_url": "https://www.startupindia.gov.in/content/sih/en/startupgov/startup_recognition_page.html",
+      "as_of": "2026-09-16",
+      "confidence": "official"
+    },
+    {
+      "claim": "Section 80-IAC income tax exemption eligibility (official page): must be a Private Limited Company or LLP (not a partnership firm or OPC), incorporated on or after 1 April 2016, less than 10 years old, annual turnover under INR 100 crore in any financial year, and must already hold DPIIT recognition. Note this turnover ceiling (INR 100 crore) differs from the DPIIT recognition page's own ceiling (INR 200/300 crore) — the two official pages are not obviously harmonized, so don't assume either figure applies to the other scheme.",
+      "source_url": "https://www.startupindia.gov.in/content/sih/en/form80iac.html",
+      "as_of": "2026-09-16",
+      "confidence": "official"
+    },
+    {
+      "claim": "The Section 80-IAC benefit is a 100% deduction of profits for any 3 consecutive financial years chosen within the startup's first 10 years of incorporation.",
+      "source_url": "https://www.startupindia.gov.in/content/sih/en/form80iac.html",
+      "as_of": "2026-09-16",
+      "confidence": "official"
+    },
+    {
+      "claim": "Startup India Seed Fund Scheme (SISFS) eligibility: Private Limited Company, registered Partnership Firm, or LLP; sole proprietorships and public limited companies are not eligible. Must hold DPIIT recognition and have been incorporated not more than 2 years before the date of application. Indian promoters must hold at least 51% shareholding at the time of application. The startup must not have received more than Rs 10 lakh of monetary support under any other Central or State Government scheme.",
+      "source_url": "https://www.cashfree.com/blog/startup-india-seed-fund-scheme-sisfs-eligibility-how-to-apply/",
+      "as_of": "2026-09-16",
+      "confidence": "secondary"
+    },
+    {
+      "claim": "SISFS funding structure: up to Rs 20 lakh as a grant for validation of proof of concept, prototype development, or product trials; up to Rs 50 lakh of investment for market entry, commercialisation, or scaling, via convertible debentures, debt, or debt-linked instruments.",
+      "source_url": "https://www.ccamp.res.in/seed-funding-SISFS",
+      "as_of": "2026-09-16",
+      "confidence": "secondary"
+    },
+    {
+      "claim": "An OPC (One Person Company) is, by definition, limited to a single shareholder at all times; it cannot admit a second shareholder or raise equity from an outside investor without first converting to a Private Limited Company. It can raise debt/debentures while remaining an OPC.",
+      "source_url": "https://www.cashfree.com/blog/one-person-company-opc/",
+      "as_of": "2026-09-16",
+      "confidence": "secondary"
+    },
+    {
+      "claim": "One source states an OPC must convert to a Private Limited Company once paid-up capital exceeds Rs 50 lakh or turnover exceeds Rs 2 crore, while another notes a 2021 amendment removed some earlier OPC restrictions (e.g., the 2-year lock-in on voluntary conversion). The two claims are not fully reconciled in the sources found — treat the specific Rs 50 lakh/Rs 2 crore mandatory-conversion trigger as unverified/possibly superseded rather than current fact.",
+      "source_url": "https://www.incorpx.io/blog/one-person-company-opc-india",
+      "as_of": "2026-09-16",
+      "confidence": "unverified"
+    },
+    {
+      "claim": "Private Limited Company is the entity of choice for venture capital and ESOPs in India: VCs and angel investors generally prefer companies because equity shares are easily valued, transferred, and diluted, and share-based ESOPs are standard. An LLP has no share capital, so it can only offer profit-linked or contribution-linked incentive arrangements, not conventional equity ESOPs, and investor exit via transfer of partnership interest is considered difficult.",
+      "source_url": "https://www.incorpx.io/blog/private-limited-vs-llp-india",
+      "as_of": "2026-09-16",
+      "confidence": "secondary"
+    },
+    {
+      "claim": "MCA's SPICe+ government filing fee for company incorporation is nil (zero) where authorised share capital is up to Rs 15 lakh, per the Companies (Registration Offices and Fees) Rules as amended. Name reservation via SPICe+ Part A costs Rs 1,000; a Digital Signature Certificate (DSC) costs roughly Rs 2,000-2,500 per person; stamp duty on the MoA/AoA/SPICe+ forms varies by the state of the registered office, cited in a range of roughly Rs 200 to Rs 12,600+.",
+      "source_url": "https://khannaandassociates.com/blog/authorised-capital-2026/",
+      "as_of": "2026-09-16",
+      "confidence": "secondary"
+    },
+    {
+      "claim": "All-in cost to incorporate a small (2-director, Rs 1-10 lakh authorised capital) Private Limited Company is commonly quoted at roughly Rs 7,000-25,000, with a typical timeline of 7-15 working days for a clean application; an SPICe+ Part A name reservation is valid for 20 days within which Part B (incorporation) must be filed.",
+      "source_url": "https://www.registerkaro.in/post/cost-of-company-registration-in-india-a-complete-breakdown",
+      "as_of": "2026-09-16",
+      "confidence": "secondary"
+    },
+    {
+      "claim": "An LLP's annual ROC compliance is limited to two forms: Form 8 (Statement of Account and Solvency) and Form 11 (Annual Return) — described across sources as significantly lighter than a company's annual filing burden.",
+      "source_url": "https://www.kanakkupillai.com/learn/can-an-llp-raise-funding-from-investors-or-venture-capital-firms/",
+      "as_of": "2026-09-16",
+      "confidence": "secondary"
+    },
+    {
+      "claim": "An LLP requires a statutory audit only if its annual turnover exceeds Rs 40 lakh or its capital contribution exceeds Rs 25 lakh in a financial year; below both thresholds, audit is optional. Non-compliance when required can draw a fine of Rs 25,000 to Rs 5,00,000 under the LLP Act, 2008, with designated partners potentially personally liable.",
+      "source_url": "https://www.kanakkupillai.com/learn/llp-audit-applicability/",
+      "as_of": "2026-09-16",
+      "confidence": "secondary"
+    },
+    {
+      "claim": "A Private Limited Company's mandatory annual compliance (regardless of size) includes a statutory audit every year, ROC annual filings (AOC-4 financials, MGT-7/MGT-7A annual return), DIR-3 KYC for each director, and an income tax return. Total annual cost for a small company (turnover up to Rs 2 crore) is commonly quoted at roughly Rs 25,000-55,000/year; broader ranges across sources run Rs 15,999 to Rs 1,50,000+ depending on size and complexity. Late ROC filings attract a penalty of Rs 100/day per form with no stated cap.",
+      "source_url": "https://www.kanakkupillai.com/learn/annual-compliance-cost-for-private-limited-company-in-india/",
+      "as_of": "2026-09-16",
+      "confidence": "secondary"
+    },
+    {
+      "claim": "The general mandatory GST registration threshold for a services business is aggregate turnover exceeding Rs 20 lakh in a financial year (Rs 10 lakh in specified special-category states).",
+      "source_url": "https://tallysolutions.com/gst/gst-limit-registration-threshold-india/",
+      "as_of": "2026-09-16",
+      "confidence": "secondary"
+    },
+    {
+      "claim": "Official government notification, read in full: Notification No. 10/2017-Integrated Tax (13 October 2017), issued under s.20 IGST Act read with s.23(2) CGST Act, exempts 'persons making inter-State supplies of taxable services and having an aggregate turnover, to be computed on all India basis, not exceeding an amount of twenty lakh rupees in a financial year' from obtaining GST registration (ten lakh rupees for specified special category states other than Jammu & Kashmir). This confirms that inter-state supply of SERVICES (unlike inter-state supply of goods, which does force immediate registration under CGST Act s.24) does not by itself remove the Rs 20 lakh registration threshold.",
+      "source_url": "https://keralataxes.gov.in/wp-content/uploads/2018/11/10_2017_IT.pdf",
+      "as_of": "2017-10-13",
+      "confidence": "official"
+    },
+    {
+      "claim": "Section 24(iii) of the CGST Act requires compulsory GST registration, irrespective of turnover, for 'persons who are required to pay tax under reverse charge.' Sources disagree on how far this reaches: one commentary (a taxguru.in article literally titled 'Provision of Section 24(iii)...is not as wider as it seems') and a related discussion argue the rule applies only when the entity is actually, presently liable to pay a reverse-charge tax, and that a small unregistered business is not automatically dragged into compulsory registration merely by importing a routine foreign service; other commentary reads it as forcing registration on any business paying reverse-charge GST on an import of services, regardless of the Rs 20 lakh domestic threshold. This is a genuinely disputed point in the sources found, not a settled one.",
+      "source_url": "https://taxguru.in/goods-and-service-tax/provision-section-24-iii-cgst-act-compulsory-registration-wider.html",
+      "as_of": "2026-09-16",
+      "confidence": "unverified"
+    },
+    {
+      "claim": "SaaS subscriptions are generally classified under GST SAC Code 9983 (Other professional, technical and business services) and attract 18% GST.",
+      "source_url": "https://www.kanakkupillai.com/learn/gst-for-saas-companies-in-india/",
+      "as_of": "2026-09-16",
+      "confidence": "secondary"
+    },
+    {
+      "claim": "Export of IT/SaaS services is zero-rated under IGST Act s.16, achieved by filing a Letter of Undertaking (LUT) at the start of each financial year; qualification as an 'export of service' requires five conditions under IGST Act s.2(6) to hold simultaneously (supplier in India, recipient outside India, place of supply outside India, payment in convertible foreign exchange or permitted INR, and supplier and recipient not merely establishments of the same distinct person).",
+      "source_url": "https://taxgarden.in/blog/gst-on-export-of-services-zero-rated-place-of-supply-india-2026",
+      "as_of": "2026-09-16",
+      "confidence": "secondary"
+    },
+    {
+      "claim": "Where a foreign SaaS/infrastructure provider supplies a business recipient in India (B2B) without an Indian GSTIN, the Indian recipient pays IGST on that import of service under the Reverse Charge Mechanism (s.5(3) IGST Act); the tax is reclaimable as input tax credit only if the recipient itself is GST-registered.",
+      "source_url": "https://kkcaindia.io/gst/gst-on-cross-border-saas/",
+      "as_of": "2026-09-16",
+      "confidence": "secondary"
+    },
+    {
+      "claim": "Udyam (MSME) Registration is free, fully online, self-declared, instant, and lifetime-valid; a business can register from day one regardless of turnover (including zero turnover), and it is not conditional on DPIIT recognition.",
+      "source_url": "https://blog.udyogsuvidhakendra.in/msme-startup/unlock-growth-udyam-registration-benefits-2026/",
+      "as_of": "2026-09-16",
+      "confidence": "secondary"
+    },
+    {
+      "claim": "Udyam-registered MSMEs get access to collateral-free credit under the Credit Guarantee Fund Trust for Micro and Small Enterprises (CGTMSE) — figures cited across sources range from up to Rs 5 crore to up to Rs 10 crore depending on the scheme/lender — a 45-day buyer payment-protection rule, eligibility for MSME-exclusive government tenders, and various subsidy/incentive schemes.",
+      "source_url": "https://khannaandassociates.com/blog/msme-udyam-registration-2026/",
+      "as_of": "2026-09-16",
+      "confidence": "secondary"
+    },
+    {
+      "claim": "Trademark e-filing government fee (Form TM-A, via ipindiaonline.gov.in): Rs 4,500 per class for an individual applicant, a DPIIT-recognised startup (holding a Startup India certificate), or a Udyam-registered MSME; Rs 9,000 per class for any other company or LLP applicant. These are the statutory fees under the First Schedule to the Trade Marks Rules, 2017, and are reported unchanged since that 2017 revision.",
+      "source_url": "https://www.intepat.com/blog/trademark-registration-fees-india",
+      "as_of": "2026-09-16",
+      "confidence": "secondary"
+    },
+    {
+      "claim": "Official Startup India IPR page states DPIIT-recognised startups get 'an 80% rebate in filing of patents vis-a-vis other companies' and, per an amendment to the Trademark Rules 2017, 'a 50% rebate in Trademarks filing fee.' The government covers the facilitator's entire professional fee for eligible startups under the SIPP scheme, who pay only the statutory fees. Note the page's own visible statistics are dated to '31 December 2024,' suggesting the page content may not be fully current.",
+      "source_url": "https://www.startupindia.gov.in/content/sih/en/intellectual-property-rights.html",
+      "as_of": "2026-09-16",
+      "confidence": "official"
+    },
+    {
+      "claim": "Multiple legal-press sources (S.S. Rana & Co., an Indian IP law firm, and a Chambers and Partners / Mondaq syndicated article) report that the most recently notified version of the SIPP scheme (which funded the facilitator-fee rebate above) concluded on 31 March 2026, and that as of the most recent reporting found (dated as late as September 2026 in one source), there has been no official DPIIT announcement of an extension, renewal, or replacement scheme. This directly conflicts with the official Startup India IPR page's framing of the benefit as available and should be treated as an open, unresolved discrepancy — verify current status directly with DPIIT or the Startup India helpline (1800-115-565) before relying on free facilitator support.",
+      "source_url": "https://www.mondaq.com/india/trademark/1813728/the-sipp-scheme-what-its-expiry-means-for-startups",
+      "as_of": "2026-09-16",
+      "confidence": "secondary"
+    },
+    {
+      "claim": "Section 56(2)(viib) of the Income Tax Act (the 'angel tax' provision, which used to tax a closely-held company on share premium received in excess of fair market value) was omitted by the Finance Act 2024, effective for share issuances from 1 April 2025 (FY 2025-26) onward. Every share issuance from that date carries no Section 56(2)(viib) exposure, regardless of valuation, investor category, or DPIIT recognition status. This is reported consistently across multiple independent professional tax sources; a direct fetch of the official Income Tax Department page on this exemption returned an access error (403) in this research session, so it is marked secondary rather than official despite strong corroboration.",
+      "source_url": "https://treelife.in/legal/angel-tax-exemption/",
+      "as_of": "2026-09-16",
+      "confidence": "secondary"
+    },
+    {
+      "claim": "Prior to abolition, a DPIIT-recognised startup could get angel-tax immunity under Section 56(2)(viib) if the aggregate paid-up capital and share premium after the relevant share issue did not exceed Rs 25 crore; this framework is now moot given the section's abolition, but may still matter for historical/legacy assessments predating 1 April 2025.",
+      "source_url": "https://www.incorpx.io/blog/angel-tax-abolished-startups-share-premium-2026",
+      "as_of": "2026-09-16",
+      "confidence": "secondary"
+    },
+    {
+      "claim": "Under Section 62(1)(c) of the Companies Act 2013, a company can issue shares to any person for consideration other than cash, but the price must be set by a valuation report from a registered valuer. Rule 13 of the Companies (Share Capital and Debentures) Rules, 2014 requires the registered valuer to submit a valuation report with justification before such an allotment. A preferential allotment for non-cash consideration also needs 21 clear days' notice, an EGM or postal ballot, and a special resolution.",
+      "source_url": "https://npahilwani.com/valuation-issue-of-shares-non-cash-consideration/",
+      "as_of": "2026-09-16",
+      "confidence": "secondary"
+    },
+    {
+      "claim": "A copyright assignment (relevant to assigning ownership of software code, since software is a literary work under Indian copyright law) is generally exempt from stamp duty under Section 19 of the Copyright Act, 1957, read with Section 23 (conveyance exemption) of the Indian Stamp Act, 1899. Named state-level exceptions: Bihar has deleted this exemption, and Uttar Pradesh restricts it to assignments of copyright in musical works — so the exemption is not guaranteed to apply in every state and should be checked against the registered office's state.",
+      "source_url": "https://blog.ipleaders.in/assignment-of-intellectual-property-rights-in-india/",
+      "as_of": "2026-09-16",
+      "confidence": "secondary"
+    },
+    {
+      "claim": "Copyright registration in India (via Form XIV filed with the Copyright Office) is optional — copyright subsists automatically on creation of the work — but supports proving an ownership/assignment chain. Where the applicant is not the original author (e.g., the company after an assignment from the founder), the assignment deed and a No-Objection Certificate from the author must be filed with the application.",
+      "source_url": "https://www.copyright.gov.in/Documents/Form-XIV-Registration%20of%20Copyright.pdf",
+      "as_of": "2026-09-16",
+      "confidence": "official"
+    },
+    {
+      "claim": "Where an entire existing business (not just isolated IP assets) is transferred into the new company, 'services by way of transfer of a going concern, as a whole or an independent part thereof' are exempt from GST under Notification No. 12/2017-Central Tax (Rate) dated 28 June 2017. However, 'going concern' is not defined under the CGST Act, which multiple sources flag as a live source of dispute about what qualifies.",
+      "source_url": "https://taxguru.in/goods-and-service-tax/gst-implications-case-slump-sale-business-transfer.html",
+      "as_of": "2026-09-16",
+      "confidence": "secondary"
+    },
+    {
+      "claim": "One source describes an outright IP-rights assignment (as opposed to a going-concern transfer) as generating capital gains taxable in the assignor's hands, citing an illustrative rate around 34% for the scenario discussed; this is presented without a clear general statutory basis and should be treated as scenario-specific and unverified rather than a rate to plan around — actual capital gains treatment (cost of acquisition of self-created IP, LTCG/STCG classification, applicable slab/surcharge) needs a CA's specific computation for the actual assignor and amount involved.",
+      "source_url": "https://www.maheshwariandco.com/faq/transfer-of-ip-rights-in-india/",
+      "as_of": "2026-09-16",
+      "confidence": "unverified"
+    },
+    {
+      "claim": "A domestic company can opt into Section 115BAA of the Income Tax Act for a concessional 22% corporate tax rate (approximately 25.17% effective with surcharge and cess), forgoing certain exemptions/incentives in exchange, and is exempt from Minimum Alternate Tax (MAT) under that option. Whether opting into 115BAA forecloses also claiming the Section 80-IAC profit-linked startup deduction was not confirmed in this research session and needs specific CA advice before choosing a tax regime at incorporation.",
+      "source_url": "https://www.indiafilings.com/income-tax/domestic-company-tax-rate",
+      "as_of": "2026-09-16",
+      "confidence": "secondary"
+    },
+    {
+      "claim": "LLPs and partnership firms are taxed at a flat 30% (plus applicable surcharge and cess) on profits, with no equivalent to a company's concessional 22%/115BAA regime reported in the sources found.",
+      "source_url": "https://www.indiafilings.com/income-tax/domestic-company-tax-rate",
+      "as_of": "2026-09-16",
+      "confidence": "secondary"
+    },
+    {
+      "claim": "Mehfilbox's own pricing document already prices all plans exclusive of 18% GST under SAC 998314, and separately states: 'Your Bunny, Vercel and Supabase bills are imports of service and attract reverse-charge GST, reclaimable as input credit only if registered. An accountant, not me — but decide it before quoting.' This internal framing of the reverse-charge exposure on foreign infra vendors is directionally correct per the GST research above (import of services from a foreign supplier does trigger reverse charge), but the doc does not resolve whether that reverse-charge exposure forces immediate registration under CGST Act s.24(iii) (a disputed point — see above) versus waiting for the Rs 20 lakh domestic threshold.",
+      "source_url": "/Users/sandeepsharma/san-claude/heirloomfilms/docs/PRICING.md:8,333-337",
+      "as_of": "2026-09-16",
+      "confidence": "official"
+    },
+    {
+      "claim": "Mehfilbox's own requirements doc lists 'GST registration, with the accountant' and a 'trademark search in classes 41 and 42, now for Mehfilbox' as still-outstanding pre-launch items — confirming that, as of the most recent doc update found, neither GST registration nor a trademark filing had happened yet.",
+      "source_url": "/Users/sandeepsharma/san-claude/heirloomfilms/docs/REQUIREMENTS.md:214-215",
+      "as_of": "2026-09-16",
+      "confidence": "official"
+    },
+    {
+      "claim": "The product's only registered asset found in the codebase/docs is the domain heirloomfilms.in, registered 14 August 2026; the brand name 'Mehfilbox' was decided 7 September 2026 but the domain, Vercel project, Bunny zones, package name, repository and sending address all still carry the older 'heirloomfilms' identifiers. No mention of a Private Limited Company, LLP, OPC, or proprietorship registration for the business appears anywhere in docs/ — a targeted search across all docs/*.md for incorporation-related terms returned no hits describing an existing legal entity.",
+      "source_url": "/Users/sandeepsharma/san-claude/heirloomfilms/docs/PRODUCT.md:30,41",
+      "as_of": "2026-09-16",
+      "confidence": "official"
+    }
+  ],
+  "actions_for_mehfilbox": [
+    "1. Incorporate a Private Limited Company via MCA SPICe+ now — not an LLP, and not an OPC. Pvt Ltd is the only structure that qualifies for DPIIT recognition, 80-IAC, and SISFS while also being what a later investor or ESOP pool needs; LLP reaches the three schemes too but is a poor fit for equity investors, and OPC is excluded from all three schemes and structurally caps out at one shareholder. Keep authorised capital at or under Rs 15 lakh on the first filing to keep the MCA government fee nil; budget roughly Rs 10,000-25,000 all-in and 1-2 weeks.",
+    "2. Before or during incorporation, confirm precisely what legal form the existing work sits in today: is 'Heirloom Films' just a product/domain name personal to Sandeep, or was it ever separately registered as a proprietorship (GST number, Shop & Establishment registration, etc.)? This changes whether step 3 is a personal-to-company IP assignment or a going-concern business transfer, which are taxed and documented differently.",
+    "3. Immediately after incorporation, execute a written IP Assignment Deed moving the codebase/copyright (and any trademark filings already made personally) from Sandeep to the new company; transfer the heirloomfilms.in and mehfilbox.com domain registrations to the company via the registrar (a separate, simple step from the deed). If Sandeep takes shares as consideration rather than cash, get the Companies Act s.62(1)(c) registered-valuer report before the allotment — the old angel-tax risk on that valuation (Section 56(2)(viib)) no longer applies to any share issuance from FY 2025-26 onward, but the valuer report is still mandatory. Check whether the registered-office state is Bihar (no stamp-duty exemption on copyright assignment) or Uttar Pradesh (exemption limited to musical works) before assuming the deed is stamp-duty free.",
+    "4. Apply for DPIIT recognition on the Startup India portal right after incorporation. It is free and is the gate for both 80-IAC and SISFS below — nothing on this list past this point unlocks without it.",
+    "5. File the Section 80-IAC application once DPIIT-recognised. It costs nothing to apply, and even pre-profit, it is worth having the 3-consecutive-year deduction (within the first 10 years) banked for whenever the studio-plan/credit revenue turns profitable.",
+    "6. Register on Udyam the same week (free, instant, self-declared, not gated on DPIIT). It costs nothing to hold and opens collateral-free CGTMSE-backed credit if Mehfilbox ever wants a working-capital loan against infra costs (Bunny/Vercel/Supabase) rather than funding them from revenue.",
+    "7. Before the first paid invoice to a studio, get the company's CA to give a specific written answer — not a general one — on GST registration timing: does Section 24(iii)'s compulsory-registration-for-reverse-charge rule get triggered today purely by the existing Bunny/Vercel/Supabase payments, independent of the Rs 20 lakh domestic-turnover runway that inter-state B2B sales to studios in other states would otherwise allow under Notification 10/2017-Integrated Tax? This closes the open item already flagged in docs/PRICING.md:333-337 and docs/REQUIREMENTS.md:214 with a real answer. If registration is confirmed necessary or chosen early, the reverse-charge GST already being paid on Bunny/Vercel/Supabase becomes reclaimable as input tax credit, as PRICING.md already anticipates.",
+    "8. File the trademark application for 'Mehfilbox' (classes 41 and 42, per docs/REQUIREMENTS.md:215) in the new company's name once DPIIT-recognised, to claim the Rs 4,500/class concessional government fee instead of Rs 9,000/class. Do not assume the SIPP facilitator subsidy (80% patent / 50% trademark rebate, government-paid facilitator) is currently available — call the Startup India helpline (1800-115-565) or check current DPIIT guidance first, since multiple legal-press sources report the scheme lapsed 31 March 2026 with no confirmed renewal; budget for a paid trademark agent unless that is affirmatively contradicted when checked.",
+    "9. Only pursue SISFS if a formal seed grant/investment through an incubator is actually wanted: eligibility requires applying within 2 years of incorporation and keeping Indian promoters at 51%+ shareholding, so if this matters, scope it into the cap-table conversation now, before any angel round changes the ownership math.",
+    "10. Set up the recurring compliance calendar with the CA/CS from day one: statutory audit (mandatory every year for a Pvt Ltd regardless of turnover), AOC-4 and MGT-7/7A ROC filings, DIR-3 KYC per director, and ITR — budget roughly Rs 25,000-55,000/year at Mehfilbox's current size. Late ROC filings carry an uncapped Rs 100/day/form penalty, so put filing dates on the same calendar as the ship/deploy ritual already in CLAUDE.md.",
+    "11. Fold the other four ideas on Sandeep's list into this same CA conversation rather than treating them as separate decisions: hiring engineers for a Go/Java rewrite or in-house transcoding means real employment contracts (PF/ESI obligations apply once headcount and wages cross statutory thresholds) that are materially cleaner to issue under an incorporated Pvt Ltd than informally; and a paid theme store selling to individual clients (versus studios) adds B2C invoicing volume under the same GST registration rather than changing the entity analysis above."
+  ],
+  "open_questions": [
+    "Is the SIPP scheme (80% patent / 50% trademark facilitator-fee rebate) actually active today, or did it lapse on 31 March 2026 as several legal-press sources report? The official Startup India IPR page does not clearly resolve this and shows statistics dated to December 2024 — confirm directly with DPIIT or the Startup India helpline before budgeting a 'free' trademark or patent filing.",
+    "Does Section 24(iii) of the CGST Act (compulsory registration for anyone liable to pay reverse-charge tax) override the Rs 20 lakh services-threshold exemption for Mehfilbox specifically, given it already pays Bunny, Vercel and Supabase? This is genuinely disputed in the secondary sources found and needs a definitive answer from Mehfilbox's own CA, ideally in writing, before the first paid invoice.",
+    "Which DPIIT turnover ceiling is actually current and intended to govern recognition — the Rs 200 crore/Rs 300 crore figure on the official startup-recognition page, or the Rs 100 crore figure on the official 80-IAC page? Immaterial to Mehfilbox's near-term size, but worth a clean answer before quoting either number to anyone else.",
+    "Was 'Heirloom Films' ever registered as a separate legal or tax entity (proprietorship, GST number, Shop & Establishment registration) distinct from Sandeep personally, or is everything to date entirely personal to him? This determines whether moving the existing code/business into the new Pvt Ltd is a straightforward personal IP assignment or a going-concern business transfer with different GST and stamp-duty treatment.",
+    "Does opting into the concessional Section 115BAA corporate tax rate (22%, ~25.17% effective) foreclose also claiming the Section 80-IAC profit-linked startup deduction? Not confirmed in this research session — get a specific answer before choosing a tax regime at incorporation.",
+    "Is SAC 998314 ('Information technology (IT) consulting and support services,' per general GST SAC classification) actually the right code for a wedding video/photo streaming and delivery service, or would a different SAC head under 9984 (telecommunication/broadcasting/information supply) or elsewhere apply? Mehfilbox's own price list (docs/PRICING.md:8) already commits to 998314 — worth a specific CA sanity check since it is printed on every invoice."
+  ]
+}

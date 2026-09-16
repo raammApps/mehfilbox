@@ -1,0 +1,95 @@
+{
+  "lens": "deployability and operations",
+  "verdicts": [
+    {
+      "title": "All alerting runs through a queue drained by a scheduler that disables itself after 60 days of repo inactivity",
+      "real": true,
+      "matters_next_12_months": true,
+      "reason": "Every claim checks out. .github/workflows/notify-drain.yml:14-15 states the 60-day rule in its own header; that workflow drives /api/cron/lifecycle (line 59), /api/cron/warnings (line 77) and /api/cron/notify (line 101), and .github/workflows/synthetic-check.yml:12 drives the hourly synthetic check. vercel.json holds only reconcile and usage, so exactly 4 of the 6 jobs in lib/jobs/run.ts:49-56 are GitHub-scheduled. lib/notify/alert.ts:58 does enqueue rather than send, and the alerts raised at app/api/cron/synthetic/route.ts:97 and app/api/cron/reconcile/route.ts:116 therefore depend on the drain that has stopped. The 60-day rule applies because the repo is public (docs/NEXT.md:467 records it was made public to restore push-to-deploy). Nothing on the Vercel side notices: probeJobs in lib/health/probes.ts:180-186 only shows 'overdue' on a page a logged-in platform admin has to open. The failure is customer-visible (a couple never gets the link) and the alert about it is stuck in the same queue.",
+      "corrected_severity": "high"
+    },
+    {
+      "title": "No migration ledger and no CLI applier: schema changes go into production by pasting SQL into a web console",
+      "real": true,
+      "matters_next_12_months": true,
+      "reason": "Confirmed. scripts/migrate.ts:15-21 only prints filenames ('Deliberately dumb' per its header at lines 5-7) and package.json:22 wires db:migrate to it. Both things that could answer 'is production on head' are stale: lib/health/probes.ts:76-77 probes creditBalance and calls credits 'the newest migration's table (0021)' while supabase/migrations/0025_occasions.sql is head, and scripts/preflight.ts:73 checks a seven-table list all from 0001. 0003 is genuinely absent from the sequence. The reviewer omits one real mitigation: docs/DEPLOYMENT.md:112-113 notes every migration is written re-runnable (create table if not exists), so re-pasting is safe and the failure mode is 'missing', not 'corrupt'. With one operator and ~10 weddings a month, a minutes-long window during a deliberate deploy is survivable, which is why this is serious debt rather than a high-severity defect; the sharpest concrete bug is the probe pinned to 0021, which cannot detect 0022-0025 missing.",
+      "corrected_evidence": "docs/DEPLOYMENT.md:116 (not :114) carries 'Which ones are already applied is a question the tables answer, since there is no ledger'; the begin;/commit; instruction is at :113. 24 migration files, 0003 skipped.",
+      "corrected_severity": "medium"
+    },
+    {
+      "title": "The usage rollup makes one sequential provider call per title in a single serverless invocation, with no maxDuration and no resume",
+      "real": true,
+      "matters_next_12_months": false,
+      "reason": "The mechanism is real: app/api/cron/usage/route.ts:56-69 nests a sequential `await provider.getUsage(title.providerId)` inside a walk over every catalogue from listAllCatalogues(), and `grep -rn maxDuration app lib vercel.json next.config.ts` returns nothing, so no route sets a duration and vercel.json has no functions block. lib/jobs/run.ts:20-28 does only record on return or catch, so a killed invocation writes no row. But the consequence is overstated on both counts. The 300GB 'alert' at lines 82-94 is a `log.warn`, not an email — nothing pages anyone whether it fires or not. And nothing depends on the figures: `listUsage` exists only in lib/db/repository.ts:395 and the two driver implementations, with zero callers in app/ or components/, while storage quota enforcement runs off title sizeBytes in lib/entitlements.ts:112, not off usage_rollup. So a timed-out rollup today costs an unread row. Worth the 4 hours when billing or an admin screen actually reads the table; not before.",
+      "corrected_evidence": "The catalogue walk is app/api/cron/usage/route.ts:51-69 (line 47 is the month string); DELIVERY_ALERT_GB fires a log.warn at :86, not an alert email. Nothing reads listUsage (lib/db/repository.ts:395 has no callers outside the driver implementations).",
+      "corrected_severity": "low"
+    },
+    {
+      "title": "No staging: a migration and the build that needs it meet for the first time in production",
+      "real": true,
+      "matters_next_12_months": true,
+      "reason": "Verified in full. docs/NEXT.md:181-194 is N-87, labelled 'debt that is costing us', and says Vercel Preview has zero variables and lib/env.ts refuses a production build on an ephemeral driver, so no preview boots against anything real. scripts/deploy-vercel.sh:27 defaults TARGET to production. .github/workflows/ci.yml:12-18 pins DATA_DRIVER=memory and VIDEO_DRIVER=fake for every job including the E2E one (:144), and no workflow deploys. The reviewer's framing is right: this is not itself an outage, it is the absence of the cheap place where findings 1, 2, 5 and 10 would each have been caught once. A day plus two free accounts against ten weddings a month is the right trade.",
+      "corrected_severity": "medium"
+    },
+    {
+      "title": "The deploy script deletes each production variable before re-adding it, and does not strip quotes the way every other reader of that file does",
+      "real": true,
+      "matters_next_12_months": true,
+      "reason": "Both mechanisms are in the code: scripts/deploy-vercel.sh:79-80 is an unconditional `vercel env rm` followed by `vercel env add` for each of 35 variables, and line 74's `value=\"${line#*=}\"` does no quote stripping while scripts/preflight.ts:21 strips with /^[\"']|[\"']$/g. But the quote half is latent rather than live: the current .env.vercel.local has 35 assignments and zero quoted values, so nothing is being pushed with quotes today. The rm/add window is the part that bites, and its blast radius is smaller than claimed — Vercel does not swap traffic to a build that fails to boot, so a missing variable means the *next deploy fails*, not that production goes down. A one-hour fix on a script that runs on every single deploy is still clearly worth doing.",
+      "corrected_evidence": ".env.vercel.local currently holds 35 variables, none quoted, so the quote defect is latent. The script header at line 7 also names the wrong file ('.env.production.local') while ENV_FILE at line 25 is .env.vercel.local.",
+      "corrected_severity": "low"
+    },
+    {
+      "title": "Secret rotation has no path, and SESSION_SECRET is overloaded three ways",
+      "real": true,
+      "matters_next_12_months": false,
+      "reason": "The overloading is real and slightly worse than described: SESSION_SECRET signs operator sessions and passcode grants (lib/auth.ts:26, consumed by lib/catalogue-access.ts:58), signs fake-driver playback tokens (lib/video/fake.ts:61) *and* the fake webhook signature (lib/video/fake.ts:131), and is the cron bearer fallback in all six routes. The rotation grep is accurate — the only 'rotat' hit in either doc is DEPLOYMENT.md:55 about Bunny IP pinning, and scripts/rotate-operator-password.ts covers one password. Two corrections to the harm: CRON_SECRET *is* set in .env.vercel.local and as the GitHub secret, so the `?? env.SESSION_SECRET` fallback is inert in production today, and the fake video driver never runs against supabase. What is left is 'no runbook if a key leaks', which is a precondition that has not happened, for one operator with ten weddings a month. Cheap to fix, but not something that will cost anything in the next twelve months absent a leak.",
+      "corrected_severity": "low"
+    },
+    {
+      "title": "The cron authorization check is copy-pasted into six routes, compared non-constant-time, and is inert outside NODE_ENV=production",
+      "real": true,
+      "matters_next_12_months": false,
+      "reason": "Factually exact: the same two lines appear at notify/route.ts:40-43, reconcile:32-35, lifecycle:22-25, usage:34-37, synthetic:37-40 and warnings:23-26, each a plain !== gated on env.NODE_ENV === 'production', and nothing under tests/ asserts any cron route performs the check (no cron route is even imported by a test; tests/unit/{alerting,health,observability}.test.ts only touch the jobs' internals). But the two stated harms are weak. A remote timing attack on a string compare of a 64-hex bearer across the public internet is not a practical attack; the constant-time point is hygiene, not a vulnerability. The 'seventh route' is speculative — there is no seventh route, and there has not been a new one since the sixth. The one genuine consequence is that the moment N-87's staging environment exists, all six endpoints are unauthenticated there, which argues for fixing this alongside finding 4 rather than on its own.",
+      "corrected_severity": "low"
+    },
+    {
+      "title": "/api/health cannot fail, and the Docker health check and the ship ritual both depend on it",
+      "real": true,
+      "matters_next_12_months": false,
+      "reason": "Every citation holds: app/api/health/route.ts:12-21 returns status 'ok' unconditionally and touches no driver, middleware.ts:12 excludes it from the matcher, version falls back to 'dev' (lib/env.ts:180), Dockerfile:46-47 wires HEALTHCHECK to it, and .claude/skills/ship/SKILL.md:49 makes the version comparison the proof of a live deploy. The materiality is thin, though. Production is Vercel, where VERCEL_GIT_COMMIT_SHA is set and the version check works; the Docker path is not run (see the next finding). And the deep probe that would catch an unreachable database already runs hourly and end-to-end as the synthetic check (app/api/cron/synthetic/route.ts), which walks resolve → bundle → ready film → playback token and alerts — a strictly better signal than a deep /api/health. The thing to fix is what schedules that check (finding 1), not this endpoint.",
+      "corrected_severity": "low"
+    },
+    {
+      "title": "The Docker path is the documented anti-lock-in story but is never built in CI and loses more than the doc admits",
+      "real": true,
+      "matters_next_12_months": false,
+      "reason": "All of it verifies. `grep -rn docker .github/` returns nothing. The three unlisted per-instance assumptions are real: lib/http/rate-limit.ts:16 holds buckets in a process Map (its comment at lines 5-11 is candid about it), lib/health/probes.ts:29 caches rows in a process Map, and .next/server/middleware-manifest.json:21 carries a per-build NEXT_SERVER_ACTIONS_ENCRYPTION_KEY. docs/DEPLOYMENT.md:356-362 does name only wildcard TLS, crons and ISR. The rot is worse than stated: the Dockerfile's last commit is 594c5e9, 2026-08-14, which predates roughly eighteen migrations (0008 onward), and its own header still calls the product 'Heirloom Films'. But this is insurance against a PaaS pricing change, for a pre-revenue product on Vercel's free tier. Three hours of CI time and a doc edit buy nothing that will be exercised in the next twelve months.",
+      "corrected_evidence": "The Dockerfile's last change (594c5e9, 2026-08-14) predates ~18 migrations, not twelve — 0008_likes.sql onward. Per-instance state confirmed at lib/http/rate-limit.ts:16 and lib/health/probes.ts:29.",
+      "corrected_severity": "low"
+    },
+    {
+      "title": "The one verification step in the ship ritual points at a hostname that is not production, and the deployment doc names three different production domains",
+      "real": true,
+      "matters_next_12_months": true,
+      "reason": "The documentation half is verified exactly: .claude/skills/ship/SKILL.md:46 curls marquee-film-pub.vercel.app; docs/DEPLOYMENT.md:273 says ROOT_DOMAIN=heirloomfilms.in while .env.vercel.local sets mehfilbox.com and both workflows target https://mehfilbox.com; DEPLOYMENT.md:287 and :289 verify against admin.raammcorp.in and marquee.raammcorp.in; DEPLOYMENT.md:251 claims fifteen variables and the file holds 35. The 'points at the old project's alias' claim I cannot confirm offline, but the repo makes it likely rather than speculative: docs/PROGRESS.md:421-424 records that renaming the Vercel project orphaned that exact alias once already and that it had to be re-aliased by hand, and the project has since been renamed again (scripts/deploy-vercel.sh:26 defaults VERCEL_PROJECT to mehfilbox). This is the only automated check on the one operation that has already failed silently once (deploy-vercel.sh:47-52 documents that incident), it costs an hour, and the fix — curl the URL `vercel --prod` just printed — removes the hardcoded hostname entirely.",
+      "corrected_evidence": "Whether marquee-film-pub.vercel.app is still attached is not verifiable from the repo; docs/NEXT.md:476 says it was still attached and serving as of the heirloomfilms rename, and docs/PROGRESS.md:421-424 documents that a later rename orphans it.",
+      "corrected_severity": "medium"
+    },
+    {
+      "title": ".env.example is nineteen variables behind lib/env.ts, and the missing ones are the operationally load-bearing ones",
+      "real": true,
+      "matters_next_12_months": false,
+      "reason": "The count is exactly right: .env.example declares 27 keys, the schema declares 46, and the set difference is 19 — every key the reviewer names (CRON_SECRET, NOTIFY_DRIVER, NOTIFY_FROM, RESEND_API_KEY, PHOTO_DRIVER, the four BUNNY_STORAGE/PHOTO keys, AUTH_DRIVER, DEMO_CATALOGUE_SLUG, ALLOW_EPHEMERAL_DATA, RECONCILE_STALL_MINUTES, PLAYBACK_TOKEN_TTL_S) plus DATA_DIR, NEXT_PHASE, SUPABASE_SECRET_KEY, NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY and VERCEL_GIT_COMMIT_SHA. PHOTO_DRIVER, RESEND_API_KEY and ALLOW_EPHEMERAL_DATA are indeed absent from docs/DEPLOYMENT.md entirely. The severity is overstated because the dangerous cases are already guarded in code rather than in the file: lib/env.ts:246-253 refuses to boot the fake notify driver against supabase (the exact incident cited), and the same validator fails closed on an ephemeral driver in production. And in practice the cold-start reader here is an agent that reads lib/env.ts, not a human copying the example. Worth the two hours as a generated-file test; not a risk.",
+      "corrected_evidence": "lib/env.ts declares 46 top-level keys, not 48; .env.example lists 27, and the difference is exactly 19.",
+      "corrected_severity": "low"
+    },
+    {
+      "title": "docs/GO-LIVE.md is a chronological log rather than a runbook, so the cold-start path is read-455-lines-and-infer",
+      "real": true,
+      "matters_next_12_months": false,
+      "reason": "The structure is exactly as described: docs/GO-LIVE.md:1 is 'Go live on heirloomfilms.in', with two further top-level go-lives appended at :317 ('The Mehfilbox switch (N-52)') and :392 ('The second pass, deployed — 12 September 2026'), and '✅ done' markers embedded in headings at :49, :213 and :359. 455 lines plus DEPLOYMENT.md's 456 plus 24 hand-pasted SQL files is a fair characterisation. It contradicts DEPLOYMENT.md:273 on the production domain, which is real. But CLAUDE.md's context discipline already routes the cold start through CLAUDE → PROGRESS → NEXT and never through GO-LIVE, and the only reader who would hit this is the founder who lived through all three go-lives. Real, correctly rated low, and not something that costs anything this year.",
+      "corrected_severity": "low"
+    }
+  ]
+}

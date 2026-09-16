@@ -1,0 +1,101 @@
+{
+  "lens": "scalability and cost-at-scale",
+  "verdicts": [
+    {
+      "title": "The guest page is not ISR-cached, and the capacity plan is built on the assumption that it is",
+      "real": true,
+      "matters_next_12_months": true,
+      "corrected_severity": "medium",
+      "corrected_evidence": "Confirmed, and there is a third dynamic trigger the reviewer missed. app/c/[slug]/page.tsx:21 is `export const revalidate = 3600`; lib/guest-locale.ts:22-23 calls `cookies()` unconditionally on every render (not just the conditional passcode read at lib/catalogue-access.ts:57), and app/c/[slug]/page.tsx:64-70 awaits `searchParams`, which on its own opts a Next 15 page out of static rendering. So the route is dynamic three times over. lib/catalogue-cache.ts:13-17 states it plainly, and app/api/cron/reconcile/route.ts:84-86 repeats it in a code comment ('revalidatePath did nothing here: the guest route reads cookies'). docs/SCALE-PLAN.md:81-82 asserts the opposite and the headroom table at :66-70 rests on it.",
+      "reason": "Verified in the code. The document is wrong on a load-bearing sentence, and the doc is what a decision about the stack would be made from — that is the material part and it is a one-line correction. The runtime consequence is smaller than 'high' implies: the data reads are already cached by lib/catalogue-cache.ts, so a burst of 300 renders is 300 cheap Node invocations against a 1M/month allowance, on a platform that autoscales them. It is worth correcting the doc now and worth considering the static shell later; it is not a wedding-evening failure."
+    },
+    {
+      "title": "The 10-second playback heartbeat is roughly 12x the whole function budget the scale plan assumes, and costs five Supabase round trips each",
+      "real": true,
+      "matters_next_12_months": true,
+      "corrected_severity": "medium",
+      "corrected_evidence": "Confirmed. components/streaming/useProgressHeartbeat.ts:5 `HEARTBEAT_MS = 10_000`, interval at :83; app/api/progress/route.ts:9 `force-dynamic`; the five repository calls are getProfile/getTitle (:38-41), getProgress (:50), upsertProgress (:52), recordPlayEvent (:62), plus a sixth `updateTitle` (:73) on the 30s threshold crossing. One correction: requireServableCatalogue (:35) is NOT a sixth round trip — it resolves through getCachedCatalogueBySlug (lib/catalogue-access.ts:32, lib/catalogue-cache.ts:47-53), so it is normally served from the data cache. The arithmetic checks out against docs/SCALE-PLAN.md:16 (300 guests x 20 min) and :70-71 (30,000 invocations/month for the whole system).",
+      "reason": "The code says what the reviewer says it says, and the plan's binding-constraint number is wrong by roughly an order of magnitude — that is worth knowing. Downgraded from high because at the stated 10 weddings a month, 360k invocations still sits inside Vercel's 1M, and the 150 qps figure assumes all 300 guests watching simultaneously, which is the peak of the peak rather than the norm. The fix is cheap and the failure mode is gradual, not a cliff."
+    },
+    {
+      "title": "The Supabase driver silently ignores liveOnly, so guests see unpublished photographs in production and no test can catch it",
+      "real": true,
+      "matters_next_12_months": true,
+      "corrected_severity": "high",
+      "corrected_evidence": "Confirmed exactly. lib/db/repository.ts:343 declares `listPhotosForCatalogue(catalogueId, options?: { liveOnly?: boolean })`; lib/db/supabase-repository.ts:1625 implements `async listPhotosForCatalogue(catalogueId: string)` with no options parameter and a query (:1626-1631) carrying no live_at predicate, while the same file reads live_at in the photo mapper (:107, :340) and writes it on publish (:975-977). lib/db/memory-repository.ts:924 does filter on liveAt. lib/catalogue-cache.ts:65 passes `{ liveOnly: true }`. The only test that asserts this behaviour, tests/unit/content-publishing.test.ts:131 and :141, runs against the memory repository.",
+      "reason": "This is the one finding in the set that is a live correctness bug rather than a capacity projection. It is a one-line fix and it silently defeats N-57 on every production catalogue. The second half of the finding — that the two-driver seam produces a drift class no test covers — is also correct and is the reason it is worth a contract suite rather than just the one line."
+    },
+    {
+      "title": "The nightly usage cron is O(catalogues x titles) serial provider calls in one function with no maxDuration, and it degrades silently",
+      "real": true,
+      "matters_next_12_months": true,
+      "corrected_severity": "medium",
+      "corrected_evidence": "The shape is confirmed: app/api/cron/usage/route.ts:51 listAllCatalogues, :58 listTitles per catalogue, :65 `await provider.getUsage(...)` one title at a time inside a nested loop, catch at :95 per catalogue; `grep -rn maxDuration app/ lib/ next.config.ts vercel.json` returns nothing. app/api/cron/reconcile/route.ts:49-95 has the same serial shape over stalled titles. Two corrections. (1) 'produces no error at all' overstates it: a wall-clock kill means lib/jobs/run.ts:18-28 never reaches either `record` call, so NO job_runs row is written — and lib/jobs/run.ts:52 registers `usage` as a 24-hour job, so lib/health/probes.ts flags it as overdue on the platform health page. It is visible as a missing run, not as a partial one. (2) Whether ~2.5 minutes exceeds the ceiling depends on the plan and on Fluid compute defaults, which nothing in the repo pins — the defect is the absence of an explicit bound, not a proven timeout.",
+      "reason": "Real and worth the one day, but not high. At today's five live catalogues the job takes seconds; at 120 catalogues the serial fan-out is genuinely risky, and that is inside 12 months. The correction matters because the reviewer's strongest argument — silent partial coverage — is partly mitigated by the health page already tracking job staleness."
+    },
+    {
+      "title": "The platform console does one database round trip per org (N+1) and reads every catalogue with no order and no limit",
+      "real": true,
+      "matters_next_12_months": false,
+      "corrected_severity": "low",
+      "corrected_evidence": "The N+1 is real: app/admin/platform/page.tsx:31 and app/admin/platform/studios/page.tsx:27 both map creditBalance over orgs, and lib/db/supabase-repository.ts:817-819 delegates to listCredits (:756-764), one PostgREST GET per org. listAllCatalogues at lib/db/supabase-repository.ts:1815-1819 is `select('*')` with no order and no limit, confirmed. Three citation errors. (1) These are `Promise.all`, i.e. N PARALLEL requests, not '100 sequential HTTPS calls' — the page does not accumulate latency linearly and will not 'time out at 1,000' for that reason; the pressure is connection/pool, not wall clock. (2) app/admin/platform/studios/page.tsx does not call listAllCatalogues; app/admin/platform/page.tsx:27 does, as does app/admin/platform/catalogues/page.tsx:25. (3) The in-JS filter/sort is at app/admin/platform/catalogues/page.tsx:29-38, not :27-37.",
+      "reason": "The code matches the shape described, but the harm analysis is built on 'sequential', which is wrong, and on 100-1,000 studios, which this business will not see in 12 months at 10 weddings a month. The PostgREST 1,000-row cap does not bite at ~120 catalogues. Worth doing when there is a reason; not worth a day now."
+    },
+    {
+      "title": "Nothing is paginated, and PostgREST's default row cap will truncate list reads without an error",
+      "real": true,
+      "matters_next_12_months": false,
+      "corrected_severity": "low",
+      "corrected_evidence": "Verified precisely. lib/db/supabase-repository.ts is 1,869 lines and contains exactly five `.limit()` calls, at :705, :728, :799, :1067 and :1556, each a single-row pick or an explicitly bounded list. `grep -n '\\.range(\\|cursor\\|offset'` across lib/db/supabase-repository.ts and lib/db/repository.ts returns nothing. listOrgs (:379), listCredits (:756), listCatalogues (:1075), listTitles (:1390), listPhotosForCatalogue (:1625) and listAllCatalogues (:1815) are all unbounded.",
+      "reason": "Factually correct on every citation. But the reviewer's own materiality line is '1,000 catalogues, which is roughly the 1,000-weddings-a-month case' — that is far outside this window. A pre-revenue product at 10 weddings a month reaches ~120 catalogues in a year. Adding a cursor to an interface nobody is straining is work bought against a risk that does not arrive."
+    },
+    {
+      "title": "`.in()` with an unbounded id array will return HTTP 414 on a large studio, breaking its own console home page",
+      "real": true,
+      "matters_next_12_months": false,
+      "corrected_severity": "low",
+      "corrected_evidence": "The unbounded `.in()` calls are confirmed at lib/db/supabase-repository.ts:1106, :1122, :1132, and the same pattern at :976, :1013 and :1272. One correction to the fix rationale: the claim that catalogueCounts 'drags every title row and every photo row in the org across the wire' is wrong — it selects only the counted columns (`select('catalogue_id, status, published')` at :1104, `select('id, catalogue_id')` at :1120, `select('album_id')` at :1131), and its own docstring at :1088-1090 says that is the point. It drags every row, but two or three columns of each.",
+      "reason": "The ceiling is real and the arithmetic (~200 ids) is about right, but the trigger is one studio holding ~70 weddings. At 10 weddings a month across the whole platform, no single org approaches that inside 12 months. A four-hour chunk helper is cheap insurance, not a priority."
+    },
+    {
+      "title": "Every film card on the guest page costs its own dynamic function and two uncached database reads",
+      "real": true,
+      "matters_next_12_months": true,
+      "corrected_severity": "low",
+      "corrected_evidence": "The route is as described: app/api/poster/[titleId]/route.ts:7-8 is nodejs + force-dynamic, :44 getTitle and :53 getCatalogueById go straight to the repository rather than through lib/catalogue-cache.ts, :56 calls resolveAccess, CACHE_S = 900 at :28 against ASSET_TTL_S = 3600 at :25. But the volume claim is wrong. The preview.webp URLs at modules/curated-row/Guest.tsx:29 and modules/continue-watching/Guest.tsx:46 are fetched only on hover, and components/streaming/PosterCard.tsx:67-74 refuses the preview outright on `prefers-reduced-motion`, on Save-Data, and on any coarse pointer — i.e. zero preview requests on the phone that docs/SCALE-PLAN.md treats as the default guest. The poster `src` itself does hit this route, but components/streaming/PosterCard.tsx renders it `loading='lazy'` unless eager, so off-screen cards do not fetch at first paint. 'Eight to sixteen before the page is readable' is not what the code does; two to four above-the-fold posters is.",
+      "reason": "The waste is real — two uncached Supabase reads for rows the same request already has cached, on a route in the first-paint path — and reading through getCachedBundle is a genuinely small fix worth taking. Downgraded because the fan-out is roughly a quarter of what the finding claims and the largest term (hover previews) does not exist on mobile at all."
+    },
+    {
+      "title": "Per-instance memory is used for two things that assume they are global: the passcode lockout and the health probe memo",
+      "real": true,
+      "matters_next_12_months": false,
+      "corrected_severity": "low",
+      "corrected_evidence": "Both Maps confirmed: lib/http/rate-limit.ts:16 and lib/health/probes.ts:28 (REMEMBER_MS is at :27, not :26; BUDGET_MS = 3000 at :26). The sweep threshold at :20 and the heartbeat's use of `enforce` at app/api/progress/route.ts:33 are both as cited. One omission: app/api/passcode/route.ts:52-53 consumes TWO buckets — a per-device key and a per-catalogue key (MAX_PER_CATALOGUE) — so the lockout is not a single 5-attempt bucket, and the per-catalogue ceiling also degrades per instance but from a higher base.",
+      "reason": "Everything cited is in the code. The materiality does not hold for this product in this window: multi-instance warm-up requires real concurrency, which happens on wedding evenings when the traffic is guests rather than an attacker patiently brute-forcing a wedding passcode, and there is a second catalogue-wide bucket the finding did not account for. The probes half is a slow admin page for one user. Worth noting in the backlog, not worth a day."
+    },
+    {
+      "title": "Four of the six cron routes are not scheduled by the platform, and the one that matters most for cost hangs off GitHub Actions",
+      "real": true,
+      "matters_next_12_months": true,
+      "corrected_severity": "medium",
+      "corrected_evidence": "The facts are confirmed: vercel.json:9-18 registers only /api/cron/reconcile and /api/cron/usage; app/api/cron/ holds lifecycle, notify, reconcile, synthetic, usage, warnings; app/api/cron/notify/route.ts:18-21 gives the Hobby two-cron reason; .github/workflows/notify-drain.yml drives lifecycle (:57), warnings (:73) and notify (:101); the double-send window is described at app/api/cron/notify/route.ts:29-35. The stakes are misattributed, though. lib/lifecycle.ts:13-14 says the ladder ends at `cold` — 'streaming paused, every file retained' — and that `deleted` is deliberately never automated. So the lifecycle job does NOT reclaim Bunny storage and is not what stands between 72,000 and 2.18 lakh a year; docs/SCALE-PLAN.md:120-121 says the deletion job is still unbuilt. What actually depends on the GitHub schedule is the notification drain (delivery emails to couples, every 15 minutes) and expiry warnings — customer-visible, and arguably a nearer-term risk than the storage argument offered.",
+      "reason": "Real, and medium stands, but for the reasons above rather than the ones given. The 60-day-inactivity disabling and best-effort delivery of GitHub's scheduler are correctly characterised, and 'the delivery email stops going out and nobody notices' is a live failure mode at 10 weddings a month. The two-hour fix is worth taking once the account is on Pro."
+    },
+    {
+      "title": "Play events accumulate forever at one row per heartbeat, and the retention column that exists is read by nothing",
+      "real": true,
+      "matters_next_12_months": false,
+      "corrected_severity": "low",
+      "corrected_evidence": "Confirmed: supabase/migrations/0001_initial_schema.sql:179-187 creates play_events with the index at :189 on (catalogue_id, at desc); app/api/progress/route.ts:61-67 inserts one row per heartbeat where deltaS > 0; `grep -rn retention_months lib/ app/ supabase/` returns only supabase/migrations/0006_entitlements.sql:25. The doc passage is at docs/SCALE-PLAN.md:176-181 (the finding cites :175-182, near enough).",
+      "reason": "Every claim checks out and the row-count correction to the doc is fair. But 120 weddings in 12 months is roughly 4.3M narrow rows plus one index — a few hundred megabytes against Supabase Pro's 8 GB, and a b-tree on (catalogue_id, at) does not meaningfully slow a per-catalogue analytics read at that size. The reviewer's own framing, year three rather than year one, is the right one."
+    },
+    {
+      "title": "Both language dictionaries ship in the guest bundle, against a budget with 4KB of headroom",
+      "real": true,
+      "matters_next_12_months": false,
+      "corrected_severity": "low",
+      "corrected_evidence": "Confirmed. lib/i18n.ts:9 exports one `dictionary` object, 424 lines / 26.9KB raw, with the `hi` map opening at :197. components/streaming/ModuleRenderer.tsx:1-3 and components/streaming/CatalogueShell.tsx:1,:6 are both 'use client' and import createTranslator from it, so both locales land in the browse chunk. lib/budgets.ts:17 is BROWSE_FIRST_LOAD_KB = 150 and scripts/check-bundle.ts:6 records 146KB. The locale is already resolved server-side at lib/guest-locale.ts:22 and passed to CatalogueShell as a prop.",
+      "reason": "Accurate on every citation, and the fix is clean. It does not matter much in this window: roughly 3KB gzipped is a few tens of milliseconds on 4G, and the only enforced consequence is that scripts/check-bundle.ts fails a build — which is a signal, not an outage. Take it opportunistically when the budget is next breached."
+    }
+  ]
+}

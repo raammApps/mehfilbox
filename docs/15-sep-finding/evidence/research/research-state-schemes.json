@@ -1,0 +1,192 @@
+{
+  "topic": "State startup policies in India relevant to a small bootstrapped SaaS (Karnataka, Maharashtra, Telangana, Delhi, Gujarat, Kerala, Uttar Pradesh), for Mehfilbox's not-yet-decided state of registration",
+  "summary": "Every meaningful benefit below requires a proper entity — Private Limited Company, registered Partnership, or LLP; sole proprietorships are excluded almost everywhere, including the central Startup India Seed Fund Scheme (SISFS) — with its registered office (or a nodal-institute/incubator relationship) inside the state paying out. That makes 'state of registration' a real lever for Mehfilbox, not paperwork. Karnataka and Kerala are the strongest fits for a bootstrapped SaaS founder: Karnataka has the largest clearly-documented non-dilutive ceiling (ELEVATE/Idea2PoC, up to Rs 50 lakh, though it is explicitly PoC-stage) plus by far the deepest tech-hiring pool if the Go/Java port under consideration goes ahead; Kerala's KSUM is the most founder-friendly state agency by reputation and process maturity, and is the one state here whose grant ladder (Idea -> Product -> Scale-Up, together up to Rs 15-20 lakh) actually has a post-PoC tier that could fit Mehfilbox's stage. Telangana is close behind on documentation quality — its SGST reimbursement (100%, 3 years, Rs 1 crore turnover cap) and patent-reimbursement clauses are the most explicitly and consistently sourced of any state checked. Gujarat's headline figure (grant assistance up to Rs 30 lakh) is competitive on paper but the eligibility detail was not independently confirmed (the primary PDF was unreadable and the portal itself was content-thin on direct fetch) and applications route through an approved nodal institute such as GUSEC, adding a step. Maharashtra's brand-new Startup, Entrepreneurship and Innovation Policy 2025 has the biggest aggregate numbers (a Rs 500 crore CM Maha Fund, IPR reimbursement up to Rs 20 lakh for international patents) but sources actively disagree on whether general SGST reimbursement survives into this new policy, and no primary Maharashtra government page could be fetched directly to settle it — treat Maharashtra's specifics as secondary pending that check. Delhi is the weakest choice right now on pure fact: its 2022 Startup Policy was cabinet-approved but, per the secondary sources found, never formally notified, and a 2025 draft replacement was still in public-comment stage in the sources checked — meaning none of Delhi's promised incentives are currently collectible, regardless of the figures quoted for them. Uttar Pradesh has a genuinely well-structured, clearly documented ladder (seed capital + prototype grant + patent reimbursement, with a 50% top-up for women/transgender/Divyangjan-led teams) and its Tier-2/3-city thrust arguably matches Mehfilbox's actual wedding-market geography (COMPETITORS.md notes 60% of India's streaming growth comes from Tier 2/3 cities) better than any metro-anchored state, though this research found less independent corroboration of UP's on-the-ground disbursal track record than for Karnataka, Kerala or Telangana. A methodological note: several state .gov.in domains (Delhi's ddc.delhi.gov.in and sws.delhi.gov.in, Maharashtra's maitri.maharashtra.gov.in, Karnataka's own startup.karnataka.gov.in) could not be reached directly (DNS failure, TLS certificate error, or connection refused) during this research, and Gujarat's and one Karnataka PDF returned unparseable content — those facts rest on corroborating secondary sources instead and are marked accordingly.",
+  "facts": [
+    {
+      "claim": "Karnataka's current flagship is the Karnataka Startup Policy 2025-30 (successor to the 2022-2027 policy); the working application/registration portal is K-Tech's registration system, not the older 'startup.karnataka.gov.in' address that recurs in secondary write-ups and no longer resolves.",
+      "source_url": "https://eitbt.karnataka.gov.in/startup/public/en",
+      "as_of": "2026-09-16",
+      "confidence": "official"
+    },
+    {
+      "claim": "Karnataka Startup Policy 2025-30 general eligibility: incorporated within 10 years of registration, and turnover in any financial year since incorporation not exceeding Rs 200 crore.",
+      "source_url": "https://eitbt.karnataka.gov.in/startup/public/policy/en",
+      "as_of": "2026-09-16",
+      "confidence": "official"
+    },
+    {
+      "claim": "Karnataka's patent-cost reimbursement under the current policy is up to Rs 15 lakh per year, covering both domestic and international filings (exact split not stated on the fetched page).",
+      "source_url": "https://eitbt.karnataka.gov.in/startup/public/policy/en",
+      "as_of": "2026-09-16",
+      "confidence": "official"
+    },
+    {
+      "claim": "Karnataka's headline non-dilutive scheme is ELEVATE (Idea2PoC): a one-time grant-in-aid of up to Rs 50 lakh, milestone-based in two tranches, for early-stage startups building a proof-of-concept, run by K-Tech / Dept. of Electronics, IT, BT & S&T. Scheme-specific eligibility: incorporated as Pvt Ltd/OPC/registered partnership/LLP/state or multi-state co-operative society, up to 10 years old, turnover not exceeding Rs 100 crore in any FY (narrower than the general policy's Rs 200 crore recognition threshold).",
+      "source_url": "https://k-tech.karnataka.gov.in/elevate-100/",
+      "as_of": "2026-09-16",
+      "confidence": "secondary"
+    },
+    {
+      "claim": "Karnataka SGST reimbursement is cited at 100% for eligible/incubated startups within the first 3 years, with turnover-band conditions (a Rs 1 crore annual turnover band is cited for the 'Beyond Bengaluru' incentive, and other slabs down to Rs 50 lakh are referenced elsewhere) — the primary policy PDF returned corrupted/unparseable text on direct fetch, so the exact single figure could not be independently confirmed from source.",
+      "source_url": "https://static.investindia.gov.in/s3fs-public/2023-06/Startup_Policy_Karnataka.pdf",
+      "as_of": "2026-09-16",
+      "confidence": "secondary"
+    },
+    {
+      "claim": "Karnataka Startup Policy registration is free ('no registration fee') via the K-Tech registration portal.",
+      "source_url": "https://registration.eitbt.karnataka.gov.in/ktechregistration/dist/#/auth/login",
+      "as_of": "2026-09-16",
+      "confidence": "official"
+    },
+    {
+      "claim": "Maharashtra's current flagship policy is the Startup, Entrepreneurship and Innovation Policy 2025 (cabinet-approved, targeting 1.25 lakh entrepreneurs / 50,000 startups over five years), which appears to supersede the Maharashtra State Innovative Start-up Policy, 2018 — this succession was not confirmed from an official Maharashtra government page, as direct fetches of maharashtra.gov.in and maitri.maharashtra.gov.in both failed (TLS certificate error).",
+      "source_url": "https://egov.eletsonline.com/2025/08/maharashtra-unveils-startup-innovation-policy-2025-aims-to-nurture-1-25-lakh-entrepreneurs-and-50000-startups/",
+      "as_of": "2026-09-16",
+      "confidence": "secondary"
+    },
+    {
+      "claim": "Maharashtra's 2025 policy headline figures reported by secondary sources: a CM Maha Fund with a Rs 500 crore corpus over five years (loans of roughly Rs 5-10 lakh), IPR reimbursement up to Rs 5 lakh for domestic and up to Rs 20 lakh for international patents, quality-certification support up to Rs 15 lakh, and exhibition support of Rs 2 lakh (domestic) / Rs 5 lakh (international).",
+      "source_url": "https://www.patronaccounting.com/blog/state-startup-policies-2026-maharashtra-karnataka-delhi-telangana",
+      "as_of": "2026-09-16",
+      "confidence": "secondary"
+    },
+    {
+      "claim": "Under Maharashtra's earlier (2018) policy, as mirrored on the national Startup India portal: SGST reimbursement was offered specifically to FinTech startups with turnover up to Rs 5 crore, capped at Rs 4 lakh annually for up to 3 years; patent-cost rebate was 80%, up to Rs 2 lakh for domestic and up to Rs 10 lakh for international patents (plus a one-time Rs 5,000-per-candidate incentive, capped Rs 1 lakh per startup over 3 years); general eligibility was incorporation as Pvt Ltd/partnership/LLP in Maharashtra, up to 7 years old (10 for biotech), turnover not exceeding Rs 25 crore.",
+      "source_url": "https://www.startupindia.gov.in/content/sih/en/state-startup-policies/Maharashtra-state-policy.html",
+      "as_of": "2026-09-16",
+      "confidence": "official"
+    },
+    {
+      "claim": "Sources disagree on whether Maharashtra currently offers general SGST reimbursement to startups: one secondary source states plainly that 'Maharashtra and Delhi do not currently offer SGST reimbursement to startups,' distinguishing this from the broader Industrial Promotion Subsidy (up to 100% Gross State GST) available to MSMEs/Large Scale Industry units generally, not startups specifically — this could not be reconciled against an official Maharashtra primary source, which was unreachable during this research.",
+      "source_url": "https://www.roedl.com/en/insights/india-maharashtra-industry-investment-services-policy-analysis/",
+      "as_of": "2026-09-16",
+      "confidence": "secondary"
+    },
+    {
+      "claim": "Maharashtra's startup portal is administered via MAITRI (Maharashtra Industry, Trade And Investment Facilitation) and the Maharashtra State Innovation Society; contact given as team@msins.in.",
+      "source_url": "https://www.startupindia.gov.in/content/sih/en/state-startup-policies/Maharashtra-state-policy.html",
+      "as_of": "2026-09-16",
+      "confidence": "official"
+    },
+    {
+      "claim": "Telangana offers 100% SGST reimbursement for 3 years, capped at a maximum annual turnover of Rs 1 crore, with claims to be submitted semi-annually (by 31 March and 30 September).",
+      "source_url": "https://startup.telangana.gov.in/funding-incentives/",
+      "as_of": "2026-09-16",
+      "confidence": "official"
+    },
+    {
+      "claim": "Telangana patent-registration reimbursement: 100% of cost up to Rs 2 lakh for Indian patents, up to Rs 10 lakh for foreign patents, claimable twice within the first five years.",
+      "source_url": "https://startup.telangana.gov.in/funding-incentives/",
+      "as_of": "2026-09-16",
+      "confidence": "official"
+    },
+    {
+      "claim": "Telangana also offers international-marketing support (30% of annual trade-show costs, capped Rs 5 lakh over the first 3 years, via endorsement from a state-supported incubator), recruitment assistance (Rs 10,000 per Telangana-domiciled employee hired in year one, minimum 8 months' tenure), and a Performance Grant of 5% of annual turnover (capped Rs 10 lakh) for startups sustaining 15%+ year-on-year growth within 3 years of incorporation.",
+      "source_url": "https://startup.telangana.gov.in/funding-incentives/",
+      "as_of": "2026-09-16",
+      "confidence": "official"
+    },
+    {
+      "claim": "Telangana's T-Fund (a T-Hub / Telangana government joint initiative) provides Rs 25 lakh to Rs 1 crore in funding for early-stage tech startups; T-Hub was also selected to disburse Rs 5 crore of the central Startup India Seed Fund Scheme.",
+      "source_url": "https://it.telangana.gov.in/initiatives/t-hub/",
+      "as_of": "2026-09-16",
+      "confidence": "secondary"
+    },
+    {
+      "claim": "Delhi's Startup Policy 2022 was approved by the Delhi Cabinet on 5 May 2022, but — per secondary reporting — was never formally notified, meaning its incentives (which included equity-free grants of up to Rs 10 lakh for selected early-stage startups and collateral-free, interest-free-for-a-year loans) are not currently claimable. Direct fetches of Delhi's own policy pages (ddc.delhi.gov.in, sws.delhi.gov.in) failed during this research (connection refused / certificate error), so this status could not be confirmed from an official Delhi government page.",
+      "source_url": "https://hoblix.com/delhi-startup-policy/",
+      "as_of": "2026-09-16",
+      "confidence": "secondary"
+    },
+    {
+      "claim": "A Draft Delhi Start-up Policy 2025 was released for stakeholder comment from 20 August to 3 September 2025 by the Dept. of Industries, GNCTD, proposing a Rs 200 crore Delhi Start-up Venture Capital Fund and a target of 5,000 startups; as of the secondary sources checked (referencing status through August 2026), it had still not been formally notified.",
+      "source_url": "https://industries.delhi.gov.in/sites/default/files/Industries/marquee-files/draft_delhi_startup_policy.pdf",
+      "as_of": "2026-09-16",
+      "confidence": "secondary"
+    },
+    {
+      "claim": "Separately, a narrower 'Delhi Start-Up and Incubation Policy' (~Rs 400 crore over five years, focused on campus/institution-led incubation centres across state universities, colleges, polytechnics and ITIs) was cabinet-approved and announced by CM Rekha Gupta — described in the source as distinct from the broader Delhi Startup Policy 2025 draft, though the exact relationship between the two initiatives was not confirmed from an official Delhi source.",
+      "source_url": "https://www.outlookbusiness.com/economy-and-policy/delhi-cabinet-greenlights-400-cr-start-up-policy-incubation-centres-planned-across-institutions",
+      "as_of": "2026-09-16",
+      "confidence": "secondary"
+    },
+    {
+      "claim": "Gujarat's Scheme for Assistance to Startups/Innovation (under the Gujarat Industrial Policy 2020 framework) offers grant assistance reported at up to Rs 30 lakh total, covering MVP development, testing/prototyping, and patent filing; applications go through the Startup Gujarat portal, generally routed via an approved Nodal Institute (e.g. GUSEC). The primary guidelines PDF and the scheme's own detail page could not be read directly (unparseable PDF; thin/paywalled page content), so the figure and its component breakdown rest on a secondary aggregator.",
+      "source_url": "https://www.startupgrantsindia.com/scheme-for-assistance-for-startupsinnovation-gujarat-industrial-policy-2020-34",
+      "as_of": "2026-09-16",
+      "confidence": "secondary"
+    },
+    {
+      "claim": "Gujarat also runs a smaller, separate 'Startup Srujan Seed Support (S4)' track (via iHub Gujarat) offering Rs 2.5-10 lakh grants to take a proof-of-concept to product/market stage.",
+      "source_url": "https://ihubgujarat.in/srujan",
+      "as_of": "2026-09-16",
+      "confidence": "secondary"
+    },
+    {
+      "claim": "Gujarat's application portal (startup.gujarat.gov.in) and general investor-facilitation portal (ifp.gujarat.gov.in, toll-free helpline 1800-233-1847 / 1800-233-0616, email icstup@gujarat.gov.in) both exist and are live, confirmed by direct fetch, though neither surfaced full scheme-eligibility detail on the pages fetched.",
+      "source_url": "https://startup.gujarat.gov.in/scheme-for-assistance",
+      "as_of": "2026-09-16",
+      "confidence": "official"
+    },
+    {
+      "claim": "Kerala Startup Mission's Idea Grant provides up to Rs 3 lakh for startups at the ideation/design/proof-of-concept stage, restricted to innovative technology-based products (not services or trade/commerce); company incorporation (Pvt Ltd/LLP/OPC) is mandatory before fund disbursement, and a re-application must wait at least 3 months after a prior one.",
+      "source_url": "https://startupmission.kerala.gov.in/schemes/idea-grant",
+      "as_of": "2026-09-16",
+      "confidence": "official"
+    },
+    {
+      "claim": "Kerala's Seed Fund Scheme is not a grant but a soft loan of up to Rs 15 lakh at 6% simple interest per annum, with a 12-month moratorium followed by 36 monthly instalments and no prepayment penalty; eligibility requires an active KSUM Unique ID, DPIIT registration with 'Active'/'Active Compliant' MCA status, and the director's CIBIL score preferably above 750.",
+      "source_url": "https://startupmission.kerala.gov.in/schemes/seed-fund",
+      "as_of": "2026-09-16",
+      "confidence": "official"
+    },
+    {
+      "claim": "Kerala's combined Innovation Grant ladder (Idea Grant + Product Grant + Scale-Up Grant together, of which the Idea Grant is the Rs 3 lakh entry tier) is reported to total up to Rs 15 lakh for startups generally and up to Rs 20 lakh for women-led startups — the Product and Scale-Up components specifically were not independently fetched from KSUM's own pages during this research.",
+      "source_url": "https://www.lendingkart.com/blog/kerala-startup-mission/",
+      "as_of": "2026-09-16",
+      "confidence": "secondary"
+    },
+    {
+      "claim": "Uttar Pradesh's Startup Policy 2020 (First Amendment 2022) offers, for a software/tech startup building an MVP: a Prototype Grant of up to Rs 5 lakh, Seed Capital/Marketing Assistance of up to Rs 7.5 lakh to launch the MVP in market, and a Sustenance Allowance of Rs 17,500 per month for up to one year at idea stage (capped at 25 startups per incubator per year).",
+      "source_url": "https://startinup.up.gov.in/state-startup-policy/",
+      "as_of": "2026-09-16",
+      "confidence": "official"
+    },
+    {
+      "claim": "UP patent reimbursement: up to Rs 2 lakh for domestic patents, up to Rs 10 lakh for international patents.",
+      "source_url": "https://startinup.up.gov.in/state-startup-policy/",
+      "as_of": "2026-09-16",
+      "confidence": "official"
+    },
+    {
+      "claim": "UP gives an additional 50% top-up on Sustenance Allowance and Seed Capital for startups with women, transgender, or Divyangjan co-founders holding more than 26% equity, and for startups in specified priority sectors or economically disadvantaged regions; general eligibility mirrors the national DPIIT definition (incorporated up to 10 years, turnover not exceeding Rs 100 crore in any FY, working on innovation or a scalable, high-potential business model), with DPIIT/Startup India recognition referenced as the underlying basis for benefit eligibility.",
+      "source_url": "https://startinup.up.gov.in/faqs/",
+      "as_of": "2026-09-16",
+      "confidence": "secondary"
+    },
+    {
+      "claim": "The central Startup India Seed Fund Scheme (SISFS) — the natural companion to any state scheme — offers up to Rs 20 lakh as a milestone-based grant for PoC/prototype/product trials, plus up to Rs 50 lakh via convertible debentures/debt-linked instruments for market entry, commercialisation or scaling. Eligibility: DPIIT-recognised Private Limited Company, registered Partnership Firm, or LLP (sole proprietorships and public limited companies are explicitly excluded), incorporated not more than 2 years before the date of application, and not having already received more than Rs 10 lakh in financial support under any other central or state government scheme. This could not be directly re-verified on seedfund.startupindia.gov.in itself, which returned no readable content on fetch (likely a JavaScript-rendered page); the figures are corroborated identically across several independent secondary sources including one official '.gov.in' mirror.",
+      "source_url": "https://www.indiascienceandtechnology.gov.in/funding-opportunities/startups/startup-india-seed-fund-scheme-sisfs",
+      "as_of": "2026-09-16",
+      "confidence": "secondary"
+    }
+  ],
+  "actions_for_mehfilbox": [
+    "1. Decide the legal entity before applying anywhere: almost every scheme above, and SISFS centrally, excludes sole proprietorships and requires a Private Limited Company, registered Partnership, or LLP. If Mehfilbox is not already incorporated as one of these, that incorporation is the actual first step — everything else in this list is blocked on it.",
+    "2. Incorporate with the registered office in Karnataka or Kerala, the two states this research supports most strongly for a bootstrapped SaaS founder — Karnataka for the largest documented non-dilutive ceiling and the deepest engineering-hiring pool (relevant if the Go/Java port proceeds), Kerala (KSUM) for process maturity, a founder-friendly reputation, and the one grant ladder here with a genuine post-idea-stage tier. Do this before, not after, exploring Gujarat's or UP's schemes in detail — the entity's home state is the gating fact for most of what follows.",
+    "3. Apply for DPIIT/Startup India recognition immediately after incorporation, in parallel with (not before) the chosen state's own startup recognition — the central Seed Fund Scheme's 2-year-from-incorporation window is the tightest clock in this whole list, and several state schemes reference DPIIT recognition as a precondition, so starting late on this narrows every other option later.",
+    "4. Aim applications at the post-product doors, not the idea-stage doors: Mehfilbox already has a live, revenue-generating catalogue (per docs/PROGRESS.md and docs/PRODUCT.md), so it does not fit Karnataka's ELEVATE Idea2PoC or Kerala's Rs 3 lakh Idea Grant, which are explicitly pre-product. The better fits are SISFS's second window (up to Rs 50 lakh, market entry/commercialisation/scaling), Kerala's Product/Scale-Up Grant tier, or Telangana's Performance Grant (5% of turnover, capped Rs 10 lakh, for 15%+ YoY growth) once there is a clean revenue trend line to show.",
+    "5. Before letting any state's SGST-reimbursement headline (Karnataka's or Telangana's 100%-for-3-years clauses, in particular) swing the state decision, get the accountant already flagged in docs/PRICING.md section 6 to answer one more question: what share of Mehfilbox's billed revenue will be intra-state SGST versus inter-state IGST once studios are onboarded nationally over WhatsApp. A revenue mix that is mostly IGST makes an SGST-reimbursement scheme worth much less than its sticker figure, and this is the single number most likely to change which state actually wins on the numbers.",
+    "6. Do not plan around Delhi. Even if incorporation ends up convenient there for other reasons, treat its startup-policy incentives as currently uncollectible (2022 policy cabinet-approved but apparently never notified; 2025 draft still in public comment in the sources found) until a direct, dated confirmation from a Delhi government source says otherwise.",
+    "7. Keep the in-house-transcoding and theme-store ideas out of this particular decision. Neither maps to a startup-grant category found here (transcoding capacity is a capital/data-centre question, not a startup-policy one; the theme store's protectable asset is a trademark or copyright, not a patent, so none of the patent-reimbursement clauses above apply to it) — research those on their own terms rather than letting them tip the state choice.",
+    "8. Treat the direct-to-couple (B2C) onboarding idea as a reason to revisit GST registration mechanics generally (consumer-facing billing, not just studio billing) at the same accountant conversation in step 5, rather than as a factor in the state-of-incorporation choice — none of the seven states' schemes reviewed here condition benefits on B2B versus B2C customer mix."
+  ],
+  "open_questions": [
+    "What share of Mehfilbox's revenue will be intra-state (SGST) versus inter-state (IGST) once studios onboard nationally — this determines the real value of Karnataka's and Telangana's SGST-reimbursement clauses and was not something this research could answer; it needs an accountant working from actual studio-location data.",
+    "Whether Maharashtra's new 2025 policy retains any SGST-reimbursement provision for startups specifically (as distinct from the broader Industrial Promotion Subsidy for MSMEs/large industry) — two secondary sources disagree and no official Maharashtra primary page could be reached during this research (maitri.maharashtra.gov.in and maharashtra.gov.in both failed to load).",
+    "Whether Delhi's ~Rs 400 crore 'Start-Up and Incubation Policy' and the broader 'Delhi Startup Policy 2025' draft are the same initiative renamed, or two genuinely separate tracks — secondary sources describe them differently and Delhi's own policy pages (ddc.delhi.gov.in, sws.delhi.gov.in) could not be fetched directly to settle it.",
+    "The exact component breakdown of Gujarat's reported Rs 30 lakh Scheme for Assistance figure (how much is earmarked for MVP development versus prototyping/testing versus patent filing) — the only source found with a breakdown was an unparseable PDF.",
+    "Whether Uttar Pradesh's incentives require the entity's registered office to be specifically within UP, or only that it register on the StartinUP portal — sources were not fully consistent on this point.",
+    "Whether any of these seven states (or others) offer a capital or infrastructure subsidy relevant to the in-house video-transcoding idea under consideration — this research was scoped to startup-policy grants and reimbursements, not industrial or IT-hardware/data-centre policy, so it is a genuinely separate research task if that idea advances."
+  ]
+}

@@ -1,0 +1,111 @@
+{
+  "lens": "documentation",
+  "verdicts": [
+    {
+      "title": "The ship skill's 'confirm it is actually live' step checks a host the backlog itself calls luck",
+      "real": true,
+      "matters_next_12_months": true,
+      "corrected_severity": "medium",
+      "reason": "Verified. .claude/skills/ship/SKILL.md:46 is `curl -s https://marquee-film-pub.vercel.app/api/health` and lines 48-51 treat a matching version as proof. scripts/deploy-vercel.sh:26 deploys PROJECT=${VERCEL_PROJECT:-mehfilbox}; docs/MANUAL-TEST.md:413 and docs/DEPLOYMENT.md both use mehfilbox.com. docs/PROGRESS.md:422-425 records the alias serving a stale commit after the rename, and docs/NEXT.md:476 plus docs/GO-LIVE.md:236 call it luck. The ship skill is the only place in the tree still curling that host (grep: SKILL.md:46 is the sole live reference; PROGRESS.md:408/423/804 are history). Severity lowered from high: the dominant failure mode is a FALSE ALARM, not a silent pass -- a stale alias returns a version that does not match HEAD, so the gate fails loudly. The genuinely dangerous case (alias pinned to the fresh deployment while mehfilbox.com has not cut over) is narrower than 'reported live while production serves old code'. Still real, still a 15-minute fix, and the canonical domain is never checked at all.",
+      "corrected_evidence": ".claude/skills/ship/SKILL.md:46 (the URL) and :48-51 (the assertion); scripts/deploy-vercel.sh:26; docs/MANUAL-TEST.md:413; docs/PROGRESS.md:422-425; docs/NEXT.md:476-478; docs/GO-LIVE.md:236."
+    },
+    {
+      "title": "CLAUDE.md's 'enforced rather than remembered' table is false for middleware.ts, modules/ and themes/ — pnpm lint never visits them",
+      "real": true,
+      "matters_next_12_months": true,
+      "corrected_severity": "medium",
+      "reason": "Verified by execution. package.json:14 is bare `next lint`; `pnpm lint` exits 0 with 'No ESLint warnings or errors', while `pnpm exec next lint --file middleware.ts` reports exactly four no-restricted-properties errors at middleware.ts:23:22, 34:8, 74:5 and 74:46 (process.env.ROOT_DOMAIN, TENANCY_MODE, NODE_ENV, ALLOW_EPHEMERAL_DATA). .eslintrc.json:25-28 does not exempt middleware.ts, so these are real violations of the rule CLAUDE.md:30 claims is enforced. Severity lowered from high on two grounds: I also ran `next lint --dir modules --dir themes` and both are currently CLEAN, so the blind spot over the 'moat' is latent rather than active; and the four middleware reads are defaulted, non-secret routing flags, not credentials. What remains true and worth fixing is the documentation defect -- CLAUDE.md:25-26 promises the check will tell you before review does, and for the one file that decides tenant resolution it never will.",
+      "corrected_evidence": "package.json:14; .eslintrc.json:16-28; middleware.ts:23, 34, 74 (four violations, confirmed by running `pnpm exec next lint --file middleware.ts`); modules/ and themes/ lint clean today."
+    },
+    {
+      "title": "README.md's 'Known gaps' section describes a prototype; the shipped product is a phase ahead of it",
+      "real": true,
+      "matters_next_12_months": true,
+      "corrected_severity": "medium",
+      "reason": "Mostly verified. README.md:295-296 does say the Supabase driver has never run, contradicted by CLAUDE.md:63 and docs/NEXT.md:30 (DATA_DRIVER=supabase live). README.md:303 says the four Phase 1 modules are not built; modules/registry.ts:28-32 registers continue_watching, timeline, checklist and randomiser and docs/PROGRESS.md:354 is the entry that built them. README.md:201 says 'applies both migrations'; scripts/bootstrap-supabase.ts:20-23 readdirSyncs the whole directory, which holds 24 files (0001-0025, 0003 absent -- not two, and not 25). README.md:80 says 168 tests; docs/NEXT.md:27 and docs/PROGRESS.md:2050 both say 659. ONE SUB-CLAIM IS WRONG: README.md:166 ('mehfilbox.com is canonical and mehfilbox.in redirects') does not contradict docs/NEXT.md:30 ('heirloomfilms.in redirects') -- docs/GO-LIVE.md:319 and docs/PROGRESS.md:888 confirm BOTH domains redirect to mehfilbox.com, so both statements are true. Severity lowered from high: the audience is thin (the agent's mandated reading order is CLAUDE.md -> PROGRESS -> NEXT, not README), there is no contractor or acquirer in the next 12 months at 10 weddings/month, and nothing here can break production. It is still the worst single misstatement in the tree -- it declares the database integration unproven four days after it went live.",
+      "corrected_evidence": "README.md:295-296, :303-304, :201, :80. NOT valid: README.md:166 vs docs/NEXT.md:30 -- both domains redirect, per docs/GO-LIVE.md:319 and docs/PROGRESS.md:888."
+    },
+    {
+      "title": "The two files CLAUDE.md tells you to read first are the most stale documents in the tree",
+      "real": true,
+      "matters_next_12_months": true,
+      "corrected_severity": "medium",
+      "reason": "Verified. CLAUDE.md:3-5 sends the reader to docs/spec/README.md and docs/spec/13-agent-runbook.md §2 first. docs/spec/README.md:1 is titled 'Heirloom Films — build documentation'; its file map at lines 45-69 uses pre-move paths (docs/00-INDEX.md, docs/09-implementation-plan.md, scripts/make_wireframes.py) and line 63 describes the decision log as 'D-1 … D-9' when docs/reference/00-decision-log.md:679 runs to D-44; the command at line 105 names scripts/make_wireframes.py while the file is at docs/wireframes/make_wireframes.py. The runbook's per-ticket map covers only P0-01..P0-30 with the same dead paths, and its paste-ready prompt at line 65 runs `pnpm lint && pnpm exec tsc --noEmit && pnpm test`, weaker than `pnpm verify` at package.json:24 (which adds check:dead and check:contrast). Minor citation correction: the runbook's §2 table is lines 17-49, not 19-45. Matters because the agent IS the engineering team here -- every cold start pays this.",
+      "corrected_evidence": "CLAUDE.md:3-5; docs/spec/README.md:1, :45-69, :63, :105; docs/spec/13-agent-runbook.md:17-49 (not 19-45) and :65; package.json:24; docs/reference/00-decision-log.md:679."
+    },
+    {
+      "title": "The advertised cold start is wrong by 5.6x, and it is the number the whole context-discipline argument rests on",
+      "real": true,
+      "matters_next_12_months": true,
+      "reason": "Verified precisely. `wc -c` gives CLAUDE.md 4,692, docs/PROGRESS.md 136,276 (2,050 lines), docs/NEXT.md 37,452 (601 lines) -- the reviewer's byte counts are exact. At ~4 bytes/token that is roughly 45k tokens for the path CLAUDE.md:15 and docs/NEXT.md:5 both advertise as '~8k tokens regardless of repo size'. docs/spec/README.md:38-39 makes the stronger, more wrong claim that PROGRESS.md alone cold-starts a session in ~4k. .claude/skills/next-item/SKILL.md:13 prescribes the same three files. Severity medium is right but this is the most operationally material item in the whole lens for THIS product: a solo founder plus an agent, where every ticket begins by loading 45k tokens under a budget that says 8k, and PROGRESS.md grows monotonically with each of the ~60 entries. The proposed split at the N-60 boundary is the right shape of fix.",
+      "corrected_evidence": "CLAUDE.md:14-15; docs/NEXT.md:5; docs/spec/README.md:38-39; .claude/skills/next-item/SKILL.md:13; measured: 4,692 / 136,276 / 37,452 bytes."
+    },
+    {
+      "title": "Five competing entry points, two of which contradict each other on the order of the same two files",
+      "real": true,
+      "matters_next_12_months": false,
+      "corrected_severity": "low",
+      "reason": "Every citation checks out: README.md:20 ('start here' on ARCHITECTURE.md), docs/README.md:10 ('The best single entry point') and :17 ('Start here for anything commercial'), CLAUDE.md:3-4 versus CLAUDE.md:14-15, docs/PROGRESS.md:8 ('CLAUDE.md → NEXT.md → this file' -- the reverse of CLAUDE.md:15), .claude/skills/next-item/SKILL.md:13, docs/spec/README.md:27. Lowered to low and marked immaterial: the PROGRESS/NEXT ordering disagreement is cosmetic -- both files get read either way, and nothing downstream depends on which lands first. With one founder and one agent there are no 'two engineers arriving with different pictures'. It is real, it is worth the ten minutes, and it is almost entirely subsumed by the fixes for the previous two findings.",
+      "corrected_evidence": "README.md:20; docs/README.md:9-10, :17; CLAUDE.md:3-4 vs :14-15; docs/PROGRESS.md:8; .claude/skills/next-item/SKILL.md:13."
+    },
+    {
+      "title": "ARCHITECTURE.md, named the 'best single entry point' in two places, predates a third of the shipped surface",
+      "real": true,
+      "matters_next_12_months": true,
+      "reason": "Verified hard. `git log -1` gives docs/ARCHITECTURE.md a last commit of 2026-08-12, and a case-insensitive grep for credit|theme|house style|platform console|custom domain|couple account|premiere|wizard|occasion returns ZERO matching lines across all 9 sections (headings at lines 1, 10, 55, 94, 129, 158, 179, 204, 234, 244 as cited). Migrations 0016-0025 and docs/spec/16-platform-v2.md all postdate it. README.md:20 and docs/README.md:10 both still call it the place to start. The concrete risk the reviewer names is the right one: platform admins sit outside the org boundary that ARCHITECTURE.md:55-93 explains, and that boundary is what CLAUDE.md:71-73 calls the place a route is visibly unscoped. The cheap half of the fix (date it and scope it to the first pass) is worth doing immediately; the full rewrite is a day and can wait.",
+      "corrected_evidence": "docs/ARCHITECTURE.md last commit 2026-08-12 08:10; zero occurrences of the nine second-pass terms; README.md:20; docs/README.md:10."
+    },
+    {
+      "title": "USAGE-GUIDE.md is a 521-line duplicate of MANUAL-TEST.md, three weeks older and describing a console since rebuilt",
+      "real": true,
+      "matters_next_12_months": false,
+      "corrected_severity": "low",
+      "reason": "The staleness is verified and the duplication claim is overstated. docs/USAGE-GUIDE.md is 521 lines, last committed 2026-08-16; docs/MANUAL-TEST.md is 423 lines, 2026-09-12. USAGE-GUIDE.md:6 does claim it describes the software today, and greps confirm zero mentions of 'theme', zero of 'house style', zero of 'premiere' and one of 'wizard'; USAGE-GUIDE.md:10 still says 'The product lives at heirloomfilms.in' with hello@heirloomfilms.in. docs/MANUAL-TEST.md:7 does defer to it. But the two are NOT the same document: MANUAL-TEST.md:1-5 is an observed click-by-click production script, USAGE-GUIDE.md is a feature narrative -- the reviewer's 'same sixteen workflows in the same order' framing inflates an overlap into a duplicate. Lowered to low and marked immaterial: no customer document is going out in the next 12 months that anyone would source from a file the founder knows is a month old, and the current MANUAL-TEST.md already covers the click path.",
+      "corrected_evidence": "docs/USAGE-GUIDE.md:6, :10 (521 lines, committed 2026-08-16); docs/MANUAL-TEST.md:1-7 (423 lines, 2026-09-12); docs/README.md:16."
+    },
+    {
+      "title": "Three product-shape documents each declare they deliberately disagree, and each is separately wrong about the current state",
+      "real": true,
+      "matters_next_12_months": true,
+      "reason": "Verified, and the load-bearing error is the one the reviewer leads with. docs/PRODUCT.md:16 says 'Last reviewed: 14 August 2026' and docs/PRODUCT.md:30 asserts in bold 'The domain is still `heirloomfilms.in`' -- flatly false since 12 September (docs/NEXT.md:30, docs/GO-LIVE.md:319, docs/PROGRESS.md:888). CLAUDE.md:11-12 makes this the file to update before NEXT.md and before code, so a wrong production domain in it is the most checkable fact in the product being wrong in the most load-bearing place. docs/ROADMAP.md:18 repeats heirloomfilms.in and :22-24 lists application email, payment, renewal, lapse, archive, metering and plan assignment as nonexistent, though docs/PROGRESS.md:699 (email), :1327 (lapse notices) and :1398 (plans) shipped at least three. docs/REQUIREMENTS.md:3 anchors to D-11..D-22 against a log running to D-44. One fairness note the reviewer omits: docs/PRODUCT.md:20-27 DOES flag the second pass and §8 carries those rows marked Built, so PRODUCT.md is stale in its header, not wholesale.",
+      "corrected_evidence": "docs/PRODUCT.md:16, :30 (but see :20-27, which is current); docs/ROADMAP.md:18, :22-24; docs/REQUIREMENTS.md:3; docs/NEXT.md:20-44; docs/PROGRESS.md:699, :1327, :1398."
+    },
+    {
+      "title": "The API contract document covers 13 of 60 routes and none of the platform surface, but the index still sends form work there",
+      "real": true,
+      "matters_next_12_months": false,
+      "reason": "Counts verified exactly: `find app/api -name route.ts | wc -l` returns 60, and docs/spec/07-api-contracts.md (179 lines) names 13 distinct /api paths -- admin/catalogues, admin/titles, admin/titles/reorder, admin/uploads, module-state, og, passcode, playback/token, profiles, progress, webhooks/bunny, webhooks/razorpay. docs/spec/00-INDEX.md:13 does list doc 07 as 'Endpoints, request/response, validation, errors — Read before Form work'. Marked immaterial for this product: the only two readers are the founder and an agent that reads route files directly, the route files are well commented, and a generated docs/API.md wired into `pnpm verify` is a 4-6 hour build plus a permanent drift-gate maintenance surface to solve a problem grep already solves. Fix the pointer at docs/spec/00-INDEX.md:13 to say the doc covers the first pass only; skip the generator until there is a second engineer.",
+      "corrected_severity": "low"
+    },
+    {
+      "title": "Four unsynchronised documents carry live-looking prices and no price exists in code, so nothing can test the ladder",
+      "real": true,
+      "matters_next_12_months": true,
+      "reason": "Verified. Rupee-figure line counts: docs/PRICING.md 118, docs/PRICING-MODEL.md 178, docs/ROADMAP.md 28, docs/REQUIREMENTS.md 23. D-17 at docs/reference/00-decision-log.md:295 sets the ladder. No tier price exists as a constant in lib/: there is no lib/plans.ts, and the only ₹ figure in lib/ is a comment about MSG91 at lib/env.ts:89. docs/README.md:35-38 identifies pricing as the largest divergence and then leaves four live copies. Severity medium stands: at ~10 weddings a month the founder will quote from these documents, and the four-hand-edit problem bites the first time a price moves. The half of the fix worth doing now is consolidation (3 hours); the lib/plans.ts + unit test half correctly waits for N-20/Razorpay, since asserting a document against a constant nothing charges against is theatre.",
+      "corrected_evidence": "docs/PRICING.md, docs/PRICING-MODEL.md, docs/ROADMAP.md, docs/REQUIREMENTS.md (118/178/28/23 lines carrying ₹); docs/reference/00-decision-log.md:295; lib/env.ts:89; no lib/plans.ts."
+    },
+    {
+      "title": "GO-LIVE.md is three completed runbooks stacked in one file, titled for a retired domain, and the backlog still routes an open item to it",
+      "real": true,
+      "matters_next_12_months": true,
+      "corrected_severity": "medium",
+      "reason": "Verified: three H1s at docs/GO-LIVE.md:1, :317, :392; completion markers at :49, :213, :359; 30 lines carrying 'heirloomfilms'; docs/NEXT.md:464 points at 'GO-LIVE.md §4' and there are two §4s (:213 and :384). docs/DEPLOYMENT.md:285-288 does verify against admin.raammcorp.in and marquee.raammcorp.in. SEVERITY RAISED from low, for a reason the reviewer files as tidying: the item buried at docs/GO-LIVE.md:225-246 is not documentation debt, it is an open production defect -- Bunny library 724076's WebhookUrl still points at the retired URL, and docs/GO-LIVE.md:236 spells out the failure mode (the day the marquee-film-* alias lands on a stale deployment, the webhook answers 200 from superseded code and titles never leave `processing`). With ~10 weddings a month that is an upload pipeline that silently stops. The documentation fix is an hour; the buried item should be lifted into NEXT.md as its own N-item today.",
+      "corrected_evidence": "docs/GO-LIVE.md:1, :49, :213, :225-246, :236, :317, :359, :384, :392; docs/NEXT.md:464, :474-478; docs/DEPLOYMENT.md:285-288."
+    },
+    {
+      "title": "Counting and numbering errors throughout make the documentation untrustworthy in the small",
+      "real": true,
+      "matters_next_12_months": false,
+      "reason": "Mixed, net real. CONFIRMED: CLAUDE.md:43 says 'Three workflows' above a four-row table at :47-50 and four directories in .claude/skills/ (add-module, next-item, parallel, ship). Two decisions both numbered D-32, at docs/reference/00-decision-log.md:539 ('The console stays English', 8 Sept) and :562 ('The tenant is in the path', 12 Sept) -- the one genuine cost here, since docs/NEXT.md:54 cites 'D-32 to D-41' by number. docs/README.md:26 says 'docs 01–15' when 16 exists. docs/spec/README.md:63 says 'D-1 … D-9' against a log to D-44. docs/spec/00-INDEX.md:45-49 still orders a trademark search on a retired name, and :37 still addresses a catalogue as aanya-vikram.heirloomfilms.app while docs/DEPLOYMENT.md:193 calls subdomain mode retired. NOT CONFIRMED: README.md:23 ('docs 01–16') is CORRECT, and .claude/skills/next-item/SKILL.md:16 ('The spec is 17 documents') is defensible -- docs/spec/ holds 17 numbered files (00-INDEX through 16) plus a README, so the reviewer's 'there are 18 files' is a different count, not a caught error. Immaterial by itself; fix the duplicate D-32 while touching the log for anything else.",
+      "corrected_evidence": "CLAUDE.md:43 vs :47-50; docs/reference/00-decision-log.md:539 and :562 (duplicate D-32); docs/NEXT.md:54; docs/README.md:26; docs/spec/README.md:63; docs/spec/00-INDEX.md:37, :45-49. README.md:23 is correct as written; the '17 documents' claim is defensible.",
+      "corrected_severity": "low"
+    },
+    {
+      "title": "Orphaned and unindexed files: a root-level doc nothing links to, a 5.3 MB binary in every clone, and a generator with the wrong path",
+      "real": true,
+      "matters_next_12_months": false,
+      "reason": "All four verified: a repo-wide grep for 'knip.md' outside node_modules/.git returns nothing, so it is genuinely unlinked; knip.md:11 records framer-motion removed for zero imports while next.config.ts:26 still lists it in optimizePackageImports and package.json no longer depends on it; docs/reference/reference-reel.mp4 is exactly 5,332,102 bytes alongside an unsearchable .docx and .pdf; docs/wireframes/make_wireframes.py is 24,775 bytes and docs/spec/README.md:105 gives the path as scripts/make_wireframes.py. Immaterial: a stale entry in optimizePackageImports for an absent package is a no-op at build time, and 5.3 MB is nothing against a repo that already ships node_modules-scale tooling -- git-lfs would add a setup step for a solo founder to save a one-time 5 MB clone. The only line worth deleting is 'framer-motion' at next.config.ts:26, which is thirty seconds.",
+      "corrected_severity": "low"
+    }
+  ]
+}

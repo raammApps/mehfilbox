@@ -1,0 +1,139 @@
+{
+  "topic": "seed-fund",
+  "summary": "Startup India Seed Fund Scheme (SISFS) offers two distinct tranches per DPIIT-recognized startup, each usable once: up to Rs 20 lakh as a non-repayable GRANT for proof-of-concept/prototype/product-trial work, and up to Rs 50 lakh as DEBT (convertible debentures/debt/debt-linked instruments, interest capped at repo rate, unsecured, 5-year max tenure) for market entry/commercialization/scaling. Both are disbursed only through an empanelled incubator, never directly by DPIIT. Eligibility is narrower than general DPIIT recognition: incorporated not more than 2 years before applying, at least 51% Indian-promoter shareholding, and no more than Rs 10 lakh of prior monetary support from any other central/state scheme. Credit Guarantee Scheme for Startups (CGSS) is not funding at all -- it is a government guarantee (via trustee NCGTC) that lets a bank/NBFC/AIF lend a DPIIT-recognized startup up to Rs 20 crore collateral-free (raised from Rs 10 crore in May 2025), covering 85% of default on loans up to Rs 10 crore and 75% above that; the startup still borrows and repays. Fund of Funds for Startups (FFS, 2016, Rs 10,000 crore) and the new Fund of Funds 2.0 (announced Budget 2025, Rs 10,000 crore, operational guidelines released by DPIIT around April 2026) are neither grants nor loans to a startup -- government money is an LP commitment into SEBI-registered AIFs (venture funds), which then buy EQUITY in startups; a startup cannot apply to FFS/FoF 2.0 directly. MAARG is a free, DPIIT-recognition-gated AI-matched mentorship portal with no funding component. Every one of these requires DPIIT Startup Recognition first, which itself requires incorporation as a Pvt Ltd, LLP, registered partnership, or cooperative society (a sole proprietorship does not qualify) -- and Mehfilbox/heirloomfilms is not yet incorporated as any of these, per the repository. The single most important open item: multiple 2026 secondary sources report SISFS applications closed 31 May 2026 with no successor cycle announced as of this research date (16 Sept 2026), which conflicts with the scheme's own master guidelines describing a year-round rolling call for applications -- this needs direct verification on the live portal, which this research could not render (it is a client-rendered SPA that returns no static content to a fetch tool).",
+  "facts": [
+    {
+      "claim": "SISFS grant: up to Rs 20 lakh disbursed in milestone-based installments for 'validation of Proof of Concept, or prototype development, or product trials' (Guidelines Sec 8.1.1).",
+      "source_url": "https://www.startupindia.gov.in/content/dam/invest-india/Templates/public/Guidelines%20for%20Startup%20India%20Seed%20Fund%20Scheme.pdf",
+      "as_of": "2026-09-16",
+      "confidence": "official"
+    },
+    {
+      "claim": "SISFS debt/convertible tranche: up to Rs 50 lakh 'for market entry, commercialization, or scaling up through convertible debentures or debt or debt-linked instruments' (Guidelines Sec 8.1.2). Interest capped at prevailing repo rate, tenure max 60 months (5 years), moratorium up to 12 months allowed, unsecured with no promoter or third-party guarantee required (Sec 8.3).",
+      "source_url": "https://www.startupindia.gov.in/content/dam/invest-india/Templates/public/Guidelines%20for%20Startup%20India%20Seed%20Fund%20Scheme.pdf",
+      "as_of": "2026-09-16",
+      "confidence": "official"
+    },
+    {
+      "claim": "SISFS-specific eligibility (narrower than general DPIIT recognition): startup 'recognized by DPIIT, incorporated not more than 2 years ago at the time of application' (Sec 3.1.1); shareholding by Indian promoters at least 51% at time of application to the incubator, per Companies Act 2013 / SEBI ICDR Regulations 2018 (Sec 3.1.6); must not have received more than Rs 10 lakh of monetary support under any other Central or State scheme, excluding prize money, subsidized space, founder allowance, or lab/prototyping access (Sec 3.1.5); a startup can receive the grant and the debt tranche once each, not more (Sec 3.1.7).",
+      "source_url": "https://www.startupindia.gov.in/content/dam/invest-india/Templates/public/Guidelines%20for%20Startup%20India%20Seed%20Fund%20Scheme.pdf",
+      "as_of": "2026-09-16",
+      "confidence": "official"
+    },
+    {
+      "claim": "Application route: a startup can apply to up to three empanelled incubators simultaneously, in order of preference (Sec 7.2.ii); each incubator's Incubator Seed Management Committee (ISMC) evaluates on weighted criteria including market need, feasibility, potential impact, novelty/IP, team strength, and fund-utilization plan, and must select startups within 45 days of receiving the application (Sec 7.2.v, vii); a rejected applicant may reapply (Sec 7.2.xii). First grant installment to a selected startup must be released within 60 days of DPIIT/incubator receiving the startup's application (Sec 8.7). No startup is ever charged a fee by the incubator for selection, disbursement, incubation, or monitoring (Sec 8.9, 5.12).",
+      "source_url": "https://www.startupindia.gov.in/content/dam/invest-india/Templates/public/Guidelines%20for%20Startup%20India%20Seed%20Fund%20Scheme.pdf",
+      "as_of": "2026-09-16",
+      "confidence": "official"
+    },
+    {
+      "claim": "Incubators (not startups) are the ones DPIIT funds directly: an Experts Advisory Committee (EAC) grants a selected incubator up to Rs 5 crore in three-or-more milestone-based installments, plus a 5% management-fee top-up, and the incubator must fully utilize it within 3 years and disburse at least 50% within the first 2 years or return unutilized funds with interest.",
+      "source_url": "https://www.startupindia.gov.in/content/dam/invest-india/Templates/public/Guidelines%20for%20Startup%20India%20Seed%20Fund%20Scheme.pdf",
+      "as_of": "2026-09-16",
+      "confidence": "official"
+    },
+    {
+      "claim": "SISFS's total scheme outlay is widely reported (though not independently confirmed in the operational guidelines text itself) as Rs 945 crore, originally over a 4-year window from 2021-22, with over 300 incubators empanelled nationwide by 2026 and over Rs 600 crore reportedly sanctioned to incubators by 2025.",
+      "source_url": "https://firstunicornstartup.com/learn/startup-india/startup-india-seed-fund-complete-guide",
+      "as_of": "2026-04",
+      "confidence": "secondary"
+    },
+    {
+      "claim": "Multiple 2026-dated secondary sources report the SISFS application window closed 31 May 2026 (incubator selection to complete by 30 June 2026) as a 'final' extended deadline, with no successor cycle announced as of late August 2026, and advise founders not to assume the scheme is currently accepting fresh applications. This is NOT independently confirmed against the live seedfund.startupindia.gov.in portal, which renders as a client-side application with no static content retrievable by an automated fetch -- verify directly before relying on this.",
+      "source_url": "https://certifykaro.com/blogs/startup-india-seed-fund-scheme-2026-latest-updates-eligibility-and-application-guide",
+      "as_of": "2026-08-23",
+      "confidence": "secondary"
+    },
+    {
+      "claim": "Separately, reporting suggests DPIIT has been pushing for the seed-fund scheme's reinstatement/renewal ahead of a future budget cycle, implying the original corpus is understood to be exhausted or lapsed as of mid-to-late 2026 rather than merely paused.",
+      "source_url": "https://indiatechdesk.com/dpiits-pre-budget-push-exposes-11-billion-capital-vacuum-crushing-early-stage-founders/",
+      "as_of": "2026-09",
+      "confidence": "unverified"
+    },
+    {
+      "claim": "General DPIIT Startup Recognition (distinct from and broader than SISFS eligibility): period of existence/operations not exceeding 10 years from incorporation, annual turnover not exceeding Rs 200 crore in any financial year since incorporation (raised from a prior Rs 100 crore threshold); a separate Deeptech recognition track allows up to 20 years and Rs 300 crore turnover. Eligible entity types are Private Limited Company, Registered Partnership Firm, LLP, or Cooperative Society -- a sole proprietorship is not listed as eligible. The entity must not have been formed by splitting or reconstructing an existing business, and must be working toward development/improvement of a product, process or service with a scalable business model.",
+      "source_url": "https://www.startupindia.gov.in/content/sih/en/startup-scheme.html",
+      "as_of": "2026-09-14",
+      "confidence": "official"
+    },
+    {
+      "claim": "Credit Guarantee Scheme for Startups (CGSS) is a guarantee, not a grant or a government loan: DPIIT/NCGTC (National Credit Guarantee Trustee Company) guarantees a portion of a loan a bank, NBFC, or SEBI-registered AIF ('Member Institution') extends to a DPIIT-recognized startup; the startup borrows from and repays the Member Institution, and CGSS never disburses money to the startup directly.",
+      "source_url": "https://www.startupindia.gov.in/content/sih/en/credit-guarantee-scheme-for-startups.html",
+      "as_of": "2026-09-16",
+      "confidence": "secondary"
+    },
+    {
+      "claim": "CGSS was revised/expanded around May 2025: maximum guarantee cover per borrower raised from Rs 10 crore to Rs 20 crore; extent of guarantee cover is 85% of the amount in default for loans up to Rs 10 crore and 75% for the portion exceeding Rs 10 crore; the Annual Guarantee Fee for startups in 27 'Champion Sectors' (under Make in India) was cut from 2% to 1% per annum. Sources disagree on the exact notification date -- one dates it 8 May 2025, another 13 May 2025; treat the amounts as solid and the exact date as unresolved.",
+      "source_url": "https://www.ibef.org/news/government-notifies-the-expansion-of-the-credit-guarantee-scheme-for-startups-cgss-to-increase-capital-mobilization-for-startups",
+      "as_of": "2025-05",
+      "confidence": "secondary"
+    },
+    {
+      "claim": "Fund of Funds for Startups (FFS): original corpus of Rs 10,000 crore approved by the Union Cabinet in June 2016, managed by SIDBI. It does not invest in startups directly -- it commits capital as an anchor LP into SEBI-registered Alternative Investment Funds (AIFs / venture capital funds), which in turn buy equity in DPIIT-recognized startups.",
+      "source_url": "https://www.sidbi.in/annualreport/AnnualReport202122/fund-of-funds.php",
+      "as_of": "2026",
+      "confidence": "secondary"
+    },
+    {
+      "claim": "A new 'Startup India Fund of Funds 2.0' with a Rs 10,000 crore corpus was announced in Union Budget 2025 (Feb 2025); DPIIT released its operational guidelines around April 2026, structuring deployment through commitments to SEBI-registered Category I and II AIFs which invest in DPIIT-recognised startups, with SIDBI named as the initial Implementation Agency. Like the original FFS, this is an indirect equity channel -- a startup cannot apply to it directly, only to the AIFs it eventually backs.",
+      "source_url": "https://www.biospectrumindia.com/news/16/27725/dpiit-releases-operational-guidelines-for-startup-india-fund-of-funds-2-0-of-rs-10000-cr.html",
+      "as_of": "2026-04-27",
+      "confidence": "secondary"
+    },
+    {
+      "claim": "Union Budget 2026-27 (presented 1 Feb 2026) did not add a new dedicated seed-fund or Fund-of-Funds announcement in the speech itself (startups were reportedly mentioned only twice); it did include a new 'SME Growth Fund' described as Rs 10,000 crore of dedicated equity support for early-stage startups and smaller enterprises, plus a Rs 2,000 crore top-up to the existing (2021) Self-Reliant India Fund. Whether the 'SME Growth Fund' is a genuinely separate vehicle from Fund of Funds 2.0 or the same initiative under a different label in different reporting is unresolved in the sources found.",
+      "source_url": "https://inc42.com/features/union-budget-2026-takeaways-key-points-highlights-indian-tech-startups/",
+      "as_of": "2026-02",
+      "confidence": "secondary"
+    },
+    {
+      "claim": "MAARG (Mentorship, Advisory, Assistance, Resilience and Growth) is Startup India's free, AI-matchmaking national mentorship portal, open to all DPIIT-recognized startups across sectors and stages. It connects founders to mentors (reported at 20,000+ registered as of 2025) and has zero funding component -- purely advisory.",
+      "source_url": "https://www.kanakkupillai.com/learn/maarg-portal-by-startup-india/",
+      "as_of": "2025",
+      "confidence": "secondary"
+    },
+    {
+      "claim": "DPIIT-recognized startups also become eligible (separately, on application) for a 100% profit-linked income-tax deduction for any 3 consecutive years chosen out of the first 10 years from incorporation. This provision, previously Section 80-IAC of the Income-tax Act 1961, is now Section 140 of the Income-tax Act 2025, which came into force 1 April 2026. It requires DPIIT recognition PLUS a separate certificate from an Inter-Ministerial Board (IMB) -- DPIIT recognition alone does not grant it.",
+      "source_url": "https://taxguru.in/income-tax/tax-deduction-startups-section-140-income-tax-act-2025.html",
+      "as_of": "2026",
+      "confidence": "secondary"
+    },
+    {
+      "claim": "One source states that only roughly 3,700 of about 1.97 lakh (197,000) DPIIT-recognized startups hold the Inter-Ministerial Board certificate needed for the Section 140/80-IAC tax holiday -- under 2%. This is a single, uncorroborated source and should be treated cautiously.",
+      "source_url": "https://www.dugainadvisors.com/post/section-80-iac-in-july-2026-what-s-changed-who-still-qualifies-and-why-only-1-8-get-it",
+      "as_of": "2026-07",
+      "confidence": "unverified"
+    },
+    {
+      "claim": "Angel tax (Section 56(2)(viib), taxing share premium on closely-held company investment as income) was omitted by the Finance (No.2) Act 2024 effective Assessment Year 2025-26, and was not re-enacted in the new Income-tax Act 2025 -- so any startup fundraising round closed on or after 1 April 2025 attracts no angel tax, for resident or foreign investors, independent of DPIIT recognition status.",
+      "source_url": "https://www.guptachandanassociates.com/startup-india-dpiit-recognition-tax-benefits/",
+      "as_of": "2026",
+      "confidence": "secondary"
+    },
+    {
+      "claim": "Generalist (non-sector-specific) incubators reported as actively running SISFS cohorts, relevant to a software/media startup rather than a deep-science one, include NSRCEL (IIM Bangalore), CIIE.CO (IIM Ahmedabad), and T-Hub (Hyderabad); CCAMP (Bangalore) is a named SISFS incubator but is biotech/life-sciences focused and a weaker fit. This list came from search-result synthesis, not a direct fetch of each incubator's current empanelment status -- confirm live before applying.",
+      "source_url": "https://firstunicornstartup.com/learn/startup-india/startup-india-seed-fund-complete-guide",
+      "as_of": "2026",
+      "confidence": "secondary"
+    }
+  ],
+  "open_questions": [
+    "Is SISFS actually open for new applications right now (16 Sept 2026), or is it genuinely between cycles as secondary sources from August 2026 suggest? The live application portal (seedfund.startupindia.gov.in) is a client-rendered app that returned no readable content to this research's fetch tooling -- needs a direct check (log into the portal, or call an incubator such as NSRCEL/T-Hub/CIIE directly) rather than trusting blog aggregators.",
+    "Has the original Rs 945 crore SISFS corpus been topped up or formally renewed for a next cycle, and on what timeline? One source claims DPIIT is lobbying for reinstatement ahead of a future budget; this was not found in any primary government source.",
+    "Is the Budget 2026-27 'SME Growth Fund' (Rs 10,000 crore, equity support) the same initiative as 'Fund of Funds 2.0' (Rs 10,000 crore, Budget 2025, SIDBI/AIF route, guidelines out ~April 2026), a successor to it, or a genuinely distinct scheme? Reporting was not conclusive either way.",
+    "Exact CGSS notification date (8 May 2025 vs 13 May 2025 in different secondary sources) -- immaterial to the numbers but worth nailing down with a CA/CS if CGSS is actually pursued.",
+    "Would Mehfilbox/heirloomfilms, once incorporated, actually score well on SISFS's stated selection criteria of 'novelty' and 'USP of the technology, associated IP' (Guidelines Sec 7.2.v) given the core product already works on a conventional Next.js/Supabase/Bunny stack -- or does a competitive pitch need to be built specifically around the in-house-transcoding R&D question rather than the platform as a whole?",
+    "Whether DPIIT recognition, once obtained, would need to be renewed/re-verified annually or holds for the life of the 10-year eligibility window -- not confirmed in the sources read."
+  ],
+  "actions_for_mehfilbox": [
+    "1. Incorporate as a Private Limited Company (not a sole proprietorship, which is ineligible for DPIIT recognition per startupindia.gov.in/content/sih/en/startup-scheme.html) before doing anything else on this list -- every scheme researched here (SISFS, CGSS, MAARG, the Section 140/80-IAC tax holiday) is gated on DPIIT recognition, and DPIIT recognition is gated on incorporation as Pvt Ltd/LLP/registered partnership/cooperative society.",
+    "2. Apply for DPIIT Startup Recognition on the Startup India portal immediately after incorporation, not after there is more traction to show. Two separate eligibility clocks -- SISFS's 'incorporated not more than 2 years ago' window and Section 140's 'any 3 years chosen from the first 10 years from incorporation' window -- both start on the incorporation date, so registering later only shortens both; it does not preserve anything by waiting.",
+    "3. Register on MAARG (free, DPIIT-recognition-gated) the same week recognition comes through, and use a mentor conversation -- not a grant application -- as the first real pressure-test of the three build-vs-buy questions already on the table: in-house transcoding vs Bunny, a Go/Java port, and the theme-store idea. This costs nothing and de-risks the next two steps.",
+    "4. Before writing any SISFS pitch, directly confirm with the live seedfund.startupindia.gov.in portal or an incubator whether a cohort is actually open -- secondary reporting says the window closed 31 May 2026 with no successor cycle announced as of late August 2026, which this research could not independently verify or refute against the portal itself.",
+    "5. If a cycle is open, aim the Rs 20 lakh SISFS GRANT tranche (non-repayable) specifically at the in-house-transcoding question -- 'validation of proof of concept, prototype development, or product trials' is a precise description of 'should we replace Bunny Stream with our own transcoding pipeline,' and it is free money to answer a question that would otherwise come out of the business's own ~65-83% gross margin. Apply through up to three incubators in parallel (allowed under the scheme); favour generalist tech/SaaS incubators (NSRCEL-IIMB, CIIE-IIMA, T-Hub) over life-science-focused ones for a product-fit match, and independently confirm each is currently empanelled and running a cohort before applying.",
+    "6. Do not fund the Go/Java rewrite with SISFS money of either kind, and think hard before funding it at all right now: the scheme's own selection criteria score 'novelty' and 'technology USP,' which a same-product language port does not demonstrate, and docs/SCALE-PLAN.md already shows 30-80x headroom on the current Next.js/Vercel/Supabase stack at the planned 60-wedding scale (and the binding constraint, Vercel function invocations, has 33x headroom). If the rewrite still happens, it should be argued and funded as an engineering/ops decision on its own merits, not dressed up as a grant-eligible R&D project.",
+    "7. Treat the SISFS Rs 50 lakh DEBT tranche and a CGSS-backed bank loan (up to Rs 20 crore collateral-free, once DPIIT-recognized) as later-stage, optional capital -- both are repayable, and docs/SCALE-PLAN.md's own numbers say the core business does not need external capital to operate at the planned volume. If used at all, point them at a specific, costed bet: most plausibly building out the theme store (paid advanced themes) or the direct-to-couple channel that already exists in skeleton form (docs/PRODUCT.md: couple-created catalogues from /my, marked Built as of N-73) -- not general working capital.",
+    "8. Do not chase Fund of Funds / Fund of Funds 2.0 directly -- there is no application; it only matters indirectly, if and when Mehfilbox raises a priced equity round from a domestic VC fund that happens to carry FFS/FoF 2.0 as an LP. File it as market context (more dry powder in Indian VC funds right now), not a task.",
+    "9. Once incorporated and DPIIT-recognized, have an accountant/CS check two things before they go into any financial model: (a) whether Mehfilbox can realistically obtain the separate Inter-Ministerial Board certificate the Section 140 (ex-80-IAC) tax holiday requires on top of DPIIT recognition -- one source claims under 2% of recognized startups hold it -- and (b) that the angel-tax abolition (no Section 56(2)(viib) liability on rounds closed after 1 April 2025) is correctly reflected in any future fundraising paperwork."
+  ]
+}

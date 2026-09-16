@@ -6,6 +6,7 @@ Everything written about this project, in one tree.
 
 | | |
 |---|---|
+| [`15-sep-finding/`](./15-sep-finding/00-README.md) | **The 15 September 2026 review**: is the code good, port to Go/Java or not, own transcoding or Bunny, Startup India, a master project file of every workflow, direct-client onboarding and a theme store. Proposals awaiting decisions D-45 to D-53; read `00-README.md` first. |
 | [`PRODUCT.md`](./PRODUCT.md) | **What the product is**, surface by surface, with what exists and what does not. Update this first on a pivot. |
 | [`ARCHITECTURE.md`](./ARCHITECTURE.md) | How the system fits together, with diagrams. The best single entry point. |
 | [`PROGRESS.md`](./PROGRESS.md) | What has been built, and why it was built that way |
