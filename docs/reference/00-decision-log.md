@@ -778,7 +778,7 @@ direction above still rests mainly on the token system and well-known convention
 products. A real design pass needs either a successful re-fetch of the gallery pages or
 screenshots Sandeep supplies directly. N-116.
 
-## D-52a · The existing entity is a proprietorship, and cannot carry D-52 · **open** (17 Sept 2026)
+## D-52a · The existing entity is a proprietorship, and cannot carry D-52 · **decided** (17 Sept 2026)
 
 **Was:** `06-what-changes-next.md`'s D-52 assumed nothing was registered and proposed incorporating
 a fresh Private Limited Company, registered office provisionally Karnataka, pending confirmation of
@@ -789,13 +789,17 @@ where Sandeep is actually based.
 12 August 2025 in Bhopal, Madhya Pradesh, not GST-registered, classified under fund management,
 real estate and management-consultancy NIC codes — and is considering using it for Mehfilbox.
 
-**Not decided:** a sole proprietorship is outside DPIIT's eligible-entity list (Private Limited
-Company, registered Partnership, or LLP only), so it cannot carry DPIIT recognition, Section 80-IAC
-or the SISFS seed grant under any circumstance — the exact benefits D-52 was written to chase.
-Three paths are open (incorporate a fresh Pvt Ltd and leave this proprietorship alone; convert it
-into a Pvt Ltd; or use it as-is and give up DPIIT/80-IAC/SISFS for Mehfilbox), and none is chosen.
-See the full reasoning and a fourth open question — who Asha Sharma is, and whether Mehfilbox
-should sit under her personal PAN and personal liability — in
-`docs/15-sep-finding/04-startup-india.md` §2.1. D-52's Karnataka-vs-actual-base question is now
-secondary to this one: it only matters once a Pvt Ltd path is chosen, and even then Madhya Pradesh
-(§6) has never been researched as an alternative.
+**Decided (Sandeep):** incorporate a fresh Private Limited Company for Mehfilbox. Raamm Group
+Enterprises stays exactly as it is, for whatever else it is for — nothing about it changes, no
+conversion, no reuse. This is the path §2.1 called cleanest given the proprietorship's age (five
+weeks) and empty financials (zero turnover, zero assets): there was nothing of substance to give
+up by not reusing it.
+
+D-52's original question — Karnataka, provisionally, pending confirmation of Sandeep's own base —
+is now the live open item, and D-52a did not resolve it: Raamm Group Enterprises' Bhopal address
+belongs to Asha Sharma, most likely a family member, and says nothing confirmed about where
+Sandeep himself is based or where the new Pvt Ltd's registered office should sit. Madhya Pradesh
+has still never been researched against Karnataka in `docs/15-sep-finding/04-startup-india.md` §6.
+The 90-day plan's first step — confirm the actual base — still stands and now has a concrete
+reason behind it: Bhopal is a real, evidenced candidate, not a guess, and deserves the same
+research Karnataka and Kerala got before either is chosen.

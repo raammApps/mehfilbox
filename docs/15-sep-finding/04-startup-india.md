@@ -111,37 +111,33 @@ keep the MCA filing fee nil.
 > because the phrasing "already have an MSME registered company... planning to use it for this"
 > reads as if it might unlock what DPIIT recognition unlocks. It does not.
 >
-> Three real paths, not a recommendation yet — this is Sandeep's call, and the decision log records
-> it as open (D-52a):
+> **Decided (Sandeep, 17 Sept, D-52a): path 1.** Incorporate a fresh Private Limited Company for
+> Mehfilbox; leave Raamm Group Enterprises exactly as it is, for whatever else it is for — no
+> conversion, no reuse. Given the proprietorship is five weeks old with zero turnover and zero
+> assets, there was nothing of substance to give up. The two paths not taken, for the record: a
+> Part IX conversion of Raamm Group Enterprises into a Pvt Ltd (more paperwork than fresh
+> incorporation, and little history in a five-week-old entity worth preserving anyway), or using it
+> as-is and giving up DPIIT/80-IAC/SISFS permanently (cheapest, but abandons the entire point of
+> this document).
 >
-> 1. **Incorporate a fresh Private Limited Company for Mehfilbox**, and leave Raamm Group
->    Enterprises as whatever else it is for. Given the proprietorship is five weeks old with zero
->    turnover and zero assets, there is nothing of substance to lose by not reusing it, and this is
->    the only path that keeps every recommendation in the rest of this document intact.
-> 2. **Convert Raamm Group Enterprises into a Private Limited Company** — a legal Part IX
->    conversion, with more paperwork and cost than fresh incorporation, and Asha Sharma becoming a
->    shareholder of the resulting company for her prior proprietorship interest. Given how new and
->    empty the proprietorship is, there is very little history actually worth preserving through a
->    conversion.
-> 3. **Use Raamm Group Enterprises as it stands**, invoice through it, and accept that DPIIT
->    recognition, the 80-IAC tax holiday and the SISFS seed grant are permanently unavailable to
->    Mehfilbox under this entity. Cheapest if the goal was only ever a GST-registered billing
->    vehicle, not the grant and tax track this document was written to chase.
->
-> Whichever path, three follow-ups do not wait on the choice: **confirm who Asha Sharma is and
-> whether operating Mehfilbox under her personal PAN and unlimited proprietor's liability is
-> intended** (a proprietorship has no separate legal personality — every liability is hers
-> personally); **the NIC codes need correcting to an IT/software/media classification** regardless
-> of which path is chosen, since state IT-sector schemes and even a future company's own Udyam
-> registration should describe what the business actually does; and **§6's state-scheme table has
-> no Madhya Pradesh row** — it was never researched, and should be before treating Bhopal as
-> settled either way.
+> **Two follow-ups do not wait on that decision, and are not yet done:** **confirm who Asha Sharma
+> is** — she is not part of Mehfilbox's new company, so this only matters for understanding what
+> Raamm Group Enterprises actually is, not for anything Mehfilbox needs; and **the
+> registered-office state is still open** — Karnataka was only ever provisional pending Sandeep's
+> actual base, and Raamm Group Enterprises' Bhopal address is evidence worth weighing, not proof,
+> since it belongs to a family member rather than being confirmed as Sandeep's own location. §6's
+> state table has no Madhya Pradesh row and should get one before either state is chosen. The
+> NIC-code mismatch noted below applies only to Raamm Group Enterprises, which is now out of scope
+> for Mehfilbox — the new Pvt Ltd's own Udyam registration should simply be filed correctly under
+> an IT/software/media code from the start.
 
 > **Correction, 17 September 2026.** The paragraph below was written assuming nothing was
 > registered. That was wrong: Sandeep has a sole proprietorship, **Raamm Group Enterprises**
-> (Udyam `UDYAM-MP-10-0138268`, incorporated 12 Aug 2025, Bhopal, Madhya Pradesh — from the two
-> certificates he shared), and is considering using it for Mehfilbox. It changes §2.1's
-> recommendation materially, not just §2.2's mechanics — see the box at the end of §2.1.
+> (Udyam `UDYAM-MP-10-0138268`, incorporated 12 Aug 2025, Bhopal, Madhya Pradesh), owned by a
+> family member — see the box at the end of §2.1 for what it is. **Decided the same day (D-52a):
+> Mehfilbox gets a fresh Private Limited Company; Raamm Group Enterprises stays untouched.** So the
+> paragraph below is accurate as written — "nobody legally owns Mehfilbox today except Sandeep
+> personally" was and remains true, since the proprietorship was never a candidate to own it.
 
 ### 2.2 Moving the existing code into the company
 

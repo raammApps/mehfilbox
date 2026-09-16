@@ -102,19 +102,20 @@ Measure before deciding. Full cost model and triggers to revisit:
 
 ### 4. Startup India, under a new company?
 
-**Yes to DPIIT recognition — but not through what is registered today.** This answer was written
-assuming nothing existed; **17 September correction: Sandeep has a proprietorship, Raamm Group
-Enterprises (Udyam `UDYAM-MP-10-0138268`), owned by Asha Sharma, and is weighing whether to use it.
-A proprietorship cannot get DPIIT recognition, the 80-IAC tax holiday, or the SISFS seed grant —
-none of DPIIT's eligible entity types include one.** Udyam (MSME) registration and DPIIT Startup
-Recognition are different systems; having the first says nothing about the second, which is worth
-being direct about since the two are easy to conflate. Three paths are open and none is chosen —
-see [04 §2.1](04-startup-india.md#21-private-limited-llp-or-opc) and decision **D-52a**. The rest
-of the original answer still stands once a path is picked: DPIIT recognition is free, saves
-**₹9,000** on the "Mehfilbox" trademark filing alongside it, and the SISFS seed grant of **up to
-₹20 lakh** is genuinely uncertain regardless — **we do not know whether the current application
-cycle is even open**, and the live portal could not be read directly to confirm. Full plan, with
-dates: [04-startup-india.md](04-startup-india.md).
+**Yes — incorporate a fresh Private Limited Company for Mehfilbox, and apply for DPIIT
+recognition immediately.** This answer was originally written assuming nothing was registered;
+that was wrong — Sandeep has a proprietorship, Raamm Group Enterprises (Udyam
+`UDYAM-MP-10-0138268`), owned by Asha Sharma. **A proprietorship cannot get DPIIT recognition,
+the 80-IAC tax holiday or the SISFS seed grant — none of DPIIT's eligible entity types include
+one** — so it was never a live option for this track, and Sandeep decided (17 Sept, **D-52a**) to
+leave it untouched and incorporate fresh instead. DPIIT recognition is free, saves **₹9,000** on
+the "Mehfilbox" trademark filing alongside it, and the SISFS seed grant of **up to ₹20 lakh** is
+genuinely uncertain regardless — **we do not know whether the current application cycle is even
+open**, and the live portal could not be read directly to confirm. **Still open: the
+registered-office state.** Raamm Group Enterprises sits in Bhopal, Madhya Pradesh — a family
+member's address, not confirmed as Sandeep's own base — and Madhya Pradesh has never been
+researched against the provisional Karnataka default (§6). Full plan, with dates:
+[04-startup-india.md](04-startup-india.md).
 
 ### 5. A master project file, documenting every workflow
 
@@ -179,7 +180,7 @@ has the full reasoning and file paths behind every one.
 | D-49 — Hold the direct-client door until the studio-safety fixes and Razorpay ship? | **Yes** |
 | D-50 — Direct-client price: test at ₹3,499, floored at the ₹1,999 studio wholesale price, once the door opens? | **Yes** — and not printed "excl. GST" until the registration question below is answered |
 | D-51 — Themes stay free for every studio; a paid tier waits for ten direct signups? | **Yes** |
-| D-52 — Incorporate as a Private Limited Company, registered office provisionally Karnataka? | **Superseded by D-52a, 17 Sept.** A proprietorship (Raamm Group Enterprises) already exists; whether to use it, convert it, or incorporate fresh alongside it is open, and it decides the state question too — Madhya Pradesh, where that entity sits, has never been researched against Karnataka |
+| D-52 / D-52a — Incorporate as a Private Limited Company? | **Yes, decided 17 Sept (D-52a).** A proprietorship, Raamm Group Enterprises, already exists and stays untouched; Mehfilbox gets a fresh Pvt Ltd instead, since the proprietorship cannot carry DPIIT/80-IAC/SISFS. Registered-office **state is still open** — Karnataka was only ever provisional, and Madhya Pradesh (where the family entity sits) has never been researched against it |
 | D-53 — Set an 8-week stop date (11 November 2026) on the codebase remediation effort? | **Yes** |
 | Buy Vercel Pro now ($20/month, about ₹1,900) to get off the GitHub Actions scheduler? | **Yes — buy it now, rather than build a workaround** |
 | Stand up staging (N-87) right after the bug fixes, before the next schema migration? | **Yes — one day and two free accounts; the conformance work everything else rests on cannot start without it** |
