@@ -238,6 +238,11 @@ one from scratch; the wizard's step 2 offers every saved style.
 **A house style in use by a published wedding is frozen.** Changing it would silently repaint a
 delivered catalogue. **Duplicate and edit** makes a new style instead.
 
+**Every theme is free to duplicate, without limit.** The styles page also lists every theme —
+built in or added by the platform — each with its own **Duplicate as a house style** button. It
+makes a new, fully editable style starting from that theme's own colours, which you can then
+rename, restyle and set as default like any other.
+
 ### Sections available
 
 Phase 0: **billboard**, **film row**, **photo row**, **letter**, **photo grid**.

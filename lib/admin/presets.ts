@@ -3,6 +3,7 @@ import { randomUUID } from 'node:crypto'
 import { z } from 'zod'
 import { ApiError } from '@/lib/http/errors'
 import { brandingSchema, localeSchema, presetSchema, type Catalogue, type Preset } from '@/lib/schema'
+import type { ThemeDefinition } from '@/themes/contract'
 import { allThemes } from '@/themes/resolve'
 import { TEMPLATES } from './templates'
 
@@ -53,6 +54,39 @@ export function presetFromCatalogue(
     branding: catalogue.branding,
     locale: catalogue.locale,
     passcodeOn: catalogue.privacy === 'passcode' && catalogue.passcodeHash !== null,
+    createdAt: now.toISOString(),
+    updatedAt: now.toISOString(),
+  })
+}
+
+/**
+ * A house style seeded from a platform theme rather than another style (D-57, N-115): "make a
+ * copy, edit, save as new," extended from copying a saved style to copying any theme a studio can
+ * see, built-in or platform-authored. Free to a studio without limit — the client's own version of
+ * this, capped at a "basic five," is N-113/N-115's other half and waits on the payment seam.
+ *
+ * Only `theme` and `accent` come from the theme itself. `displayFont` is left unset on purpose —
+ * absent means "the theme's own face" (see `ThemePicker`), and setting it here would make the
+ * copy diverge from the theme the moment a studio picks a different one from the picker later.
+ * Everything else (`presentedBy`, `logoUrl`) has no equivalent on a theme, which is tokens only —
+ * it seeds from the studio's own branding, same as a blank "New house style" already does.
+ */
+export function presetFromTheme(
+  theme: Pick<ThemeDefinition, 'id' | 'tokens'>,
+  name: string,
+  orgId: string,
+  studioBranding: Pick<Preset['branding'], 'presentedBy' | 'logoUrl' | 'platformCredit'>,
+  now = new Date(),
+): Preset {
+  return presetSchema.parse({
+    id: randomUUID(),
+    orgId,
+    name,
+    isDefault: false,
+    templateId: 'keepsake',
+    branding: { ...studioBranding, theme: theme.id, accent: theme.tokens.accent },
+    locale: 'en',
+    passcodeOn: false,
     createdAt: now.toISOString(),
     updatedAt: now.toISOString(),
   })

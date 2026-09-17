@@ -8,6 +8,7 @@ import { hashSecret, verifySecret } from '@/lib/crypto'
 import { setRepository } from '@/lib/db'
 import { MemoryRepository, emptySnapshot } from '@/lib/db/memory-repository'
 import { catalogueSchema, operatorSchema, orgSchema, presetSchema, type Catalogue } from '@/lib/schema'
+import { builtInThemes } from '@/themes/registry'
 
 /**
  * House styles (D-36, doc 16 §5).
@@ -247,6 +248,36 @@ describe('the freeze (D-36)', () => {
     await create({ presetId: made.preset.id })
     expect((await patchStyle(made.preset.id, { branding: { theme: 'classic' } })).status).toBe(200)
     expect((await deleteStyle(made.preset.id)).status).toBe(200)
+  })
+})
+
+describe('duplicating a theme into a style (D-57, N-115)', () => {
+  it('seeds the theme’s own accent, and carries the studio’s presented-by, not the theme’s', async () => {
+    const classic = builtInThemes().find((theme) => theme.id === 'classic')!
+    const { status, body } = await postStyle({ name: 'Classic style', duplicateOf: 'classic' })
+    expect(status).toBe(201)
+    expect(body.preset).toMatchObject({
+      name: 'Classic style',
+      templateId: 'keepsake',
+      branding: { theme: 'classic', accent: classic.tokens.accent, presentedBy: 'Kalyanam Weddings' },
+      isDefault: false,
+    })
+    // The theme's own face wins unless the studio overrides it — same as a blank new style.
+    expect(body.preset.branding.displayFont).toBeUndefined()
+    expect((await repo.listPresets(MINE)).map((p) => p.name)).toEqual(['Classic style'])
+  })
+
+  it('is not frozen and not scoped to an org — every studio can duplicate the same theme', async () => {
+    const first = await postStyle({ name: 'A', duplicateOf: 'feed' })
+    const second = await postStyle({ name: 'B', duplicateOf: 'feed' })
+    expect(first.status).toBe(201)
+    expect(second.status).toBe(201)
+    expect(first.body.preset.id).not.toBe(second.body.preset.id)
+  })
+
+  it('404s on an id that is neither a style this studio owns nor a known theme', async () => {
+    const refused = await postStyle({ name: 'Nope', duplicateOf: 'not-a-real-theme' })
+    expect(refused.status).toBe(404)
   })
 })
 

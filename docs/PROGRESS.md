@@ -2535,3 +2535,61 @@ Files: `docs/help/studio.md` (new), `docs/help/client.md` (new), `components/hel
 `.claude/skills/next-item/SKILL.md`, `.claude/skills/ship/SKILL.md`, `docs/USAGE-GUIDE.md`
 (deleted), `docs/README.md`, `docs/PRODUCT.md`, `docs/MANUAL-TEST.md`. New dependencies:
 `react-markdown`, `remark-gfm`, `rehype-slug`.
+
+## N-115, studio half · The theme store — 18 September 2026
+
+D-57: every platform theme is free to a studio, without limit, **including duplicating any one
+into an editable house style** — "make a copy, edit, save as new," the exact mechanic house
+styles already had for duplicating a saved style (`duplicateOf`, N-64), extended to accept a
+theme id as well as a preset id. The client half — a "basic five" free, anything past that
+purchased — stays open, blocked on N-113's payment seam; nothing here builds toward it beyond
+using the same `duplicateOf` field.
+
+**`POST /api/admin/presets`** tries `repository.getPreset(duplicateOf, orgId)` first, unchanged;
+on a miss it now checks `duplicateOf` against `allThemes()` (built-in and platform-authored,
+enabled or withdrawn — a studio duplicating a style already on a withdrawn theme must still be
+able to). A match builds a new preset via `presetFromTheme` (`lib/admin/presets.ts`), seeded with
+the theme's own `accent` and `theme` id. **`displayFont` is deliberately left unset** rather than
+copied from the theme's tokens — absent means "the theme's own face" everywhere else in the
+product (`ThemePicker`), and writing it explicitly would make the copy diverge from the theme the
+first time a studio picked a different one from a picker elsewhere. `presentedBy`/`logoUrl` seed
+from the studio's own org branding, since a theme is tokens only and has no equivalent — the same
+source a blank "New house style" already uses.
+
+**`/admin/studio/styles`** gained a "Themes" section below the studio's own saved styles: every
+enabled theme as a card (`ThemeSwatch`, reused), each with a new **Duplicate as a house style**
+button (`components/admin/DuplicateThemeButton.tsx`) that posts the duplicate and routes straight
+to the new style's editor — the same one-click shape `HouseStyleActions`' existing Duplicate
+button already has, aimed at a theme instead of a saved style.
+
+**The ticket's own route reference didn't hold up under inspection**, worth recording since it
+shaped the design: `/admin/platform/themes` is platform-admin-only (`getPlatformAdmin()` +
+`notFound()`), unreachable by a studio operator at all, so "works from `/admin/platform/themes`"
+could not be literal. Read D-57 itself instead, which names the actual extension point precisely
+(`duplicateOf`, `app/api/admin/presets/route.ts:23-44`) and settles what the ticket's route
+mention only gestured at: a studio-facing page offering every theme with the same duplicate
+mechanic, wherever it lives — which is `/admin/studio/styles`, since that's already where a
+studio's saved styles and their Duplicate buttons live.
+
+**Found live-testing, unrelated to this change:** this developer's `.env.local` still carries
+`DEV_OPERATOR_EMAIL=operator@mehfil.test` / `DEV_OPERATOR_PASSWORD=mehfil-dev` — the pre-rebrand
+values, not `docs/NEXT.md`'s documented `operator@mehfilbox.test` / `mehfilbox-dev`. Gitignored
+and local to this machine, not fixed here; noted so the next session that hits "those details did
+not work" locally does not lose time to it.
+
+3 new unit tests in `tests/unit/house-styles.test.ts` (seeds the theme's own accent and the
+studio's presented-by, not the theme's; not org-scoped — any studio can duplicate the same theme;
+404s on an id that is neither a style this studio owns nor a known theme). Full suite: 735
+unit/component, 159 passed / 56 skipped E2E, unchanged beyond the 3 new. Verified live: signed in
+locally, duplicated Classic and Feed from `/admin/studio/styles`, confirmed each landed on its own
+new style with the theme's accent (`#8a6a1e` for Classic, matching its own token), "[Theme]'s own"
+selected for the headline typeface, and the studio's own "presented by" carried over — zero
+console errors on a fresh tab.
+
+`docs/PRODUCT.md` §6 and `docs/NEXT.md`'s N-115 entry both updated to record the studio half done
+and the client half still blocked. `docs/help/studio.md`'s house-styles section gained a line
+about it, per the rule N-88 just added to the `next-item`/`ship` skills.
+
+Files: `app/api/admin/presets/route.ts`, `lib/admin/presets.ts`,
+`components/admin/DuplicateThemeButton.tsx` (new), `app/admin/studio/styles/page.tsx`,
+`tests/unit/house-styles.test.ts`, `docs/PRODUCT.md`, `docs/NEXT.md`, `docs/help/studio.md`.

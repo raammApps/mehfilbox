@@ -184,6 +184,14 @@ Headroom: ~33× on function invocations at 10 weddings a month.
 > branding panel, the whole guest surface following it (D-35) — and studios save **house styles**
 > on top of it (D-36). What remains open below is the *marketplace*: selling one, and third
 > parties.
+>
+> **18 September 2026, N-115, studio half — D-57 answers question 3 below, at least for a
+> studio.** Every theme is free to a studio, without limit, **including duplicating any one into
+> an editable house style** — `/admin/studio/styles` offers every theme with a **Duplicate as a
+> house style** button, which is `POST /api/admin/presets`'s existing `duplicateOf` mechanism
+> (N-64) extended to accept a theme id as well as a preset id. This is close to "The honest read"
+> below, built rather than just argued for. **The client half — a "basic five" free, anything past
+> that a purchase — is still open**, blocked on N-113's payment seam the same way N-113 itself is.
 
 **Was missing, and the largest single item on this page.** The text below is kept as the
 statement of the problem.

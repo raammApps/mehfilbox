@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { AdminChrome } from '@/components/admin/AdminChrome'
+import { DuplicateThemeButton } from '@/components/admin/DuplicateThemeButton'
 import { HouseStyleActions } from '@/components/admin/HouseStyleActions'
 import { ThemeSwatch } from '@/components/admin/ThemeCards'
 import { getOperatorSession, getSessionOrg } from '@/lib/admin/session'
@@ -113,6 +114,40 @@ export default async function HouseStylesPage() {
             })}
           </ul>
         )}
+
+        {/*
+          Every theme, free to duplicate into an editable house style (D-57, N-115) — "make a
+          copy, edit, save as new," the same mechanic as the Duplicate button above, aimed at a
+          theme instead of a saved style. Withdrawn themes are left off: a studio can still edit a
+          style already on one, but starting a fresh copy from it would be offering something the
+          platform has taken back.
+        */}
+        <section className="mt-10">
+          <h2 className="text-[18px] font-bold tracking-[-0.01em]">Themes</h2>
+          <p className="mt-0.5 max-w-[62ch] text-[14px] text-[var(--color-l-text-mid)]">
+            Free for your studio, and there is no limit — duplicate any one into a house style of
+            your own, then edit the colour, the layout and everything else about it.
+          </p>
+          <ul className="mt-4 grid gap-3 sm:grid-cols-3">
+            {themes
+              .filter((theme) => theme.enabled)
+              .map((theme) => (
+                <li key={theme.id} className="rounded-[var(--radius-card)] border border-[var(--color-l-line)] bg-white p-2">
+                  <ThemeSwatch theme={theme} />
+                  <p className="mt-2 flex items-center gap-1.5 text-[14px] font-semibold">
+                    {theme.name}
+                    {theme.source === 'custom' ? (
+                      <span className="rounded-[var(--radius-pill)] bg-[var(--color-l-surface-2)] px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-[0.06em] text-[var(--color-l-text-mid)]">
+                        New
+                      </span>
+                    ) : null}
+                  </p>
+                  <p className="mt-0.5 text-[12px] leading-snug text-[var(--color-l-text-mid)]">{theme.description}</p>
+                  <DuplicateThemeButton themeId={theme.id} themeName={theme.name} />
+                </li>
+              ))}
+          </ul>
+        </section>
       </div>
     </AdminChrome>
   )

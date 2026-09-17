@@ -255,12 +255,17 @@ default — this ticket is mostly naming that the override is the mechanism, tig
 the override automatically at the point a paid registration (N-113) or a plan purchase (N-80)
 happens, instead of a platform admin typing a number in by hand.
 
-### N-115 · The theme store  ·  ~1 session  ·  **needs N-113 for the client half**  ·  D-57
+### N-115 · The theme store  ·  **studio half done, 18 September 2026**  ·  client half **blocked on N-113**  ·  D-57
 
-Two halves, buildable separately. **Studio half:** extend house styles' `duplicateOf` (N-64,
-`app/api/admin/presets/route.ts:23-44`) to accept a platform theme id as its source, so "make a
-copy, edit, save as new" works from `/admin/platform/themes` the same way it already works from a
-saved house style — no new schema. **Client half:** a `tier` column on `themes`
+Two halves, buildable separately. **Studio half: done.** House styles' `duplicateOf`
+(`app/api/admin/presets/route.ts`, N-64) now accepts a theme id as well as a preset id —
+`/admin/studio/styles` offers every enabled theme with a **Duplicate as a house style** button, so
+"make a copy, edit, save as new" works from a theme exactly the way it already worked from a saved
+style. No new schema, matching the ticket's own constraint: a theme has no `presentedBy`/`logoUrl`
+of its own, so those still seed from the studio's own branding, the same as a blank "New house
+style" already does.
+
+**Client half — still open.** A `tier` column on `themes`
 (`supabase/migrations/0019_themes.sql` has none today), a catalogue-scoped entitlement write (the
 seam `lib/entitlements.ts` was built to support and nothing has ever used, per `map-commerce.md`
 §7), a "locked until bought" state in the customizer picker, and the purchase itself, which is
