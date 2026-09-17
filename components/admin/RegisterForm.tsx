@@ -78,7 +78,7 @@ export function RegisterForm({ challenge }: { challenge: ChallengeConfig }) {
 
   return (
     <form onSubmit={submit} className="mx-auto max-w-[420px] py-12">
-      <h1 className="text-[24px] font-bold">Create a partner account</h1>
+      <h1 className="text-[24px] font-bold">Create a studio account</h1>
       <p className="mb-6 mt-1 text-[15px] text-[var(--color-l-text-mid)]">
         For studios and planners. You will build catalogues for your couples and hand each one
         over when it is ready.

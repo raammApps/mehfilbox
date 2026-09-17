@@ -66,7 +66,7 @@ function MarketingNav() {
           Studio sign in
         </Link>
         <Link href="/login?door=couple" className="type-meta text-text-mid underline-offset-4 hover:underline">
-          Couple sign in
+          Client sign in
         </Link>
       </nav>
     </header>
@@ -348,7 +348,7 @@ function MarketingFooter() {
             Studio sign in
           </Link>
           <Link href="/login?door=couple" className="type-meta text-text-mid underline-offset-4 hover:underline">
-            Couple sign in
+            Client sign in
           </Link>
         </nav>
       </div>

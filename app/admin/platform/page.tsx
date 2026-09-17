@@ -34,7 +34,7 @@ export default async function PlatformPage() {
   ])
 
   const partners = orgs.filter((org) => org.kind === 'partner')
-  const couples = orgs.filter((org) => org.kind === 'couple')
+  const clients = orgs.filter((org) => org.kind === 'couple')
   const live = catalogues.filter((catalogue) => catalogue.status === 'published').length
   const outstanding = balances.reduce((total, balance) => total + balance.available, 0)
   const suspended = partners.filter((org) => org.status === 'suspended').length
@@ -51,7 +51,7 @@ export default async function PlatformPage() {
 
       <dl aria-label="At a glance" className="mb-8 grid gap-3 sm:grid-cols-3 lg:grid-cols-5">
         <Stat label="Studios" value={partners.length} hint={suspended > 0 ? `${suspended} suspended` : undefined} href="/admin/platform/studios" />
-        <Stat label="Couples" value={couples.length} href="/admin/platform/couples" />
+        <Stat label="Clients" value={clients.length} href="/admin/platform/clients" />
         <Stat label="Catalogues" value={catalogues.length} hint={`${live} live · ${catalogues.length - live} draft`} href="/admin/platform/catalogues" />
         <Stat label="Credits outstanding" value={outstanding} hint="unspent, across every studio" />
         <Stat

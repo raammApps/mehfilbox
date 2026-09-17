@@ -13,9 +13,14 @@ export type Door = 'studio' | 'couple'
  * Two doors, one credential store (D-33).
  *
  * The door is a **tab, not a credential.** Both post to the same session route, and where a
- * person lands is decided by the org their operator row belongs to — a couple who picks the
+ * person lands is decided by the org their operator row belongs to — a client who picks the
  * studio tab by mistake still ends up in their own account. What the door changes is the words:
- * a studio is told where to sign up, a couple is told their studio made this sign-in.
+ * a studio is told where to sign up, a client is told their studio made this sign-in.
+ *
+ * "Client" rather than "Couple" (D-42): the account this door signs into is not always a
+ * couple's — a naming day or a fashion show has a client and no couple, and two of the seven
+ * occasions the wizard offers were never a wedding at all. `orgKind = 'couple'` does not change;
+ * it is a database value nobody reads as a word.
  *
  * The challenge appears when the server says so (D-34) — after the third failure on this
  * address or this device, when a captcha driver is configured — and never before.
@@ -72,7 +77,7 @@ export function LoginForm({
   const copy =
     door === 'couple'
       ? {
-          heading: 'Couple sign in',
+          heading: 'Client sign in',
           body: 'Your studio created this sign-in and sent you the first password. Change it whenever you like.',
         }
       : {
@@ -144,7 +149,7 @@ function DoorTabs({ door, email }: { door: Door; email: string }) {
       {(
         [
           ['studio', 'Studio'],
-          ['couple', 'Couple'],
+          ['couple', 'Client'],
         ] as const
       ).map(([value, label]) => (
         <Link

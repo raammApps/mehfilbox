@@ -1,7 +1,7 @@
 # Usage guide
 
 Every workflow the product supports, in the order somebody meets them: a partner signs up, builds
-a wedding, hands it to the couple, and the couple keeps it going.
+a wedding, hands it to the client, and the client keeps it going.
 
 This describes **what the software does today**, not what is planned. Where a flow is incomplete
 or needs a person with a password, it says so rather than reading around it. `docs/NEXT.md` holds
@@ -14,7 +14,7 @@ The product lives at **`heirloomfilms.in`** — the console at `/admin`, a weddi
 - **Getting an account** — [Registration](#2-partner-registration) · [Signing in](#3-signing-in-and-out)
 - **Building a wedding** — [Create](#4-creating-a-catalogue) · [Films](#5-films) · [Photographs](#6-photographs) · [Customizer](#7-the-customizer) · [Publish](#8-publishing)
 - **Running it** — [Settings](#9-settings) · [Deleting](#10-deleting-a-catalogue) · [Handover](#11-handing-a-wedding-to-the-couple)
-- **The other side** — [Guests](#12-what-a-guest-sees) · [Couples](#13-what-a-couple-can-do)
+- **The other side** — [Guests](#12-what-a-guest-sees) · [Clients](#13-what-a-client-can-do)
 - **Platform** — [Platform admin](#14-platform-admin) · [Limits](#15-limits-and-entitlements) · [When things go wrong](#16-when-something-goes-wrong)
 
 ---
@@ -24,14 +24,16 @@ The product lives at **`heirloomfilms.in`** — the console at `/admin`, a weddi
 | Role | Belongs to | Can see |
 |---|---|---|
 | **Partner** | their own org | every catalogue their org owns |
-| **Couple** | their own org, created at handover | the one wedding handed to them |
+| **Client** | their own org, created at handover | the one wedding handed to them |
 | **Platform admin** | **no org at all** | every org, read-only |
 | **Guest** | nothing — no account | one catalogue, via its link |
 
-Partner and couple are the same software wearing different hats: a couple's org is an ordinary
+Partner and client are the same software wearing different hats: a client's org is an ordinary
 org that happens to hold one catalogue. That is deliberate. An "owner" column instead would make
 every query in the product ask *"my org, or am I the owner?"*, and cross-tenant leaks live in
-that branch.
+that branch. The database value `orgKind = 'couple'` does not change — it is not a word anybody
+reads, and the client is not always a couple: a naming day or a fashion show has a client and no
+couple (D-42).
 
 A platform admin is **not** a member of any org, for the same reason. There is no way to widen a
 partner into an admin, in either direction.
@@ -418,9 +420,9 @@ somewhere that explains itself, never on a 404.
 
 ---
 
-## 13. What a couple can do
+## 13. What a client can do
 
-After claiming, a couple's console is the partner's console minus the handover panel. They can:
+After claiming, a client's console is the partner's console minus the handover panel. They can:
 
 - add and remove films and photographs,
 - rearrange and rename sections, change branding,
@@ -475,7 +477,7 @@ point at which a keepsake becomes a folder; if you routinely want past it, the p
 drifted into being an archive.
 
 They are no longer constants — a catalogue or an org can be granted more, and **a catalogue's own
-grant wins**, per limit. That matters after a handover: a couple who buys storage must not stay
+grant wins**, per limit. That matters after a handover: a client who buys storage must not stay
 capped by a partner who has already left the relationship.
 
 > **Nothing writes a grant yet** — that is the billing work (N-20). Until

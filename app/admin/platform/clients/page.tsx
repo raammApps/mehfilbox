@@ -9,17 +9,20 @@ import { getRepository } from '@/lib/db'
 export const dynamic = 'force-dynamic'
 
 /**
- * Every couple's account with its catalogues (doc 16 §8) — the support view for "we can't get
- * in", which is the one thing a couple writes to us about. One write: a set-password link.
+ * Every client account with its catalogues (doc 16 §8) — the support view for "we can't get
+ * in", which is the one thing a client writes to us about. One write: a set-password link.
+ *
+ * "Client" rather than "Couple" (D-42): the account is not always a couple's, and `orgKind`
+ * itself stays `'couple'` regardless — a database value nobody reads as a word.
  */
-export default async function PlatformCouplesPage() {
+export default async function PlatformClientsPage() {
   const admin = await getPlatformAdmin()
   if (!admin) notFound()
 
   const repository = getRepository()
-  const couples = await repository.listOrgs('couple')
+  const clients = await repository.listOrgs('couple')
   const rows = await Promise.all(
-    couples.map(async (org) => ({
+    clients.map(async (org) => ({
       org,
       operators: await repository.listOperators(org.id),
       catalogues: await repository.listCataloguesForCouple(org.id),
@@ -29,7 +32,7 @@ export default async function PlatformCouplesPage() {
   return (
     <div className="mx-auto min-h-svh w-full max-w-[1100px] p-6">
       <header className="mb-4">
-        <h1 className="text-[24px] font-bold tracking-[-0.01em]">Couples</h1>
+        <h1 className="text-[24px] font-bold tracking-[-0.01em]">Clients</h1>
         <p className="mt-0.5 text-[14px] text-[var(--color-l-text-mid)]">
           Accounts issued by studios, and what each one can see.
         </p>
@@ -38,7 +41,7 @@ export default async function PlatformCouplesPage() {
 
       {rows.length === 0 ? (
         <p className="rounded-[var(--radius-card)] border border-dashed border-[var(--color-l-line)] px-4 py-10 text-center text-[14px] text-[var(--color-l-text-mid)]">
-          No couple accounts yet.
+          No client accounts yet.
         </p>
       ) : (
         <ul className="flex flex-col gap-3">

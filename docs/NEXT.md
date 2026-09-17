@@ -143,20 +143,6 @@ keys, then `CAPTCHA_DRIVER=turnstile` (`GO-LIVE.md`, second pass §2). The chall
 failures is what makes the per-instance-vs-durable arithmetic stop mattering at all; the durable
 store above is the fix for as long as it stays off.
 
-### N-78 · "Client", not "Couple"  ·  ~2h  ·  **D-42**
-
-`/my` already shows every catalogue linked to the signed-in address, from any studio (N-62), so the
-substance of this gap is built. What changes is the word. "Couple" is the people in the wedding;
-the *account* is the client, and the moment a studio delivers a fashion show or a naming day the
-old word is wrong on the door.
-
-Outward copy only: the login form's door and heading, two lines on the landing page, `Couples` in
-the platform nav, `/admin/platform/couples`, the register page's "partner account" (the third word
-for the same thing), the handover and credential emails where they address the account rather than
-the people, and the usage guide. **Not** the guest surface — "the couple" stays wherever it means
-the couple — and not `orgKind = 'couple'`, which is a database value nobody sees. Hindi keys
-alongside, or `i18n.test.ts` fails.
-
 ### N-88 · A studio guide and a client guide, kept current  ·  ~1 session
 
 `docs/USAGE-GUIDE.md` exists and is the right shape, and it describes the product before the second

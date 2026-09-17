@@ -15,11 +15,11 @@ test.describe('signing in', () => {
     await expect(page.getByLabel('Email')).toHaveValue('someone@example.test')
   })
 
-  test('the couple door says where the sign-in came from, and offers no sign-up', async ({ page }) => {
+  test('the client door says where the sign-in came from, and offers no sign-up', async ({ page }) => {
     await page.goto('/login?door=studio')
-    await page.getByRole('link', { name: 'Couple' }).click()
+    await page.getByRole('link', { name: 'Client' }).click()
     await expect(page).toHaveURL(/door=couple/)
-    await expect(page.getByRole('heading', { name: 'Couple sign in' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Client sign in' })).toBeVisible()
     await expect(page.getByText(/your studio created this sign-in/i)).toBeVisible()
     await expect(page.getByRole('link', { name: /create a studio account/i })).toHaveCount(0)
   })

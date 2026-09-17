@@ -49,10 +49,10 @@ export default async function PlatformOrgPage({ params }: { params: Promise<{ id
   return (
     <div className="mx-auto min-h-svh w-full max-w-[1100px] p-6">
       <Link
-        href={org.kind === 'couple' ? '/admin/platform/couples' : '/admin/platform/studios'}
+        href={org.kind === 'couple' ? '/admin/platform/clients' : '/admin/platform/studios'}
         className="mb-3 inline-flex items-center gap-1 text-[13px] text-[var(--color-l-text-mid)] hover:text-[var(--color-l-text-hi)]"
       >
-        <span aria-hidden>←</span> {org.kind === 'couple' ? 'Couples' : 'Studios'}
+        <span aria-hidden>←</span> {org.kind === 'couple' ? 'Clients' : 'Studios'}
       </Link>
 
       <header className="mb-4">

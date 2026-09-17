@@ -2424,3 +2424,45 @@ Files: `lib/titles.ts` (new), `scripts/reslug-titles.ts` (new),
 `lib/db/seed-data.ts`, `lib/db/supabase-repository.ts`, `app/api/admin/titles/[id]/route.ts`,
 `app/api/admin/uploads/route.ts`, `app/c/[slug]/watch/[titleSlug]/page.tsx`,
 `components/admin/TitleList.tsx`, `package.json`.
+
+## N-78 · "Client", not "Couple" — 18 September 2026
+
+D-42: the account is the *client*, everywhere copy names the account — the door, the console
+list, the emails that address the account. "The couple" stays wherever it means the people in the
+wedding, which is the guest surface and the handover copy. Copy-only; `/my` already showed every
+catalogue linked to the signed-in address (N-62), so nothing about who can see what changed.
+
+**Renamed:** `LoginForm.tsx`'s door tab and heading ("Couple" → "Client", "Couple sign in" →
+"Client sign in" — the `door=couple` URL param and the `Door` type's `'couple'` value stay, same
+as `orgKind = 'couple'`, since neither is a word anyone reads); both "Couple sign in" links on the
+landing page; the platform nav's `Couples` entry and the route itself, `/admin/platform/couples` →
+`/admin/platform/clients` (file moved, function renamed, both inbound links updated —
+`app/admin/platform/page.tsx`'s stat card and `orgs/[id]/page.tsx`'s back-link); the register
+page's "Create a partner account" → "Create a studio account" (D-42's own "Was" names this as a
+*third* inconsistent word for the studio side, not a couple→client swap — "partner" needed to
+align with "Studio," used everywhere else on that door); and `docs/USAGE-GUIDE.md`'s roles table,
+its "Couples" TOC entry, and §13's heading and body.
+
+**Checked and deliberately left alone:** every occurrence where "couple" names the wedding people
+rather than the account — the landing page's marketing copy, the wizard's "Couple" name field
+(guest-facing, same field the usage guide documents at line ~106), `RegisterForm.tsx`'s "your
+couples" language-preference question, and the whole of `docs/USAGE-GUIDE.md` §11 (Handover) and
+§12 (guest surface), which D-42 names as exceptions outright. Checked the handover and credential
+email templates by hand, since the ticket named them explicitly — none contain the literal word
+"couple" anywhere, in either language: `notify.handover`/`.delivery`/`.expiry`/`.grace`/`.archived`
+all use `{coupleName}`, the wedding's *name* (schema field, untouched, out of scope), and
+`notify.credential` addresses `{name}`, the person. There was nothing to rename there.
+
+No `lib/i18n.ts` dictionary values changed — every surface in scope (`LoginForm.tsx`,
+`PlatformNav.tsx`, the clients page, the register page) is hardcoded English JSX with no `t(...)`
+call, consistent with the rest of the admin console; Hindi is a guest-locale feature, not an
+operator-console one. `tests/unit/i18n.test.ts`'s EN/HI parity gate has nothing to check here.
+
+1 E2E test's assertions updated (`e2e/auth.spec.ts`) to match the new door label and heading. Full
+suite unchanged: 732 unit/component, 159 passed / 56 skipped E2E — a copy rename with no logic
+behind it changes nothing either suite was built to catch.
+
+Files: `components/auth/LoginForm.tsx`, `app/page.tsx`, `components/admin/PlatformNav.tsx`,
+`app/admin/platform/clients/page.tsx` (moved from `.../couples/`), `app/admin/platform/page.tsx`,
+`app/admin/platform/orgs/[id]/page.tsx`, `app/admin/register/page.tsx`,
+`components/admin/RegisterForm.tsx`, `docs/USAGE-GUIDE.md`, `e2e/auth.spec.ts`.
