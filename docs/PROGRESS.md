@@ -2410,6 +2410,11 @@ change and carrying titles with no `previousSlug`/`slugChangedAt` keys at all, s
 fixture (gitignored, regenerates from `lib/db/seed-data.ts` on next boot) was the fix for *this*
 environment; the identical shape of gap in production is exactly what the migration above closes.
 
+**Migration applied to production, deploy live, both confirmed** the same day. `pnpm reslug:titles
+--write` has not been run against real data yet — no urgency, since every title untouched by it
+simply keeps its current (working) address, and it only ever needs running once to sweep up films
+renamed before this ticket existed.
+
 11 new/updated unit tests (`lib/titles.ts`, `uniqueSlug`, `titleSlugSchema`), 1 new E2E test
 (`path-mode.spec.ts`, upload → rename → guest-side redirect, settled with a signed webhook rather
 than a sleep so it is exact instead of hopeful about `FakeVideoProvider`'s processing delay).
