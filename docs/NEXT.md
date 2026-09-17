@@ -171,15 +171,6 @@ uniqueness check the catalogue slug has. Existing rows: a one-off `pnpm` script 
 titles whose slug still matches the filename pattern, with the old slug kept as a redirect for 90
 days — the deep-link spec (path-mode E2E) is the test that this did not break forwarded links.
 
-### N-77 · Generate a guest code, on both panels  ·  ~1h
-
-Changing the code is built on both sides — the studio's settings screen and the couple's
-`GuestCodePanel` both take a new code and bump `passcodeVersion`, which signs out every holder of
-the old one (N-71). What both lack is the button the wizard has: *generate one for me*
-(`generatePasscode`, six digits, no ambiguous characters), shown once with a copy control. A
-"reset" in the sense of *I forgot it* is the same button, since the owner sets the code rather than
-recovering it — say that on the panel.
-
 ### N-78 · "Client", not "Couple"  ·  ~2h  ·  **D-42**
 
 `/my` already shows every catalogue linked to the signed-in address, from any studio (N-62), so the

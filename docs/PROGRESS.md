@@ -2147,3 +2147,22 @@ own findings corrected in place at the three spots that described this as still 
 left to contradict the closed ticket.
 
 680 unit and component tests total.
+
+## N-77 · Generate a guest code, on both panels — 18 September 2026
+
+The button the wizard already has, now on the studio's settings screen and the couple's own
+`GuestCodePanel`. Extracted `generatePasscode` out of `lib/admin/presets.ts` (`server-only`,
+`node:crypto`) into a new `lib/passcode.ts` with no such tag — Web Crypto
+(`crypto.getRandomValues`) instead, present in both the browser and the Node runtime the server
+already runs on, so a client component's button can fill the field without a round trip. Same
+range as before, six digits, never a leading zero.
+
+Both panels: a "Generate one for me" button fills the visible input (typed or generated, the same
+field, same Save/Change-code step after — nothing writes until the operator or couple confirms
+it), and a Copy button once a code is present, matching `PublicLink.tsx`'s existing copy-control
+pattern. "Reset" in the sense of *I forgot it* is the same button — the owner sets the code rather
+than recovering it, said on the studio panel directly since that screen doesn't already say it;
+the couple's panel already explains the sign-out effect in its hint.
+
+2 new unit tests for the extracted `generatePasscode` (range, leading zero, low collision rate at
+50 draws). 682 unit and component tests total.

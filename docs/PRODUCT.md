@@ -298,7 +298,7 @@ it mattered, against production. Decided as D-42 to D-44; scheduled as N-77 to N
 
 | Raised | Status | Where it stands |
 |---|---|---|
-| The catalogue's owner can reset the passcode | **Built**, one button short | Both the studio's settings screen and the client's `GuestCodePanel` take a new code and sign out every holder of the old one (N-71). Neither has *generate one for me*; the wizard does. N-77. |
+| The catalogue's owner can reset the passcode | **Built** | Both the studio's settings screen and the client's `GuestCodePanel` take a new code and sign out every holder of the old one (N-71), and both now have *generate one for me* with a copy control, matching the wizard. N-77, 18 Sept. |
 | Studio signup | **Built** — decision open | Public at `/admin/register`, linked from the login form, captcha-ready, three per IP per hour, one credit granted. No approval step: D-39 chose suspend-after over approve-before, and the platform console can create a studio directly. Whether to gate it is Sandeep's call (`NEXT.md`, decisions). |
 | What "who is watching" is for | **Built** — answered, not ticketed | The profile gate is labels, not people (Bride's side · Groom's side · Friends · Family), which keeps personal data off the guest path. It is (a) the streaming moment that says what kind of thing was opened, (b) the key that Continue Watching resumes on — progress is per profile, so two phones on one code each keep their place — and (c) the seed for likes. It is **not** a sign-in and it feeds **no dashboard yet**; "who watched", for the client and the studio, is N-37 and N-38. |
 | Client login shows every catalogue for that email | **Built** | `/my` lists every catalogue linked to the signed-in address, from any studio (N-62). |

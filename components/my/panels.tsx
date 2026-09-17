@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { SaveState, type SaveStatus } from '@/components/admin/SaveState'
+import { generatePasscode } from '@/lib/passcode'
 
 /**
  * The six things a couple actually does with their catalogue (D-37), each a small panel that
@@ -40,6 +41,18 @@ export function GuestCodePanel({ catalogueId, hasCode }: { catalogueId: string; 
   const [code, setCode] = useState('')
   const [status, setStatus] = useState<SaveStatus>('idle')
   const [error, setError] = useState<string | null>(null)
+  const [copied, setCopied] = useState(false)
+
+  const copy = async () => {
+    if (!code) return
+    try {
+      await navigator.clipboard.writeText(code)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      // Clipboard is permission-gated in some browsers; the code is still visible in the box.
+    }
+  }
 
   const save = async (next: string | null) => {
     setStatus('saving')
@@ -81,8 +94,23 @@ export function GuestCodePanel({ catalogueId, hasCode }: { catalogueId: string; 
           autoComplete="off"
           minLength={4}
           maxLength={64}
-          className="h-10 w-[160px] rounded-[var(--radius-input)] border border-[var(--color-l-line)] px-3 text-[15px]"
+          className="h-10 w-[160px] rounded-[var(--radius-input)] border border-[var(--color-l-line)] px-3 text-[15px] font-mono"
         />
+        {code ? (
+          <button type="button" onClick={() => void copy()} aria-live="polite" className={secondary}>
+            {copied ? 'Copied' : 'Copy'}
+          </button>
+        ) : null}
+        <button
+          type="button"
+          onClick={() => {
+            setCode(generatePasscode())
+            setCopied(false)
+          }}
+          className={secondary}
+        >
+          Generate one for me
+        </button>
         <button type="submit" disabled={code.trim().length < 4 || status === 'saving'} className={primary}>
           {hasCode ? 'Change code' : 'Set code'}
         </button>

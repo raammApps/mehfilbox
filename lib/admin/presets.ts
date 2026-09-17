@@ -1,5 +1,5 @@
 import 'server-only'
-import { randomInt, randomUUID } from 'node:crypto'
+import { randomUUID } from 'node:crypto'
 import { z } from 'zod'
 import { ApiError } from '@/lib/http/errors'
 import { brandingSchema, localeSchema, presetSchema, type Catalogue, type Preset } from '@/lib/schema'
@@ -56,15 +56,6 @@ export function presetFromCatalogue(
     createdAt: now.toISOString(),
     updatedAt: now.toISOString(),
   })
-}
-
-/**
- * A six-digit guest code, generated when a style asks for one at creation. Six rather than four:
- * the per-catalogue bucket (D-34) allows thirty guesses across every device before it closes,
- * and a four-digit code leaves that a real fraction of the space.
- */
-export function generatePasscode(): string {
-  return String(randomInt(100000, 1000000))
 }
 
 /** The fields whose change would rewrite what a delivered wedding was made from. */

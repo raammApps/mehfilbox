@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
+import { generatePasscode } from '@/lib/passcode'
 import type { Catalogue, Locale, Privacy } from '@/lib/schema'
 import { TIMEZONES, wallTimeIn, zonedTimeToUtc } from '@/lib/time'
 
@@ -18,6 +19,28 @@ export function CatalogueSettings({ catalogue }: { catalogue: Catalogue }) {
   const [status, setStatus] = useState<string | null>(null)
   const [confirmName, setConfirmName] = useState('')
   const [deleting, setDeleting] = useState(false)
+  const [copied, setCopied] = useState(false)
+
+  /**
+   * "Generate one for me" (N-77) — the button the wizard already has, here too. The owner sets
+   * the code rather than recovering it, so this doubles as *I forgot it*: generating replaces
+   * whatever is in the box, typed or not, and Save signs out every device already holding the
+   * old one (`passcodeVersion`, N-71) — the same guarantee a hand-typed change makes.
+   */
+  const generate = () => {
+    setPasscode(generatePasscode())
+    setCopied(false)
+  }
+  const copy = async () => {
+    if (!passcode) return
+    try {
+      await navigator.clipboard.writeText(passcode)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      // Clipboard is permission-gated in some browsers; the code is still visible in the box.
+    }
+  }
 
   const save = async () => {
     const response = await fetch(`/api/admin/catalogues/${catalogue.id}`, {
@@ -142,18 +165,45 @@ export function CatalogueSettings({ catalogue }: { catalogue: Catalogue }) {
         </label>
 
         {privacy === 'passcode' ? (
-          <label className="mb-3 block">
-            <span className="mb-1 block text-[13px] font-semibold">
-              {catalogue.passcodeHash ? 'New passcode (leave blank to keep the current one)' : 'Passcode'}
-            </span>
-            <input
-              type="text"
-              value={passcode}
-              onChange={(event) => setPasscode(event.target.value)}
-              autoComplete="off"
-              className="w-full rounded-[var(--radius-input)] border border-[var(--color-l-line)] px-3 py-2 text-[15px]"
-            />
-          </label>
+          <div className="mb-3">
+            <label className="block">
+              <span className="mb-1 block text-[13px] font-semibold">
+                {catalogue.passcodeHash ? 'New passcode (leave blank to keep the current one)' : 'Passcode'}
+              </span>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={passcode}
+                  onChange={(event) => setPasscode(event.target.value)}
+                  autoComplete="off"
+                  className="w-full flex-1 rounded-[var(--radius-input)] border border-[var(--color-l-line)] px-3 py-2 text-[15px] font-mono"
+                />
+                <button
+                  type="button"
+                  onClick={copy}
+                  disabled={!passcode}
+                  aria-live="polite"
+                  className="shrink-0 rounded-[var(--radius-pill)] border border-[var(--color-l-line)] bg-white px-3 text-[13px] font-medium disabled:opacity-50"
+                >
+                  {copied ? 'Copied' : 'Copy'}
+                </button>
+              </div>
+            </label>
+            <div className="mt-1.5 flex items-center gap-2">
+              <button
+                type="button"
+                onClick={generate}
+                className="rounded-[var(--radius-pill)] border border-[var(--color-l-line)] bg-white px-2.5 py-1 text-[12px] font-medium"
+              >
+                Generate one for me
+              </button>
+              <span className="text-[12px] text-[var(--color-l-text-mid)]">
+                {catalogue.passcodeHash
+                  ? 'Forgot the current one? Generate a new one — Save replaces it, and signs out everyone still using the old code.'
+                  : 'Six digits, easy to read over the phone.'}
+              </span>
+            </div>
+          </div>
         ) : null}
 
         <div className="flex items-center gap-3">
