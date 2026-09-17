@@ -29,6 +29,11 @@ export async function GET(request: Request) {
       // as it gates the page, and lapsing does not relax it.
       throw new ApiError('FORBIDDEN', 'Enter the passcode first')
     }
+    if (verdict.kind === 'signin') {
+      // D-43: the passcode is view-only. Downloading needs the couple's or the studio's own
+      // sign-in, not merely the code.
+      throw new ApiError('UNAUTHORIZED', 'Sign in to download')
+    }
 
     const manifest = await buildManifest(verdict.catalogue)
     log.info('download manifest built', {

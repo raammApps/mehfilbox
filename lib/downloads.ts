@@ -1,5 +1,6 @@
 import 'server-only'
 import { cookies } from 'next/headers'
+import { getOperatorSession } from '@/lib/admin/session'
 import { getCachedBundle, getCachedCatalogueBySlug } from '@/lib/catalogue-cache'
 import { passcodeCookieName, verifyPasscodeGrant } from '@/lib/auth'
 import type { Catalogue } from '@/lib/schema'
@@ -21,7 +22,13 @@ import { getVideoProvider } from '@/lib/video'
 
 export type DownloadVerdict =
   | { kind: 'ok'; catalogue: Catalogue }
-  /** A passcode is set and this guest has not entered it. */
+  /**
+   * Reachable — the passcode was entered, or none is needed — but this browser is not signed in
+   * as an account this wedding belongs to. The passcode is view-only (D-43); the download page
+   * renders a sign-in prompt rather than the manifest.
+   */
+  | { kind: 'signin'; catalogue: Catalogue }
+  /** A passcode is set, this guest has not entered it, and it is not signed in as an owner either. */
   | { kind: 'locked' }
   /** No such catalogue, or one that was never published — there is nothing anyone was given. */
   | { kind: 'missing' }
@@ -34,6 +41,13 @@ export type DownloadVerdict =
  * behind it to protect. Reusing it here would have handed a passcode-protected wedding to anybody
  * with the link the moment it expired, which is exactly the wrong direction for a rule whose whole
  * point is that lapsing changes nothing about ownership.
+ *
+ * **D-43: the passcode is view-only; downloading needs the client's own sign-in.** A guest who
+ * has the code watches; the couple who own the wedding, and the studio that made it, download.
+ * `isAuthorized` is checked once and used two ways: it is what a signed-in owner uses to skip the
+ * passcode entirely (the same courtesy `getEditableCatalogue` and the playback-token route
+ * already extend an operator on their own catalogue), and it is what turns an otherwise-`ok`
+ * passcode holder into `signin` instead.
  */
 export async function resolveDownloadAccess(slug: string): Promise<DownloadVerdict> {
   const catalogue = await getCachedCatalogueBySlug(slug)
@@ -46,12 +60,30 @@ export async function resolveDownloadAccess(slug: string): Promise<DownloadVerdi
    */
   if (!catalogue.publishedAt) return { kind: 'missing' }
 
-  if (catalogue.privacy === 'passcode') {
+  const isAuthorized = await isAuthorizedToDownload(catalogue)
+
+  if (catalogue.privacy === 'passcode' && !isAuthorized) {
     const grant = (await cookies()).get(passcodeCookieName(catalogue.slug))?.value
     if (!verifyPasscodeGrant(grant, catalogue.id, catalogue.passcodeVersion)) return { kind: 'locked' }
   }
 
-  return { kind: 'ok', catalogue }
+  return isAuthorized ? { kind: 'ok', catalogue } : { kind: 'signin', catalogue }
+}
+
+/**
+ * Owns it now (`orgId`, post-handover or a studio that never handed over), is linked to it before
+ * a handover (`coupleOrgId` — `lib/my/session.ts`'s `relationOf` calls this same state "linked",
+ * and `/my/c/[id]` already offers a linked couple the download link, not only an owning one), or
+ * made it (`originOrgId`, permanently — a handover moves `orgId` away but not who filmed it).
+ */
+async function isAuthorizedToDownload(catalogue: Catalogue): Promise<boolean> {
+  const session = await getOperatorSession()
+  if (!session) return false
+  return (
+    session.orgId === catalogue.orgId ||
+    session.orgId === catalogue.coupleOrgId ||
+    session.orgId === catalogue.originOrgId
+  )
 }
 
 export type DownloadItem = {

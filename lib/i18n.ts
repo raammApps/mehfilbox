@@ -109,6 +109,11 @@ export const dictionary = {
     'download.unavailable':
       '{count} could not be prepared just now. Everything is still stored — try again in a few minutes.',
     'download.all': 'Download everything',
+    /** D-43: the passcode is view-only; downloading needs the couple's or studio's own account. */
+    'download.signIn.heading': 'Sign in to download',
+    'download.signIn.body':
+      'The passcode is enough to watch. Downloading the originals needs the account this wedding belongs to — the couple, or the studio that made it.',
+    'download.signIn.cta': 'Sign in',
 
     'premiere.eyebrow': 'Premiering soon',
     'premiere.heading': 'The films go live on {when}',
@@ -288,6 +293,10 @@ export const dictionary = {
     'download.unavailable':
       '{count} अभी तैयार नहीं हो सकीं। सब कुछ सुरक्षित है — कुछ मिनट बाद फिर कोशिश कीजिए।',
     'download.all': 'सब कुछ डाउनलोड करें',
+    'download.signIn.heading': 'डाउनलोड के लिए साइन इन करें',
+    'download.signIn.body':
+      'देखने के लिए पासकोड काफ़ी है। ओरिजिनल डाउनलोड करने के लिए उस खाते से साइन इन करना होगा जिसकी यह शादी है — दंपति का खाता, या जिस स्टूडियो ने इसे बनाया।',
+    'download.signIn.cta': 'साइन इन करें',
 
     'premiere.eyebrow': 'जल्द ही प्रीमियर',
     'premiere.heading': 'फ़िल्में {when} को लाइव होंगी',

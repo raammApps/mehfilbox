@@ -143,19 +143,6 @@ keys, then `CAPTCHA_DRIVER=turnstile` (`GO-LIVE.md`, second pass §2). The chall
 failures is what makes the per-instance-vs-durable arithmetic stop mattering at all; the durable
 store above is the fix for as long as it stays off.
 
-### N-85 · A passcode views; an account downloads  ·  ~2h  ·  **D-43**
-
-Today `resolveDownloadAccess` grants `/download` — originals, six-hour signed links, everything —
-to anyone holding the guest code. Sandeep's rule (D-43): **the passcode is view-only; downloading
-needs the client's sign-in.** A guest who has the code watches; the couple who own the wedding, and
-the studio that made it, download.
-
-The pieces exist: `getOperatorSession` says who is signed in, `couple_org_id` and `origin_org_id`
-say who may claim the wedding, and the download page already reads a verdict. The change is the
-verdict — `ok` only when the signed-in account owns or originated the catalogue — and the guest
-page's download link becoming a sign-in prompt for everyone else. Per-film download (N-22b) inherits
-the rule when it lands. Nothing to migrate.
-
 ### N-84 · The film's address is the upload's filename  ·  ~1h
 
 `/watch/whatsapp-video-2026-08-12-at-02-07-21` is a film the operator renamed *Sangeet*. The slug is

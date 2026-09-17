@@ -25,12 +25,36 @@ export default async function DownloadPage({ params }: { params: Promise<{ slug:
 
   // A locked catalogue 404s rather than explaining itself: the passcode gate lives on the
   // catalogue's own page, and this must not become a second place to probe for one.
-  if (verdict.kind !== 'ok') notFound()
+  if (verdict.kind === 'missing' || verdict.kind === 'locked') notFound()
 
   const { catalogue } = verdict
   await requireCanonicalAddress(catalogue, '/download')
   const locale = await guestLocale(catalogue)
   const t = createTranslator(locale)
+
+  // D-43: the passcode is view-only. A guest who reached this page on the passcode alone sees a
+  // sign-in prompt, not the manifest — the account this wedding belongs to is what unlocks it.
+  if (verdict.kind === 'signin') {
+    return (
+      <>
+        <ThemeStyle branding={catalogue.branding} theme={await resolveTheme(catalogue.branding)} />
+        <main className="gutter-x mx-auto max-w-[720px] py-16">
+          <p className="type-label mb-4 text-accent-hi">
+            {resolveLocalised(catalogue.coupleName, locale)}
+          </p>
+          <h1 className="type-display-lg mb-3">{t('download.signIn.heading')}</h1>
+          <p className="type-body-lg mb-8 max-w-[52ch] text-text-mid">{t('download.signIn.body')}</p>
+          <a
+            href="/login?door=couple"
+            className="type-body inline-flex rounded-[var(--radius-pill)] bg-accent px-5 py-2.5 font-semibold text-accent-ink"
+          >
+            {t('download.signIn.cta')}
+          </a>
+        </main>
+      </>
+    )
+  }
+
   const manifest = await buildManifest(catalogue)
 
   const films = manifest.items.filter((i) => i.kind === 'film')

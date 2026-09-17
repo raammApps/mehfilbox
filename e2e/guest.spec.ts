@@ -172,6 +172,28 @@ test.describe('E2E-6: access control', () => {
     expect(response.status()).toBe(404)
     expect((await response.json()).error.code).toBe('CATALOGUE_NOT_FOUND')
   })
+
+  /**
+   * D-43 (N-85): the passcode is view-only. A guest reaching the download page on nothing more
+   * than the link (no operator session at all) gets a sign-in prompt, not the manifest — and the
+   * API behind it refuses the same way, so a guest cannot get the files by skipping the page.
+   */
+  test('the download page asks a guest to sign in rather than handing over the files', async ({
+    page,
+    request,
+  }) => {
+    await page.goto(`/c/${CATALOGUE}/download`)
+    await expect(page.getByRole('heading', { name: 'Sign in to download' })).toBeVisible()
+    await expect(page.getByRole('link', { name: 'Sign in' })).toHaveAttribute(
+      'href',
+      /\/login/,
+    )
+    // The manifest itself is absent, not merely unlinked.
+    await expect(page.getByRole('link', { name: 'Download' })).toHaveCount(0)
+
+    const response = await request.get(`/api/download?catalogue=${CATALOGUE}`)
+    expect(response.status()).toBe(401)
+  })
 })
 
 /**

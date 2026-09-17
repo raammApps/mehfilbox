@@ -2323,3 +2323,34 @@ PosterCard.tsx`, `components/streaming/Lightbox.tsx`, `modules/photo-grid/Guest.
 photo-row/Guest.tsx`, `app/api/admin/catalogues/[id]/route.ts`, `app/api/admin/catalogues/[id]/
 photos/route.ts`, `app/admin/c/[id]/photos/page.tsx`, `app/admin/c/[id]/customizer/page.tsx`,
 `scripts/preflight.ts`, `docs/DEPLOYMENT.md`, `.env.example`.
+
+## N-85 · A passcode views; an account downloads — 18 September 2026
+
+`resolveDownloadAccess` granted `/download` — originals, six-hour signed links, everything — to
+anyone holding the guest code. Sandeep's rule (D-43): **the passcode is view-only; downloading
+needs the client's sign-in.** A guest who has the code watches; the couple who own the wedding,
+and the studio that made it, download.
+
+`isAuthorizedToDownload` checks a signed-in session's org against three fields, not one:
+`catalogue.orgId` (the current owner — a studio pre-handover, or the couple after), `coupleOrgId`
+(a couple linked *before* handover — `/my/c/[id]`'s own doc comment already promises a linked
+couple "download", not only an owning one, so the check has to agree), and `originOrgId` (the
+studio that made it, permanently — a handover moves `orgId` away but not who filmed it). The
+result is used twice: an authorised session skips the passcode entirely, the same courtesy
+`getEditableCatalogue` and the playback-token route already extend an operator on their own
+catalogue; and it is what turns an otherwise-`ok` passcode holder into a new `signin` verdict
+instead. The download page renders that as a sign-in prompt — tenant-branded, translated, a plain
+link to `/login?door=couple` — rather than `notFound()`; the API route answers the same case with
+a 401.
+
+Verified live, both sides: signed out, `/download` shows "Sign in to download" and
+`/api/download` 401s; signed in as the catalogue's own operator, the real manifest renders
+unchanged. 7 new unit tests (`getOperatorSession` stubbed through the same `setAuthProvider` seam
+N-27's suspension tests use — the org and operator rows for each session have to exist too, or
+the lookup returns null and every "signed in" test silently behaves as if it were not, which is
+exactly what the first draft of these tests did). 1 new E2E test, and an existing accessibility
+test's framing corrected — it was asserting on the manifest page's accessibility by accident,
+since nothing had signed in, and now correctly asserts on the sign-in prompt it actually reaches.
+
+Files: `lib/downloads.ts`, `app/api/download/route.ts`, `app/c/[slug]/download/page.tsx`,
+`lib/i18n.ts`, `tests/unit/downloads.test.ts`, `e2e/guest.spec.ts`, `e2e/gates.spec.ts`.
