@@ -892,3 +892,43 @@ Built same day: `lib/payments/razorpay.ts`, `lib/env.ts` (the enum value and the
 check), `.env.example` and `docs/DEPLOYMENT.md`. 8 new unit tests, including a real HMAC-SHA256
 round-trip against the webhook verifier — no network call reaches Razorpay in the suite, but the
 signature math is exercised for real, not mocked. 676 unit and component tests total.
+
+## D-60 · Storage tiers coexist with the duration ladder, and quota moves to the catalogue (18 Sept 2026)
+
+**Was:** D-44 proposed a storage ladder — Light 5 GB · Medium 50 GB · Heavy 100 GB · Custom
+100–300 GB — sized per occasion, explicitly undecided against `PRICING.md`'s existing
+duration-priced ladder (Deliver 90 days / Keep 12 months / Cinema 12 months, each with a fixed
+storage amount and, for Keep and Cinema, included 4K minutes). D-54 separately decided that quota
+follows what an org purchased, written at the point of purchase — framed at the *org* level,
+because that is where quota lived when D-54 was made.
+
+**Decided (Sandeep), three parts:**
+
+1. **Coexist, not replace.** A catalogue gets a storage tier (Light/Medium/Heavy/Custom, sized to
+   the occasion — Light for a single performance, Heavy for a full wedding) *and* a duration plan
+   (Deliver/Keep/Cinema, for how long it streams and how much 4K it includes). These are
+   independent axes: the tier answers "how much," the duration plan answers "for how long." Both
+   keep their own row in `plans` once N-27c seeds it.
+2. **Quota moves from the org to the catalogue.** D-54's "quota follows what was purchased" still
+   holds — it now follows what was purchased *for that catalogue*, not for the studio as a whole,
+   since a tier is chosen per occasion and a studio's different catalogues can sit on different
+   tiers (a Light-sized recital alongside a Heavy-sized wedding). `resolveLimits`'s per-org
+   override (`lib/entitlements.ts:84-87`) gets a catalogue-level counterpart above it in the
+   resolution order; the org-level override stays as the fallback for a catalogue that has not
+   purchased its own tier, so nothing regresses for an org already relying on it.
+3. **The tiers get their own prices, set in a follow-up.** Light/Medium/Heavy/Custom become
+   priced line items rather than a free relabelling of Deliver/Keep/Cinema's existing storage —
+   the actual rupee figures are not decided here and should not be guessed at build time; `plans`
+   rows for the tiers carry a placeholder price until Sandeep sets them, the same shape `PRICING.md`
+   already uses for open figures elsewhere.
+
+**Not decided here, and not blocking the build:** the exact prices (above), and whether `Custom`
+(100–300 GB) is a picker or a "contact us" tier — left to whoever builds the wizard step.
+
+**Settled by the ticket's own text, not re-litigated:** `OCCASIONS` gains `performance` and
+`event` alongside the seven it has, per N-80's own note that "Light has nothing to be for"
+without them — an implementation detail, not a pricing question.
+
+Unblocks N-80's build (seed `plans`, `resolveLimits` reads a catalogue-level tier before the org
+override, the wizard gets a tier step) and, once that lands, N-79 (buying storage) and N-21c (the
+Cinema "call them" prompt, which needs `entitlements.planId` actually assigned to something).

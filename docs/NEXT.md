@@ -171,20 +171,22 @@ and lands in the platform console next to the quota control. When N-20 lands, th
 takes a payment instead. Note the seam: quota is *per org* today and Sandeep's tiers are *per
 catalogue*; N-80 decides which, and this follows it.
 
-### N-80 · Plan tiers by storage  ·  **decision first — Sandeep's**  ·  then ~half a session
+### N-80 · Plan tiers by storage  ·  **decided 18 September 2026 (D-60)**  ·  ~half a session
 
-Proposed 13 September: **Light** (5 GB), **Medium** (50 GB), **Heavy** (100 GB), **Custom**
-(100–300 GB), with Light sized for a single performance — a fashion show, a recital — and extended
-later with add-on space. Recorded in `PRICING.md` as a proposal, because it is not what the price
-list says today: `PRICING.md` §1 sells Deliver (100 GB, 90 days), Keep (100 GB, 12 months) and
-Cinema (200 GB), priced on *duration and 4K minutes*, with storage a constant. The proposal prices
-on *storage*. Both can be true — a tier for the occasion, and a duration for the plan — but that is
-a pricing decision and it is not the agent's.
+**Light** (5 GB), **Medium** (50 GB), **Heavy** (100 GB), **Custom** (100–300 GB) — sized per
+occasion, Light for a single performance, a fashion show, a recital. D-60 settled the question
+D-44 left open: the tiers **coexist** with `PRICING.md` §1's duration ladder (Deliver/Keep/Cinema)
+rather than replacing it — a catalogue gets both a tier (how much storage) and a duration plan
+(how long, and how much 4K). Quota moves from the org to the catalogue, since a tier is chosen per
+occasion; a studio's different weddings can sit on different tiers. The tiers get their own
+prices, figures still unset — `plans` rows for them carry a placeholder until Sandeep sets them,
+which does not block seeding the rows or building the reader.
 
-Once decided, the build is N-27c's: seed `plans`, make `resolveLimits` read the plan rather than a
-bare `storage_gb`, move quota to the catalogue if the tiers are per catalogue, and give the wizard
-a tier step. `OCCASIONS` also wants `performance` and `event` alongside the seven it has, or Light
-has nothing to be for.
+The build is N-27c's: seed `plans` (duration rows and tier rows, both), give `resolveLimits` a
+catalogue-level tier to read before it falls back to the existing per-org override
+(`lib/entitlements.ts:84-87`, unchanged as the fallback), and give the wizard a tier step.
+`OCCASIONS` gains `performance` and `event` alongside the seven it has — settled by N-80's own
+text, not a fresh decision — or Light has nothing to be for.
 
 ### N-81 · Measure the limits  ·  ~2h  ·  **after three real weddings**
 
@@ -216,7 +218,8 @@ N-25b reconciles the per-catalogue estimate against the same bill; build them to
   the login form, captcha-ready, three per IP per hour, one credit granted). D-39 chose *suspend
   after* over *approve before*, and the platform console can also create a studio directly. An
   approval queue is ~2h if wanted; it costs every honest studio a wait.
-- **Plan tiers** (N-80) — the storage ladder, and whether quota is per catalogue.
+- **Plan tiers** (N-80) — decided, D-60. The remaining open figure is the tiers' actual prices,
+  needed before the wizard's tier step can show them, not before the rest of the build.
 
 ---
 

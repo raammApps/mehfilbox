@@ -11,13 +11,14 @@ All prices **exclude 18% GST** (SAC 998314).
 
 ## The plans
 
-> **Proposed 13 September 2026, not yet decided (D-44).** A storage ladder — **Light** 5 GB ·
-> **Medium** 50 GB · **Heavy** 100 GB · **Custom** 100–300 GB — with Light sized for a single
-> performance (a fashion show, a recital) and grown later with add-on space (`PRICING-MODEL.md` §3).
-> It prices on *storage*; the ladder below prices on *duration and 4K minutes* with storage a
-> constant. They can coexist — a tier for the occasion, a plan for how long it is kept — but that is
-> the decision, and until it is made `plans` stays empty (N-27c, N-80). Whether the quota moves from
-> the studio to the catalogue is part of the same call.
+> **Decided 18 September 2026 (D-60), proposed 13 September (D-44).** A storage ladder — **Light**
+> 5 GB · **Medium** 50 GB · **Heavy** 100 GB · **Custom** 100–300 GB — sized per occasion (Light
+> for a single performance, a fashion show, a recital) **coexists** with the duration ladder below
+> rather than replacing it: a catalogue gets a tier (how much) and a plan (how long, and how much
+> 4K). Quota moves from the org to the catalogue, since a tier is chosen per occasion. The tiers
+> get their own prices — figures not yet set, so `plans` carries them as placeholders until they
+> are. Still open until N-80/N-27c build it: seeding `plans`, `resolveLimits` reading a
+> catalogue-level tier, and the wizard's tier step.
 
 > **Revised 6 September 2026.** Highlights is gone; **Deliver** replaces it. The ladder is now
 > shaped like viddrop's (the per-wedding competitor `COMPETITORS.md` §1 added in September) and
