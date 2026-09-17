@@ -168,25 +168,9 @@ does not exist is a way for a client to *buy* it, which is N-20's checkout.
 The interim step is the one credits already have: an **Ask for more space** control where the
 refusal is shown, which emails `SUPPORT_EMAIL` with the org, the current quota and what was tried,
 and lands in the platform console next to the quota control. When N-20 lands, the same control
-takes a payment instead. Note the seam: quota is *per org* today and Sandeep's tiers are *per
-catalogue*; N-80 decides which, and this follows it.
-
-### N-80 · Plan tiers by storage  ·  **decided 18 September 2026 (D-60)**  ·  ~half a session
-
-**Light** (5 GB), **Medium** (50 GB), **Heavy** (100 GB), **Custom** (100–300 GB) — sized per
-occasion, Light for a single performance, a fashion show, a recital. D-60 settled the question
-D-44 left open: the tiers **coexist** with `PRICING.md` §1's duration ladder (Deliver/Keep/Cinema)
-rather than replacing it — a catalogue gets both a tier (how much storage) and a duration plan
-(how long, and how much 4K). Quota moves from the org to the catalogue, since a tier is chosen per
-occasion; a studio's different weddings can sit on different tiers. The tiers get their own
-prices, figures still unset — `plans` rows for them carry a placeholder until Sandeep sets them,
-which does not block seeding the rows or building the reader.
-
-The build is N-27c's: seed `plans` (duration rows and tier rows, both), give `resolveLimits` a
-catalogue-level tier to read before it falls back to the existing per-org override
-(`lib/entitlements.ts:84-87`, unchanged as the fallback), and give the wizard a tier step.
-`OCCASIONS` gains `performance` and `event` alongside the seven it has — settled by N-80's own
-text, not a fresh decision — or Light has nothing to be for.
+takes a payment instead. **Decided, D-60/N-80:** quota is per *catalogue* — a studio's weddings
+can sit on different tiers, and the interim control should refuse against and raise the
+catalogue's own grant, not the org's.
 
 ### N-81 · Measure the limits  ·  ~2h  ·  **after three real weddings**
 

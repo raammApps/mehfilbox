@@ -84,9 +84,10 @@ carry off every original file forever.
 **Where:** `/my` → **Start a catalogue of your own**
 
 The same five-step wizard a studio uses, in its own shape for you: the occasion comes first
-(wedding, engagement, anniversary, birthday, proposal, baby shower, naming day), there are no
-house styles to choose from since those belong to studios, and there is no step for "the couple's
-sign-in" — it is already you.
+(wedding, engagement, anniversary, birthday, proposal, performance, event, baby shower, naming
+day), there are no house styles to choose from since those belong to studios, and there is no step
+for "the couple's sign-in" — it is already you. You can also pick a storage size — Light (5 GB),
+Medium (50 GB) or Heavy (100 GB) — sized to what you are making; leave it unset for the default.
 
 A catalogue you start this way is a **draft until a credit is added**, by us or by a studio you
 ask — the same ₹1,999 a studio's second-and-later wedding costs. Nothing about the page, the films

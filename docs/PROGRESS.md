@@ -2593,3 +2593,68 @@ about it, per the rule N-88 just added to the `next-item`/`ship` skills.
 Files: `app/api/admin/presets/route.ts`, `lib/admin/presets.ts`,
 `components/admin/DuplicateThemeButton.tsx` (new), `app/admin/studio/styles/page.tsx`,
 `tests/unit/house-styles.test.ts`, `docs/PRODUCT.md`, `docs/NEXT.md`, `docs/help/studio.md`.
+
+## N-80 · Plan tiers by storage — 18 September 2026
+
+D-60 (recorded the same day, once Sandeep decided the shape): **Light** (5 GB), **Medium**
+(50 GB), **Heavy** (100 GB) coexist with `PRICING.md` §1's duration ladder rather than replacing
+it — a catalogue can have both a tier (how much storage) and a duration plan (how long). The
+wizard's step 1 offers the three as an optional pill group; unset by default, so a catalogue
+nobody picks one for behaves exactly as it always has. Choosing one writes the catalogue's own
+storage grant, which `resolveLimits` was already built to prefer over the org's — `getEntitlements`
+and `resolveLimits`'s catalogue-then-org-then-default order (doc 15 §3) needed no change at all;
+the only thing missing was ever writing a catalogue-scoped row.
+
+**`plans` gets three rows purely to satisfy a foreign key, and is never read.** `entitlements.
+plan_id references plans(id)`, so `light`/`medium`/`heavy` have to exist there for the entitlement
+write not to fail — but the tiers themselves are defined once, in code
+(`lib/entitlements.ts`'s `STORAGE_TIERS`), the same way the built-in themes are code and platform
+themes are the only ones that get a database row. Migration `0028_storage_tiers.sql` also drops
+`plans.price_paise`'s `not null`: the three rows are seeded before their prices are decided
+(D-60), and `0` would have read as "free" rather than "not yet set." **Custom** (100–300 GB) is
+deliberately not a `plans` row at all — it has no fixed number, so the wizard's copy says to ask
+rather than offering a size nobody chose.
+
+**`setCatalogueEntitlement`** (new on `Repository`, implemented in both drivers) is deliberately
+not a toggle like `setOrgStorageQuota` — it is written once, at creation, because a catalogue this
+young cannot already have a row to find and update. The overview page (`app/admin/c/[id]/page.tsx`)
+now resolves `planId` back to a tier name via `storageTierFor` and shows it beside the GB figure
+("0.0 of 5 GB · Light") — closing the loop so a tier is a real, visible thing rather than a number
+indistinguishable from a hand-typed override.
+
+`OCCASIONS` gains `performance` and `event`, settled by the ticket's own text ("Light has nothing
+to be for" without them) rather than a fresh decision.
+
+**A real, reproducible E2E failure, tracked down rather than worked around.** Adding the wizard's
+Storage card made an *unrelated*, pre-existing test fail deterministically —
+`admin.spec.ts`'s house-style wizard test, force-checking a `sr-only` style radio on step 2. The
+trace showed the actual mechanism: Playwright's forced click landed at `y≈39` (the top navbar),
+not the radio at `y≈350`. Every other `.check({force: true})` on an `sr-only` radio in this suite
+runs after the page has already settled from an earlier action (opening a panel, say); this one
+force-checks *immediately* after a navigation and a step transition with no settle point between
+them, and the extra render weight of one more page section was enough to tip a pre-existing,
+unrelated timing race that `force: true` — which skips Playwright's own stability wait — cannot
+protect against. Fixed by clicking the real, visible wrapping `<label>` instead of forcing the
+hidden input, which lets Playwright wait properly; verified stable across multiple repeated runs
+before and after. Not a bug in the new feature, and not patched by avoiding the addition — the
+race was latent before this ticket and any other change nudging the same timing could have found
+it instead.
+
+7 new unit tests (`tests/unit/storage-tiers.test.ts`): a chosen tier grants exactly what
+`resolveLimits` then prefers; an unknown tier id is refused; every real tier round-trips; leaving
+the tier unset writes nothing at all, preserving today's behaviour byte for byte. One new
+integration test against real Supabase (`tests/integration/drivers.test.ts`, skips without
+credentials) — **not yet run against production**, since migration `0028` is not yet applied
+there; needs to be before this deploys. One new E2E test walks the wizard's Storage card end to
+end and confirms the overview reads the grant back correctly.
+
+Full suite: 742 unit/component (+7), 160 E2E passed / 57 skipped (+1 new, the two pre-existing
+failures fixed rather than papered over).
+
+Files: `lib/entitlements.ts`, `lib/schema.ts`, `lib/db/repository.ts`,
+`lib/db/memory-repository.ts`, `lib/db/supabase-repository.ts`,
+`app/api/admin/catalogues/route.ts`, `components/admin/CreateWizard.tsx`,
+`app/admin/c/[id]/page.tsx`, `app/my/page.tsx`,
+`supabase/migrations/0028_storage_tiers.sql` (new), `tests/unit/storage-tiers.test.ts` (new),
+`tests/integration/drivers.test.ts`, `e2e/admin.spec.ts`, `docs/PRODUCT.md`, `docs/PRICING.md`,
+`docs/NEXT.md`, `docs/help/studio.md`, `docs/help/client.md`.

@@ -234,6 +234,17 @@ export interface Repository {
    */
   setOrgStorageQuota(orgId: string, storageGb: number | null): Promise<Entitlement | null>
 
+  /**
+   * Grant a catalogue its storage tier at creation (D-60, N-80).
+   *
+   * Unlike `setOrgStorageQuota` this is not a toggle a console revisits — it is written once, when
+   * the wizard's tier pill is chosen, and there is no existing row to find first: a catalogue this
+   * young cannot already have one. `resolveLimits` reads it ahead of the org's own override without
+   * any change on its side, because that ordering (catalogue beats org) already existed for exactly
+   * this reason — a couple's own grant must not be capped by a studio no longer in the picture.
+   */
+  setCatalogueEntitlement(catalogueId: string, planId: string, storageGb: number): Promise<Entitlement>
+
   // ── Transfers (doc 15 §2) ───────────────────────────────────────────────────
   createTransfer(transfer: Transfer): Promise<Transfer>
   /** Looked up by hash: the plaintext token exists only in the link. */

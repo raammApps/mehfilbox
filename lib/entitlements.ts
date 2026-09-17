@@ -54,6 +54,32 @@ export const entitlementSchema = z.object({
 export type Entitlement = z.infer<typeof entitlementSchema>
 
 /**
+ * The storage ladder, sized per occasion (D-60, N-80) — coexists with `docs/PRICING.md`'s
+ * duration ladder (Deliver/Keep/Cinema) rather than replacing it; a catalogue can have both. Kept
+ * as code, the way `themes/registry.ts` keeps the built-in themes as code: a `plans` row for each
+ * of these exists too (migration `0028`), but only so `entitlements.plan_id`'s foreign key has
+ * something to point at — nothing reads the `plans` table itself, so there is exactly one
+ * definition of what "Light" means, not two that can drift.
+ *
+ * **`Custom` (100–300 GB) is deliberately not here.** It has no fixed number, so it is not a
+ * self-service pill — the wizard says to ask instead, rather than seeding a `plans` row with a
+ * size nobody chose. **Prices are not here either.** D-60 chose to seed the tiers before their
+ * prices are set rather than block seeding on a number that is not this codebase's to invent.
+ */
+export type StorageTier = { id: string; name: string; storageGb: number; description: string }
+
+export const STORAGE_TIERS: readonly StorageTier[] = [
+  { id: 'light', name: 'Light', storageGb: 5, description: 'A single performance — a fashion show, a recital.' },
+  { id: 'medium', name: 'Medium', storageGb: 50, description: 'A short function, or a couple’s own occasion.' },
+  { id: 'heavy', name: 'Heavy', storageGb: 100, description: 'A full wedding — every function, both sides.' },
+] as const
+
+/** The tier a `planId` names, or `null` for one this list does not recognise (or none at all). */
+export function storageTierFor(planId: string | null): StorageTier | null {
+  return STORAGE_TIERS.find((tier) => tier.id === planId) ?? null
+}
+
+/**
  * Catalogue entitlement → org entitlement → default. The order is the substance.
  *
  * A couple who buys storage must not be silently capped by their partner's tier, because by then

@@ -67,11 +67,12 @@ until the catalogue exists, which happens at the end of step 2.
 | Field | Notes |
 |---|---|
 | Couple | `Aanya & Vikram`. Shown to guests and used to list the wedding for you. |
-| Occasion | Wedding, engagement, anniversary, birthday, proposal, baby shower or naming day. |
+| Occasion | Wedding, engagement, anniversary, birthday, proposal, performance, event, baby shower or naming day. |
 | Wedding date | Also drives "in 12 days" on your list. |
 | City | Optional. |
 | **Web address** | Suggested from the names **and the year** — `aanya-and-vikram-2026`. Editable until you touch it, checked for availability as you type. |
 | App name | The wordmark on the guest's profile screen. Blank uses `<Couple> Originals`. |
+| **Storage** | Optional — **Light** (5 GB), **Medium** (50 GB) or **Heavy** (100 GB), sized to the occasion. Leave it unset to keep the default (20 GB). Need more than 100 GB? Ask your platform for a custom amount. |
 
 > **The address is the one thing you cannot casually change later.** It goes into every guest's
 > WhatsApp message. Changing it after the link is out breaks every copy already sent — there is no
@@ -383,7 +384,7 @@ holds.
 
 | Limit | Default |
 |---|---|
-| **Storage per catalogue** | **20 GB** |
+| **Storage per catalogue** | **20 GB**, or a tier chosen at creation |
 | Per-file upload | 20 GB |
 | Included term | 12 months |
 
@@ -391,9 +392,12 @@ Storage counts what the provider actually stores — the encoding ladder for a f
 rendition for a photograph — not the file that was uploaded. An upload that would not fit is
 refused before a byte moves, with the figures in the message.
 
-A catalogue or an org can be granted more than the default, and **a catalogue's own grant wins** —
-which matters after a handover, so a client who buys storage does not stay capped by a studio who
-has already left the relationship. Buying storage is not built yet; ask us in the meantime.
+**A storage tier — Light (5 GB), Medium (50 GB) or Heavy (100 GB) — set in the wizard
+overrides the 20 GB default for that one catalogue**, sized to the occasion rather than left flat.
+Every catalogue or org can also be granted more by hand, and **a catalogue's own grant always
+wins** — which matters after a handover, so a client who buys storage does not stay capped by a
+studio who has already left the relationship. Buying storage past a tier is not built yet; ask us
+in the meantime.
 
 ---
 

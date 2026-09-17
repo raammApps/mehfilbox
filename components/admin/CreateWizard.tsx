@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { suggestSlug } from '@/lib/format'
 import { TEMPLATES } from '@/lib/admin/templates'
+import { STORAGE_TIERS } from '@/lib/entitlements'
 import type { Preset } from '@/lib/schema'
 import type { ThemeDefinition } from '@/themes/contract'
 import { themeFrom } from '@/themes/registry'
@@ -35,6 +36,8 @@ const OCCASION_LABELS: Record<Occasion, string> = {
   proposal: 'Proposal',
   'baby-shower': 'Baby shower',
   'naming-day': 'Naming day',
+  performance: 'Performance',
+  event: 'Event',
 }
 
 const DRAFT_KEY = 'mehfilbox.wizard.draft'
@@ -98,6 +101,8 @@ export function CreateWizard({
     reason?: string
     suggestion?: string
   } | null>(null)
+  /** Unset by default (D-60, N-80): nothing chosen falls through to today's behaviour exactly. */
+  const [tierId, setTierId] = useState<string | null>(null)
   const [template, setTemplate] = useState(TEMPLATES[0]!.id)
   const [theme, setTheme] = useState(studioTheme)
   /**
@@ -211,6 +216,7 @@ export function CreateWizard({
         // From a style, the route copies its layout and branding; otherwise only the theme is
         // sent and the rest of the studio's branding is inherited.
         ...(styleId ? { presetId: styleId } : { template, branding: { theme } }),
+        ...(tierId ? { tierId } : {}),
       }),
     })
 
@@ -433,6 +439,47 @@ export function CreateWizard({
                   : errors['appName.en']
               }
             />
+          </Card>
+
+          <Card
+            title="Storage"
+            hint="Sized to the occasion. Leave this unset to keep the default (20 GB)."
+          >
+            <fieldset className="mb-2">
+              <legend className="sr-only">Storage tier</legend>
+              <div className="flex flex-wrap gap-2">
+                {STORAGE_TIERS.map((tier) => (
+                  <label
+                    key={tier.id}
+                    className="cursor-pointer rounded-[var(--radius-pill)] border border-[var(--color-l-line)] px-3 py-1.5 text-[13px] has-[:checked]:border-[var(--color-accent)] has-[:checked]:font-semibold"
+                  >
+                    <input
+                      type="radio"
+                      name="tier"
+                      value={tier.id}
+                      checked={tierId === tier.id}
+                      onChange={() => setTierId(tier.id)}
+                      className="sr-only"
+                    />
+                    {tier.name} · {tier.storageGb} GB
+                  </label>
+                ))}
+                {tierId ? (
+                  <button
+                    type="button"
+                    onClick={() => setTierId(null)}
+                    className="cursor-pointer rounded-[var(--radius-pill)] px-3 py-1.5 text-[13px] text-[var(--color-l-text-mid)] underline underline-offset-4"
+                  >
+                    Clear
+                  </button>
+                ) : null}
+              </div>
+              <p className="mt-2 text-[12px] text-[var(--color-l-text-mid)]">
+                {tierId
+                  ? STORAGE_TIERS.find((t) => t.id === tierId)!.description
+                  : 'Need more than 100 GB? Ask your platform for a custom amount.'}
+              </p>
+            </fieldset>
           </Card>
 
           <Nav

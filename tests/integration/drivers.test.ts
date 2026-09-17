@@ -216,6 +216,28 @@ describe.skipIf(!hasSupabase)('Supabase Postgres, for real', () => {
     REMOTE_TIMEOUT,
   )
 
+  it(
+    'grants a catalogue its storage tier, and resolveLimits prefers it (D-60, N-80)',
+    async () => {
+      const { SupabaseRepository } = await import('@/lib/db/supabase-repository')
+      const { resolveLimits } = await import('@/lib/entitlements')
+      const repository = new SupabaseRepository()
+
+      const catalogueId = createdCatalogues[0]
+      expect(catalogueId, 'the catalogue test must run first').toBeTruthy()
+
+      // If this throws "violates foreign key constraint", migration 0028 has not been applied —
+      // `plans` has no `light` row for `entitlements.plan_id` to point at.
+      const entitlement = await repository.setCatalogueEntitlement(catalogueId!, 'light', 5)
+      expect(entitlement).toMatchObject({ catalogueId, planId: 'light', storageGb: 5 })
+
+      const grants = await repository.getEntitlements(catalogueId!, orgId)
+      expect(grants.catalogue).toMatchObject({ planId: 'light', storageGb: 5 })
+      expect(resolveLimits(grants.catalogue, grants.org).storageGb).toBe(5)
+    },
+    REMOTE_TIMEOUT,
+  )
+
   it('round-trips a title, including the arrays and the nullable columns', async () => {
     const { SupabaseRepository } = await import('@/lib/db/supabase-repository')
     const repository = new SupabaseRepository()

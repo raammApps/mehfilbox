@@ -12,7 +12,7 @@ import { SetupChecklist } from '@/components/admin/SetupChecklist'
 import { getEditableCatalogue, getSessionOrg } from '@/lib/admin/session'
 import { catalogueAttention } from '@/lib/admin/catalogue-health'
 import { setupChecklist } from '@/lib/admin/setup-checklist'
-import { hoursFor, resolveLimits, storageUsage } from '@/lib/entitlements'
+import { hoursFor, resolveLimits, storageTierFor, storageUsage } from '@/lib/entitlements'
 import { getRepository } from '@/lib/db'
 import { formatWeddingDate } from '@/lib/format'
 import { resolveLocalised } from '@/lib/i18n'
@@ -51,6 +51,9 @@ export default async function CatalogueOverviewPage({
   const linkedCouple = coupleOperator ? { email: coupleOperator.email, name: coupleOperator.name } : null
 
   const limits = resolveLimits(grants.catalogue, grants.org)
+  // The tier's own name, when this catalogue's grant came from one (D-60, N-80) — an org-level
+  // override, or none at all, has no tier to name, and the bare GB figure already says the truth.
+  const tier = storageTierFor(grants.catalogue?.planId ?? null)
 
   const counts = {
     titles: titles.length,
@@ -132,7 +135,7 @@ export default async function CatalogueOverviewPage({
             */}
             <Stat
               label="Storage"
-              value={`${usage.usedGb.toFixed(1)} of ${usage.limitGb} GB`}
+              value={`${usage.usedGb.toFixed(1)} of ${usage.limitGb} GB${tier ? ` · ${tier.name}` : ''}`}
               hint={
                 // What the plan holds, not just what is left of it (N-23, PRICING.md §6). A
                 // partner asks "is 100 GB a lot?" and the honest answer is in hours of film.

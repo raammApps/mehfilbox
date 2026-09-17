@@ -194,7 +194,17 @@ test.describe('the admin console', () => {
     await expect(page.getByText('Available')).toBeVisible()
     await page.getByRole('button', { name: 'Continue' }).click()
 
-    await page.getByRole('radio', { name: /^E2E Carnival/ }).check({ force: true })
+    /**
+     * The wrapping `<label>`, not `.check({force: true})` on the `sr-only` input directly.
+     *
+     * This step follows a navigation and a step transition with no settle point between them —
+     * unlike every other place this suite force-checks a `sr-only` radio, which does so only
+     * after opening a panel on an already-loaded page. `force` skips Playwright's stability wait,
+     * and on this particular sequence that occasionally raced a still-settling layout: the click
+     * landed near the top of the page instead of on the radio (caught via the trace, not guessed
+     * at). The label is really rendered — no force needed — so clicking it waits properly.
+     */
+    await page.locator('label').filter({ has: page.getByRole('radio', { name: /^E2E Carnival/ }) }).click()
     // Picking a style hides the theme and layout cards: the style has answered them.
     await expect(page.getByRole('radio', { name: /^The Keepsake/ })).toHaveCount(0)
     await page.getByRole('button', { name: 'Continue' }).click()
@@ -224,6 +234,40 @@ test.describe('the admin console', () => {
     await page.evaluate(async (id) => {
       await fetch(`/api/admin/presets/${id}`, { method: 'DELETE' })
     }, style.preset.id)
+  })
+
+  /**
+   * D-60, N-80 — the storage ladder, sized per occasion. Unset by default (proven at the API
+   * layer in tests/unit/storage-tiers.test.ts); this is the wizard's own affordance for it, and
+   * that the choice actually lands as the catalogue's own grant rather than a label with nothing
+   * behind it — the overview reads it back through the same `resolveLimits` every upload does.
+   */
+  test('choosing a storage tier grants the catalogue its own storage, shown back on the overview', async ({ page }) => {
+    const slug = `e2e-tier-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`
+    await page.getByRole('link', { name: 'New catalogue' }).first().click()
+    await page.getByLabel('Couple').fill('Tier & Wizard')
+    await page.getByLabel('Wedding date').fill('2026-12-01')
+    await page.getByLabel('Web address').fill(slug)
+    await expect(page.getByText('Available')).toBeVisible()
+
+    // The label, not a forced check on the sr-only input — see the house-style test above for why.
+    await page.locator('label').filter({ has: page.getByRole('radio', { name: /^Light/ }) }).click()
+    await page.getByRole('button', { name: 'Continue' }).click()
+    await page.getByRole('button', { name: 'Continue' }).click()
+    await page.getByRole('button', { name: 'Create and start uploading' }).click()
+    await expect(page.getByText(new RegExp(slug))).toBeVisible()
+
+    const created = await page.evaluate(async (wanted) => {
+      const response = await fetch('/api/admin/catalogues')
+      const { catalogues } = (await response.json()) as { catalogues: { id: string; slug: string }[] }
+      return catalogues.find((c) => c.slug === wanted) ?? null
+    }, slug)
+    expect(created).toBeTruthy()
+
+    await page.goto(`/admin/c/${created!.id}`)
+    // "0.0 of 5 GB" — the tier's own number, not the 20 GB default — with the tier's name beside
+    // it, which only appears when the overview resolved a real planId back to STORAGE_TIERS.
+    await expect(page.getByText(/of 5 GB · Light/)).toBeVisible()
   })
 
   test('a taken address is refused before anything is created', async ({ page }) => {

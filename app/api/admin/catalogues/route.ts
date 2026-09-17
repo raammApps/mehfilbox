@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { requireOperator } from '@/lib/admin/session'
 import { seedModules } from '@/lib/admin/templates'
 import { hashSecret } from '@/lib/crypto'
+import { STORAGE_TIERS } from '@/lib/entitlements'
 import { generatePasscode } from '@/lib/passcode'
 import { isValidTimeZone } from '@/lib/time'
 import { getRepository } from '@/lib/db'
@@ -52,6 +53,15 @@ const createSchema = z.object({
   passcode: z.string().min(4).max(64).optional(),
   timezone: z.string().refine(isValidTimeZone, 'Unknown time zone').default('Asia/Kolkata'),
   premiereAt: z.string().datetime().nullable().optional(),
+  /**
+   * The storage ladder, sized per occasion (D-60, N-80). Optional and unset by default — a
+   * catalogue nobody picks a tier for keeps today's behaviour exactly, falling through to the
+   * org's own override or the flat default, unchanged.
+   */
+  tierId: z
+    .string()
+    .refine((id) => STORAGE_TIERS.some((tier) => tier.id === id), 'Unknown storage tier')
+    .optional(),
 })
 
 /**
@@ -153,6 +163,11 @@ export async function POST(request: Request) {
     const withModules = await repository.updateCatalogue(catalogue.id, orgId, {
       draftModules: modules,
     })
+
+    // The chosen tier becomes the catalogue's own storage grant (D-60, N-80) — read ahead of the
+    // org's override by `resolveLimits` already, with no change needed there for it to apply.
+    const tier = body.tierId ? STORAGE_TIERS.find((t) => t.id === body.tierId) : undefined
+    if (tier) await repository.setCatalogueEntitlement(catalogue.id, tier.id, tier.storageGb)
 
     return noStore({ catalogue: withModules, ...(generated && passcode ? { passcode } : {}) }, 201)
   })

@@ -19,6 +19,8 @@ const OCCASION_LABEL: Record<Catalogue['occasion'], string> = {
   proposal: 'Proposal',
   'baby-shower': 'Baby shower',
   'naming-day': 'Naming day',
+  performance: 'Performance',
+  event: 'Event',
 }
 
 /**

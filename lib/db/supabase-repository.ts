@@ -459,6 +459,15 @@ export class SupabaseRepository implements Repository {
     return SupabaseRepository.toEntitlement(SupabaseRepository.unwrap<Row>(result))
   }
 
+  async setCatalogueEntitlement(catalogueId: string, planId: string, storageGb: number): Promise<Entitlement> {
+    const result = await this.db
+      .from('entitlements')
+      .insert({ catalogue_id: catalogueId, plan_id: planId, storage_gb: storageGb })
+      .select('*')
+      .single()
+    return SupabaseRepository.toEntitlement(SupabaseRepository.unwrap<Row>(result))!
+  }
+
   // ── Transfers ───────────────────────────────────────────────────────────────
   private static toTransfer(r: Row): Transfer {
     return {

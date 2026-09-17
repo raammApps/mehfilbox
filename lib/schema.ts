@@ -51,6 +51,9 @@ export const OCCASIONS = [
   /** The two a couple starts for themselves most often (doc 16 §6). */
   'baby-shower',
   'naming-day',
+  /** What the Light storage tier is sized for (D-60, N-80) — a fashion show, a recital. */
+  'performance',
+  'event',
 ] as const
 export const occasionSchema = z.enum(OCCASIONS)
 export type Occasion = z.infer<typeof occasionSchema>
