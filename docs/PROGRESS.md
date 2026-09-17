@@ -2253,3 +2253,51 @@ ticket.
 
 Files: `scripts/make-sample-hls.mjs` (new), `public/media/hls/` (new, committed — CI has no
 encoder, only a player), `lib/video/fake.ts`.
+
+## N-83 · Every photograph is signed, always — 18 September 2026
+
+The photo pull zone had no token authentication (found live, 13 September): a photograph's URL,
+copied out of a passcode-protected wedding, returned 200 to anyone, forever. The proposal on the
+table was to sign only passcode-gated catalogues and leave unlisted ones plain, for WhatsApp's own
+preview fetch. **Sandeep's call: sign everything, always** — no unsigned tier. `docs/DEPLOYMENT.md`
+already notes WhatsApp caches a preview for days once fetched, which is what makes a 24h-TTL signed
+URL safe for that first fetch too — the trade the proposal was hedging against does not actually
+bite.
+
+`PhotoProvider` gained `signCatalogue(catalogueId, ttlS)`: one Bunny token-auth signature
+(`sha256(securityKey + path + expires)`, the exact algorithm `BunnyProvider.signDirectory` already
+uses for video) over the whole `c/<catalogueId>/` directory, so every width of every photograph in
+a catalogue is authorised by one token rather than one per file. `signPhotos` (`lib/photos/
+index.ts`) applies it everywhere a photo URL reaches a browser — which turned out to be five
+places, not the one: the guest page and the download manifest (both flow through
+`getCachedBundle`), and three admin surfaces rendering real thumbnails from the same pull zone —
+`PhotoManager`'s initial server read and its own upload response, the catalogue overview's
+customizer preview, and the admin API routes those pages' client-side updates call. Missing any
+one of them would have meant an operator's own console 403ing its own thumbnails the moment token
+auth is enabled on the zone — found by checking each render path against a live `pnpm dev` session
+with the real Bunny driver, not by reasoning about which components render photographs.
+
+That same live check caught a real bug before it shipped: the demo catalogue's photographs reuse
+the poster-frame generator (`/api/poster/frame?asset=…&n=1`), whose URL already carries a query
+string. The first version's `${url}${query}` concatenation wrote a second `?` into it, which a
+browser parses as part of the previous parameter's *value* rather than a new one — the token
+silently went nowhere, on a URL that looked completely normal in the DOM. Fixed by joining with
+`&` when a query is already present; regression test added, since nothing about the manifest text
+or the unit tests as first written would have caught it, only rendering the actual page did.
+
+`pnpm preflight` gained the same shape of check it already runs on the video zone —
+`BUNNY_PHOTO_TOKEN_AUTH_KEY` set, and, given `BUNNY_ACCOUNT_API_KEY`, the pull zone actually
+enforcing it — matched by CDN hostname rather than by library id, since a storage-backed pull zone
+has no library to look one up from.
+
+**Two steps remain, and neither is code:** turn on Token Authentication for the photo pull zone
+(`docs/DEPLOYMENT.md` §3) and set `BUNNY_PHOTO_TOKEN_AUTH_KEY` in Vercel — the second one *before*
+this commit reaches `main`, because `PHOTO_DRIVER=bunny` is already live in production and
+`lib/env.ts` now refuses to boot without that key, the same fail-closed shape `BUNNY_TOKEN_AUTH_KEY`
+already has for video.
+
+4 new unit tests. Files: `lib/photos/provider.ts`, `lib/photos/bunny.ts`, `lib/photos/fake.ts`,
+`lib/photos/index.ts`, `lib/catalogue-cache.ts`, `lib/downloads.ts`, `lib/env.ts`,
+`app/api/admin/catalogues/[id]/route.ts`, `app/api/admin/catalogues/[id]/photos/route.ts`,
+`app/admin/c/[id]/photos/page.tsx`, `app/admin/c/[id]/customizer/page.tsx`,
+`scripts/preflight.ts`, `docs/DEPLOYMENT.md`, `.env.example`.

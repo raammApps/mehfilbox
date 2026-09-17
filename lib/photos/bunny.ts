@@ -1,4 +1,5 @@
 import 'server-only'
+import { createHash } from 'node:crypto'
 import { env } from '@/lib/env'
 import { log } from '@/lib/log'
 import type { PhotoProvider, StoredPhoto } from './provider'
@@ -32,6 +33,24 @@ export class BunnyPhotoProvider implements PhotoProvider {
 
   urlFor(key: string): string {
     return `https://${env.BUNNY_PHOTO_CDN_HOSTNAME}/${key}`
+  }
+
+  /**
+   * `token = base64url(sha256(securityKey + path + expires))` — Bunny's URL token
+   * authentication, the exact algorithm `BunnyProvider.signDirectory` already uses for video.
+   * Signing `c/<catalogueId>/` (a directory, trailing slash) rather than one photograph's path
+   * authorises every width and every photograph in the catalogue with one token, matching
+   * `photoKey`'s own layout (`c/<catalogueId>/w<width>/<photoId>.<ext>`).
+   */
+  signCatalogue(catalogueId: string, ttlS: number): string {
+    const expires = Math.floor(Date.now() / 1000) + ttlS
+    const token = createHash('sha256')
+      .update(`${env.BUNNY_PHOTO_TOKEN_AUTH_KEY}/c/${catalogueId}/${expires}`)
+      .digest('base64')
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=/g, '')
+    return `?token=${token}&expires=${expires}`
   }
 
   async put(key: string, body: ArrayBuffer, contentType: string): Promise<StoredPhoto> {

@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto'
 import { env } from '@/lib/env'
+import type { Photo } from '@/lib/schema'
 import { PHOTO_WIDTHS } from './srcset'
 import { BunnyPhotoProvider } from './bunny'
 import { FakePhotoProvider } from './fake'
@@ -58,6 +59,44 @@ export function defaultAlbumId(catalogueId: string): string {
   bytes[8] = (bytes[8]! & 0x3f) | 0x80 // RFC 4122 variant
   const hex = bytes.toString('hex')
   return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`
+}
+
+/**
+ * How long a signed photo URL lives (N-83).
+ *
+ * Guest reads come off `getCachedBundle`'s data cache, which can serve a snapshot for up to its
+ * own `MAX_AGE_S` (an hour) before revalidating — so the token baked into that snapshot has to
+ * outlive the cache, not just the request that wrote it. 24h clears that with room to spare, and
+ * is short enough that a forwarded photograph still goes dead within the day, the same promise
+ * doc 01 US-5 already makes for video.
+ */
+export const PHOTO_SIGN_TTL_S = 60 * 60 * 24
+
+/**
+ * Sign every photograph in `photos` for one read, so a guest page or the admin console never
+ * renders a photo pull zone URL that a token-authenticated zone will now 403.
+ *
+ * One call to `signCatalogue` covers the lot: every photograph in `photos` is expected to belong
+ * to `catalogueId` already (the caller's own read was scoped there), and every rendition of every
+ * photograph lives under that one directory (`photoKey`), so one token authorises all of them.
+ */
+export function signPhotos(catalogueId: string, photos: Photo[]): Photo[] {
+  const query = getPhotoProvider().signCatalogue(catalogueId, PHOTO_SIGN_TTL_S)
+  if (!query) return photos
+  return photos.map((photo) => ({ ...photo, url: appendQuery(photo.url, query) }))
+}
+
+/**
+ * A real Bunny CDN url from `urlFor` never carries a query of its own, but the demo catalogue's
+ * seed data reuses the poster-frame generator for its photographs (`/api/poster/frame?asset=…`),
+ * which does — found by actually looking at what the demo catalogue rendered, not by assuming
+ * every stored `url` has the shape `urlFor` produces. A bare `${url}${query}` concatenation
+ * there would have written a second `?` into the URL and silently swallowed the token inside the
+ * poster route's own `n` parameter.
+ */
+function appendQuery(url: string, query: string): string {
+  const params = query.startsWith('?') ? query.slice(1) : query
+  return `${url}${url.includes('?') ? '&' : '?'}${params}`
 }
 
 export * from './provider'

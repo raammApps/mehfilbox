@@ -353,6 +353,68 @@ async function checkPhotos(): Promise<void> {
   }
 
   await fetch(url, { method: 'DELETE', headers: { AccessKey: password } }).catch(() => null)
+
+  /**
+   * N-83: holding a signing key is not the same as the zone enforcing it. An unenforced zone
+   * serves every photograph to anyone with the URL, exactly the gap this ticket closed — and
+   * nothing above would notice, because the write/read/delete check just performed works
+   * identically whether or not token authentication is on.
+   */
+  if (!env.BUNNY_PHOTO_TOKEN_AUTH_KEY) {
+    fail(
+      'BUNNY_PHOTO_TOKEN_AUTH_KEY',
+      'not set — photo URLs would be unsigned',
+      'the photo pull zone Security tab; token authentication must also be ON',
+    )
+    return
+  }
+  pass('BUNNY_PHOTO_TOKEN_AUTH_KEY', 'set')
+
+  const accountKey = env.BUNNY_ACCOUNT_API_KEY
+  if (!accountKey) return
+
+  // Matched by hostname rather than by a library id (photos have no library): a storage-backed
+  // pull zone is still just a pull zone, and the CDN hostname is the one thing this script
+  // already knows for certain names it.
+  const zones = await fetch('https://api.bunny.net/pullzone', {
+    headers: { AccessKey: accountKey, accept: 'application/json' },
+  })
+    .then((r) =>
+      r.ok
+        ? (r.json() as Promise<
+            {
+              Id: number
+              Hostnames?: { Value: string }[]
+              ZoneSecurityEnabled?: boolean
+              ZoneSecurityIncludeHashRemoteIP?: boolean
+            }[]
+          >)
+        : null,
+    )
+    .catch(() => null)
+
+  const pullZone = zones?.find((z) => z.Hostnames?.some((h) => h.Value === host))
+  if (!pullZone) return
+
+  if (!pullZone.ZoneSecurityEnabled) {
+    fail(
+      'Photo token auth enforced',
+      'the pull zone does not require a token',
+      'signed URLs are generated but never checked — enable Token Authentication on the photo pull zone',
+    )
+  } else {
+    pass('Photo token auth enforced', `pull zone ${pullZone.Id}`)
+  }
+
+  if (pullZone.ZoneSecurityIncludeHashRemoteIP) {
+    fail(
+      'Photo IP pinning',
+      'enabled',
+      'turn it off — Indian mobile IPs rotate mid-download and it causes false failures (doc 05 §4)',
+    )
+  } else {
+    pass('Photo IP pinning', 'off, as doc 05 §4 requires')
+  }
 }
 
 async function main(): Promise<void> {

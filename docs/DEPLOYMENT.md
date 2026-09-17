@@ -71,6 +71,24 @@ Verify: `pnpm preflight` should show token auth enforced, referrer blocking off,
 Then `pnpm verify:playback` uploads a real clip and asserts a signed manifest, a signed child
 playlist and a signed poster all return 200 while all three unsigned return 403.
 
+### Photo pull zone
+
+A separate zone from video — Bunny Edge Storage behind its own pull zone, `BUNNY_STORAGE_ZONE` /
+`BUNNY_STORAGE_PASSWORD` / `BUNNY_PHOTO_CDN_HOSTNAME` — and it needs the same setting the video
+library does, in the pull zone's own Security tab:
+
+| Setting | Value | Why |
+|---|---|---|
+| Token authentication | **ON** | N-83: off, and any photograph's URL — copied out of a passcode-protected wedding — returns 200 to anyone, forever. The passcode gates the page, not the bytes. |
+| IP pinning (`ZoneSecurityIncludeHashRemoteIP`) | **OFF** | Same reason as video: Indian mobile IPs rotate mid-download. |
+
+`BUNNY_PHOTO_TOKEN_AUTH_KEY` (Security tab, a different key from `BUNNY_TOKEN_AUTH_KEY`) signs
+every photo URL the app hands out, including in the download manifest — there is no unsigned
+tier, every catalogue gets one whether or not it has a passcode.
+
+Verify: `pnpm preflight` should show `BUNNY_PHOTO_TOKEN_AUTH_KEY` set and photo token auth
+enforced, the same shape of check as video's.
+
 ## 4. Supabase
 
 ```bash
@@ -227,6 +245,10 @@ Set these on the Vercel project (Production, and Preview if you want previews to
 | `BUNNY_CDN_HOSTNAME` | `vz-….b-cdn.net`, hostname only | |
 | `BUNNY_TOKEN_AUTH_KEY` | Pull zone → Security | ● |
 | `BUNNY_WEBHOOK_SECRET` | The library **read-only** key | ● |
+| `PHOTO_DRIVER` | `bunny` | |
+| `BUNNY_STORAGE_ZONE` · `BUNNY_STORAGE_PASSWORD` · `BUNNY_STORAGE_REGION` | Edge Storage zone (§3, Photo pull zone) | ● (password) |
+| `BUNNY_PHOTO_CDN_HOSTNAME` | The pull zone in front of it | |
+| `BUNNY_PHOTO_TOKEN_AUTH_KEY` | Photo pull zone → Security (N-83) | ● |
 
 **Optional**
 

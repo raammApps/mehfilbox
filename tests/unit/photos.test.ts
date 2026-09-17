@@ -1,6 +1,8 @@
-import { describe, expect, it } from 'vitest'
-import { defaultAlbumId, photoKey } from '@/lib/photos'
+import { afterEach, describe, expect, it } from 'vitest'
+import { defaultAlbumId, photoKey, setPhotoProvider, signPhotos } from '@/lib/photos'
 import { FakePhotoProvider } from '@/lib/photos/fake'
+import type { PhotoProvider } from '@/lib/photos/provider'
+import { photoSchema } from '@/lib/schema'
 
 /**
  * Photographs upload several at a time, which is where the interesting failure lives.
@@ -71,4 +73,81 @@ describe('the provider contract', () => {
     const provider = new FakePhotoProvider()
     await expect(provider.remove('never-existed')).resolves.toBeUndefined()
   })
+
+  it('signs nothing, because there is no real CDN behind it to enforce a token', () => {
+    expect(new FakePhotoProvider().signCatalogue(CATALOGUE, 3600)).toBe('')
+  })
 })
+
+/**
+ * N-83 — every photograph is now signed, on every catalogue, whether or not it has a passcode
+ * (Sandeep's call: a plain URL for WhatsApp's own preview fetch was the alternative, and
+ * `docs/DEPLOYMENT.md`'s own note that WhatsApp caches a preview for days is what makes a
+ * signed, TTL'd URL safe for that fetch too).
+ */
+describe('signPhotos', () => {
+  const PHOTO_1 = '11111111-1111-4111-8111-111111111111'
+  const PHOTO_2 = '22222222-2222-4222-8222-222222222222'
+
+  function photo(id: string, url: string) {
+    return photoSchema.parse({ id, albumId: '44444444-4444-4444-8444-444444444444', url, sortOrder: 0 })
+  }
+
+  afterEach(() => {
+    setPhotoProvider(new FakePhotoProvider())
+  })
+
+  it('appends the catalogue-scoped query to every photograph, once each', () => {
+    setPhotoProvider(stubProvider('?token=abc&expires=123'))
+    const photos = [
+      photo(PHOTO_1, 'https://cdn.example.net/c/cat-1/w2048/p1.jpg'),
+      photo(PHOTO_2, 'https://cdn.example.net/c/cat-1/w2048/p2.jpg'),
+    ]
+
+    const signed = signPhotos(CATALOGUE, photos)
+
+    expect(signed.map((p) => p.url)).toEqual([
+      'https://cdn.example.net/c/cat-1/w2048/p1.jpg?token=abc&expires=123',
+      'https://cdn.example.net/c/cat-1/w2048/p2.jpg?token=abc&expires=123',
+    ])
+  })
+
+  it('joins with `&`, not a second `?`, for a url that already has a query', () => {
+    // Found live, not reasoned out: the demo catalogue's photographs reuse the poster-frame
+    // generator (`/api/poster/frame?asset=…&n=1`), which already has a query string. A naive
+    // `${url}${query}` concatenation wrote a second `?` into the URL and silently swallowed the
+    // token inside the poster route's own `n` parameter instead of adding one.
+    setPhotoProvider(stubProvider('?token=abc&expires=123'))
+    const photos = [photo(PHOTO_1, '/api/poster/frame?asset=demo-photo-1&n=1')]
+
+    expect(signPhotos(CATALOGUE, photos)[0]!.url).toBe(
+      '/api/poster/frame?asset=demo-photo-1&n=1&token=abc&expires=123',
+    )
+  })
+
+  it('leaves the input array untouched', () => {
+    setPhotoProvider(stubProvider('?token=abc&expires=123'))
+    const photos = [photo(PHOTO_1, 'https://cdn.example.net/c/cat-1/w2048/p1.jpg')]
+
+    signPhotos(CATALOGUE, photos)
+
+    expect(photos[0]!.url).toBe('https://cdn.example.net/c/cat-1/w2048/p1.jpg')
+  })
+
+  it('passes photographs through unchanged when the driver has nothing to sign', () => {
+    setPhotoProvider(new FakePhotoProvider())
+    const photos = [photo(PHOTO_1, '/fake-photos/c/cat-1/w2048/p1.jpg')]
+
+    expect(signPhotos(CATALOGUE, photos)).toEqual(photos)
+  })
+})
+
+function stubProvider(query: string): PhotoProvider {
+  return {
+    name: 'stub',
+    urlFor: (key) => key,
+    put: async (key) => ({ url: key, key }),
+    remove: async () => {},
+    signCatalogue: () => query,
+  }
+}

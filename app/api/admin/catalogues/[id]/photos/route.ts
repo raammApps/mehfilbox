@@ -5,7 +5,7 @@ import { revalidateCatalogue } from '@/lib/catalogue-cache'
 import { getRepository } from '@/lib/db'
 import { ApiError } from '@/lib/http/errors'
 import { noStore, route } from '@/lib/http/handler'
-import { defaultAlbumId, getPhotoProvider, photoKey, PHOTO_WIDTHS } from '@/lib/photos'
+import { defaultAlbumId, getPhotoProvider, photoKey, PHOTO_WIDTHS, signPhotos } from '@/lib/photos'
 import { albumSchema, photoSchema } from '@/lib/schema'
 import { resolveLimits, storageCheck } from '@/lib/entitlements'
 
@@ -75,7 +75,9 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
     const albums = await repository.listAlbums(id)
     const photos = await repository.listPhotosForCatalogue(id)
 
-    return noStore({ albums, photos })
+    // Signed (N-83): the manager's own thumbnails are `<img src={photo.url}>` — the same pull
+    // zone a token-authenticated one now refuses without a token.
+    return noStore({ albums, photos: signPhotos(id, photos) })
   })
 }
 
@@ -199,6 +201,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     await repository.createPhoto(photo)
 
     revalidateCatalogue(catalogue.slug)
-    return noStore({ photo, album })
+    // Signed in the response, unsigned in the row (N-83): `<PhotoManager>` renders this photo
+    // immediately from what POST returns, before any GET re-reads the list.
+    return noStore({ photo: signPhotos(catalogue.id, [photo])[0], album })
   })
 }

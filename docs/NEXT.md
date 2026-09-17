@@ -98,30 +98,49 @@ three came out of the security pass and two of them were verified live, not infe
 
 Three decisions are Sandeep's to make before their tickets can be taken up; each is marked.
 
-### N-83 · Photographs are public once the URL is known  ·  ~half a session + one dashboard step  ·  **security**
+### N-83 · Photographs are public once the URL is known  ·  **code done, 18 September 2026**  ·  **two operator steps left**  ·  **security**
 
-**Verified against production on 13 September.** The photo pull zone (`mehfilbox-photos.b-cdn.net`)
-has no token authentication; a photograph's URL, copied out of a passcode-protected wedding, returns
-`200` to anyone, forever. The passcode protects the *page*. The video path is different and right:
-Bunny Stream token authentication is on, the playback token needs a servable catalogue, and a
-copied `.m3u8` dies within hours (US-5). Nothing equivalent stands in front of the stills.
+**Verified against production on 13 September; the decision Sandeep made 18 September diverges
+from the proposal below.** The photo pull zone (`mehfilbox-photos.b-cdn.net`) had no token
+authentication; a photograph's URL, copied out of a passcode-protected wedding, returned `200` to
+anyone, forever. The passcode protected the *page*. The video path was different and right: Bunny
+Stream token authentication is on, the playback token needs a servable catalogue, and a copied
+`.m3u8` dies within hours (US-5). Nothing equivalent stood in front of the stills.
 
-What softens it: keys are `c/<catalogue uuid>/<photo uuid>-<width>.<ext>` — nothing guessable and
-no filename in them — so the exposure is *a URL that leaked*, not *a URL that can be found*. What
-does not soften it: guests forward things, and a photograph is the thing most likely to be
-forwarded.
+The proposal below (13 September) suggested signing only passcode-gated catalogues, leaving
+unlisted ones plain for WhatsApp's own preview fetch. **Sandeep's call, 18 September: sign
+everything, always** — no unsigned tier, whether or not a catalogue has a passcode. `docs/
+DEPLOYMENT.md`'s own note that WhatsApp caches a preview for days once fetched is what makes a
+24h-TTL signed URL safe for that first fetch too, so the trade the proposal was hedging against
+turned out not to bite.
 
-The fix is the one the video already uses. Turn token authentication **on** for the photo pull
-zone (dashboard, like §3 of `DEPLOYMENT.md`), then sign every photo URL at render with a TTL longer
-than the guest page's ISR window — 24h is plenty, and a copied link is dead by tomorrow. `srcset`
-means every width is signed; `lqip` is inline and needs nothing. The download page signs its
-originals the same way. `pnpm preflight` gains the same three checks it runs on the video zone,
-because a photo zone with token auth off looks exactly like a working one.
+**Built:** `PhotoProvider.signCatalogue(catalogueId, ttlS)` — one call signs the whole
+`c/<catalogueId>/` directory (every width, every photograph), the same trade
+`BunnyProvider.signDirectory` makes for video. `signPhotos` (`lib/photos/index.ts`) applies it
+everywhere a photo URL reaches a browser: the guest page and the download manifest (both via
+`getCachedBundle`), and three admin surfaces that render real thumbnails from the same pull zone —
+the photo manager, the catalogue overview's customizer preview, and both routes' initial
+server-rendered read. A live check against the demo catalogue caught a real bug before it shipped:
+the demo catalogue's photographs reuse the poster-frame generator, whose URL already carries a
+query string, and a naive `${url}${query}` concatenation wrote a second `?` into it and silently
+dropped the token into the wrong parameter — fixed by joining with `&` when a query is already
+present, with a regression test. `pnpm preflight` gained the same shape of check it already runs
+on the video zone: `BUNNY_PHOTO_TOKEN_AUTH_KEY` set, and (with `BUNNY_ACCOUNT_API_KEY`) the pull
+zone actually enforcing it, matched by hostname since a storage-backed zone has no library id to
+key off. 4 new unit tests.
 
-**Decide first**: whether unsigned photographs are acceptable for *unlisted* catalogues (no
-passcode) — a share preview and WhatsApp's own image fetch both want a plain URL. The honest
-default is: sign when the catalogue has a passcode, leave plain when it does not, and say so on the
-privacy setting.
+**Two steps left, and neither is code:**
+
+1. **Turn on Token Authentication for the photo pull zone** (`docs/DEPLOYMENT.md` §3, Photo pull
+   zone) and copy its key into `BUNNY_PHOTO_TOKEN_AUTH_KEY`. Until this happens, every photo URL
+   is *signed* but not yet *enforced* — the app now signs, but Bunny still serves an unsigned
+   request 200, so the leak N-83 was opened for is still open until this step.
+2. **Add `BUNNY_PHOTO_TOKEN_AUTH_KEY` to Vercel before the next deploy.** `PHOTO_DRIVER=bunny` is
+   already live in production, and this ticket makes the key **required** whenever that driver is
+   set (`lib/env.ts`) — the same fail-closed shape `BUNNY_TOKEN_AUTH_KEY` already has for video.
+   **Deploying this commit without it set in Vercel will refuse to boot in production — not just
+   photographs, the whole site** — so step 2 has to land in Vercel *before* this code reaches
+   `main`, not after.
 
 ### N-86 · Lockouts that hold across instances  ·  **code done, 18 September 2026**  ·  **one operator step left**
 
@@ -294,8 +313,6 @@ N-25b reconciles the per-catalogue estimate against the same bill; build them to
   after* over *approve before*, and the platform console can also create a studio directly. An
   approval queue is ~2h if wanted; it costs every honest studio a wait.
 - **Plan tiers** (N-80) — the storage ladder, and whether quota is per catalogue.
-- **Unlisted catalogues' photographs** (N-83) — signed like the passcoded ones, or left plain for
-  the share preview.
 
 ---
 

@@ -101,7 +101,9 @@ export async function buildManifest(catalogue: Catalogue): Promise<Manifest> {
   }
 
   for (const photo of bundle.photos) {
-    // Photographs are already files on a pull zone; there is nothing to sign or transcode.
+    // Already signed (N-83): `bundle.photos` comes from `getCachedBundle`, which signs every
+    // photograph before returning it, so there is nothing left to do here but transcode — and
+    // a photograph is already a file on a pull zone, so there is not even that.
     items.push({
       kind: 'photograph',
       name: photo.caption?.en ?? photo.url.split('/').pop() ?? 'photograph',

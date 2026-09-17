@@ -114,6 +114,13 @@ const schema = z
     BUNNY_STORAGE_REGION: z.string().default('de'),
     /** The pull zone in front of the storage zone — public reads, no credential. */
     BUNNY_PHOTO_CDN_HOSTNAME: z.string().optional(),
+    /**
+     * Token authentication key for the **photo** pull zone (N-83) — a separate zone and a
+     * separate key from `BUNNY_TOKEN_AUTH_KEY`, which signs video. Without it every photograph
+     * is a permanent, unsigned URL: the passcode gates the guest page, nothing gates the bytes,
+     * and a photograph is the thing a guest is most likely to forward.
+     */
+    BUNNY_PHOTO_TOKEN_AUTH_KEY: z.string().optional(),
 
     CRON_SECRET: z.string().min(16).optional(),
 
@@ -312,6 +319,7 @@ const schema = z
         'BUNNY_STORAGE_ZONE',
         'BUNNY_STORAGE_PASSWORD',
         'BUNNY_PHOTO_CDN_HOSTNAME',
+        'BUNNY_PHOTO_TOKEN_AUTH_KEY',
       ] as const) {
         if (!env[key]) {
           ctx.addIssue({

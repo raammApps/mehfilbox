@@ -6,7 +6,7 @@ import { isValidTimeZone } from '@/lib/time'
 import { getRepository } from '@/lib/db'
 import { resolveLimits } from '@/lib/entitlements'
 import { log } from '@/lib/log'
-import { getPhotoProvider, PHOTO_WIDTHS } from '@/lib/photos'
+import { getPhotoProvider, PHOTO_WIDTHS, signPhotos } from '@/lib/photos'
 import { getVideoProvider } from '@/lib/video'
 import { ApiError } from '@/lib/http/errors'
 import { noStore, readJson, route } from '@/lib/http/handler'
@@ -81,7 +81,10 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
     // The caps travel with the data. A client that imports a constant is a client that shows the
     // wrong number the moment the catalogue is upgraded (doc 15 §3).
     const limits = resolveLimits(grants.catalogue, grants.org)
-    return noStore({ catalogue, titles, albums, photos, limits })
+    // Signed (N-83): the customizer preview renders these in the operator's own browser, the
+    // same real guest components the guest page uses (doc 08, the client-rendered-tree
+    // deviation), so they need the same signed URL a guest would get.
+    return noStore({ catalogue, titles, albums, photos: signPhotos(catalogue.id, photos), limits })
   })
 }
 

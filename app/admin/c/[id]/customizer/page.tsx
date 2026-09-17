@@ -6,6 +6,7 @@ import { seedModules } from '@/lib/admin/templates'
 import { getRepository } from '@/lib/db'
 import { effectiveModules } from '@/lib/db/repository'
 import { publicUrlOf } from '@/lib/address'
+import { signPhotos } from '@/lib/photos'
 import { allThemes } from '@/themes/resolve'
 
 export const dynamic = 'force-dynamic'
@@ -55,7 +56,7 @@ export default async function CustomizerPage({ params }: { params: Promise<{ id:
         catalogue={catalogue}
         titles={titles}
         albums={albums}
-        photos={photos}
+        photos={signPhotos(catalogue.id, photos)}
         initialModules={modules}
         publicUrl={publicUrlOf(catalogue)}
         pendingContent={pending}

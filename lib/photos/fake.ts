@@ -13,6 +13,11 @@ export class FakePhotoProvider implements PhotoProvider {
     return `/fake-photos/${key}`
   }
 
+  /** No real CDN to authenticate against — nothing to sign. */
+  signCatalogue(_catalogueId: string, _ttlS: number): string {
+    return ''
+  }
+
   async put(key: string, body: ArrayBuffer, contentType: string): Promise<StoredPhoto> {
     this.files.set(key, { contentType, bytes: body.byteLength })
     return { url: this.urlFor(key), key }

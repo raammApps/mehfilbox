@@ -1,6 +1,7 @@
 import 'server-only'
 import { revalidateTag, unstable_cache } from 'next/cache'
 import { getRepository } from './db'
+import { signPhotos } from './photos'
 import type { Catalogue, CatalogueBundle } from './schema'
 
 /**
@@ -35,7 +36,7 @@ export function catalogueTag(slug: string): string {
  * on a legacy link, with every unit test green and the row itself correct. Part of the key rather
  * than a tag, because a tag can only be invalidated from a running process that knows to.
  */
-const CACHE_GENERATION = 'g2'
+const CACHE_GENERATION = 'g3'
 
 /**
  * An hour is the backstop, not the mechanism.
@@ -66,7 +67,13 @@ export const getCachedBundle = (catalogue: Catalogue): Promise<CatalogueBundle> 
       ])
       // The catalogue itself is not cached in here: it arrives from the caller, which has
       // already read it fresh enough to have made an access decision against it.
-      return { catalogue, titles, albums, photos }
+      //
+      // Signed here, not at render (N-83): this is the one place every guest read of a
+      // catalogue's photographs funnels through, including the download manifest
+      // (`lib/downloads.ts`), so signing here is signing everywhere at once. `PHOTO_SIGN_TTL_S`
+      // is what makes a signed snapshot still valid after sitting in this cache for up to
+      // `MAX_AGE_S`.
+      return { catalogue, titles, albums, photos: signPhotos(catalogue.id, photos) }
     },
     ['catalogue-bundle', CACHE_GENERATION, catalogue.id],
     { tags: [catalogueTag(catalogue.slug)], revalidate: MAX_AGE_S },

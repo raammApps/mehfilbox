@@ -3,6 +3,7 @@ import { AdminChrome } from '@/components/admin/AdminChrome'
 import { PhotoManager } from '@/components/admin/PhotoManager'
 import { getEditableCatalogue, getOperatorSession, getSessionOrg } from '@/lib/admin/session'
 import { getRepository } from '@/lib/db'
+import { signPhotos } from '@/lib/photos'
 
 export const dynamic = 'force-dynamic'
 
@@ -41,7 +42,7 @@ export default async function PhotosPage({ params }: { params: Promise<{ id: str
         </p>
       </div>
 
-      <PhotoManager catalogueId={catalogue.id} initialPhotos={photos} />
+      <PhotoManager catalogueId={catalogue.id} initialPhotos={signPhotos(catalogue.id, photos)} />
     </AdminChrome>
   )
 }

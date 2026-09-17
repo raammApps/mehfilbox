@@ -36,4 +36,15 @@ export interface PhotoProvider {
 
   /** The public URL a key maps to, without uploading. */
   urlFor(key: string): string
+
+  /**
+   * A query string (`?token=…&expires=…`, or `''`) authorising every rendition of every
+   * photograph under one catalogue for `ttlS` seconds (N-83).
+   *
+   * Scoped to the **catalogue**, not the photograph, for the reason `BunnyProvider.signDirectory`
+   * scopes video the same way: one token that covers `c/<catalogueId>/` authorises every width
+   * under it too, so a guest page with forty photographs signs once, not forty times, and
+   * `photoSrcSet`'s width-swap on the URL string keeps working unchanged.
+   */
+  signCatalogue(catalogueId: string, ttlS: number): string
 }
