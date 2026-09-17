@@ -143,6 +143,8 @@ function buildTitles(): Title[] {
     id: titleId(seed.n),
     catalogueId: CATALOGUE_ID,
     slug: seed.slug,
+    previousSlug: null,
+    slugChangedAt: null,
     name: { en: seed.en, hi: seed.hi },
     // Plausible for a few minutes of encoded ladder, so the demo's storage figure is not zero.
     sizeBytes: 900 * 1024 * 1024,

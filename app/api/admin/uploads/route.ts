@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto'
 import { z } from 'zod'
 import { requireEditableCatalogue } from '@/lib/admin/session'
 import { getRepository } from '@/lib/db'
-import { slugify, titleFromFilename } from '@/lib/format'
+import { titleFromFilename, uniqueSlug } from '@/lib/format'
 import { ApiError } from '@/lib/http/errors'
 import { noStore, readJson, route } from '@/lib/http/handler'
 import { log } from '@/lib/log'
@@ -88,6 +88,9 @@ export async function POST(request: Request) {
       id: randomUUID(),
       catalogueId: catalogue.id,
       slug: uniqueSlug(draftName, existing.map((t) => t.slug)),
+      // Free to re-derive on the first rename (N-84) — nobody has seen this address yet.
+      previousSlug: null,
+      slugChangedAt: null,
       name: { en: draftName },
       category: 'highlights',
       credits: [],
@@ -124,13 +127,4 @@ export async function POST(request: Request) {
       chunkSizeBytes: ticket.chunkSizeBytes,
     })
   })
-}
-
-/** Slugs are per-catalogue and appear in share links, so collisions get a numeric suffix. */
-function uniqueSlug(name: string, taken: string[]): string {
-  const base = slugify(name) || 'film'
-  if (!taken.includes(base)) return base
-  let n = 2
-  while (taken.includes(`${base}-${n}`)) n += 1
-  return `${base}-${n}`
 }

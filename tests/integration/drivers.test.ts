@@ -227,6 +227,8 @@ describe.skipIf(!hasSupabase)('Supabase Postgres, for real', () => {
       id: randomUUID(),
       catalogueId: catalogueId!,
       slug: 'itest-film',
+      previousSlug: null,
+      slugChangedAt: null,
       sizeBytes: 1024,
       name: { en: 'Integration Film', hi: 'परीक्षण' },
       category: 'highlights' as const,

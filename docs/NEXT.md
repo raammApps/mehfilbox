@@ -143,18 +143,26 @@ keys, then `CAPTCHA_DRIVER=turnstile` (`GO-LIVE.md`, second pass §2). The chall
 failures is what makes the per-instance-vs-durable arithmetic stop mattering at all; the durable
 store above is the fix for as long as it stays off.
 
-### N-84 · The film's address is the upload's filename  ·  ~1h
+### N-84 · The film's address is the upload's filename  ·  **code done, 18 September 2026**  ·  **one operator step left**
 
-`/watch/whatsapp-video-2026-08-12-at-02-07-21` is a film the operator renamed *Sangeet*. The slug is
-set once, from the filename, at upload (`app/api/admin/uploads/route.ts`), and renaming the title
-never touches it. Not an access problem — the film behind it is gated — but it puts the upload's
-metadata in every shared link and reads as a bug to anyone who notices.
+`/watch/whatsapp-video-2026-08-12-at-02-07-21` was a film the operator had renamed *Sangeet* —
+the slug was set once, from the filename, at upload, and renaming the title never touched it.
 
-Re-derive the slug from the title's name on the first rename after upload (keep it stable after
-that, since links are in phones), and let the operator edit it in the film list with the same
-uniqueness check the catalogue slug has. Existing rows: a one-off `pnpm` script that re-slugs
-titles whose slug still matches the filename pattern, with the old slug kept as a redirect for 90
-days — the deep-link spec (path-mode E2E) is the test that this did not break forwarded links.
+**Built:** the first rename after upload re-derives the slug from the new name automatically
+(`resolveSlugChange`, `lib/titles.ts`); an operator can also edit the address by hand in the film
+list, checked against its own catalogue's other films the same way a catalogue's own address is
+checked. Either way the old slug becomes a 90-day redirect (`findRenamedTitle`, same file) — a
+forwarded link resolves at the new address rather than 404ing the moment the rename saves. A
+one-off script, `pnpm reslug:titles` (`--write` to save; dry run without), fixes every existing
+row whose slug no longer matches what its current name would produce — the exact rows a past,
+un-tracked rename left behind. Full detail in `docs/PROGRESS.md`.
+
+**One step left, and it is not code:** apply `supabase/migrations/0027_title_slug_history.sql` to
+production **before** this deploys — `titles.previous_slug` / `titles.slug_changed_at` do not
+exist there yet, and a rename attempted before they do fails with a raw Postgres error rather than
+the "that address is taken" an operator can act on. Once it is applied, `pnpm reslug:titles
+--write` is worth running once, against real data, to close the gap for every film already
+mis-slugged in production.
 
 ### N-78 · "Client", not "Couple"  ·  ~2h  ·  **D-42**
 

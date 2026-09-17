@@ -38,7 +38,8 @@
     "test:ci": "vitest run --coverage --reporter=default --reporter=json --outputFile=reports/vitest.json",
     "check:vitals": "tsx scripts/check-vitals.ts",
     "backfill:sizes": "tsx scripts/backfill-sizes.ts",
-    "repoint:photos": "tsx scripts/repoint-photo-cdn.ts"
+    "repoint:photos": "tsx scripts/repoint-photo-cdn.ts",
+    "reslug:titles": "tsx scripts/reslug-titles.ts"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

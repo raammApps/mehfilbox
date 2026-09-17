@@ -10,7 +10,9 @@ import {
   localisedRequiredSchema,
   localisedStringSchema,
   posterSourceSchema,
+  titleSlugSchema,
 } from '@/lib/schema'
+import { resolveSlugChange } from '@/lib/titles'
 import { getVideoProvider } from '@/lib/video'
 
 export const runtime = 'nodejs'
@@ -25,6 +27,8 @@ const patchSchema = z.object({
   posterSource: posterSourceSchema.optional(),
   published: z.boolean().optional(),
   sortOrder: z.number().int().optional(),
+  /** N-84 — an operator editing the address directly, the same affordance a catalogue's has. */
+  slug: titleSlugSchema.optional(),
 })
 
 /** The right to edit is proven through the title's catalogue — never from a body-supplied org. */
@@ -45,6 +49,8 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       throw new ApiError('TITLE_NOT_READY', 'This film is still processing, so it cannot be published yet')
     }
 
+    const slugChange = await resolveSlugChange(title, body)
+
     const patch = {
       ...body,
       ...(body.published !== undefined
@@ -54,6 +60,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       ...(body.posterUrl !== undefined && body.posterSource === undefined
         ? { posterSource: 'custom' as const }
         : {}),
+      ...(slugChange ?? {}),
     }
 
     const updated = await getRepository().updateTitle(id, patch)

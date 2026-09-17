@@ -90,6 +90,23 @@ export function disambiguate(slug: string): string {
   return `${base}-${Math.random().toString(36).slice(2, 5)}`
 }
 
+/**
+ * Slugs are per-catalogue and appear in share links, so collisions get a numeric suffix rather
+ * than the random one `disambiguate` gives an org or catalogue address — a film list is small
+ * enough that "highlights-2" reads as intentional, where a partner-facing address needs to hide
+ * that a collision happened at all.
+ *
+ * Shared by upload (the first slug a film gets) and a title rename (N-84, re-deriving it from a
+ * new name) — one rule for what "the free neighbour of this name" means, not two that drift.
+ */
+export function uniqueSlug(name: string, taken: string[]): string {
+  const base = slugify(name) || 'film'
+  if (!taken.includes(base)) return base
+  let n = 2
+  while (taken.includes(`${base}-${n}`)) n += 1
+  return `${base}-${n}`
+}
+
 /** Strip an extension and de-noise a videographer's filename into a first-draft title. */
 export function titleFromFilename(filename: string): string {
   const withoutExtension = filename.replace(/\.[a-z0-9]+$/i, '')

@@ -70,6 +70,8 @@ export function makeTitle(catalogueId: string, overrides: Partial<Title> = {}): 
     id: randomUUID(),
     catalogueId,
     slug: 'a-film',
+    previousSlug: null,
+    slugChangedAt: null,
     name: { en: 'A Film' },
     synopsis: undefined,
     category: 'highlights',

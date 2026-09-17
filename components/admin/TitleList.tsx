@@ -190,6 +190,22 @@ export function TitleList({
                   />
                 </label>
 
+                <label className="block">
+                  {/* N-84: the address a guest actually follows — set once from the upload's
+                      filename, editable here with the catalogue address's own uniqueness rule
+                      (per wedding, not global), and never moved again once it has been. */}
+                  <span className="mb-1 block text-[13px] font-semibold">Address</span>
+                  <input
+                    type="text"
+                    defaultValue={title.slug}
+                    onBlur={(event) => {
+                      const next = event.target.value.trim().toLowerCase()
+                      if (next && next !== title.slug) void update(title.id, { slug: next })
+                    }}
+                    className="w-full rounded-[var(--radius-input)] border border-[var(--color-l-line)] px-3 py-2 text-[15px] font-mono"
+                  />
+                </label>
+
                 <label className="block sm:col-span-2">
                   <span className="mb-1 block text-[13px] font-semibold">Synopsis</span>
                   <textarea

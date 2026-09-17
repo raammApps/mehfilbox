@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { appNameSchema, catalogueSchema, slugSchema, titleSchema } from '@/lib/schema'
+import { appNameSchema, catalogueSchema, slugSchema, titleSchema, titleSlugSchema } from '@/lib/schema'
 import { demoSnapshot } from '@/lib/db/seed-data'
 
 /** doc 10 §1 test 13, plus the invariants the rest of the app assumes hold. */
@@ -53,6 +53,32 @@ describe('slugSchema', () => {
 
   it('lowercases and trims before validating', () => {
     expect(slugSchema.parse('  Aanya-Vikram  ')).toBe('aanya-vikram')
+  })
+})
+
+describe('titleSlugSchema (N-84)', () => {
+  /**
+   * A film's own address is scoped to its wedding, never a subdomain — a wedding legitimately
+   * titled "Admin" or "API" (a joke reel, a tech-team in-joke) must not be refused an address for
+   * a reason that only ever applied to `slugSchema`'s subdomain namespace.
+   */
+  it.each(['admin', 'api', 'www', 'a'])('accepts %s, unlike slugSchema', (slug) => {
+    expect(titleSlugSchema.safeParse(slug).success).toBe(true)
+    expect(slugSchema.safeParse(slug).success).toBe(false)
+  })
+
+  it.each([
+    ['-leading', 'leading hyphen'],
+    ['trailing-', 'trailing hyphen'],
+    ['double--hyphen', 'double hyphen'],
+    ['Under_score', 'underscore'],
+    ['', 'empty'],
+  ])('rejects %s (%s)', (slug) => {
+    expect(titleSlugSchema.safeParse(slug).success).toBe(false)
+  })
+
+  it('lowercases and trims before validating', () => {
+    expect(titleSlugSchema.parse('  Sangeet-Night  ')).toBe('sangeet-night')
   })
 })
 

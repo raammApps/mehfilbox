@@ -2354,3 +2354,68 @@ since nothing had signed in, and now correctly asserts on the sign-in prompt it 
 
 Files: `lib/downloads.ts`, `app/api/download/route.ts`, `app/c/[slug]/download/page.tsx`,
 `lib/i18n.ts`, `tests/unit/downloads.test.ts`, `e2e/guest.spec.ts`, `e2e/gates.spec.ts`.
+
+## N-84 · The film's address stops being its upload filename — 18 September 2026
+
+`/watch/whatsapp-video-2026-08-12-at-02-07-21` was a film the operator had renamed *Sangeet*. The
+slug was set once, from the videographer's filename, at upload
+(`app/api/admin/uploads/route.ts`), and renaming the title never touched it — not an access
+problem, the film behind it stayed gated, but the upload's own metadata sat in every link a guest
+forwarded.
+
+**The rule, and only ever once.** `resolveSlugChange` (`lib/titles.ts`) re-derives the slug from
+the new name on the **first** rename after upload — `slugChangedAt` still null is the signal —
+using `uniqueSlug`, the exact function upload itself already used to avoid a sibling's address
+(moved from a private helper in the uploads route to `lib/format.ts`, so both callers share one
+rule for "the free neighbour of this name" rather than two that drift). Every rename after the
+first leaves the slug alone: a link may already be in someone's phone by then, and an address that
+moves on every save is not an address. An operator can also set it by hand in the film list — a
+new "Address" field, checked against the catalogue's own other films the same shape
+`slugAvailable` already checks catalogue addresses with, just scoped to `catalogue_id` rather than
+global, matching what the DB itself enforces (`unique (catalogue_id, slug)`).
+
+**The old address does not just die.** Either kind of change writes `previousSlug` and
+`slugChangedAt`, and `/watch/[titleSlug]` (`app/c/[slug]/watch/[titleSlug]/page.tsx`) tries a
+title whose *previous* slug matches, within 90 days of the change, before it 404s — `redirect`s to
+the new address rather than silently rendering under the old one, and updates a shared link's OG
+title the same way. A signed-in operator setting an address a sibling film already has is refused
+`VALIDATION_FAILED`, the same code catalogue address collisions already use.
+
+Verified live, not just by the unit suite: renamed a demo film's name in a local `pnpm dev`
+session, watched the Address field auto-update on reload, then opened its *old* address as an
+anonymous guest and watched it redirect to the new one and play, with a bogus never-existed slug
+confirmed still 404ing cleanly alongside it — a live check that also caught a real gap in the
+local dev fixture itself (below).
+
+**Existing rows get `pnpm reslug:titles`** (`--write` to save; a dry run without), a one-off
+script in the shape `backfill-sizes`/`repoint-photo-cdn` already established: talks to Supabase
+directly rather than importing the app's `server-only` data modules, defaults to reporting rather
+than writing. Detection is a name/slug mismatch — a title whose current name no longer slugifies
+to its current slug has, by definition, been renamed since the slug was set, whether that
+happened yesterday or a year before this ticket existed. `slugify`/`uniqueSlug` are imported for
+real from `lib/format.ts` rather than re-implemented, since neither them nor their dependencies
+(`lib/i18n.ts`, `lib/schema.ts`) carry the `server-only` boundary the app's data modules do — one
+rule for a free address, not a second copy quietly drifting from the first.
+
+**Two things this ticket found that were not what it went looking for.** First: running the
+script against real production data hit `column titles.slug_changed_at does not exist` — proof,
+not assumption, that the new columns need `supabase/migrations/0027_title_slug_history.sql`
+applied before this code ships, the same fail-closed sequencing N-86 and N-83 already forced this
+session; `resolveSlugChange` runs on every title PATCH, so a rename attempted before the migration
+lands would 500 with a raw Postgres error rather than a message an operator could act on. Second:
+the live check above initially found the auto-rederivation silently doing nothing at all — not a
+code bug, but `.data/store.json`, this developer's local file-driver fixture, predating the schema
+change and carrying titles with no `previousSlug`/`slugChangedAt` keys at all, so
+`slugChangedAt === null` was never true for them (`undefined !== null`). Resetting the local
+fixture (gitignored, regenerates from `lib/db/seed-data.ts` on next boot) was the fix for *this*
+environment; the identical shape of gap in production is exactly what the migration above closes.
+
+11 new/updated unit tests (`lib/titles.ts`, `uniqueSlug`, `titleSlugSchema`), 1 new E2E test
+(`path-mode.spec.ts`, upload → rename → guest-side redirect, settled with a signed webhook rather
+than a sleep so it is exact instead of hopeful about `FakeVideoProvider`'s processing delay).
+
+Files: `lib/titles.ts` (new), `scripts/reslug-titles.ts` (new),
+`supabase/migrations/0027_title_slug_history.sql` (new), `lib/schema.ts`, `lib/format.ts`,
+`lib/db/seed-data.ts`, `lib/db/supabase-repository.ts`, `app/api/admin/titles/[id]/route.ts`,
+`app/api/admin/uploads/route.ts`, `app/c/[slug]/watch/[titleSlug]/page.tsx`,
+`components/admin/TitleList.tsx`, `package.json`.

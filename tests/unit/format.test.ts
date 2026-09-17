@@ -7,6 +7,7 @@ import {
   suggestSlug,
   disambiguate,
   titleFromFilename,
+  uniqueSlug,
 } from '@/lib/format'
 
 describe('formatClock', () => {
@@ -85,6 +86,22 @@ describe('disambiguate', () => {
 
   it('stays inside the slug schema', () => {
     expect(slugSchema.safeParse(disambiguate('priya-and-arjun-2026')).success).toBe(true)
+  })
+})
+
+describe('uniqueSlug', () => {
+  /** Shared by upload and a title rename (N-84) — one rule for "the free neighbour", not two. */
+  it('slugifies the name when nothing else claims it', () => {
+    expect(uniqueSlug('Sangeet Night', [])).toBe('sangeet-night')
+  })
+
+  it('appends a numeric suffix, counting up, for a name already taken', () => {
+    expect(uniqueSlug('Sangeet', ['sangeet'])).toBe('sangeet-2')
+    expect(uniqueSlug('Sangeet', ['sangeet', 'sangeet-2'])).toBe('sangeet-3')
+  })
+
+  it('falls back to a stable word when nothing survives slugifying', () => {
+    expect(uniqueSlug('???', [])).toBe('film')
   })
 })
 

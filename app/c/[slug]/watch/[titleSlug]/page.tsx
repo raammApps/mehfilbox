@@ -8,6 +8,7 @@ import { addressFor, requireCanonicalAddress } from '@/lib/address'
 import {resolveLocalised} from '@/lib/i18n'
 import { guestLocale } from '@/lib/guest-locale'
 import { posterDataUri } from '@/lib/poster'
+import { findRenamedTitle } from '@/lib/titles'
 import { resolveTheme } from '@/themes/resolve'
 
 /** Dynamic — every visit needs a fresh playback token (doc 05 §6). */
@@ -19,7 +20,9 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
   const { slug, titleSlug } = await params
   const verdict = await resolveAccess(slug)
   if (verdict.kind !== 'ok') return { title: 'Mehfilbox' }
-  const title = await getRepository().getTitleBySlug(verdict.catalogue.id, titleSlug)
+  const title =
+    (await getRepository().getTitleBySlug(verdict.catalogue.id, titleSlug)) ??
+    (await findRenamedTitle(verdict.catalogue.id, titleSlug))
   return { title: title ? title.name.en : 'Mehfilbox', robots: { index: false, follow: false } }
 }
 
@@ -48,7 +51,18 @@ export default async function WatchPage({
   )
 
   const title = await getRepository().getTitleBySlug(verdict.catalogue.id, titleSlug)
-  if (!title || !title.published) notFound()
+  if (!title || !title.published) {
+    // N-84: the slug this guest followed may be one a rename retired, not one that never
+    // existed. A forwarded link gets 90 days from `slugChangedAt` before it genuinely 404s.
+    const renamed = await findRenamedTitle(verdict.catalogue.id, titleSlug)
+    if (renamed) {
+      redirect(
+        `${(await addressFor(verdict.catalogue)).basePath}/watch/${encodeURIComponent(renamed.slug)}` +
+          (timestamp ? `?t=${encodeURIComponent(timestamp)}` : ''),
+      )
+    }
+    notFound()
+  }
 
   const locale = await guestLocale(verdict.catalogue)
   const name = resolveLocalised(title.name, locale)

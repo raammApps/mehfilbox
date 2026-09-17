@@ -105,6 +105,19 @@ export const slugSchema = z
   })
 
 /**
+ * A film's own address within its catalogue (N-84) — `…/watch/<slug>`. Looser than `slugSchema`:
+ * a title's slug is scoped to one wedding and is never a subdomain, so the reserved-word
+ * refinement that protects `admin`/`api`/… would refuse a film legitimately named after one.
+ */
+export const titleSlugSchema = z
+  .string()
+  .trim()
+  .toLowerCase()
+  .min(1, 'Slug must not be empty')
+  .max(64, 'Slug must be 64 characters or fewer')
+  .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'Use lowercase letters, numbers and single hyphens')
+
+/**
  * doc 12 §1 rule 2: no `-flix` in any name we ship, including the per-couple app name an
  * operator types. Enforced at creation rather than in review, because the operator is the one
  * who will reach for it.
@@ -427,6 +440,17 @@ export const titleSchema = z.object({
   id: z.string().uuid(),
   catalogueId: z.string().uuid(),
   slug: z.string().min(1),
+  /**
+   * The slug this one replaced, still resolvable for 90 days from `slugChangedAt` (N-84) — a
+   * forwarded link outlives the rename that would otherwise have broken it.
+   */
+  previousSlug: z.string().nullable().default(null),
+  /**
+   * When the current slug was set. Null means it is still exactly what upload derived from the
+   * filename — the next rename is free to re-derive it. Once set, a rename never touches the
+   * slug again, because by then the link may already be in someone's phone.
+   */
+  slugChangedAt: z.string().nullable().default(null),
 
   name: localisedRequiredSchema,
   synopsis: localisedStringSchema.optional(),
