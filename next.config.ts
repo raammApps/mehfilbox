@@ -60,7 +60,14 @@ function contentSecurityPolicy(): string {
     'style-src': ["'self'", "'unsafe-inline'"],
     'img-src': ["'self'", 'data:', 'https://*.b-cdn.net'],
     'font-src': ["'self'"],
-    'media-src': ["'self'", 'https://*.b-cdn.net'],
+    // `blob:` is load-bearing, not decoration: hls.js uses the Media Source Extensions API,
+    // which assembles fetched segments (governed by connect-src, already listed) into a
+    // MediaSource and assigns the video element's `src` to a `blob:` URL it mints itself — found
+    // by actually playing a film against this policy, not by reasoning about it. Without this,
+    // every film in the product refuses to play with `MEDIA_ELEMENT_ERROR: Media load rejected
+    // by URL safety check`, and every route/page/component test still passes, because none of
+    // them run a real browser against a real CSP.
+    'media-src': ["'self'", 'blob:', 'https://*.b-cdn.net'],
     'connect-src': ["'self'", 'https://*.b-cdn.net', 'https://challenges.cloudflare.com'],
     'frame-src': ['https://challenges.cloudflare.com'],
     'frame-ancestors': ["'none'"],
