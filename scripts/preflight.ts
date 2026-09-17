@@ -13,6 +13,7 @@
  * not ready, so it can gate a deploy.
  */
 import { existsSync, readFileSync } from 'node:fs'
+import { createHash } from 'node:crypto'
 
 if (existsSync('.env.local')) {
   for (const line of readFileSync('.env.local', 'utf8').split('\n')) {
@@ -291,6 +292,18 @@ async function checkLibrary(apiKey: string, libraryId: string): Promise<void> {
  *
  * So this writes, reads back through the CDN, and deletes.
  */
+/** Same algorithm as `BunnyPhotoProvider.signPath`: `token = base64url(sha256(key + path + expires))`. */
+function signPhotoPath(path: string, key: string): string {
+  const expires = Math.floor(Date.now() / 1000) + 60
+  const token = createHash('sha256')
+    .update(`${key}${path}${expires}`)
+    .digest('base64')
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=/g, '')
+  return `?token=${token}&expires=${expires}`
+}
+
 async function checkPhotos(): Promise<void> {
   const zone = env.BUNNY_STORAGE_ZONE
   const password = env.BUNNY_STORAGE_PASSWORD
@@ -339,7 +352,13 @@ async function checkPhotos(): Promise<void> {
 
   // The CDN is a separate hop with its own cache; a zone can accept writes while the pull zone
   // points somewhere else entirely, which is precisely what a half-finished rename looks like.
-  const read = await fetch(`https://${host}/${key}`, { cache: 'no-store' }).catch(() => null)
+  //
+  // N-83 turned Token Authentication on for this zone, so an unsigned request now correctly
+  // 403s — the same signature `BunnyPhotoProvider.signPath` computes, reproduced here rather
+  // than imported, since this script deliberately reads `process.env` directly instead of going
+  // through `lib/env.ts`'s `server-only` boundary.
+  const query = env.BUNNY_PHOTO_TOKEN_AUTH_KEY ? signPhotoPath(`/${key}`, env.BUNNY_PHOTO_TOKEN_AUTH_KEY) : ''
+  const read = await fetch(`https://${host}/${key}${query}`, { cache: 'no-store' }).catch(() => null)
   if (!read || !read.ok) {
     fail(
       'Photo CDN',
