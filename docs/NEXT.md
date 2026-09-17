@@ -155,10 +155,37 @@ oversight — Next's RSC hydration payload and the inline `style={{...}}` themin
 files both need it, and the existing `no-dangerouslySetInnerHTML` eslint rule is what actually
 guards same-origin script injection.
 
+**It shipped without `media-src blob:` and broke every film in production for a few minutes.**
+`hls.js` fetches segments over `connect-src` (already correct) then assembles them into a
+`MediaSource` and assigns the video element's `src` to a `blob:` URL it mints itself — a browser
+mechanic, not something grepping the codebase surfaces. Caught by playing a real film against the
+live deploy right after it shipped, fixed the same way within minutes (commit `05b30f8`). See
+N-90 below for the reason nothing automated caught it first.
+
 **Still open, and it is not code:** turning Turnstile on itself — a widget for `mehfilbox.com`, two
 keys, then `CAPTCHA_DRIVER=turnstile` (`GO-LIVE.md`, second pass §2). The challenge after three
 failures is what makes the per-instance-vs-durable arithmetic stop mattering at all; the durable
 store above is the fix for as long as it stays off.
+
+### N-90 · The playback path has no automated test at all  ·  ~half a session  ·  **found while fixing N-86**
+
+Every unit test, every component test, and the full E2E suite passed while N-86's CSP shipped
+broken to production. Not a gap in running them — `useHlsPlayback.ts`'s own `isManifest` check
+(`/\.m3u8(\?|$)/.test(playbackUrl)`) means the fake video driver's `/media/sample.webm` never
+takes the HLS branch at all: no `hls.js`, no `MediaSource`, no `blob:`, the exact path that broke.
+CI, the unit suite and the E2E suite all genuinely exercise "does a video element show up and can
+it be commanded" — none of them exercise "does the actual streaming mechanism work," which is the
+one guarantee doc 01 US-1's "under a second and a half" promise depends on.
+
+Two ways to close it, and the second is worth more than the first: (a) make the fake driver serve
+a real, tiny `.m3u8` pointing at short local segments, so `isManifest` is true and E2E's existing
+playback assertions start running through `hls.js` for real — no new tests, the same ones finally
+testing the real path; (b) a synthetic check in the spirit of `app/api/cron/synthetic/route.ts`,
+but from an actual browser (Playwright, run on a schedule, not as part of the deploy-blocking
+suite) against production itself, asking not just "does the token endpoint respond" but "does the
+`<video>` element reach `readyState >= 2`." (a) is cheaper and belongs with the next real playback
+change; (b) is the only thing that would have caught this specific failure at the moment it shipped
+rather than minutes later by hand.
 
 ### N-85 · A passcode views; an account downloads  ·  ~2h  ·  **D-43**
 

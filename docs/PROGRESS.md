@@ -2190,13 +2190,24 @@ its fallback (`tests/unit/rate-limit-durable.test.ts`); the existing rate-limit-
 `login-security.test.ts`'s full lockout and challenge logic, `credential-links.test.ts` — passes
 unchanged through the memory driver.
 
-**The CSP.** `next.config.ts` gains the sixth header doc 05 §4 asks for. Every directive traces to
-something the app actually does, checked by grep first: fonts self-hosted, so `font-src 'self'`
-alone; `*.b-cdn.net` for Bunny, the only external host the browser reaches, in `img-src`,
-`media-src` and `connect-src`; Turnstile's three directives added now, even switched off today, so
-turning it on later needs no header change. `'unsafe-inline'` on `script-src` (Next's RSC
-hydration payload) and `style-src` (the inline `style={{...}}` theming pattern, checked against 19
-files before deciding it was load-bearing) is named as a real trade-off in the file's own comment,
-not left implicit.
+**The CSP broke every film in production for a few minutes, and this section says so.**
+`next.config.ts` gains the sixth header doc 05 §4 asks for. Every directive was checked against
+what the app actually does, by grep, before writing it — fonts self-hosted, so `font-src 'self'`
+alone; `*.b-cdn.net` for Bunny in `img-src`, `media-src` and `connect-src`; Turnstile's three
+directives added now, even switched off today — but `media-src` shipped without `blob:`, and
+`hls.js`'s use of it (fetch the segments over `connect-src`, then assemble them into a
+`MediaSource` and assign the video element's `src` to a `blob:` URL it mints itself) is a browser
+mechanic no amount of grepping the codebase would surface, only playing a film would. The full
+unit suite, the full E2E suite against a real production build, and a first live check all passed
+— **because the E2E suite's fake video driver serves a plain `.webm` file, not an `.m3u8`
+manifest**, and `useHlsPlayback.ts`'s own `isManifest` check means `hls.js`, `MediaSource` and
+`blob:` are never touched by any automated test in this repository, only by real Bunny content in
+a real browser. Caught by doing exactly that against the live deploy, minutes after it shipped;
+fixed same day, commit `05b30f8`. The gap itself is not fixed and is worth its own ticket — see
+`docs/NEXT.md`.
+
+`'unsafe-inline'` on `script-src` (Next's RSC hydration payload) and `style-src` (the inline
+`style={{...}}` theming pattern, checked against 19 files before deciding it was load-bearing) is
+named as a real trade-off in the file's own comment, not left implicit.
 
 9 new unit tests; 691 unit and component tests total.
