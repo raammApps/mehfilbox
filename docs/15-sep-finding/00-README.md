@@ -125,7 +125,8 @@ Planned, with a file path behind every claim. It paid for itself before it was f
 the media pipeline caught a live bug — guests could already see a film or photograph before the
 studio's next Publish. Every uploaded photograph was visible the instant it finished uploading, with
 no toggle to delay it at all. The photo half was fixed the same day (commit `7730633`); the titles
-half is still open in production today, now ticketed as N-89. Its single biggest finding, independent of
+half, and the same gap on the playback-token route one layer up, were both fixed 18 September
+(ticket N-89, both parts, [PROGRESS.md](../PROGRESS.md)). Its single biggest finding, independent of
 that bug: the price list sells 100–200 GB of storage and a working payment flow; what's actually
 enforced today is a flat **20 GB cap** and a credit granted by hand, because Razorpay does not
 exist anywhere in the code.
@@ -199,12 +200,11 @@ week) — and **whether a studio will actually offer the Keep upgrade at day 60,
 
 ## What happens next, once Sandeep decides
 
-One thing doesn't wait for a decision: **the titles half of the guest-visibility bug is still open
-in production** (`lib/db/supabase-repository.ts:1390-1392`, ticket N-89, about two hours of work),
-and the same gate is missing a second time on the playback-token route
-(`app/api/playback/token/route.ts:35-41`, about half a day, same ticket) — fixing only the first
-leaves a ticked-but-unpublished film mintable by anyone who knows its slug. Fix both first, before
-anything else below, regardless of what Sandeep decides on the rest.
+**N-89 is closed, both parts** — the titles list gate (17 September) and the playback-token route
+one layer up (18 September, `app/api/playback/token/route.ts`), which needed a real design
+decision rather than a line: a guest is gated on `live_at`, an operator whose session owns the
+catalogue is not, so the customizer's own preview — which calls this same endpoint for real —
+keeps working. Nothing is waiting on a decision any more; this section is kept for the record.
 
 Once the nine decisions above are confirmed, [06-what-changes-next.md](06-what-changes-next.md) has
 23 tickets (N-89–N-111) ready to run, in the backlog's own order: unretired risk first — the live

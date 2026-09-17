@@ -1031,7 +1031,9 @@ does **not** reach the guest gallery until the studio's next explicit Publish
 just-encoded film puts it in front of guests **immediately**, before the next catalogue Publish.
 This directly contradicts the "identical semantics" promise CLAUDE.md makes for the `Repository`
 seam (deliberate deviation 2) and is worth fixing before it is worth explaining to a studio why a
-pre-publish preview leaked. It is ticketed as N-89 ([06 §2](./06-what-changes-next.md)).
+pre-publish preview leaked. Ticketed as N-89 ([06 §2](./06-what-changes-next.md)); **fixed
+18 September 2026, both the list gate below and the playback-token route (see the corrected row
+in §12.8).**
 
 **Fixed 16 September 2026 — the photograph half.** `SupabaseRepository.listPhotosForCatalogue`
 did not accept the `liveOnly` parameter the `Repository` interface declares, so it returned
@@ -1317,7 +1319,7 @@ N-86.
 | No automated test enforces the `org_id`-scoping convention | Observed | Chapter 12.2. |
 | Cron bearer-secret compares are not constant-time (`!==`, not `timingSafeEqual`) | Observed | Low practical severity — a 16+ character secret over the network. |
 | Three guest endpoints have no rate limit at all, while every sibling does | Observed | `POST/GET /api/likes` (unlimited toggling), `GET /api/download` (unlimited manifest builds, **one provider call per film per request**), `GET /api/og` (uncapped on the first request per `v=`, then cached a year). Every other guest API — passcode, profiles, progress, playback/token, module-state, qoe — calls `lib/http/rate-limit.ts` (`map-guest.md` §7 item 2). |
-| The playback-token route gates on `published`, never `live_at` | N-89 | Chapter 9.6, second bullet. The same class as the list-gate bug and not closed by fixing it — a ticked-but-unpublished film still mints a working URL to anyone holding the slug (`map-media-infra.md` §7 item 3). |
+| ~~The playback-token route gates on `published`, never `live_at`~~ — **fixed 18 September 2026** | N-89 | Was Chapter 9.6, second bullet; the same class as the list-gate bug. `app/api/playback/token/route.ts` now gates a guest on `live_at`, falling back to the owning operator's session only when that check has already failed — the customizer's own preview calls this same route for real and still works. 4 new unit tests, including cross-org refusal. |
 | `POST/DELETE /api/admin/catalogues/:id/transfer` is ownership-scoped, not partner-scoped | Observed | `requireOwnedCatalogue` with no `org.kind === 'partner'` check, unlike `couple/route.ts:49`, which does check. No UI exposes it (`canHandOver` hides the panel for a couple) and the `direct: true` shortcut is separately blocked — but a couple who owns a catalogue could, by calling the API directly, mint a working 14-day claim link to **any** address and hand their own wedding away (`map-client.md` §7 item 6). |
 
 ---
@@ -1561,7 +1563,7 @@ escape hatch) is why N-37 moved earlier and why nothing writes `subStatus='delet
 
 | # | Decision | Where it comes up | Recommended default |
 |---|---|---|---|
-| 1 | **Fix the Supabase-driver publish gate for films now, before any feature work** (the photograph half was fixed on 16 September, commit `7730633`). A film ticked "visible to guests" is live to guests before the studio publishes (Chapter 9.6) — a silent break of a stated product promise, live, today — and the playback-token route has the same gap independently. | Chapter 9.6 | **Fix it first**, both sites. It is a data-correctness bug in production, not a feature gap; every day it stays open is a day a "preview" can leak. Ticketed as N-89. |
+| 1 | ~~Fix the Supabase-driver publish gate for films now, before any feature work~~ — **done, 18 September 2026, all three sites**: the photograph half (16 Sept, commit `7730633`), the titles list gate and the playback-token route (18 Sept, N-89). | Chapter 9.6 | Closed. Kept here for the record. |
 | 2 | **Should studio self-registration require approval?** Today anyone can register at `/admin/register` with no gate. | Chapter 4.1; `docs/NEXT.md` "Decisions Sandeep owns" | Keep it open (D-39's "suspend after," already decided) unless real abuse shows up — an approval queue costs every honest studio a wait. |
 | 3 | **Should unlisted (no-passcode) catalogues' photographs be signed too, once N-83 is fixed?** | Chapter 12.6 | Sign photographs on any catalogue **with** a passcode; leave unlisted ones plain, since a share preview and WhatsApp's own image fetch need an unsigned URL. |
 | 4 | **Build N-85/D-43 (passcode views, only an account downloads) alongside N-83.** Both are named, live security gaps; the pieces for N-85 already exist in the code. | Chapter 12.6, 12.7 | Build both together — they are the same class of fix and the second is smaller than the first. |

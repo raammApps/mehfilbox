@@ -65,22 +65,27 @@ where it belongs (Razorpay for credits, N-20; the ops account, N-53b).
 
 ## Tier 1b — unretired risk
 
-### N-89 · Close the publish gate on the two paths that still leak  ·  2h, then half a day  ·  **security, part fixed**
+### N-89 · Close the publish gate on the two paths that leaked  ·  **done, 18 September 2026**  ·  **security**
 
 The photo bug's twin, same driver, same class. `listTitles({ publishedOnly })` on the Supabase
 driver gated on `published` — the operator's intent — instead of `live_at` — whether a Publish
 actually carried a film to guests — so a ticked-but-never-published film was already on the guest
-list read. **Part (a), the list gate, was fixed 17 September 2026**
+list read. **Part (a), the list gate, fixed 17 September 2026**
 (`lib/db/supabase-repository.ts`, matching the memory driver's `live_at`-only predicate since
 N-57; pinned by `tests/unit/supabase-query-shape.test.ts`).
 
-**Part (b), the playback gate, is still open.** `app/api/playback/token/route.ts:35-41` refuses a
-title on `!title.published` alone and never reads `live_at`, so a ticked-but-unpublished film can
-still mint a working, TTL'd playback URL to anyone who knows its slug — and a slug is frozen to
-the upload filename forever (N-84), so it is guessable from a forwarded file. The half-day is a
-decision, not the line: the customizer's own preview mounts the real guest components and calls
-this same endpoint, so the fix needs a way to tell an operator's preview from a guest holding the
-passcode before it can gate on `live_at` here too. Do this before anything else in Tier 1c/1d.
+**Part (b), the playback gate, fixed 18 September 2026.** `app/api/playback/token/route.ts`
+refused a title on `!title.published` alone and never read `live_at`, so a ticked-but-unpublished
+film could mint a working, TTL'd playback URL to anyone who knew its slug — and a slug is frozen
+to the upload filename forever (N-84), so it is guessable from a forwarded file. The decision the
+half-day was scoped for: the customizer's own preview calls this same endpoint for real, with no
+`preview`-mode check anywhere in `TitleModal.tsx`'s manifest prefetch, and that is deliberate — it
+is what wins the sub-1.5s playback target once a guest actually presses Play. So the fix reads
+`live_at` for a guest and falls back to `getOperatorSession()` — the org that owns the catalogue,
+not merely any session — only when that first, cheap check has already failed, which costs a real
+guest on a live film nothing extra. The un-ticked case stays refused to the owner too; encoding
+status (`TITLE_NOT_READY`) stayed a wholly separate check throughout, exactly as before. 4 new
+unit tests, including cross-org refusal.
 
 ---
 

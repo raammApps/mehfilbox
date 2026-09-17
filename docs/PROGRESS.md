@@ -2116,3 +2116,34 @@ this: a real driver, ready for test keys now, live keys later, same three env va
 8 new unit tests, including a real HMAC-SHA256 round-trip against the verifier — no network call
 reaches Razorpay in the suite, but the signature math is exercised for real. `.env.example` and
 `docs/DEPLOYMENT.md` document the three new variables. 676 unit and component tests total.
+
+## N-89, closed — the playback-token gate — 18 September 2026
+
+**Part (b).** `app/api/playback/token/route.ts` refused a title on `!title.published` alone and
+never read `live_at`, so — on any catalogue that had already been published once — a
+ticked-but-unpublished film could mint a working, TTL'd playback URL to anyone who knew its slug.
+Same class as N-89(a) (the titles list gate, fixed 17 September) and the photo bug the day before
+it; all three were the Supabase driver trusting the operator's tick where the guest gate needs
+whether a Publish actually happened.
+
+The half-day this was scoped for was a design decision, not a line: `TitleModal.tsx`'s manifest
+prefetch calls this same endpoint for real, unconditionally, with no `preview`-mode check at all
+— deliberately, since that prefetch is what wins the sub-1.5s playback target once a guest
+actually presses Play, and it is also exactly how an operator previews a film they have ticked but
+not yet published. Gating strictly on `live_at` would have silently broken that preview.
+
+The fix: a guest is gated on `live_at`, same predicate as N-89(a); an operator whose session's org
+owns the catalogue is gated on the tick alone, same as the console already shows them. The
+operator-session lookup only runs once the guest check has already failed, so a real guest on a
+live film — the route's own documented p99 budget — pays nothing extra. Encoding status
+(`TITLE_NOT_READY`) stayed a wholly separate, unconditional check throughout, which is what an
+early version of this fix got wrong: folding readiness into the authorisation gate briefly broke
+the "still encoding" case for every caller, guest included, caught by the existing test before it
+shipped.
+
+4 new unit tests: refused to a guest, served to the owning operator, refused to a different org's
+operator, and refused to the owner too when the title was never ticked. `docs/15-sep-finding/`'s
+own findings corrected in place at the three spots that described this as still open, rather than
+left to contradict the closed ticket.
+
+680 unit and component tests total.

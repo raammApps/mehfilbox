@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { getOperatorSession } from '@/lib/admin/session'
 import { requireServableCatalogue } from '@/lib/catalogue-access'
 import { getRepository } from '@/lib/db'
 import { env } from '@/lib/env'
@@ -32,8 +33,34 @@ export async function POST(request: Request) {
     const repository = getRepository()
 
     const title = await repository.getTitleBySlug(catalogue.id, body.titleSlug)
-    if (!title || !title.published) {
-      // An unpublished title is indistinguishable from a missing one to a guest.
+
+    /**
+     * `live_at`, not `published` alone (N-89b — the twin of N-89a, one layer up). `published` is
+     * the operator's tick; `live_at` is whether a Publish actually carried the film to guests.
+     * Gating on `published` alone meant a ticked-but-unpublished film could mint a working,
+     * TTL'd playback URL to anyone who knew its slug, on any catalogue that had ever been
+     * published once — independent of whether *this* film had.
+     *
+     * The customizer's own preview deliberately calls this same endpoint for real
+     * (`components/streaming/TitleModal.tsx`'s manifest prefetch, unconditional, no `preview`
+     * check — that is what wins the sub-1.5s playback target once Play is actually pressed by a
+     * guest), and an operator previewing a film they have ticked but not yet published is the
+     * whole reason that prefetch exists. So the guest gate and the owner's gate are different,
+     * on purpose: a guest needs `live_at`; an operator whose session's org owns this catalogue
+     * needs only the tick, same as the console already shows them.
+     *
+     * The operator-session lookup only runs when the guest gate has already failed, so a real
+     * guest on a live film — the overwhelming majority of calls, and the one this route's own
+     * p99 budget is written for — costs nothing extra.
+     */
+    const knownToGuests = title?.published && title.liveAt !== null
+    let allowed = Boolean(knownToGuests)
+    if (!allowed && title?.published) {
+      const session = await getOperatorSession()
+      allowed = session !== null && session.orgId === catalogue.orgId
+    }
+    if (!title || !allowed) {
+      // Indistinguishable from a missing film to anyone this was not for.
       throw new ApiError('CATALOGUE_NOT_FOUND', 'No such film')
     }
     if (title.status !== 'ready' || !title.providerId) {

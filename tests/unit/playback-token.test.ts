@@ -1,4 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { setAuthProvider } from '@/lib/admin/auth'
+import type { AuthProvider } from '@/lib/admin/auth-provider'
+import { operatorSchema, orgSchema } from '@/lib/schema'
 import { setVideoProvider } from '@/lib/video'
 import { FakeVideoProvider } from '@/lib/video/fake'
 import { installRepository, makeCatalogue, makeTitle } from '../helpers/repository'
@@ -206,6 +209,112 @@ describe('POST /api/playback/token', () => {
 
     const response = await post({ catalogue: catalogue.slug, titleSlug: title.slug, profileId })
     expect((await response.json()).resumeAtS).toBe(0)
+  })
+})
+
+/**
+ * N-89b — the twin of N-89a, one layer up. A ticked-but-not-yet-live title used to mint a real
+ * token for anyone who knew its slug; the fix has to close that without breaking the
+ * customizer's own preview, which calls this same route for real (`TitleModal.tsx`'s manifest
+ * prefetch has no `preview` check at all).
+ */
+describe('a title that has been ticked but never carried live (published, liveAt null)', () => {
+  const AT = '2026-01-01T00:00:00.000Z'
+  const OWNER = '00000000-0000-4000-8000-000000000001'
+  const OTHER_ORG_OPERATOR = '00000000-0000-4000-8000-000000000002'
+  const OTHER_ORG = '11111111-1111-4111-8111-11111111111b'
+
+  const signedInAs = (id: string, email: string): AuthProvider =>
+    ({
+      name: 'stub',
+      currentUser: async () => ({ id, email }),
+      signIn: async () => null,
+      signOut: async () => {},
+    }) as unknown as AuthProvider
+
+  const signedOut = (): AuthProvider =>
+    ({ name: 'stub', currentUser: async () => null, signIn: async () => null, signOut: async () => {} }) as unknown as AuthProvider
+
+  async function install() {
+    const catalogue = makeCatalogue()
+    const title = makeTitle(catalogue.id, { slug: 'not-yet-live', liveAt: null })
+    const repository = installRepository({
+      ...(await emptyStore()),
+      orgs: [orgSchema.parse({ id: catalogue.orgId, name: 'Owner Studio', slug: 'owner-studio', createdAt: AT })],
+      operators: [
+        operatorSchema.parse({
+          id: OWNER,
+          orgId: catalogue.orgId,
+          email: 'owner@example.test',
+          name: 'Owner',
+          role: 'admin',
+          passwordHash: '',
+          createdAt: AT,
+        }),
+        operatorSchema.parse({
+          id: OTHER_ORG_OPERATOR,
+          orgId: OTHER_ORG,
+          email: 'other@example.test',
+          name: 'Someone Else',
+          role: 'admin',
+          passwordHash: '',
+          createdAt: AT,
+        }),
+      ],
+      catalogues: [catalogue],
+      titles: [title],
+    })
+    return { catalogue, title, repository }
+  }
+
+  it('is refused to a guest, exactly like a missing film', async () => {
+    setAuthProvider(signedOut())
+    const { catalogue } = await install()
+    const response = await post({ catalogue: catalogue.slug, titleSlug: 'not-yet-live' })
+    expect(response.status).toBe(404)
+    expect((await response.json()).error.code).toBe('CATALOGUE_NOT_FOUND')
+  })
+
+  it('is served to the operator whose session owns this catalogue — the customizer preview', async () => {
+    setAuthProvider(signedInAs(OWNER, 'owner@example.test'))
+    const { catalogue } = await install()
+    const response = await post({ catalogue: catalogue.slug, titleSlug: 'not-yet-live' })
+    expect(response.status).toBe(200)
+    const body = (await response.json()) as { playbackUrl: string }
+    expect(body.playbackUrl).toBeTruthy()
+  })
+
+  it('is refused to a signed-in operator from a different org — ownership, not merely a session', async () => {
+    setAuthProvider(signedInAs(OTHER_ORG_OPERATOR, 'other@example.test'))
+    const { catalogue } = await install()
+    const response = await post({ catalogue: catalogue.slug, titleSlug: 'not-yet-live' })
+    expect(response.status).toBe(404)
+  })
+
+  it('stays refused to the owner too when the title was never even ticked', async () => {
+    setAuthProvider(signedInAs(OWNER, 'owner@example.test'))
+    const catalogue = makeCatalogue()
+    const title = makeTitle(catalogue.id, { slug: 'not-ticked', published: false, liveAt: null })
+    installRepository({
+      ...(await emptyStore()),
+      orgs: [orgSchema.parse({ id: catalogue.orgId, name: 'Owner Studio', slug: 'owner-studio', createdAt: AT })],
+      operators: [
+        operatorSchema.parse({
+          id: OWNER,
+          orgId: catalogue.orgId,
+          email: 'owner@example.test',
+          name: 'Owner',
+          role: 'admin',
+          passwordHash: '',
+          createdAt: AT,
+        }),
+      ],
+      catalogues: [catalogue],
+      titles: [title],
+    })
+
+    const response = await post({ catalogue: catalogue.slug, titleSlug: 'not-ticked' })
+    expect(response.status).toBe(404)
   })
 })
 
