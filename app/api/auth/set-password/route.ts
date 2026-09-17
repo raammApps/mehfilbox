@@ -28,7 +28,7 @@ const WINDOW_S = 60 * 60
 
 export async function POST(request: Request) {
   return route('auth/set-password', async () => {
-    const limit = consume(`set-password:${clientIp(request)}`, PER_IP, WINDOW_S)
+    const limit = await consume(`set-password:${clientIp(request)}`, PER_IP, WINDOW_S)
     if (!limit.allowed) {
       throw new ApiError('RATE_LIMITED', 'Too many attempts', { retryAfterS: limit.retryAfterS })
     }

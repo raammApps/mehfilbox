@@ -67,6 +67,10 @@ export type CreateTitleInput = Omit<
 > &
   Partial<Pick<Title, 'createdAt' | 'publishedAt' | 'viewCount' | 'watchSeconds'>>
 
+/** The verdict a rate-limit consume returns — defined here, not in `lib/http`, because a
+ *  driver returns it and the http layer is the caller, not the source (N-86). */
+export type LimitResult = { allowed: boolean; remaining: number; retryAfterS: number }
+
 export interface Repository {
   // ── Orgs & operators ────────────────────────────────────────────────────────
   getOrg(id: string): Promise<Org | null>
@@ -143,6 +147,19 @@ export interface Repository {
   /** The newest run of every job that has ever run. */
   latestJobRuns(): Promise<JobRun[]>
   notificationQueueStats(failedSinceIso: string): Promise<QueueStats>
+
+  // ── Rate limiting (N-86) ─────────────────────────────────────────────────
+  /**
+   * One fixed window per key, incremented atomically and reset once it expires — the read, the
+   * reset-or-increment decision and the write happen as one operation in whichever driver
+   * implements this, which is what makes it safe under concurrent callers on the same key
+   * (`lib/http/rate-limit.ts` is the one place that calls this; nothing else should).
+   */
+  consumeRateLimit(key: string, limit: number, windowS: number): Promise<LimitResult>
+  /** How many times a key has been consumed in its current window, without consuming it. */
+  peekRateLimit(key: string): Promise<number>
+  /** Clears a bucket — after a successful passcode entry, a successful sign-in, and by tests. */
+  resetRateLimit(key: string): Promise<void>
 
   // ── Credits (D-38) ───────────────────────────────────────────────────────
   listCredits(orgId: string): Promise<PublishCredit[]>

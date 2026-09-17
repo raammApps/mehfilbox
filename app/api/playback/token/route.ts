@@ -27,7 +27,7 @@ export async function POST(request: Request) {
   return route('playback/token', async () => {
     const body = await readJson(request, bodySchema)
 
-    enforce(`playback:${clientIp(request)}:${body.catalogue}`, 60, 60)
+    await enforce(`playback:${clientIp(request)}:${body.catalogue}`, 60, 60)
 
     const catalogue = await requireServableCatalogue(body.catalogue)
     const repository = getRepository()

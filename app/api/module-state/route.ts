@@ -20,7 +20,7 @@ const bodySchema = z.object({
 export async function POST(request: Request) {
   return route('module-state', async () => {
     const body = await readJson(request, bodySchema)
-    enforce(`module-state:${clientIp(request)}`, 120, 60)
+    await enforce(`module-state:${clientIp(request)}`, 120, 60)
 
     const profile = await getRepository().getProfile(body.profileId)
     if (!profile) return new NextResponse(null, { status: 204 })

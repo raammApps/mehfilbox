@@ -46,7 +46,7 @@ export async function POST(request: Request) {
       return new NextResponse(null, { status: 204 })
     }
 
-    enforce(`qoe:${clientIp(request)}`, 120, 60)
+    await enforce(`qoe:${clientIp(request)}`, 120, 60)
 
     // Still authorise: this endpoint should not confirm that an unknown catalogue exists.
     const catalogue = await requireServableCatalogue(body.catalogue)

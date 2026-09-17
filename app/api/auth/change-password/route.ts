@@ -31,7 +31,7 @@ export async function POST(request: Request) {
     const session = await getOperatorSession()
     if (!session) throw new ApiError('UNAUTHORIZED', 'Sign in to continue')
 
-    const limit = consume(`change-password:${clientIp(request)}`, 10, 15 * 60)
+    const limit = await consume(`change-password:${clientIp(request)}`, 10, 15 * 60)
     if (!limit.allowed) {
       throw new ApiError('RATE_LIMITED', 'Too many attempts', { retryAfterS: limit.retryAfterS })
     }

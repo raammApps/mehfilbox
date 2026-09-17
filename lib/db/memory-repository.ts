@@ -32,6 +32,7 @@ import type {
   CatalogueCounts,
   CatalogueFilter,
   CreateTitleInput,
+  LimitResult,
   Repository,
 } from './repository'
 
@@ -116,6 +117,12 @@ export function emptySnapshot(): Snapshot {
  */
 export class MemoryRepository implements Repository {
   protected data: Snapshot
+  /**
+   * Instance state, not module state — unlike the old `lib/http/rate-limit.ts` map this replaces,
+   * a fresh `MemoryRepository` (which every test's `beforeEach` creates) gets fresh buckets too,
+   * for free. The bucket math itself is unchanged from that file (N-86).
+   */
+  private rateLimitBuckets = new Map<string, { count: number; resetAt: number }>()
 
   constructor(snapshot: Snapshot = emptySnapshot()) {
     this.data = MemoryRepository.withTenantSlugs(snapshot)
@@ -328,6 +335,38 @@ export class MemoryRepository implements Repository {
       failedSince: this.data.notifications.filter((n) => n.status === 'failed' && n.createdAt >= failedSinceIso).length,
       oldestQueuedAt: oldest,
     }
+  }
+
+  // ── Rate limiting (N-86) ─────────────────────────────────────────────────
+  async consumeRateLimit(key: string, limit: number, windowS: number): Promise<LimitResult> {
+    const now = Date.now()
+    // Evict opportunistically so a long-lived process (the dev server, a Playwright worker)
+    // cannot grow this map without bound — the same threshold the module-level map used.
+    if (this.rateLimitBuckets.size >= 5000) {
+      for (const [k, bucket] of this.rateLimitBuckets) {
+        if (bucket.resetAt <= now) this.rateLimitBuckets.delete(k)
+      }
+    }
+
+    const bucket = this.rateLimitBuckets.get(key)
+    if (!bucket || bucket.resetAt <= now) {
+      this.rateLimitBuckets.set(key, { count: 1, resetAt: now + windowS * 1000 })
+      return { allowed: true, remaining: limit - 1, retryAfterS: windowS }
+    }
+
+    bucket.count += 1
+    const retryAfterS = Math.max(1, Math.ceil((bucket.resetAt - now) / 1000))
+    return { allowed: bucket.count <= limit, remaining: Math.max(0, limit - bucket.count), retryAfterS }
+  }
+
+  async peekRateLimit(key: string): Promise<number> {
+    const bucket = this.rateLimitBuckets.get(key)
+    if (!bucket || bucket.resetAt <= Date.now()) return 0
+    return bucket.count
+  }
+
+  async resetRateLimit(key: string): Promise<void> {
+    this.rateLimitBuckets.delete(key)
   }
 
   // ── Credits (D-38) ────────────────────────────────────────────────────────

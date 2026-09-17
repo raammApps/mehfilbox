@@ -49,7 +49,7 @@ export async function POST(request: Request) {
     const ipKey = `login:${ip}`
 
     // Failures so far, before this attempt. Decides whether a challenge is owed right now.
-    const failures = Math.max(peek(addressKey), peek(ipKey))
+    const failures = Math.max(await peek(addressKey), await peek(ipKey))
     const challenged = captchaEnabled() && failures >= CHALLENGE_AFTER
     if (challenged && !(await verifyCaptcha(body.captchaToken, ip))) {
       throw new ApiError('UNAUTHORIZED', 'Please complete the check below and try again', {
@@ -57,8 +57,8 @@ export async function POST(request: Request) {
       })
     }
 
-    const address = consume(addressKey, PER_ADDRESS, WINDOW_S)
-    const perIp = consume(ipKey, PER_IP, WINDOW_S)
+    const address = await consume(addressKey, PER_ADDRESS, WINDOW_S)
+    const perIp = await consume(ipKey, PER_IP, WINDOW_S)
     if (!address.allowed || !perIp.allowed) {
       const retryAfterS = Math.max(address.retryAfterS, perIp.retryAfterS)
       throw new ApiError(
@@ -94,8 +94,8 @@ export async function POST(request: Request) {
     const platformAdmin =
       user && !operator ? await getRepository().getPlatformAdmin(user.id) : null
     if (user && !operator && platformAdmin) {
-      reset(addressKey)
-      reset(ipKey)
+      await reset(addressKey)
+      await reset(ipKey)
       log.info('platform login: ok', { adminId: platformAdmin.id, driver: getAuthProvider().name })
       const response = NextResponse.json(
         {
@@ -116,8 +116,8 @@ export async function POST(request: Request) {
       })
     }
 
-    reset(addressKey)
-    reset(ipKey)
+    await reset(addressKey)
+    await reset(ipKey)
     log.info('admin login: ok', { operatorId: operator.id, driver: getAuthProvider().name })
 
     const org = await getRepository().getOrg(operator.orgId)

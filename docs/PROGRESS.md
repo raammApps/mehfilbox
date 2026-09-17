@@ -2166,3 +2166,37 @@ the couple's panel already explains the sign-out effect in its hint.
 
 2 new unit tests for the extracted `generatePasscode` (range, leading zero, low collision rate at
 50 draws). 682 unit and component tests total.
+
+## N-86 · A durable rate limiter, and a Content-Security-Policy — 18 September 2026
+
+**The durable store.** `lib/http/rate-limit.ts`'s in-memory map, per-instance and approximate on
+every real deploy, is now a thin async delegator to `Repository.consumeRateLimit` /
+`peekRateLimit` / `resetRateLimit`. `MemoryRepository` keeps the identical bucket math as instance
+state (a fresh repository gets fresh buckets, for free). `SupabaseRepository` calls a new Postgres
+function, `consume_rate_limit` (migration `0026_rate_limits.sql`), one atomic
+`insert … on conflict do update … returning` statement so a read-decide-write never races two
+concurrent requests on the same key.
+
+The part worth being explicit about: `SupabaseRepository` falls back to its own in-memory bucket,
+logged via `log.error`, whenever the durable table errors — the table not existing yet because the
+migration has not been applied is exactly this case. Without that fallback, this deploy would 500
+every sign-in, every registration, every guest-code attempt the moment it shipped ahead of the
+migration — the class of mistake `docs/GO-LIVE.md` already recorded once, for a different
+migration. With it, the worst case on a missing table is exactly today's behaviour, never worse,
+and the fix activates the moment the migration is applied, no redeploy required.
+
+All ~20 call sites across 13 route files now `await`. 9 new unit tests for the durable path and
+its fallback (`tests/unit/rate-limit-durable.test.ts`); the existing rate-limit-dependent suite —
+`login-security.test.ts`'s full lockout and challenge logic, `credential-links.test.ts` — passes
+unchanged through the memory driver.
+
+**The CSP.** `next.config.ts` gains the sixth header doc 05 §4 asks for. Every directive traces to
+something the app actually does, checked by grep first: fonts self-hosted, so `font-src 'self'`
+alone; `*.b-cdn.net` for Bunny, the only external host the browser reaches, in `img-src`,
+`media-src` and `connect-src`; Turnstile's three directives added now, even switched off today, so
+turning it on later needs no header change. `'unsafe-inline'` on `script-src` (Next's RSC
+hydration payload) and `style-src` (the inline `style={{...}}` theming pattern, checked against 19
+files before deciding it was load-bearing) is named as a real trade-off in the file's own comment,
+not left implicit.
+
+9 new unit tests; 691 unit and component tests total.

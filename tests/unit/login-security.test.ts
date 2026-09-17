@@ -27,7 +27,7 @@ const PASSWORD = 'right-password-1234'
 
 let repo: MemoryRepository
 
-beforeEach(() => {
+beforeEach(async () => {
   const snapshot = emptySnapshot()
   snapshot.orgs.push(orgSchema.parse({ id: ORG, name: 'Kalyanam', slug: 'kalyanam', createdAt: AT }))
   snapshot.operators.push(
@@ -57,14 +57,16 @@ beforeEach(() => {
   repo = new MemoryRepository(snapshot)
   setRepository(repo)
   setAuthProvider(new LocalAuthProvider())
-  // The limiter is process memory and outlives the store; IPs are unique per test, addresses are not.
+  // A fresh MemoryRepository holds its own, empty rate-limit buckets (N-86), so these resets
+  // are no longer load-bearing — kept anyway so a future change back to shared state does not
+  // silently reintroduce cross-test bleed, and because a reset here costs nothing.
   for (const key of [
     'login:email:priya@kalyanam.test',
     'login:email:temp@kalyanam.test',
     'login:email:lock-me@kalyanam.test',
     'passcode:catalogue:locked-wedding',
   ]) {
-    reset(key)
+    await reset(key)
   }
 })
 
@@ -242,7 +244,7 @@ describe('the platform door', () => {
     }
   }
 
-  beforeEach(() => {
+  beforeEach(async () => {
     // `snapshot()` clones, so the admin is added to a copy the repository is rebuilt from.
     const snapshot = repo.snapshot()
     snapshot.platformAdmins.push(
@@ -257,7 +259,7 @@ describe('the platform door', () => {
     setRepository(repo)
     setAuthProvider(new StubAuthProvider())
     for (const key of ['login:email:root@mehfilbox.test', 'login:email:stranger@example.test']) {
-      reset(key)
+      await reset(key)
     }
   })
 

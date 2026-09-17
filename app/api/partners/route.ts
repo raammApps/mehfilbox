@@ -53,7 +53,7 @@ async function availableSlug(businessName: string): Promise<string> {
 
 export async function POST(request: Request) {
   return route('partners:register', async () => {
-    const limit = consume(`register:${clientIp(request)}`, MAX_PER_IP, WINDOW_S)
+    const limit = await consume(`register:${clientIp(request)}`, MAX_PER_IP, WINDOW_S)
     if (!limit.allowed) {
       throw new ApiError('RATE_LIMITED', 'Too many attempts', { retryAfterS: limit.retryAfterS })
     }

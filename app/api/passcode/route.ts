@@ -41,7 +41,7 @@ export async function POST(request: Request) {
     const deviceKey = `passcode:${ip}:${body.catalogue}`
     const catalogueKey = `passcode:catalogue:${body.catalogue}`
 
-    const failures = peek(deviceKey)
+    const failures = await peek(deviceKey)
     const challenged = captchaEnabled() && failures >= CHALLENGE_AFTER
     if (challenged && !(await verifyCaptcha(body.captchaToken, ip))) {
       throw new ApiError('PASSCODE_REQUIRED', 'Please complete the check and try again', {
@@ -49,8 +49,8 @@ export async function POST(request: Request) {
       })
     }
 
-    const device = consume(deviceKey, MAX_ATTEMPTS, LOCKOUT_S)
-    const whole = consume(catalogueKey, MAX_PER_CATALOGUE, LOCKOUT_S)
+    const device = await consume(deviceKey, MAX_ATTEMPTS, LOCKOUT_S)
+    const whole = await consume(catalogueKey, MAX_PER_CATALOGUE, LOCKOUT_S)
     if (!device.allowed || !whole.allowed) {
       throw new ApiError('RATE_LIMITED', 'Too many attempts', {
         retryAfterS: Math.max(device.retryAfterS, whole.retryAfterS),
@@ -67,7 +67,7 @@ export async function POST(request: Request) {
       })
     }
 
-    reset(deviceKey)
+    await reset(deviceKey)
 
     const response = NextResponse.json({ ok: true }, { headers: { 'cache-control': 'no-store' } })
     response.cookies.set(

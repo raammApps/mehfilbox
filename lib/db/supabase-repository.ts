@@ -35,6 +35,7 @@ import type {
   CatalogueCounts,
   CatalogueFilter,
   CreateTitleInput,
+  LimitResult,
   Repository,
 } from './repository'
 
@@ -736,6 +737,73 @@ export class SupabaseRepository implements Repository {
       failedSince: failed.count ?? 0,
       oldestQueuedAt: (oldest.data?.created_at as string | undefined) ?? null,
     }
+  }
+
+  // ── Rate limiting (N-86) ─────────────────────────────────────────────────
+  /**
+   * A last-resort fallback, used only when the durable table errors — most likely because
+   * migration 0026 has not been applied yet. Never the primary path: without this, a deploy
+   * shipped ahead of that migration would 500 every sign-in, every registration, every guest-code
+   * attempt, until someone pastes the migration into the SQL editor — precisely the class of
+   * mistake `docs/GO-LIVE.md` already recorded once, for a different migration. With it, the
+   * worst case on a missing table is exactly the old behaviour, approximate and per-instance,
+   * never worse, and `log.error` makes a stale migration visible in production logs rather than
+   * silently degrading forever.
+   */
+  private readonly rateLimitFallback = new Map<string, { count: number; resetAt: number }>()
+
+  async consumeRateLimit(key: string, limit: number, windowS: number): Promise<LimitResult> {
+    const { data, error } = await this.db
+      .rpc('consume_rate_limit', { p_key: key, p_limit: limit, p_window_s: windowS })
+      .single()
+    if (error || !data) {
+      log.error('rate limit: durable store unreachable, falling back to per-instance memory', {
+        key,
+        reason: error?.message ?? 'consume_rate_limit returned no row',
+      })
+      return this.consumeFallback(key, limit, windowS)
+    }
+    const row = data as { count: number; reset_at: string }
+    const retryAfterS = Math.max(1, Math.ceil((new Date(row.reset_at).getTime() - Date.now()) / 1000))
+    return { allowed: row.count <= limit, remaining: Math.max(0, limit - row.count), retryAfterS }
+  }
+
+  async peekRateLimit(key: string): Promise<number> {
+    const { data, error } = await this.db.from('rate_limits').select('count, reset_at').eq('key', key).maybeSingle()
+    if (error) {
+      log.error('rate limit: durable store unreachable for peek, falling back', { key, reason: error.message })
+      return this.peekFallback(key)
+    }
+    if (!data || new Date(data.reset_at as string).getTime() <= Date.now()) return 0
+    return data.count as number
+  }
+
+  async resetRateLimit(key: string): Promise<void> {
+    const { error } = await this.db.from('rate_limits').delete().eq('key', key)
+    if (error) {
+      log.error('rate limit: durable store unreachable for reset', { key, reason: error.message })
+    }
+    // Cleared either way: a request served from the fallback while the table was unreachable
+    // must not stay locked out once whichever store actually answers says "reset".
+    this.rateLimitFallback.delete(key)
+  }
+
+  private consumeFallback(key: string, limit: number, windowS: number): LimitResult {
+    const now = Date.now()
+    const bucket = this.rateLimitFallback.get(key)
+    if (!bucket || bucket.resetAt <= now) {
+      this.rateLimitFallback.set(key, { count: 1, resetAt: now + windowS * 1000 })
+      return { allowed: true, remaining: limit - 1, retryAfterS: windowS }
+    }
+    bucket.count += 1
+    const retryAfterS = Math.max(1, Math.ceil((bucket.resetAt - now) / 1000))
+    return { allowed: bucket.count <= limit, remaining: Math.max(0, limit - bucket.count), retryAfterS }
+  }
+
+  private peekFallback(key: string): number {
+    const bucket = this.rateLimitFallback.get(key)
+    if (!bucket || bucket.resetAt <= Date.now()) return 0
+    return bucket.count
   }
 
   // ── Credits (D-38) ────────────────────────────────────────────────────────

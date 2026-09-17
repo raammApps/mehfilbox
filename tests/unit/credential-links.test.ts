@@ -34,7 +34,7 @@ const AT = '2026-01-01T00:00:00.000Z'
 let repo: MemoryRepository
 let mail: FakeNotificationProvider
 
-beforeEach(() => {
+beforeEach(async () => {
   const snapshot = emptySnapshot()
   snapshot.orgs.push(
     orgSchema.parse({ id: ORG, name: 'Kalyanam', slug: 'kalyanam', locale: 'hi', createdAt: AT }),
@@ -66,8 +66,9 @@ beforeEach(() => {
   setAuthProvider(new LocalAuthProvider())
   mail = new FakeNotificationProvider()
   setNotificationProvider(mail)
-  // The limiter is process memory and outlives the store; each test starts with a clean address.
-  reset('forgot:email:priya@kalyanam.test')
+  // A fresh MemoryRepository holds its own, empty rate-limit buckets (N-86), so this reset is
+  // no longer load-bearing — kept as a guard against a future change back to shared state.
+  await reset('forgot:email:priya@kalyanam.test')
 })
 
 function json(path: string, body: unknown, ip = '10.0.0.1'): Request {

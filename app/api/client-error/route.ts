@@ -25,7 +25,7 @@ export async function POST(request: Request) {
   // Deliberately silent on every failure path: this endpoint exists to observe a broken page,
   // and it must not become a second thing that is broken.
   try {
-    const limit = consume(`client-error:${clientIp(request)}`, 10, 60)
+    const limit = await consume(`client-error:${clientIp(request)}`, 10, 60)
     if (!limit.allowed) return new NextResponse(null, { status: 204 })
 
     const body = bodySchema.parse(await request.json())

@@ -30,7 +30,7 @@ export async function POST(request: Request) {
   return route('progress', async () => {
     const body = await readJson(request, bodySchema)
 
-    enforce(`progress:${clientIp(request)}`, 240, 60)
+    await enforce(`progress:${clientIp(request)}`, 240, 60)
 
     const catalogue = await requireServableCatalogue(body.catalogue)
     const repository = getRepository()

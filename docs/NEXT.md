@@ -123,27 +123,42 @@ passcode) — a share preview and WhatsApp's own image fetch both want a plain U
 default is: sign when the catalogue has a passcode, leave plain when it does not, and say so on the
 privacy setting.
 
-### N-86 · Lockouts that hold across instances  ·  ~2h  ·  **security**
+### N-86 · Lockouts that hold across instances  ·  **code done, 18 September 2026**  ·  **one operator step left**
 
-`lib/http/rate-limit.ts` is process memory, and says so. On one warm Vercel instance the guest-code
-budget is 5 per device and 30 per catalogue per fifteen minutes; on *N* instances it is *N* times
-that, and a lockout on one instance is unknown to the others. Ten routes lean on it: sign-in,
-registration, forgot-password, the guest code, the playback token, profiles. With
-`CAPTCHA_DRIVER=none` in production, this is the only thing standing between a script and a
+`lib/http/rate-limit.ts` was process memory, and said so. On one warm Vercel instance the
+guest-code budget was 5 per device and 30 per catalogue per fifteen minutes; on *N* instances it
+was *N* times that, and a lockout on one instance was unknown to the others. With
+`CAPTCHA_DRIVER=none` in production, this was the only thing standing between a script and a
 four-digit code.
 
-Two halves, and the cheap one first:
+**Durable store: done.** `consume`/`peek`/`reset`/`enforce` are now async, delegating to
+`Repository.consumeRateLimit`/`peekRateLimit`/`resetRateLimit` (migration `0026_rate_limits.sql`,
+one atomic `insert … on conflict do update … returning` function so a read-decide-write never
+races). `MemoryRepository` keeps the exact same bucket math as instance state — a fresh repository
+in every test's `beforeEach` gets fresh buckets for free, which is why several tests' explicit
+`reset()` calls are now belt-and-braces rather than load-bearing. `SupabaseRepository` falls back
+to an in-memory bucket, logged, whenever the durable table errors — deliberately: without that
+fallback, shipping this code before the migration is applied would 500 every sign-in, every
+registration, every guest-code attempt. With it, the worst case on a missing table is exactly the
+old per-instance behaviour, never worse, and the improvement activates the moment the migration is
+applied — no redeploy needed. All ~20 call sites across 13 route files now `await`. 9 new unit
+tests for the durable path and its fallback, on top of the existing suite passing unchanged
+through the memory driver. `docs/DEPLOYMENT.md` §4 covers applying a migration to a live project.
 
-1. **Turn Turnstile on** — an operator step, not code: a widget for `mehfilbox.com`, two keys, and
-   `CAPTCHA_DRIVER=turnstile` (`GO-LIVE.md`, second pass §2). The challenge after three failures is
-   what makes the per-instance arithmetic irrelevant.
-2. **A durable store behind `consume`.** A `rate_limits` table with `(key, count, reset_at)` and an
-   `upsert … returning` is one round-trip and needs no new vendor; Upstash is the alternative if a
-   Postgres call per attempt ever shows up in latency. The call sites do not change — that was the
-   point of the comment in the file.
+**`Content-Security-Policy`: done**, in `next.config.ts` — the other five headers were there, this
+one was not. Built from what the app actually connects to, checked by grep before writing a
+directive: fonts are self-hosted (`lib/fonts.ts`), so nothing needed there; Bunny (`*.b-cdn.net`)
+is the only external host the browser talks to, for HLS and every poster and photograph; Turnstile's
+three directives (`script-src`, `frame-src`, `connect-src` → `challenges.cloudflare.com`) are in
+now rather than left for whoever turns it on. `'unsafe-inline'` is a named trade-off, not an
+oversight — Next's RSC hydration payload and the inline `style={{...}}` theming pattern used in 19
+files both need it, and the existing `no-dangerouslySetInnerHTML` eslint rule is what actually
+guards same-origin script injection.
 
-Add a `Content-Security-Policy` while in `next.config.ts`: the other five headers are there, this
-one is not, and hls.js plus Bunny's hosts are a known list.
+**Still open, and it is not code:** turning Turnstile on itself — a widget for `mehfilbox.com`, two
+keys, then `CAPTCHA_DRIVER=turnstile` (`GO-LIVE.md`, second pass §2). The challenge after three
+failures is what makes the per-instance-vs-durable arithmetic stop mattering at all; the durable
+store above is the fix for as long as it stays off.
 
 ### N-85 · A passcode views; an account downloads  ·  ~2h  ·  **D-43**
 

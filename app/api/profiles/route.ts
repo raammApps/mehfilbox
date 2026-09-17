@@ -23,7 +23,7 @@ const bodySchema = z.object({
 export async function POST(request: Request) {
   return route('profiles', async () => {
     const body = await readJson(request, bodySchema)
-    enforce(`profiles:${clientIp(request)}`, 20, 60)
+    await enforce(`profiles:${clientIp(request)}`, 20, 60)
 
     const catalogue = await requireServableCatalogue(body.catalogue)
 

@@ -31,8 +31,8 @@ export async function POST(request: Request) {
     const body = await readJson(request, bodySchema)
     const email = body.email.trim().toLowerCase()
 
-    const ip = consume(`forgot:${clientIp(request)}`, PER_IP, WINDOW_S)
-    const address = consume(`forgot:email:${email}`, PER_ADDRESS, WINDOW_S)
+    const ip = await consume(`forgot:${clientIp(request)}`, PER_IP, WINDOW_S)
+    const address = await consume(`forgot:email:${email}`, PER_ADDRESS, WINDOW_S)
 
     if (ip.allowed && address.allowed) {
       const operator = await getRepository().getOperatorByEmail(email)

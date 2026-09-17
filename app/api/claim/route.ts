@@ -41,7 +41,7 @@ function hashToken(token: string): string {
 
 export async function POST(request: Request) {
   return route('claim', async () => {
-    const limit = consume(`claim:${clientIp(request)}`, MAX_PER_IP, WINDOW_S)
+    const limit = await consume(`claim:${clientIp(request)}`, MAX_PER_IP, WINDOW_S)
     if (!limit.allowed) {
       throw new ApiError('RATE_LIMITED', 'Too many attempts', { retryAfterS: limit.retryAfterS })
     }
