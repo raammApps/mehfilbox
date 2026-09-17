@@ -4,8 +4,10 @@ import { expect, test, type Page } from '@playwright/test'
  * doc 10 §2 E2E-1 — a guest watches, leaves, and comes back to where they stopped.
  *
  * This is US-1 and US-2, the two user stories the whole product is arranged around. It needs
- * real playback to mean anything, which is why the `fake` driver serves a real clip
- * (`scripts/make-sample-video.mjs`) rather than a dead URL.
+ * real playback to mean anything, which is why the `fake` driver serves a real HLS manifest over
+ * real fMP4 segments (`scripts/make-sample-hls.mjs`, N-90) rather than a dead URL — that's also
+ * what sends this suite through `hls.js`, `MediaSource` and `blob:`, the path a guest's browser
+ * actually takes and the one that was silently untested until N-90.
  *
  * Continue Watching is P1 (VE-7, demoted in doc 01 §5.1), so what is asserted here is the P0
  * half: the position persists and the player resumes at it.
