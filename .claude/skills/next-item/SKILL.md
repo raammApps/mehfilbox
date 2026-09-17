@@ -46,10 +46,15 @@ This repo's standard is higher than "tests pass", and it is the reason to follow
 ## Then, in order
 
 1. `pnpm verify` · `pnpm test:e2e`
-2. Commit — say what changed and **why**, in prose. Include what went wrong and what it taught,
+2. **If this item changed a row in `docs/PRODUCT.md`, the guide changed too.** Update whichever of
+   `docs/help/studio.md` / `docs/help/client.md` describes the affected surface, for the reader it
+   affects — a studio-only change touches only the studio guide, a guest-visible one may touch
+   neither (guests read nothing published). N-88 exists because this drifted once already; do not
+   let it drift again.
+3. Commit — say what changed and **why**, in prose. Include what went wrong and what it taught,
    because that is what the next session needs.
-3. Move the item **out** of `docs/NEXT.md` and append to `docs/PROGRESS.md`. Do not leave it ticked.
-4. **Stop.** Do not start the next item unless asked.
+4. Move the item **out** of `docs/NEXT.md` and append to `docs/PROGRESS.md`. Do not leave it ticked.
+5. **Stop.** Do not start the next item unless asked.
 
 ## If it turns out to be stale
 

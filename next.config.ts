@@ -85,6 +85,12 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   // Emits a self-contained server bundle so the Docker image does not ship node_modules.
   output: process.env.NEXT_OUTPUT_STANDALONE === '1' ? 'standalone' : undefined,
+  // `app/help/*/page.tsx` reads `docs/help/*.md` with `fs.readFileSync` (N-88) — a plain file
+  // read, invisible to the build's dependency tracer, so without this the markdown is silently
+  // absent from the deployed bundle and the page 500s in production while working fine locally.
+  outputFileTracingIncludes: {
+    '/help/*': ['./docs/help/*.md'],
+  },
   experimental: {
     optimizePackageImports: ['lucide-react', 'framer-motion'],
   },

@@ -14,7 +14,7 @@ Everything written about this project, in one tree.
 | [`ROADMAP.md`](./ROADMAP.md) | **Where the product is going** — the proposed feature set against what exists, every revenue stream, and the phases that get there. Read once when planning. |
 | [`REQUIREMENTS.md`](./REQUIREMENTS.md) | **The target product**, consolidated: personas, the lifecycle state machine, billing rules, the notification matrix. Deliberately disagrees with `PRODUCT.md`, which is what exists today. |
 | [`DEPLOYMENT.md`](./DEPLOYMENT.md) | Accounts, environment variables, DNS, and the settings that fail silently when wrong |
-| [`USAGE-GUIDE.md`](./USAGE-GUIDE.md) | Every workflow, end to end — registration, a wedding built and published, the handover, what a guest sees |
+| [`help/studio.md`](./help/studio.md) · [`help/client.md`](./help/client.md) | The published guides — every workflow, end to end, one per reader. Live at `/help/studio` and `/help/client`. |
 | [`PRICING.md`](./PRICING.md) | **The plans and prices, on one page.** Start here for anything commercial. |
 | [`COMPETITORS.md`](./COMPETITORS.md) | Who else sells this, what they charge, and the one finding that should change how we pitch |
 | [`SCALE-PLAN.md`](./SCALE-PLAN.md) | Whether Vercel, Bunny and Supabase hold as volume grows, where each one breaks, and the costs that compound |

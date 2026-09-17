@@ -255,7 +255,7 @@ was considered.
 | [`NEXT.md`](./NEXT.md) | The ordered slice of what is missing here |
 | [`PRICING.md`](./PRICING.md) | What the built parts are sold for |
 | [`ARCHITECTURE.md`](./ARCHITECTURE.md) | How the built parts fit together |
-| [`USAGE-GUIDE.md`](./USAGE-GUIDE.md) | How to use the built parts |
+| [`help/studio.md`](./help/studio.md) · [`help/client.md`](./help/client.md) | How to use the built parts, published at `/help/studio` and `/help/client` |
 
 ---
 
@@ -310,4 +310,4 @@ it mattered, against production. Decided as D-42 to D-44; scheduled as N-77 to N
 | Security — is media reachable without the passcode? | **Photographs: yes.** Video: no. | **Verified live, 13 Sept.** The photo pull zone has no token auth, so a copied photo URL works forever for anyone; keys are UUIDs, so it cannot be guessed, only leaked. Video is signed and dies within hours. N-83. The "real filename in the URL" is the film's slug, set from the upload filename and kept after renaming — a metadata leak, not access: N-84. Lockouts are per Vercel instance and Turnstile is off: N-86. Security headers are present; CSP is not. Guest pages are `noindex`. |
 | The passcode is view-only; downloading needs the account | **Not built** — D-43 | Today the guest code grants `/download`, originals included. N-85 makes it the client's or the studio's sign-in. |
 | A staging environment | **Not built** | CI is hermetic; Vercel Preview has no variables and cannot boot against real services; everything real is tested in production. N-87. |
-| Studio- and client-facing documentation | **Exists, stale, unpublished** | `docs/USAGE-GUIDE.md` predates the second pass and lives only in the repo. N-88 splits it by reader, publishes both at `/help`, and makes updating it part of the ship ritual. |
+| Studio- and client-facing documentation | **Built** | N-88, 18 Sept. `docs/help/studio.md` and `docs/help/client.md`, rendered at `/help/studio` and `/help/client` straight from the repo — a deploy publishes whatever the markdown says. The `next-item` and `ship` skills now ask whether a `PRODUCT.md` change should also touch the guide. |

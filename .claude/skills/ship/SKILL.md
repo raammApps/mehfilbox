@@ -29,6 +29,12 @@ pnpm build && pnpm check:bundle && pnpm check:vitals
 Say what changed and **why**. Include what went wrong and what it taught — that is what the next
 session needs, and this repo's history is genuinely useful because of it.
 
+**If `docs/PRODUCT.md` changed in this change, check `docs/help/studio.md` and
+`docs/help/client.md` before committing.** They are published at `/help/studio` and `/help/client`
+straight from the repo (N-88) — a deploy that changes what the product does without touching the
+guide is exactly the drift N-88 fixed. Refuse to call the ticket done on a `PRODUCT.md` change
+that left both guides untouched without a reason.
+
 ## 3. Push and deploy
 
 ```bash

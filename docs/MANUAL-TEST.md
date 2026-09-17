@@ -4,7 +4,8 @@ A script for exercising the product by hand, in the order a real studio would me
 below is production, and every expected result was observed on **11 September 2026** unless the step
 says otherwise.
 
-`USAGE-GUIDE.md` explains what each feature *is*. This is what to click, and what should happen.
+`help/studio.md` and `help/client.md` explain what each feature *is*. This is what to click, and
+what should happen.
 
 ---
 

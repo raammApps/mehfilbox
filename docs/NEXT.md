@@ -143,18 +143,6 @@ keys, then `CAPTCHA_DRIVER=turnstile` (`GO-LIVE.md`, second pass §2). The chall
 failures is what makes the per-instance-vs-durable arithmetic stop mattering at all; the durable
 store above is the fix for as long as it stays off.
 
-### N-88 · A studio guide and a client guide, kept current  ·  ~1 session
-
-`docs/USAGE-GUIDE.md` exists and is the right shape, and it describes the product before the second
-pass — `heirloomfilms.in`, `/c/` addresses, one door, no themes, credits, house styles, premiere,
-domains or client accounts. Nothing is published where a studio or a client could read it.
-
-Split it in two, one per reader, and publish both at `/help/studio` and `/help/client` from
-markdown in the repo, so the guide deploys with the change that made it true. Then make it a rule
-rather than an intention: the `next-item` and `ship` skills gain a line — *if `PRODUCT.md` changed,
-the guide changed* — and the ship checklist refuses to call a ticket done otherwise. A test that
-diffs the two is tempting and would be theatre; the skill is where the ritual already lives.
-
 ### N-87 · A staging environment  ·  ~half a session + two accounts  ·  **debt that is costing us**
 
 Everything real is tested in production, and 12 September proved why that is a problem: applying

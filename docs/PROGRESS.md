@@ -2466,3 +2466,72 @@ Files: `components/auth/LoginForm.tsx`, `app/page.tsx`, `components/admin/Platfo
 `app/admin/platform/clients/page.tsx` (moved from `.../couples/`), `app/admin/platform/page.tsx`,
 `app/admin/platform/orgs/[id]/page.tsx`, `app/admin/register/page.tsx`,
 `components/admin/RegisterForm.tsx`, `docs/USAGE-GUIDE.md`, `e2e/auth.spec.ts`.
+
+## `pnpm preflight`'s photo CDN check, stale since N-83 — 18 September 2026
+
+Found picking up the next item: `pnpm preflight` reported `✗ Photo CDN — pull zone returned 403`
+against a zone that was, in fact, correctly configured. The check fetches its own probe file back
+through the CDN unsigned to confirm the pull zone fronts the right storage zone — correct until
+N-83 turned Token Authentication on for that zone earlier the same day, after which an unsigned
+request is *supposed* to 403. The check never learned that; it kept asserting the pre-N-83 world.
+
+Fixed by signing the probe read the same way `BunnyPhotoProvider.signPath` does
+(`sha256(key + path + expires)`, base64url) whenever `BUNNY_PHOTO_TOKEN_AUTH_KEY` is set,
+reproduced locally in `scripts/preflight.ts` rather than imported — this script deliberately reads
+`process.env` directly instead of going through `lib/env.ts`'s `server-only` boundary, on purpose,
+so it can run before any of the app's modules would agree to load. Falls back to an unsigned
+fetch when the key is absent, so a zone without token auth (a fresh local setup, say) still checks
+the way it always did. Verified live: `pnpm preflight` passes clean against the real zone again.
+
+Worth remembering: **a preflight check can go stale the same day the feature it checks ships**, if
+the feature changes what "correct" looks like rather than just adding a new failure mode. Nothing
+caught this automatically — it surfaced only because the next session actually ran the command
+CLAUDE.md asks every session to run first.
+
+Files: `scripts/preflight.ts`.
+
+## N-88 · A studio guide and a client guide, kept current — 18 September 2026
+
+`docs/USAGE-GUIDE.md` described the product as it stood before the second pass — one door, no
+themes, no credits, no house styles, no premiere, no client accounts — and nothing published it
+anywhere a studio or a client could read it. Split by reader and rebuilt against the product as it
+actually is today (`docs/PRODUCT.md` §8–9, plus a handful of exact-copy checks against the live
+components — the wizard's five step labels, the platform nav's current entries, the credit panel's
+wording, the passcode's "Generate one for me," the handover panel's "Hand this over to the
+couple") rather than patched line by line.
+
+**`docs/help/studio.md` and `docs/help/client.md` are now the source.** Each is rendered at
+`/help/studio` and `/help/client` by a server component that reads the file and hands it to
+`react-markdown` (+ `remark-gfm` for tables, `rehype-slug` for the heading anchors the guides'
+own tables of contents link to) — no `dangerouslySetInnerHTML` anywhere, since `react-markdown`
+builds a real React tree rather than an HTML string. **Editing the `.md` and deploying is the
+entire publishing step**, which is the whole point: the old guide could drift forever because
+nothing forced a look at it.
+
+**The part that would have shipped broken without checking:** a plain `fs.readFileSync` in a
+Server Component reads fine in `next dev` and in a local `pnpm build && pnpm start`, but Vercel's
+serverless bundle only ships files the build's dependency tracer can find a reference to — a raw
+filesystem read is invisible to it. Confirmed the risk was real by inspecting the actual build
+trace (`.next/server/app/help/studio/page.js.nft.json`) before adding anything and finding
+`docs/help/*.md` genuinely absent from it; added `outputFileTracingIncludes` in `next.config.ts`
+mapping `/help/*` to `./docs/help/*.md`, then confirmed the same trace file lists both markdown
+files afterward, and separately ran a full `pnpm build && pnpm start` and fetched both routes for
+real (200, correct content, working heading anchors, no console errors on a fresh tab) rather than
+trusting the trace file alone.
+
+`docs/PRODUCT.md` §9's row for this is now Built. Per the ticket, the `next-item` and `ship`
+skills each gained a line: a change to a `PRODUCT.md` row should prompt a look at whichever guide
+describes that surface, for the reader it affects. No test diffing the two guides — that was
+argued against explicitly in the ticket as theatre, and the skill line is where the ritual
+already lives for everything else this repo enforces by habit rather than by CI.
+
+`docs/USAGE-GUIDE.md` is deleted; every cross-reference to it (`docs/README.md`, `docs/PRODUCT.md`,
+`docs/MANUAL-TEST.md`) now points at the two new files. Full suite unchanged: 732 unit/component,
+159 passed / 56 skipped E2E — new pages with no app logic behind them, nothing either suite was
+built to catch, verified live in the browser instead.
+
+Files: `docs/help/studio.md` (new), `docs/help/client.md` (new), `components/help/HelpPage.tsx`
+(new), `app/help/studio/page.tsx` (new), `app/help/client/page.tsx` (new), `next.config.ts`,
+`.claude/skills/next-item/SKILL.md`, `.claude/skills/ship/SKILL.md`, `docs/USAGE-GUIDE.md`
+(deleted), `docs/README.md`, `docs/PRODUCT.md`, `docs/MANUAL-TEST.md`. New dependencies:
+`react-markdown`, `remark-gfm`, `rehype-slug`.
