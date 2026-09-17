@@ -236,6 +236,8 @@ Set these on the Vercel project (Production, and Preview if you want previews to
 | `DEV_OPERATOR_EMAIL` / `DEV_OPERATOR_PASSWORD` | — | Ignored under `DATA_DRIVER=supabase` |
 | `CAPTCHA_DRIVER` | `none` | `none` · `fake` · `turnstile` — the challenge after repeated sign-in and guest-code failures, and on every registration (D-34). `none` keeps the rate limits and lockouts and shows no widget. |
 | `NEXT_PUBLIC_TURNSTILE_SITE_KEY` / `TURNSTILE_SECRET_KEY` | — | Required when `CAPTCHA_DRIVER=turnstile`. From the Cloudflare dashboard → Turnstile → the widget for `mehfilbox.com`. The site key is public by design; the secret never leaves the server. |
+| `PAYMENT_DRIVER` | `none` | `none` · `fake` · `razorpay` (N-20, D-58). `none` is where production is today — no payment code runs, every credit is granted by hand from the platform console. |
+| `RAZORPAY_KEY_ID` / `RAZORPAY_KEY_SECRET` / `RAZORPAY_WEBHOOK_SECRET` | — | Required when `PAYMENT_DRIVER=razorpay`. The first two are the account's API credentials (Settings → API Keys) — test mode needs only sign-up, no business KYC. The webhook secret is separate, from Settings → Webhooks, and is never the same value as the API secret. |
 
 > **`CRON_SECRET` is the one people forget.** Vercel sends `Authorization: Bearer $CRON_SECRET`
 > on scheduled invocations — and **no header at all** when it is unset. The jobs then 401 and

@@ -2100,3 +2100,19 @@ so the direction rests on the existing token architecture and known conventions 
 actual visual inspection.
 
 7 new unit tests; 668 unit and component tests.
+
+## The Razorpay driver — 18 September 2026
+
+**N-20/D-58a.** `lib/payments/razorpay.ts` implements `PaymentProvider` against Razorpay's
+Payment Links API: `createPayment` posts to `/v1/payment_links/` with Basic auth and returns the
+`short_url` as `checkoutUrl`; `verifyWebhook` checks `X-Razorpay-Signature` (HMAC-SHA256 over the
+raw body, the webhook secret, never the API secret — same three-separate-keys shape as Bunny's
+webhook) and reads `payment_link.paid` as paid, every other event as failed. Wired behind
+`PAYMENT_DRIVER=razorpay`, gated on all three credentials at boot the same way
+`DOMAIN_DRIVER=vercel` is. Test-mode keys need only sign-up, no business KYC, so this is usable
+before the company question (D-52c) resolves — Sandeep chose the gateway and asked for exactly
+this: a real driver, ready for test keys now, live keys later, same three env values either way.
+
+8 new unit tests, including a real HMAC-SHA256 round-trip against the verifier — no network call
+reaches Razorpay in the suite, but the signature math is exercised for real. `.env.example` and
+`docs/DEPLOYMENT.md` document the three new variables. 676 unit and component tests total.

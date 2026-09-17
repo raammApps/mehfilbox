@@ -873,3 +873,22 @@ recommended immediate next step.
 shareholder or director, someone else must operate the bank account and sign GST returns and
 invoices day to day — worth naming, since "just for invoicing" still needs a person authorised to
 invoice.
+
+## D-58a · Gateway chosen: Razorpay, test mode first (17–18 Sept 2026)
+
+**Was:** D-58 built the `PaymentProvider` seam with the gateway explicitly undecided among
+Razorpay, Cashfree and PhonePe.
+
+**Decided (Sandeep):** Razorpay. Build a real driver now, against Razorpay's Payment Links API
+(not Orders/Checkout — Payment Links returns a hosted URL to redirect the payer to, which is what
+`PaymentIntent.checkoutUrl` promises; Orders needs a client-side widget, a different integration
+this seam does not assume), wired behind `PAYMENT_DRIVER=razorpay` and gated on
+`RAZORPAY_KEY_ID`/`RAZORPAY_KEY_SECRET`/`RAZORPAY_WEBHOOK_SECRET`. Test-mode keys need only
+sign-up, no business KYC or the incorporation D-52c deferred — so the driver can be exercised for
+real, by Sandeep, before the company question resolves. Live keys are a later swap of the same
+three env values once a real account exists.
+
+Built same day: `lib/payments/razorpay.ts`, `lib/env.ts` (the enum value and the credential
+check), `.env.example` and `docs/DEPLOYMENT.md`. 8 new unit tests, including a real HMAC-SHA256
+round-trip against the webhook verifier — no network call reaches Razorpay in the suite, but the
+signature math is exercised for real, not mocked. 676 unit and component tests total.

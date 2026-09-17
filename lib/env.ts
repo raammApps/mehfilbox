@@ -146,7 +146,12 @@ const schema = z
      * chosen; `getPaymentProvider()` throws rather than falling back to `none` for an unimplemented
      * name, so a misconfigured deploy fails at boot instead of quietly granting nothing.
      */
-    PAYMENT_DRIVER: z.enum(['none', 'fake']).default('none'),
+    PAYMENT_DRIVER: z.enum(['none', 'fake', 'razorpay']).default('none'),
+    /** Payment Links API credentials. Test mode needs only sign-up, no business KYC. */
+    RAZORPAY_KEY_ID: z.string().optional(),
+    RAZORPAY_KEY_SECRET: z.string().optional(),
+    /** Separate from the API secret — configured in the dashboard's Webhooks tab. */
+    RAZORPAY_WEBHOOK_SECRET: z.string().optional(),
 
     /**
      * How long a title may sit in a non-terminal state before reconcile asks the provider what
@@ -208,6 +213,17 @@ const schema = z
         code: z.ZodIssueCode.custom,
         message: 'DOMAIN_DRIVER=vercel needs VERCEL_API_TOKEN and VERCEL_PROJECT_ID',
       })
+    }
+    if (env.PAYMENT_DRIVER === 'razorpay') {
+      for (const key of ['RAZORPAY_KEY_ID', 'RAZORPAY_KEY_SECRET', 'RAZORPAY_WEBHOOK_SECRET'] as const) {
+        if (!env[key]) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: [key],
+            message: `${key} is required when PAYMENT_DRIVER=razorpay`,
+          })
+        }
+      }
     }
     if (env.DATA_DRIVER === 'supabase') {
       for (const key of [
