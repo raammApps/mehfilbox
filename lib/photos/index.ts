@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto'
 import { env } from '@/lib/env'
 import type { Photo } from '@/lib/schema'
-import { PHOTO_WIDTHS } from './srcset'
+import { PHOTO_WIDTHS, photoSrcSet } from './srcset'
 import { BunnyPhotoProvider } from './bunny'
 import { FakePhotoProvider } from './fake'
 import type { PhotoProvider } from './provider'
@@ -72,18 +72,58 @@ export function defaultAlbumId(catalogueId: string): string {
  */
 export const PHOTO_SIGN_TTL_S = 60 * 60 * 24
 
+/** A photograph with its `srcSet` already resolved and signed — see `signPhotos`. */
+export type SignedPhoto = Photo & { srcSet?: string }
+
 /**
  * Sign every photograph in `photos` for one read, so a guest page or the admin console never
  * renders a photo pull zone URL that a token-authenticated zone will now 403.
  *
- * One call to `signCatalogue` covers the lot: every photograph in `photos` is expected to belong
- * to `catalogueId` already (the caller's own read was scoped there), and every rendition of every
- * photograph lives under that one directory (`photoKey`), so one token authorises all of them.
+ * **File-scoped, not directory-scoped.** A first version signed the whole `c/<catalogueId>/`
+ * directory once and relied on `photoSrcSet`'s width-swap reusing that one token across every
+ * rendition — the same trade video's directory token makes. That shipped and 403'd every
+ * photograph in production: this pull zone's Token Authentication only honours a token for the
+ * exact path it was signed for, confirmed by testing both shapes against the live zone. So every
+ * rendition gets its own signature here — `photoSrcSet` still derives the *candidate* URLs from
+ * the unsigned master (unchanged), but each candidate is now signed individually before being
+ * joined back into a `srcSet` string, which is why this returns `SignedPhoto` rather than
+ * mutating `photo.url` alone: a consumer that wants the responsive set has to read `.srcSet`,
+ * there is no single shared query left to derive it from client-side.
+ *
+ * `catalogueId` is not part of the signature any more, but every `photo.url` this is called with
+ * is still expected to belong to it — the caller's own read was already scoped there.
  */
-export function signPhotos(catalogueId: string, photos: Photo[]): Photo[] {
-  const query = getPhotoProvider().signCatalogue(catalogueId, PHOTO_SIGN_TTL_S)
-  if (!query) return photos
-  return photos.map((photo) => ({ ...photo, url: appendQuery(photo.url, query) }))
+export function signPhotos(catalogueId: string, photos: Photo[]): SignedPhoto[] {
+  const provider = getPhotoProvider()
+  void catalogueId
+  return photos.map((photo) => {
+    const rawSrcSet = photoSrcSet(photo.url)
+    const srcSet = rawSrcSet
+      ? rawSrcSet
+          .split(', ')
+          .map((entry) => {
+            const splitAt = entry.lastIndexOf(' ')
+            return `${signOne(provider, entry.slice(0, splitAt))} ${entry.slice(splitAt + 1)}`
+          })
+          .join(', ')
+      : undefined
+    return { ...photo, url: signOne(provider, photo.url), srcSet }
+  })
+}
+
+function signOne(provider: PhotoProvider, url: string): string {
+  const query = provider.signPath(pathOf(url), PHOTO_SIGN_TTL_S)
+  return query ? appendQuery(url, query) : url
+}
+
+/** The request path Bunny signs against — no host, no query. Handles a relative url too (the
+ *  fake driver, and the demo catalogue's poster-frame fixture), which `new URL` alone cannot. */
+function pathOf(url: string): string {
+  try {
+    return new URL(url, 'https://placeholder.invalid').pathname
+  } catch {
+    return url.split('?')[0] ?? url
+  }
 }
 
 /**

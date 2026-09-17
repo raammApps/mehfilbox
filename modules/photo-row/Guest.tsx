@@ -4,11 +4,13 @@ import { Lightbox } from '@/components/streaming/Lightbox'
 import { usePhotoDeepLink } from '@/components/streaming/usePhotoDeepLink'
 import { PosterRow } from '@/components/streaming/PosterRow'
 import { resolveLocalised } from '@/lib/i18n'
+import type { SignedPhoto } from '@/lib/photos'
 import type { GuestProps } from '../contract'
 import type { PhotoRowConfig } from './schema'
 
 export default function Guest({ config, ctx }: GuestProps<PhotoRowConfig>) {
-  const photos = ctx.photos
+  // Already signed (N-83) — the contract types this `Photo[]` for every other module's sake.
+  const photos = (ctx.photos as SignedPhoto[])
     .filter((photo) => (config.albumId ? photo.albumId === config.albumId : true))
     .slice(0, config.limit)
 
@@ -23,6 +25,7 @@ export default function Guest({ config, ctx }: GuestProps<PhotoRowConfig>) {
     key: String(index),
     label: resolveLocalised(photo.caption, ctx.locale),
     posterUrl: photo.url,
+    posterSrcSet: photo.srcSet,
     alt: resolveLocalised(photo.caption, ctx.locale),
   }))
 

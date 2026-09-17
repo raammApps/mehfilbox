@@ -2254,7 +2254,7 @@ ticket.
 Files: `scripts/make-sample-hls.mjs` (new), `public/media/hls/` (new, committed — CI has no
 encoder, only a player), `lib/video/fake.ts`.
 
-## N-83 · Every photograph is signed, always — 18 September 2026
+## N-83 · Every photograph is signed, always — and it broke production first — 18 September 2026
 
 The photo pull zone had no token authentication (found live, 13 September): a photograph's URL,
 copied out of a passcode-protected wedding, returned 200 to anyone, forever. The proposal on the
@@ -2264,40 +2264,62 @@ already notes WhatsApp caches a preview for days once fetched, which is what mak
 URL safe for that first fetch too — the trade the proposal was hedging against does not actually
 bite.
 
-`PhotoProvider` gained `signCatalogue(catalogueId, ttlS)`: one Bunny token-auth signature
-(`sha256(securityKey + path + expires)`, the exact algorithm `BunnyProvider.signDirectory` already
-uses for video) over the whole `c/<catalogueId>/` directory, so every width of every photograph in
-a catalogue is authorised by one token rather than one per file. `signPhotos` (`lib/photos/
-index.ts`) applies it everywhere a photo URL reaches a browser — which turned out to be five
-places, not the one: the guest page and the download manifest (both flow through
-`getCachedBundle`), and three admin surfaces rendering real thumbnails from the same pull zone —
-`PhotoManager`'s initial server read and its own upload response, the catalogue overview's
-customizer preview, and the admin API routes those pages' client-side updates call. Missing any
-one of them would have meant an operator's own console 403ing its own thumbnails the moment token
-auth is enabled on the zone — found by checking each render path against a live `pnpm dev` session
-with the real Bunny driver, not by reasoning about which components render photographs.
+**What shipped first, and what it actually did.** `PhotoProvider` gained
+`signCatalogue(catalogueId, ttlS)`: one Bunny token-auth signature
+(`sha256(securityKey + path + expires)`) over the whole `c/<catalogueId>/` directory, copying the
+trade `BunnyProvider.signDirectory` makes for video — one token authorising every width of every
+photograph in a catalogue. `signPhotos` applied it everywhere a photo URL reaches a browser, five
+places found by checking each render path against a live `pnpm dev` session rather than reasoning
+about which components render photographs: the guest page and the download manifest (both via
+`getCachedBundle`), and three admin surfaces — `PhotoManager`'s initial read and upload response,
+the customizer preview, and the admin API routes their client-side updates call. That same live
+check also caught a real bug before it shipped: the demo catalogue's photographs reuse the
+poster-frame generator (`/api/poster/frame?asset=…&n=1`), whose URL already carries a query
+string, and a naive `${url}${query}` concatenation wrote a second `?` into it, silently dropping
+the token into the wrong parameter — fixed by joining with `&` when a query is already present.
 
-That same live check caught a real bug before it shipped: the demo catalogue's photographs reuse
-the poster-frame generator (`/api/poster/frame?asset=…&n=1`), whose URL already carries a query
-string. The first version's `${url}${query}` concatenation wrote a second `?` into it, which a
-browser parses as part of the previous parameter's *value* rather than a new one — the token
-silently went nowhere, on a URL that looked completely normal in the DOM. Fixed by joining with
-`&` when a query is already present; regression test added, since nothing about the manifest text
-or the unit tests as first written would have caught it, only rendering the actual page did.
+Sandeep turned on Token Authentication on the photo pull zone and set
+`BUNNY_PHOTO_TOKEN_AUTH_KEY` in Vercel, we deployed — **and every photograph 403'd in production.**
+The key was assumed to be the problem first (it was re-copied, then regenerated, twice, with no
+change), which cost real time before the actual cause surfaced: **this pull zone's Token
+Authentication only honours a token signed for the exact file path — the directory-scoped design
+above does not work here at all**, confirmed by signing the same path both ways against the live
+zone directly (`curl`, no app in the loop) — file-scoped: 200; directory-scoped: 403, key held
+constant. Video's Stream pull zone accepting a directory token and this Storage-backed one
+refusing it is a real difference between the two zone types, not a mistake in the key. A discovery
+that also explains the delay: nothing in the local suite could have caught this, because it is not
+a logic bug — it is Bunny's zone behaving differently per zone type, observable only by asking the
+real zone.
+
+**The real fix: `signPath(path, ttlS)`, called once per file, not once per catalogue.** Every
+rendition of every photograph now gets its own signature. That breaks the old
+`photoSrcSet`-does-a-string-swap-on-one-signed-url trick — a swapped width is a different file
+with a different required signature — so `signPhotos` now signs each width variant individually
+and returns `SignedPhoto` (`Photo & { srcSet?: string }`): a precomputed, fully-signed responsive
+set, not something a client component can derive by editing a URL string anymore. Threaded through
+the only four places a photo's `srcSet` is actually read — `PosterCard` (via a new
+`RowItem.posterSrcSet`), `Lightbox`, `modules/photo-grid/Guest.tsx`, and `modules/photo-row/
+Guest.tsx`'s `RowItem` construction — `photoSrcSet` itself is unchanged and still does the pure
+width-substitution, just now on the unsigned master before each candidate gets signed, not after.
+
+Verified three ways before calling it done, in order of how little each one trusts the last: unit
+tests against a stub that signs each path *differently*, so a regression back to one shared token
+fails them; the real `BunnyPhotoProvider.signPath` run through vitest against the real key,
+`curl`'d straight at the live pull zone (200), with a deliberately corrupted token on the same URL
+confirmed still rejected (403) — proving enforcement was genuinely on and the signature genuinely
+right, not that the zone happened to be lenient; and the full suite, 697 unit/component (10 new),
+156 passed / 56 skipped E2E, unchanged.
 
 `pnpm preflight` gained the same shape of check it already runs on the video zone —
 `BUNNY_PHOTO_TOKEN_AUTH_KEY` set, and, given `BUNNY_ACCOUNT_API_KEY`, the pull zone actually
 enforcing it — matched by CDN hostname rather than by library id, since a storage-backed pull zone
-has no library to look one up from.
+has no library to look one up from. It does not (yet) distinguish file-scoped from
+directory-scoped enforcement; N-117-adjacent follow-up if this class of zone-behaviour surprise
+recurs.
 
-**Two steps remain, and neither is code:** turn on Token Authentication for the photo pull zone
-(`docs/DEPLOYMENT.md` §3) and set `BUNNY_PHOTO_TOKEN_AUTH_KEY` in Vercel — the second one *before*
-this commit reaches `main`, because `PHOTO_DRIVER=bunny` is already live in production and
-`lib/env.ts` now refuses to boot without that key, the same fail-closed shape `BUNNY_TOKEN_AUTH_KEY`
-already has for video.
-
-4 new unit tests. Files: `lib/photos/provider.ts`, `lib/photos/bunny.ts`, `lib/photos/fake.ts`,
-`lib/photos/index.ts`, `lib/catalogue-cache.ts`, `lib/downloads.ts`, `lib/env.ts`,
-`app/api/admin/catalogues/[id]/route.ts`, `app/api/admin/catalogues/[id]/photos/route.ts`,
-`app/admin/c/[id]/photos/page.tsx`, `app/admin/c/[id]/customizer/page.tsx`,
+Files: `lib/photos/provider.ts`, `lib/photos/bunny.ts`, `lib/photos/fake.ts`, `lib/photos/
+index.ts`, `lib/catalogue-cache.ts`, `lib/downloads.ts`, `lib/env.ts`, `components/streaming/
+PosterCard.tsx`, `components/streaming/Lightbox.tsx`, `modules/photo-grid/Guest.tsx`, `modules/
+photo-row/Guest.tsx`, `app/api/admin/catalogues/[id]/route.ts`, `app/api/admin/catalogues/[id]/
+photos/route.ts`, `app/admin/c/[id]/photos/page.tsx`, `app/admin/c/[id]/customizer/page.tsx`,
 `scripts/preflight.ts`, `docs/DEPLOYMENT.md`, `.env.example`.

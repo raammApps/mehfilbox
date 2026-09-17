@@ -3,18 +3,19 @@
 import { ChevronLeft, ChevronRight, X } from 'lucide-react'
 import { useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
-import { photoSrcSet } from '@/lib/photos/srcset'
 import { ShareButton } from './ShareButton'
 import { LikeButton } from './LikeButton'
 import { photoShareUrl } from './usePhotoDeepLink'
 import { resolveLocalised, type Translator } from '@/lib/i18n'
-import type { Locale, Photo } from '@/lib/schema'
+import type { SignedPhoto } from '@/lib/photos'
+import type { Locale } from '@/lib/schema'
 import { useFocusTrap } from './useFocusTrap'
 
 type Props = {
   /** Needed by the like button, which has to name the catalogue it is counting within. */
   catalogueSlug: string
-  photos: Photo[]
+  /** Already signed (N-83) — every caller reads this off a bundle `signPhotos` produced. */
+  photos: SignedPhoto[]
   index: number
   locale: Locale
   t: Translator
@@ -104,7 +105,7 @@ export function Lightbox({ catalogueSlug, photos, index, locale, t, onIndexChang
           {/* eslint-disable-next-line @next/next/no-img-element -- see PosterCard */}
           <img
             src={photo.url}
-            srcSet={photoSrcSet(photo.url) || undefined}
+            srcSet={photo.srcSet || undefined}
             // Full-bleed, so the browser should take the widest it can use — but a phone still
             // only needs ~1024. This is the one place the 2048 rendition earns its keep.
             sizes="100vw"

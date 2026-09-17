@@ -3,7 +3,7 @@
 import { Lightbox } from '@/components/streaming/Lightbox'
 import { usePhotoDeepLink } from '@/components/streaming/usePhotoDeepLink'
 import { resolveLocalised } from '@/lib/i18n'
-import { photoSrcSet } from '@/lib/photos/srcset'
+import type { SignedPhoto } from '@/lib/photos'
 import type { GuestProps } from '../contract'
 import type { PhotoGridConfig } from './schema'
 
@@ -11,7 +11,10 @@ import type { PhotoGridConfig } from './schema'
 const EAGER_COUNT = 12
 
 export default function Guest({ config, ctx }: GuestProps<PhotoGridConfig>) {
-  const photos = ctx.photos.filter((photo) =>
+  // Every photo reaching a guest module has already been through `signPhotos` (N-83); the
+  // contract types this array as `Photo[]` since that's what every *other* module needs, so the
+  // extra field is recovered here rather than widened onto the shared contract.
+  const photos = (ctx.photos as SignedPhoto[]).filter((photo) =>
     config.albumId ? photo.albumId === config.albumId : true,
   )
 
@@ -43,7 +46,7 @@ export default function Guest({ config, ctx }: GuestProps<PhotoGridConfig>) {
               {/* eslint-disable-next-line @next/next/no-img-element -- see PosterCard */}
               <img
                 src={photo.url}
-                srcSet={photoSrcSet(photo.url) || undefined}
+                srcSet={photo.srcSet || undefined}
                 // A grid cell is the viewport divided by the column count, less the gutters.
                 // Without this the browser assumes full width and fetches the 2048 for a
                 // thumbnail, which is the whole cost this was meant to avoid.

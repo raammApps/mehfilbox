@@ -14,7 +14,7 @@ export class FakePhotoProvider implements PhotoProvider {
   }
 
   /** No real CDN to authenticate against — nothing to sign. */
-  signCatalogue(_catalogueId: string, _ttlS: number): string {
+  signPath(_path: string, _ttlS: number): string {
     return ''
   }
 

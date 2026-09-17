@@ -1,7 +1,6 @@
 'use client'
 
 import { memo, useEffect, useRef, useState } from 'react'
-import { photoSrcSet } from '@/lib/photos/srcset'
 import { posterDataUri, type PosterPaletteName } from '@/lib/poster'
 
 export type Aspect = '2:3' | '16:9' | '1:1' | '4:3'
@@ -24,6 +23,8 @@ export type RowItem = {
   previewUrl?: string | null
   /** The theme's palette for generated art (D-35). Set by the module that built the item. */
   palette?: PosterPaletteName
+  /** Already signed (N-83), for a photo row's `posterUrl` — empty for a film's generated poster. */
+  posterSrcSet?: string | null
 }
 
 const ASPECT_CLASS: Record<Aspect, string> = {
@@ -129,9 +130,9 @@ function PosterCardImpl({ item, aspect, onOpen, eager = false, wide = false }: P
             generated data: URIs; the image optimiser adds a hop for no benefit here. */}
         <img
           src={src}
-          // Photo rows pass a stored photograph here; film posters come from `/api/poster/…`
-          // and have no rendition set, so this is empty for them and the markup is unchanged.
-          srcSet={photoSrcSet(src) || undefined}
+          // Photo rows pass an already-signed srcset (N-83); film posters come from
+          // `/api/poster/…` and have none, so this is empty for them and the markup is unchanged.
+          srcSet={item.posterSrcSet || undefined}
           sizes="(max-width: 768px) 45vw, 320px"
           alt={item.alt ?? ''}
           loading={eager ? 'eager' : 'lazy'}

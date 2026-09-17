@@ -36,7 +36,7 @@ export function catalogueTag(slug: string): string {
  * on a legacy link, with every unit test green and the row itself correct. Part of the key rather
  * than a tag, because a tag can only be invalidated from a running process that knows to.
  */
-const CACHE_GENERATION = 'g4'
+const CACHE_GENERATION = 'g6'
 
 /**
  * An hour is the backstop, not the mechanism.

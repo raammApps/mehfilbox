@@ -75,7 +75,7 @@ describe('the provider contract', () => {
   })
 
   it('signs nothing, because there is no real CDN behind it to enforce a token', () => {
-    expect(new FakePhotoProvider().signCatalogue(CATALOGUE, 3600)).toBe('')
+    expect(new FakePhotoProvider().signPath('/c/cat-1/w2048/p1.jpg', 3600)).toBe('')
   })
 })
 
@@ -84,6 +84,12 @@ describe('the provider contract', () => {
  * (Sandeep's call: a plain URL for WhatsApp's own preview fetch was the alternative, and
  * `docs/DEPLOYMENT.md`'s own note that WhatsApp caches a preview for days is what makes a
  * signed, TTL'd URL safe for that fetch too).
+ *
+ * File-scoped, not directory-scoped, and that distinction is load-bearing, not cosmetic: a first
+ * version signed once per catalogue and shipped to production 403ing every photograph, because
+ * this pull zone's Token Authentication only honours a token for the exact path it names. These
+ * tests pin the current, verified-live shape — a stub that signs each path differently, so a bug
+ * that reused one token across every file (the original mistake) would fail them.
  */
 describe('signPhotos', () => {
   const PHOTO_1 = '11111111-1111-4111-8111-111111111111'
@@ -97,19 +103,37 @@ describe('signPhotos', () => {
     setPhotoProvider(new FakePhotoProvider())
   })
 
-  it('appends the catalogue-scoped query to every photograph, once each', () => {
-    setPhotoProvider(stubProvider('?token=abc&expires=123'))
+  it('signs each photograph by its own path, not one shared token', () => {
+    setPhotoProvider(stubProvider((path) => `?token=for(${path})&expires=123`))
     const photos = [
-      photo(PHOTO_1, 'https://cdn.example.net/c/cat-1/w2048/p1.jpg'),
-      photo(PHOTO_2, 'https://cdn.example.net/c/cat-1/w2048/p2.jpg'),
+      photo(PHOTO_1, 'https://cdn.example.net/c/cat-1/p1.jpg'),
+      photo(PHOTO_2, 'https://cdn.example.net/c/cat-1/p2.jpg'),
     ]
 
     const signed = signPhotos(CATALOGUE, photos)
 
     expect(signed.map((p) => p.url)).toEqual([
-      'https://cdn.example.net/c/cat-1/w2048/p1.jpg?token=abc&expires=123',
-      'https://cdn.example.net/c/cat-1/w2048/p2.jpg?token=abc&expires=123',
+      'https://cdn.example.net/c/cat-1/p1.jpg?token=for(/c/cat-1/p1.jpg)&expires=123',
+      'https://cdn.example.net/c/cat-1/p2.jpg?token=for(/c/cat-1/p2.jpg)&expires=123',
     ])
+  })
+
+  it('signs every width in the srcset with its own token, not the master\'s', () => {
+    setPhotoProvider(stubProvider((path) => `?token=for(${path})&expires=123`))
+    const photos = [photo(PHOTO_1, 'https://cdn.example.net/c/cat-1/w2048/p1.jpg')]
+
+    const [signed] = signPhotos(CATALOGUE, photos)
+
+    expect(signed!.url).toBe(
+      'https://cdn.example.net/c/cat-1/w2048/p1.jpg?token=for(/c/cat-1/w2048/p1.jpg)&expires=123',
+    )
+    expect(signed!.srcSet).toBe(
+      [
+        'https://cdn.example.net/c/cat-1/w2048/p1.jpg?token=for(/c/cat-1/w2048/p1.jpg)&expires=123 2048w',
+        'https://cdn.example.net/c/cat-1/w1024/p1.jpg?token=for(/c/cat-1/w1024/p1.jpg)&expires=123 1024w',
+        'https://cdn.example.net/c/cat-1/w480/p1.jpg?token=for(/c/cat-1/w480/p1.jpg)&expires=123 480w',
+      ].join(', '),
+    )
   })
 
   it('joins with `&`, not a second `?`, for a url that already has a query', () => {
@@ -117,7 +141,7 @@ describe('signPhotos', () => {
     // generator (`/api/poster/frame?asset=…&n=1`), which already has a query string. A naive
     // `${url}${query}` concatenation wrote a second `?` into the URL and silently swallowed the
     // token inside the poster route's own `n` parameter instead of adding one.
-    setPhotoProvider(stubProvider('?token=abc&expires=123'))
+    setPhotoProvider(stubProvider(() => '?token=abc&expires=123'))
     const photos = [photo(PHOTO_1, '/api/poster/frame?asset=demo-photo-1&n=1')]
 
     expect(signPhotos(CATALOGUE, photos)[0]!.url).toBe(
@@ -126,28 +150,32 @@ describe('signPhotos', () => {
   })
 
   it('leaves the input array untouched', () => {
-    setPhotoProvider(stubProvider('?token=abc&expires=123'))
-    const photos = [photo(PHOTO_1, 'https://cdn.example.net/c/cat-1/w2048/p1.jpg')]
+    setPhotoProvider(stubProvider(() => '?token=abc&expires=123'))
+    const photos = [photo(PHOTO_1, 'https://cdn.example.net/c/cat-1/p1.jpg')]
 
     signPhotos(CATALOGUE, photos)
 
-    expect(photos[0]!.url).toBe('https://cdn.example.net/c/cat-1/w2048/p1.jpg')
+    expect(photos[0]!.url).toBe('https://cdn.example.net/c/cat-1/p1.jpg')
   })
 
   it('passes photographs through unchanged when the driver has nothing to sign', () => {
     setPhotoProvider(new FakePhotoProvider())
     const photos = [photo(PHOTO_1, '/fake-photos/c/cat-1/w2048/p1.jpg')]
 
-    expect(signPhotos(CATALOGUE, photos)).toEqual(photos)
+    const [signed] = signPhotos(CATALOGUE, photos)
+
+    expect(signed!.url).toBe(photos[0]!.url)
+    // Still derives the (unsigned) srcset — `photoSrcSet`'s own job, untouched by signing.
+    expect(signed!.srcSet).toContain('/fake-photos/c/cat-1/w480/p1.jpg 480w')
   })
 })
 
-function stubProvider(query: string): PhotoProvider {
+function stubProvider(sign: (path: string) => string): PhotoProvider {
   return {
     name: 'stub',
     urlFor: (key) => key,
     put: async (key) => ({ url: key, key }),
     remove: async () => {},
-    signCatalogue: () => query,
+    signPath: (path) => sign(path),
   }
 }

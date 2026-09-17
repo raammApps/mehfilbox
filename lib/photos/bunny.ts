@@ -36,16 +36,17 @@ export class BunnyPhotoProvider implements PhotoProvider {
   }
 
   /**
-   * `token = base64url(sha256(securityKey + path + expires))` — Bunny's URL token
-   * authentication, the exact algorithm `BunnyProvider.signDirectory` already uses for video.
-   * Signing `c/<catalogueId>/` (a directory, trailing slash) rather than one photograph's path
-   * authorises every width and every photograph in the catalogue with one token, matching
-   * `photoKey`'s own layout (`c/<catalogueId>/w<width>/<photoId>.<ext>`).
+   * `token = base64url(sha256(securityKey + path + expires))` — the same hash
+   * `BunnyProvider.signDirectory` uses for video, but file-scoped: this pull zone's Token
+   * Authentication rejects a token signed for the containing directory, confirmed by testing
+   * both shapes against the live zone directly after a directory-scoped version shipped to
+   * production and 403'd every photograph. `path` must be exactly the request path — leading
+   * slash, no host, no query — or the hash will not match what Bunny computes on its side.
    */
-  signCatalogue(catalogueId: string, ttlS: number): string {
+  signPath(path: string, ttlS: number): string {
     const expires = Math.floor(Date.now() / 1000) + ttlS
     const token = createHash('sha256')
-      .update(`${env.BUNNY_PHOTO_TOKEN_AUTH_KEY}/c/${catalogueId}/${expires}`)
+      .update(`${env.BUNNY_PHOTO_TOKEN_AUTH_KEY}${path}${expires}`)
       .digest('base64')
       .replace(/\+/g, '-')
       .replace(/\//g, '_')

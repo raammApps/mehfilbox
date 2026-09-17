@@ -38,13 +38,16 @@ export interface PhotoProvider {
   urlFor(key: string): string
 
   /**
-   * A query string (`?token=…&expires=…`, or `''`) authorising every rendition of every
-   * photograph under one catalogue for `ttlS` seconds (N-83).
+   * A query string (`?token=…&expires=…`, or `''`) authorising exactly `path` for `ttlS`
+   * seconds (N-83).
    *
-   * Scoped to the **catalogue**, not the photograph, for the reason `BunnyProvider.signDirectory`
-   * scopes video the same way: one token that covers `c/<catalogueId>/` authorises every width
-   * under it too, so a guest page with forty photographs signs once, not forty times, and
-   * `photoSrcSet`'s width-swap on the URL string keeps working unchanged.
+   * File-scoped, not directory-scoped — checked against the real pull zone, not assumed. A first
+   * version signed the whole `c/<catalogueId>/` directory once per catalogue, the trade
+   * `BunnyProvider.signDirectory` makes for video's Stream pull zone. That shipped to production
+   * and 403'd every photograph: this Storage-backed pull zone's Token Authentication only honours
+   * a token for the exact path it was signed for, proven by testing both shapes against the live
+   * zone directly. `path` is the request path only (leading slash, no host, no query) — every
+   * rendition of a photograph is its own file and needs its own call.
    */
-  signCatalogue(catalogueId: string, ttlS: number): string
+  signPath(path: string, ttlS: number): string
 }
