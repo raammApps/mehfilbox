@@ -2212,6 +2212,20 @@ named as a real trade-off in the file's own comment, not left implicit.
 
 9 new unit tests; 691 unit and component tests total.
 
+**Turnstile itself, turned on — 18 September 2026, closing the ticket.** A widget created in
+Cloudflare's dashboard for `mehfilbox.com` (Managed mode), `NEXT_PUBLIC_TURNSTILE_SITE_KEY` /
+`TURNSTILE_SECRET_KEY` set on Vercel, `CAPTCHA_DRIVER` flipped from `none` to `turnstile`, then a
+redeploy — `NEXT_PUBLIC_` values are baked in at build time, so setting them alone does not reach
+a live page. Verified live rather than assumed, and the live check found a real wrinkle worth
+recording: checked first through this session's own automated browser tool, the widget rendered
+correctly but the challenge itself failed with Cloudflare's error `600010`. That code is Turnstile's
+generic bot-detection bucket, not a configuration error — a different, specific code covers a wrong
+site key or an unlisted domain — and it is documented as commonly triggered by exactly an
+automated or devtools-attached browser. Confirmed by asking for one real, human click in an
+ordinary Chrome window instead: "Success!" on the first try. The durable rate limiter from earlier
+in this ticket is now backup rather than the only thing standing between a script and a four-digit
+code, which was the whole reason for building it before the widget existed to turn on.
+
 ## N-90 · A real HLS fixture for the `fake` driver — 18 September 2026
 
 Closed the gap N-86 found: the fake video driver served `/media/sample.webm`, and

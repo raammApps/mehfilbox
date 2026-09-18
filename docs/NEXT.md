@@ -98,51 +98,6 @@ three came out of the security pass and two of them were verified live, not infe
 
 Three decisions are Sandeep's to make before their tickets can be taken up; each is marked.
 
-### N-86 · Lockouts that hold across instances  ·  **code done, 18 September 2026**  ·  **one operator step left**
-
-`lib/http/rate-limit.ts` was process memory, and said so. On one warm Vercel instance the
-guest-code budget was 5 per device and 30 per catalogue per fifteen minutes; on *N* instances it
-was *N* times that, and a lockout on one instance was unknown to the others. With
-`CAPTCHA_DRIVER=none` in production, this was the only thing standing between a script and a
-four-digit code.
-
-**Durable store: done.** `consume`/`peek`/`reset`/`enforce` are now async, delegating to
-`Repository.consumeRateLimit`/`peekRateLimit`/`resetRateLimit` (migration `0026_rate_limits.sql`,
-one atomic `insert … on conflict do update … returning` function so a read-decide-write never
-races). `MemoryRepository` keeps the exact same bucket math as instance state — a fresh repository
-in every test's `beforeEach` gets fresh buckets for free, which is why several tests' explicit
-`reset()` calls are now belt-and-braces rather than load-bearing. `SupabaseRepository` falls back
-to an in-memory bucket, logged, whenever the durable table errors — deliberately: without that
-fallback, shipping this code before the migration is applied would 500 every sign-in, every
-registration, every guest-code attempt. With it, the worst case on a missing table is exactly the
-old per-instance behaviour, never worse, and the improvement activates the moment the migration is
-applied — no redeploy needed. All ~20 call sites across 13 route files now `await`. 9 new unit
-tests for the durable path and its fallback, on top of the existing suite passing unchanged
-through the memory driver. `docs/DEPLOYMENT.md` §4 covers applying a migration to a live project.
-
-**`Content-Security-Policy`: done**, in `next.config.ts` — the other five headers were there, this
-one was not. Built from what the app actually connects to, checked by grep before writing a
-directive: fonts are self-hosted (`lib/fonts.ts`), so nothing needed there; Bunny (`*.b-cdn.net`)
-is the only external host the browser talks to, for HLS and every poster and photograph; Turnstile's
-three directives (`script-src`, `frame-src`, `connect-src` → `challenges.cloudflare.com`) are in
-now rather than left for whoever turns it on. `'unsafe-inline'` is a named trade-off, not an
-oversight — Next's RSC hydration payload and the inline `style={{...}}` theming pattern used in 19
-files both need it, and the existing `no-dangerouslySetInnerHTML` eslint rule is what actually
-guards same-origin script injection.
-
-**It shipped without `media-src blob:` and broke every film in production for a few minutes.**
-`hls.js` fetches segments over `connect-src` (already correct) then assembles them into a
-`MediaSource` and assigns the video element's `src` to a `blob:` URL it mints itself — a browser
-mechanic, not something grepping the codebase surfaces. Caught by playing a real film against the
-live deploy right after it shipped, fixed the same way within minutes (commit `05b30f8`). The
-reason nothing automated caught it first — the fake video driver never exercised `hls.js` at all —
-is N-90, closed 18 September (`docs/PROGRESS.md`); N-117 below covers what's still open.
-
-**Still open, and it is not code:** turning Turnstile on itself — a widget for `mehfilbox.com`, two
-keys, then `CAPTCHA_DRIVER=turnstile` (`GO-LIVE.md`, second pass §2). The challenge after three
-failures is what makes the per-instance-vs-durable arithmetic stop mattering at all; the durable
-store above is the fix for as long as it stays off.
-
 ### N-87 · A staging environment  ·  **script and docs ready, 18 September 2026**  ·  **the two accounts are Sandeep's**
 
 Everything real is tested in production, and 12 September proved why that is a problem: applying
