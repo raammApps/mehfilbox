@@ -2838,3 +2838,35 @@ file and is left for the first real use of the environment rather than manufactu
 call this session already made once for N-86's Turnstile widget.
 
 Files: `scripts/deploy-vercel.sh`, `docs/DEPLOYMENT.md`, `docs/NEXT.md`.
+
+## N-22b · A per-film download from the title modal — 18 September 2026
+
+The small case `/c/<slug>/download` (N-22) never covered: a guest watching one film who wants
+that one film, without a trip to a page listing forty photographs. A **Download** control sits in
+the title modal next to Play and Share, shown only when the server already marked this viewer
+authorised (`isAuthorizedToDownload`, exported from `lib/downloads.ts` rather than duplicated) —
+but the control is only ever the invitation. `GET /api/download/title?catalogue=&titleSlug=`
+re-runs the full `resolveDownloadAccess` check server-side and signs the one asset on demand
+(`getVideoProvider().getDownloadUrl`), so a copied-out URL is refused exactly the way the manifest
+route already is — proven, not assumed: a test disabling that re-check was confirmed red (302
+instead of 401) before being reverted.
+
+**What the ticket asked for and this does not answer:** its own text named "what a 6 GB file does
+on a phone" as the interesting part, unlearnable from a 750 KB sample. The two real catalogues
+N-14 found hold ~40-second clips, not a genuine multi-gigabyte film, and this session had no
+larger file to try it against — so the control, the route and its authorisation are built and
+tested, but a real large-file download on a real phone is still unverified. Left for whoever next
+touches a catalogue with a real wedding's worth of footage in it.
+
+10 new tests: 7 for the route (redirect, three refusal paths, three 404 shapes) in
+`tests/unit/downloads.test.ts`, 3 for the modal's conditional rendering in
+`tests/component/title-modal.test.tsx`. 759 unit/component total. `pnpm verify` and
+`pnpm test:e2e` both green; the existing E2E suite has nothing that signs in as a catalogue's
+owner from the guest surface, so it did not need a new spec to stay green — worth naming as a real
+gap in guest-side E2E coverage rather than assuming this path is watched.
+
+Files: `lib/downloads.ts`, `app/api/download/title/route.ts` (new), `app/c/[slug]/page.tsx`,
+`components/streaming/CatalogueShell.tsx`, `components/streaming/TitleModal.tsx`, `lib/i18n.ts`,
+`tests/unit/downloads.test.ts`, `tests/component/title-modal.test.tsx`, `docs/PRODUCT.md`
+(corrected a stale "Missing" row for N-22 itself, found while updating it for N-22b),
+`docs/help/client.md`, `docs/NEXT.md`.

@@ -273,16 +273,6 @@ doc 15 asks for a prompt to phone rather than email when the renewal is a Cinema
 Cinema — `entitlements.planId` is there, and nothing assigns it. Build it after N-27b puts plan
 assignment in the platform console, or it is a prompt keyed on a plan nobody has.
 
-### N-22b · A per-film download from the title modal  ·  ~1h
-
-`/c/<slug>/download` lists everything (N-22, 8 September). What is missing is the small case: a
-guest watching one film who wants that one film, without a trip to a page listing forty
-photographs. `getDownloadUrl` already exists on the provider — this is a control in the title modal
-and a route that signs one asset.
-
-Worth doing when there is real footage to try it against: the interesting part is what a 6 GB file
-does on a phone, and that cannot be learned from a 750 KB sample.
-
 ### N-24a · The encoding ladder  ·  ~1h  ·  operator task
 
 Set the Bunny library to 360p–720p by default; confirm Keep Original Files and MP4 Fallback are

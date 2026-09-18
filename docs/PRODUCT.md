@@ -118,7 +118,7 @@ graph, so there is no privilege-escalation path to get wrong; what is missing is
 | Passcode management | **Built** | From `/my`, before and after the handover; changing it signs out everyone holding the old one (N-71, 12 Sept). |
 | Buy and apply a theme | **Partial** | Seven themes and platform-authored ones, chosen per catalogue (N-63, 12 Sept). Nothing is *bought* yet — see §6 and doc 16 §7. |
 | Hand back to the studio | **Built** | N-62, 12 Sept — as a window rather than a return: the couple opens the studio's access for seven or fourteen days from `/my`, and it closes on its own. |
-| Download everything | **Missing** | **Required before any lapse behaviour ships.** Available at any time — before expiry, in grace, and from archive. `PRICING.md` §2. |
+| Download everything | **Built** | N-22, 8 Sept. `/c/<slug>/download` — every film and photograph as signed links, before expiry, through grace, and from archive. D-43 (N-85): the passcode alone never grants it, only the couple's or the studio's own sign-in. A control in the title modal signs one film on its own too (N-22b, 18 Sept), for a guest who wants that one film without a trip to the full list. |
 | Archive instead of deletion *(changed 6 Sept 2026)* | **Missing** | Lapse → 90 days' grace → archive (streaming paused, files kept, restore on payment). Automatic deletion is **removed from the product**; `deleted` is reachable only by a recorded request from the couple. N-24. |
 | Family circles *(new)* | **Missing** | Scoped links per side, "who watched". The profile gate already identifies a guest; nothing groups them. N-38. |
 | Anniversary moment *(new)* | **Missing** | A clip and a message on the date; the renewal nudge that does not read as one. N-39. |

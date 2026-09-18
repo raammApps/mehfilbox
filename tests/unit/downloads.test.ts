@@ -55,7 +55,10 @@ function signedInAs(userId: string): AuthProvider {
  * Bunny over the network and every film comes back unavailable. That is the *correct* behaviour
  * under a broken provider, which is exactly why it made a confusing test failure.
  */
-async function install(overrides: Parameters<typeof makeCatalogue>[0] = {}) {
+async function install(
+  overrides: Parameters<typeof makeCatalogue>[0] = {},
+  extraTitles: Array<Parameters<typeof makeTitle>[1]> = [],
+) {
   const catalogue = makeCatalogue({
     orgId: ORG,
     slug: 'aanya-vikram',
@@ -66,6 +69,9 @@ async function install(overrides: Parameters<typeof makeCatalogue>[0] = {}) {
   const snapshot = emptySnapshot()
   snapshot.catalogues.push(catalogue)
   snapshot.titles.push(makeTitle(catalogue.id, { slug: 'the-ceremony', published: true }))
+  for (const extra of extraTitles) {
+    snapshot.titles.push(makeTitle(catalogue.id, { published: true, ...extra }))
+  }
   // An org and an operator row for every org a test might sign in as — `getOperatorSession`
   // requires both to exist (a session whose org has vanished is not a session), and looks the
   // operator up by the auth provider's user id, which here is just the org id, kept simple.
@@ -202,6 +208,77 @@ describe('who may actually download (D-43)', () => {
     setAuthProvider(signedInAs(ORG))
     const { resolveDownloadAccess } = await import('@/lib/downloads')
     expect((await resolveDownloadAccess('aanya-vikram')).kind).toBe('ok')
+  })
+})
+
+/**
+ * N-22b — the small case: a guest watching one film who wants that one film, without a trip to
+ * a page listing forty photographs. Same D-43 authorisation as the manifest, proven again here
+ * rather than assumed from the shared function, because this is the route a URL can be copied
+ * out of — the modal only *offers* the control to an authorised session, but the route is what
+ * actually has to refuse everyone else.
+ */
+describe('GET /api/download/title', () => {
+  async function get(catalogue: string, titleSlug: string): Promise<Response> {
+    const { GET } = await import('@/app/api/download/title/route')
+    const query = `catalogue=${encodeURIComponent(catalogue)}&titleSlug=${encodeURIComponent(titleSlug)}`
+    return GET(new Request(`http://aanya-vikram.mehfilbox.app/api/download/title?${query}`))
+  }
+
+  it('redirects the owning org to a freshly signed provider URL', async () => {
+    await install()
+    setAuthProvider(signedInAs(ORG))
+
+    const response = await get('aanya-vikram', 'the-ceremony')
+
+    expect(response.status).toBe(302)
+    expect(response.headers.get('location')).toBeTruthy()
+  })
+
+  it('refuses an anonymous guest even for a real, published film', async () => {
+    // The bug this guards against: the modal decides whether to *show* the control from a
+    // server-rendered prop, but that prop never reaches this route, so if the route trusted the
+    // request instead of re-checking `resolveDownloadAccess`, copying the URL out of the page
+    // source would hand anyone the film regardless of who is signed in.
+    await install()
+
+    const response = await get('aanya-vikram', 'the-ceremony')
+
+    expect(response.status).toBe(401)
+  })
+
+  it('refuses a session signed in as neither the owning, linked, nor originating org', async () => {
+    await install()
+    setAuthProvider(signedInAs(OTHER_ORG))
+
+    expect((await get('aanya-vikram', 'the-ceremony')).status).toBe(401)
+  })
+
+  it('refuses a locked, passcode-only catalogue rather than asking for the code here', async () => {
+    await install({ privacy: 'passcode' })
+
+    expect((await get('aanya-vikram', 'the-ceremony')).status).toBe(403)
+  })
+
+  it('404s a wedding that does not exist', async () => {
+    await install()
+    setAuthProvider(signedInAs(ORG))
+
+    expect((await get('not-a-wedding', 'the-ceremony')).status).toBe(404)
+  })
+
+  it('404s a title slug that is not part of this catalogue', async () => {
+    await install()
+    setAuthProvider(signedInAs(ORG))
+
+    expect((await get('aanya-vikram', 'not-a-film')).status).toBe(404)
+  })
+
+  it('404s a title that was never uploaded', async () => {
+    await install({}, [{ slug: 'no-file', providerId: null }])
+    setAuthProvider(signedInAs(ORG))
+
+    expect((await get('aanya-vikram', 'no-file')).status).toBe(404)
   })
 })
 

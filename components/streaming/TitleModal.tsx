@@ -1,6 +1,6 @@
 'use client'
 
-import { ChevronLeft, ChevronRight, Play, X } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Download, Play, X } from 'lucide-react'
 import { useEffect, useMemo, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { formatClock, formatWeddingDate } from '@/lib/format'
@@ -19,6 +19,8 @@ type Props = {
   t: Translator
   shareBaseUrl: string
   palette?: PosterPaletteName
+  /** Whether the signed-in viewer may download — the couple's or studio's own session (D-43). */
+  canDownload?: boolean
 }
 
 /**
@@ -28,7 +30,15 @@ type Props = {
  * this component owns content order, sibling navigation, and the manifest prefetch that is
  * where the sub-1.5s playback target is actually won.
  */
-export function TitleModal({ catalogue, titles, locale, t, shareBaseUrl, palette = 'warm' }: Props) {
+export function TitleModal({
+  catalogue,
+  titles,
+  locale,
+  t,
+  shareBaseUrl,
+  palette = 'warm',
+  canDownload = false,
+}: Props) {
   const { openTitleSlug, closeTitle, openTitle, play, progressByTitleId } = useCatalogue()
   const panel = useRef<HTMLDivElement>(null)
 
@@ -168,6 +178,16 @@ export function TitleModal({ catalogue, titles, locale, t, shareBaseUrl, palette
               subjectId={title.id}
               t={t}
             />
+            {canDownload && title.providerId ? (
+              <a
+                href={`/api/download/title?catalogue=${encodeURIComponent(catalogue.slug)}&titleSlug=${encodeURIComponent(title.slug)}`}
+                download
+                className="edge inline-flex h-12 items-center gap-2 rounded-[var(--radius-pill)] px-5 font-semibold text-text-hi hover:bg-surface-3 md:h-11"
+              >
+                <Download size={18} strokeWidth={1.75} aria-hidden />
+                {t('title.download')}
+              </a>
+            ) : null}
           </div>
 
           {synopsis ? <p className="type-body-lg mt-6 text-text-mid">{synopsis}</p> : null}

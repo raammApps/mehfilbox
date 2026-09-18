@@ -76,7 +76,7 @@ export async function resolveDownloadAccess(slug: string): Promise<DownloadVerdi
  * and `/my/c/[id]` already offers a linked couple the download link, not only an owning one), or
  * made it (`originOrgId`, permanently — a handover moves `orgId` away but not who filmed it).
  */
-async function isAuthorizedToDownload(catalogue: Catalogue): Promise<boolean> {
+export async function isAuthorizedToDownload(catalogue: Catalogue): Promise<boolean> {
   const session = await getOperatorSession()
   if (!session) return false
   return (
@@ -98,7 +98,8 @@ export type DownloadItem = {
 export type Manifest = { catalogue: string; items: DownloadItem[]; unavailable: number }
 
 /** How long a link lives. Long enough to start a 40 GB download, short enough not to be a share. */
-const TTL_S = 60 * 60 * 6
+export const DOWNLOAD_TTL_S = 60 * 60 * 6
+const TTL_S = DOWNLOAD_TTL_S
 
 export async function buildManifest(catalogue: Catalogue): Promise<Manifest> {
   const bundle = await getCachedBundle(catalogue)

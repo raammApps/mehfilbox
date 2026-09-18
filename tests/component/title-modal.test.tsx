@@ -23,7 +23,7 @@ const titles = [
   makeTitle(catalogue.id, { slug: 'third', name: { en: 'Third Film' } }),
 ]
 
-function renderModal(initialTitleSlug: string | null) {
+function renderModal(initialTitleSlug: string | null, canDownload = false) {
   return render(
     <CatalogueProvider
       locale="en"
@@ -38,6 +38,7 @@ function renderModal(initialTitleSlug: string | null) {
         locale="en"
         t={t}
         shareBaseUrl="https://test-wedding.mehfilbox.app"
+        canDownload={canDownload}
       />
     </CatalogueProvider>,
   )
@@ -142,6 +143,42 @@ describe('<TitleModal>', () => {
   it('offers Share — the flaunt mechanic — alongside Play', () => {
     renderModal('first')
     expect(screen.getByRole('button', { name: 'Share' })).toBeInTheDocument()
+  })
+
+  /**
+   * N-22b / D-43: the control is only ever the invitation — `/api/download/title` is what
+   * actually refuses everyone else, re-checking the same authorisation server-side (see
+   * `tests/unit/downloads.test.ts`). Nothing here is a security boundary; it is what a session
+   * the server already vetted gets shown.
+   */
+  it('offers no download link to a viewer the server did not mark authorised', () => {
+    renderModal('first', false)
+    expect(screen.queryByRole('link', { name: 'Download' })).not.toBeInTheDocument()
+  })
+
+  it('offers Download, signed to this exact film, once the server says the viewer may', () => {
+    renderModal('first', true)
+    const link = screen.getByRole('link', { name: 'Download' })
+    expect(link).toHaveAttribute(
+      'href',
+      `/api/download/title?catalogue=${catalogue.slug}&titleSlug=first`,
+    )
+  })
+
+  it('does not offer a download link for a film with nothing uploaded yet', () => {
+    const noFile = [makeTitle(catalogue.id, { slug: 'empty', providerId: null, name: { en: 'Empty' } })]
+    render(
+      <CatalogueProvider
+        locale="en"
+        catalogueSlug={catalogue.slug}
+        initialTitleSlug="empty"
+        initialProgress={[]}
+        firstRowId={null}
+      >
+        <TitleModal catalogue={catalogue} titles={noFile} locale="en" t={t} shareBaseUrl="" canDownload />
+      </CatalogueProvider>,
+    )
+    expect(screen.queryByRole('link', { name: 'Download' })).not.toBeInTheDocument()
   })
 
   it('says a processing film is being prepared instead of offering a dead Play button', () => {

@@ -25,6 +25,8 @@ type Props = {
   basePath?: string
   /** Set inside the customizer's preview pane: navigation, history and the gate go inert. */
   preview?: boolean
+  /** Whether the title modal offers a download control — the couple's or studio's own session. */
+  canDownload?: boolean
   /** Whether the footer says "Made with Mehfilbox" — a studio setting, on unless turned off (D-41). */
   platformCredit?: boolean
   /** Where that line points: the marketing site, carrying the studio that sent the guest. */
@@ -54,6 +56,7 @@ export function CatalogueShell({
   publicUrl,
   basePath = '',
   preview = false,
+  canDownload = false,
   platformCredit = true,
   platformHref,
   palette = 'warm',
@@ -142,6 +145,7 @@ export function CatalogueShell({
         t={t}
         shareBaseUrl={shareBaseUrl}
         palette={palette}
+        canDownload={canDownload}
       />
     </CatalogueProvider>
   )

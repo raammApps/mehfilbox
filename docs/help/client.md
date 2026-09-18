@@ -67,7 +67,8 @@ it).
 
 ## Downloading
 
-**Where:** a catalogue → `/download` on its guest link, or from your own `/my` console.
+**Where:** a catalogue → `/download` on its guest link, or from your own `/my` console. Want just
+one film? Open it and look for **Download** next to Play and Share — no trip to the full list.
 
 **A passcode lets a guest *watch*. It does not let anyone download.** Downloading — including
 original, full-resolution files — needs a sign-in: yours, if the wedding is yours, or your

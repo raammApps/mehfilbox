@@ -31,6 +31,7 @@ export const dictionary = {
 
     'title.play': 'Play',
     'title.share': 'Share',
+    'title.download': 'Download',
     'title.close': 'Close',
     'title.previous': 'Previous title',
     'title.next': 'Next title',
@@ -228,6 +229,7 @@ export const dictionary = {
 
     'title.play': 'चलाएँ',
     'title.share': 'साझा करें',
+    'title.download': 'डाउनलोड',
     'title.close': 'बंद करें',
     'title.previous': 'पिछला',
     'title.next': 'अगला',

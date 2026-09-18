@@ -6,6 +6,7 @@ import { CatalogueShell } from '@/components/streaming/CatalogueShell'
 import { addressFor, ogImageUrlOf, publicUrlOf, requireCanonicalAddress } from '@/lib/address'
 import { loadBundle, resolveAccess } from '@/lib/catalogue-access'
 import { getRepository } from '@/lib/db'
+import { isAuthorizedToDownload } from '@/lib/downloads'
 import { env } from '@/lib/env'
 import { createTranslator, parseLocale, resolveLocalised } from '@/lib/i18n'
 import { guestLocale } from '@/lib/guest-locale'
@@ -115,6 +116,10 @@ export default async function CataloguePage({
   const publicUrl = address.publicUrl
   // The whole guest surface follows the theme (D-35); resolved once, custom-aware, here.
   const theme = await resolveTheme(catalogue.branding)
+  // D-43: the passcode never grants this, only the couple's or the studio's own sign-in — the
+  // same check `/api/download/title` repeats server-side, since this only decides whether the
+  // modal shows a control, not whether the route will actually hand out a file.
+  const canDownload = await isAuthorizedToDownload(catalogue)
 
   return (
     <>
@@ -126,6 +131,7 @@ export default async function CataloguePage({
         locale={locale}
         initialTitleSlug={titleParam ?? null}
         initialProgress={progress}
+        canDownload={canDownload}
         shareBaseUrl={publicUrl.replace(/\/$/, '')}
         publicUrl={publicUrl}
         basePath={address.basePath}
