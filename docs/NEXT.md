@@ -143,7 +143,7 @@ keys, then `CAPTCHA_DRIVER=turnstile` (`GO-LIVE.md`, second pass §2). The chall
 failures is what makes the per-instance-vs-durable arithmetic stop mattering at all; the durable
 store above is the fix for as long as it stays off.
 
-### N-87 · A staging environment  ·  ~half a session + two accounts  ·  **debt that is costing us**
+### N-87 · A staging environment  ·  **script and docs ready, 18 September 2026**  ·  **the two accounts are Sandeep's**
 
 Everything real is tested in production, and 12 September proved why that is a problem: applying
 migrations broke catalogue creation for the minutes before the deploy, and there was nowhere to
@@ -151,12 +151,22 @@ find that out first. CI is deliberately hermetic (memory + fake); Vercel Preview
 variables and `lib/env.ts` refuses a production build on an ephemeral driver, so preview
 deployments cannot boot against anything real and none exist.
 
-Staging is: a second Supabase project (free tier, seeded from the demo fixture), a second Bunny
-library and photo zone (pennies), the Preview environment on Vercel carrying that set of variables,
-and `staging.mehfilbox.com` pointed at the preview branch. Then the ritual changes: migrations and
-`deploy-vercel.sh` run against staging first, the E2E suite gets a `--base-url` so it can walk
-staging, and production only ever sees what staging survived. The variables file is the pattern
-already — `.env.staging.local` next to `.env.vercel.local`, both gitignored.
+**Ready to use the moment the accounts exist.** `scripts/deploy-vercel.sh` now takes
+`VERCEL_TARGET`/`VERCEL_ENV_FILE` overrides — `VERCEL_TARGET=preview VERCEL_ENV_FILE=.env.staging.local
+./scripts/deploy-vercel.sh` pushes to Vercel's Preview environment from a second file and deploys
+without `--prod`. `docs/DEPLOYMENT.md` §14 has the full ritual: a second Supabase project (schema
+only via `pnpm bootstrap:sql` — no demo data exists to seed even in production, N-6), a second
+Bunny library and photo zone, `staging.mehfilbox.com` assigned to a `staging` branch in Vercel's
+own dashboard (one CNAME, no code), and the sequencing change once it exists — a migration or an
+env change lands on staging first, walked the way §8 already does, before it reaches `main`.
+
+**Still open, and not code:** the two accounts themselves — only Sandeep can create them. **Also
+still open, named rather than guessed at:** N-87's own ask for the E2E suite to get a `--base-url`
+so it can "walk staging" is more than a flag — every existing spec assumes the hermetic fixtures
+`playwright.config.ts` boots locally (a known demo catalogue, a fixed password, the `fake` video
+driver), none of which exist against a real staging environment. A second, staging-safe suite is
+real scope of its own and overlaps with N-117's synthetic production check closely enough that the
+two should be designed together, not each guessed at separately.
 
 ### N-79 · Buying storage  ·  **interim step done, 18 September 2026**  ·  the checkout itself **blocked by N-20**
 

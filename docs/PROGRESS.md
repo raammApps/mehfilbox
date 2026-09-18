@@ -2709,3 +2709,51 @@ Files: `lib/db/repository.ts`, `lib/db/memory-repository.ts`, `lib/db/supabase-r
 (new), `app/admin/platform/catalogues/[id]/page.tsx`, `app/admin/c/[id]/page.tsx`,
 `lib/notify/templates.ts`, `lib/i18n.ts`, `tests/unit/catalogue-quota.test.ts` (new),
 `docs/PRODUCT.md`, `docs/NEXT.md`, `docs/help/studio.md`.
+
+## N-87, script and docs half · A staging environment — 18 September 2026
+
+Asked to "set up Turnstile and staging" — both need a real account only Sandeep can create
+(Cloudflare, a second Supabase project, a second Bunny library), so the actual scope here is
+everything short of that: getting the code and the ritual ready to use the moment the accounts
+exist, rather than leaving both as a paragraph of intentions.
+
+**Turnstile: nothing to build.** Checked rather than assumed — `lib/env.ts` already refuses to
+boot with `CAPTCHA_DRIVER=turnstile` and either key missing, the CSP already allows
+`challenges.cloudflare.com` on all three directives it needs (N-86), and `docs/DEPLOYMENT.md` §13
+already documents the exact Cloudflare dashboard steps. This was already entirely done; the only
+open item was ever the widget itself.
+
+**Staging: `scripts/deploy-vercel.sh` gained `VERCEL_TARGET`/`VERCEL_ENV_FILE` overrides.** The
+script already read `VERCEL_TARGET` to choose which Vercel environment `vercel env add` writes
+to, but the deploy line itself was hardcoded to `vercel --prod --yes` regardless — meaning even
+with every variable pushed correctly to Preview, the script would have deployed straight to
+production anyway. Fixed: `production` still gets `--prod`, anything else gets a plain preview
+build. `ENV_FILE` was hardcoded too; it now reads `VERCEL_ENV_FILE`, defaulting to
+`.env.vercel.local` exactly as before, so nothing about today's production deploys changes.
+
+**`docs/DEPLOYMENT.md` §14 writes the full ritual down**, cross-referencing rather than
+duplicating §3/§4's account-creation steps: the two accounts, `.env.staging.local`, the deploy
+one-liner, and — found while writing it, not assumed — that a stable `staging.mehfilbox.com` URL
+needs exactly one Vercel dashboard setting (a custom domain assigned to a `staging` git branch
+instead of Production) and no code at all, the same way `main` already auto-deploys to
+production today.
+
+**A real error caught before it shipped.** The first draft of §14 said to seed the new Supabase
+project from the demo fixture via `pnpm seed`. Reading the script instead of assuming: `pnpm seed`
+writes only to the file driver and exits immediately on `DATA_DRIVER=supabase`, and — worth
+knowing on its own — **production has no seeded demo catalogue in the real database either**
+(`docs/NEXT.md` already said so; this was independent confirmation). Corrected to the true state:
+staging starts as empty as production did, and gets real content the same way production did —
+signing in and creating one.
+
+**Deliberately not built:** N-87's own text asks for the E2E suite to get a `--base-url` so it can
+"walk staging." Read literally that is a CLI flag; read honestly it is a second test suite, since
+every existing spec depends on the hermetic fixtures `playwright.config.ts` boots locally — a
+known demo catalogue, a fixed operator password, the `fake` video driver — none of which exist
+against a real, stateful environment. Writing that suite now, against a staging URL that does not
+exist yet to verify it against, would be exactly the kind of unverified code this session has
+repeatedly found real bugs in (N-88's file-tracing, N-80's E2E race). Named as real, undone scope
+instead, and pointed at N-117 — a browser-driven synthetic check against production — since the
+two want designing together rather than guessed at separately.
+
+Files: `scripts/deploy-vercel.sh`, `docs/DEPLOYMENT.md`, `docs/NEXT.md`.

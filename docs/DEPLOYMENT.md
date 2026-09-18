@@ -478,3 +478,58 @@ refused before the password is even checked. Create the widget in Cloudflare's d
 *Managed*, allow `mehfilbox.com` (and the preview hostnames if you want previews to sign in), and
 set both keys. Leave the driver at `none` until then — the per-address and per-IP lockouts apply
 regardless.
+
+## 14. Staging (N-87)
+
+Everything above deploys straight to production, and 12 September proved why that is a problem:
+applying a migration broke catalogue creation for the minutes before the deploy, with nowhere to
+find that out first. Staging is a second, real copy of every service — not a mock — so a migration
+or an environment change is proven before it touches a real wedding.
+
+**Two accounts, once, by hand — nothing here can create them for you:**
+
+- **A second Supabase project.** Free tier is enough. Repeat §4 against it: `pnpm bootstrap:sql`
+  and paste the result into the new project's SQL editor once. **No demo data to seed** — `pnpm
+  seed` writes only to the file driver and refuses `DATA_DRIVER=supabase` outright, and production
+  itself has no seeded demo catalogue in the real database either (N-6). Staging starts exactly as
+  empty as production did, and gets real content the same way: signing in and creating one.
+- **A second Bunny library and photo storage zone.** Repeat §3 — a new Stream library, a new Edge
+  Storage zone and pull zone, token auth and referrer settings matching production exactly, or a
+  staging-only bug (an unsigned photo URL, say) proves nothing about the real one. Pennies a month
+  either way; Bunny bills on what is stored and delivered, not on the zone existing.
+
+**Then the environment file.** `.env.staging.local` — gitignored, next to `.env.vercel.local`, same
+variable names throughout, pointed at the two accounts above instead. If you start from a copy of
+`.env.vercel.local`, remember to change `ROOT_DOMAIN` too: it should read `staging.mehfilbox.com`
+here, not the production domain the source file carries.
+
+**The deploy itself reuses the same script**, pointed at a second file and Vercel's Preview
+environment rather than Production:
+
+```bash
+VERCEL_TARGET=preview VERCEL_ENV_FILE=.env.staging.local ./scripts/deploy-vercel.sh
+```
+
+It pushes every variable from that file into the Preview environment (never Production — `TARGET`
+governs which `vercel env add ... <target>` runs) and deploys without `--prod`, an ordinary
+preview build.
+
+**A stable URL, from one Vercel setting, not from this script.** Create a `staging` branch; in the
+Vercel dashboard, Project → Settings → Domains → add `staging.mehfilbox.com` and assign it to the
+`staging` git branch instead of Production — every push to that branch then deploys and re-aliases
+automatically, the same way pushing to `main` already does for production (§7). DNS is one CNAME,
+`staging` → `cname.vercel-dns.com` (§5's target, same one production's custom domains use).
+
+**Then the ritual changes.** A migration or an environment change lands on `staging` first,
+gets the same manual walk §8 describes against `https://staging.mehfilbox.com`, and only then
+goes to `main`. `docs/NEXT.md`'s "Picking up an item" sequencing rule (apply a migration before
+relying on it) now has somewhere to apply it that is not production.
+
+**What this does not include.** N-87's own text asks for the E2E suite to get a `--base-url` so it
+can "walk staging" — genuinely more than a CLI flag, since every existing spec assumes the
+hermetic fixtures `playwright.config.ts` boots locally (a known demo catalogue, a fixed operator
+password, the `fake` video driver), none of which exist against a real, stateful staging
+environment. Building a *second*, smaller suite of staging-safe checks — read-only, or against
+data it creates and cleans up itself — is real scope of its own, and overlaps enough with N-117's
+"browser-driven synthetic check against production" that they should be designed together rather
+than this section guessing at a shape neither ticket has committed to yet.

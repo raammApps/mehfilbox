@@ -1,28 +1,34 @@
 #!/usr/bin/env bash
 #
-# Push every production environment variable to Vercel, then deploy.
+# Push every environment variable to Vercel, then deploy.
 #
 # Exists because setting fifteen variables by hand in a web form is where a deploy goes wrong:
 # one typo in BUNNY_TOKEN_AUTH_KEY and every guest gets a 403, with a green build and no error
-# anywhere. This reads `.env.production.local`, which is generated and gitignored, so the values
-# are the same ones the local verification scripts already proved work.
+# anywhere. This reads `.env.vercel.local` by default, which is generated and gitignored, so the
+# values are the same ones the local verification scripts already proved work.
 #
 #   vercel login          # once, interactive — this script cannot do it for you
 #   ./scripts/deploy-vercel.sh
+#
+# Staging (N-87): VERCEL_TARGET=preview VERCEL_ENV_FILE=.env.staging.local ./scripts/deploy-vercel.sh
+# pushes to the Preview environment from a second file instead, and deploys without `--prod` — a
+# plain preview build. `docs/DEPLOYMENT.md`'s staging section covers the rest of the ritual: the
+# second Supabase project and Bunny library the values in that file point at, and pointing
+# staging.mehfilbox.com at the deploying branch, once, in the Vercel dashboard.
 #
 # The filename matters. Next.js auto-loads `.env.production.local` on *any* production build,
 # so holding deploy values there silently applies them to local builds too — which cost an
 # afternoon: TENANCY_MODE=path leaked in, middleware became a no-op, and 44 E2E tests failed
 # pointing at Next rather than at a filename. Next only ever loads `.env.local` and
 # `.env.<NODE_ENV>.local`, and NODE_ENV is development|production|test, so `.env.vercel.local`
-# is inert while `.env*.local` still keeps it out of git.
+# (and `.env.staging.local`) are inert while `.env*.local` still keeps them out of git.
 #
 # Idempotent: re-running replaces each variable rather than erroring on a duplicate.
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
-ENV_FILE=".env.vercel.local"
+ENV_FILE="${VERCEL_ENV_FILE:-.env.vercel.local}"
 PROJECT="${VERCEL_PROJECT:-mehfilbox}"
 TARGET="${VERCEL_TARGET:-production}"
 
@@ -83,8 +89,15 @@ while IFS= read -r line; do
 done < "$ENV_FILE"
 
 echo "→ $pushed variables set"
-echo "→ deploying"
-vercel --prod --yes
+echo "→ deploying ($TARGET)"
+if [ "$TARGET" = "production" ]; then
+  vercel --prod --yes
+else
+  # No --prod: an ordinary preview build. Its stable URL comes from the Vercel dashboard's own
+  # branch-to-domain assignment (staging.mehfilbox.com → the branch this deploys from), configured
+  # once — this script only ever pushes variables and triggers the build.
+  vercel --yes
+fi
 
 cat <<'NEXT'
 
