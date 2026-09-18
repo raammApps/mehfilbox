@@ -292,7 +292,10 @@ The script links the project, replaces every variable (idempotent — safe to re
 and prints the verification steps.
 
 After the first deploy, connecting the GitHub repo (`raammApps/mehfilbox`) to the project
-means every push to `main` deploys.
+would mean every push to `main` deploys — **not done as of 18 September** (§14 found this live:
+`vercel project inspect` shows no Git Repository section, and two docs-only pushes to `main`
+produced no new deployment). Every deploy today, staging and production alike, is the manual
+`./scripts/deploy-vercel.sh` above.
 
 > Production runs `ROOT_DOMAIN=heirloomfilms.in`. If the real URL differs, update it and redeploy
 > — in `path` mode a wrong value breaks share links and the OG card, not routing, so the site
@@ -518,11 +521,18 @@ preview build.
 attaches the domain to the project — with no branch given, Vercel defaults it to `target:
 production`, which silently serves the *production* deployment at `staging.mehfilbox.com` until
 corrected. Point it at a specific preview build instead with
-`vercel alias set <preview-deployment-url> staging.mehfilbox.com`. This is a manual step today: no
-git branch is wired to auto-deploy and re-alias the domain the way pushing to `main` does for
-production (§7), so every new staging build needs that `alias set` re-run by hand against its new
-deployment URL. Wiring a `staging` branch to auto-assign the domain (Vercel dashboard → Project →
-Settings → Domains) would remove this step; not done yet.
+`vercel alias set <preview-deployment-url> staging.mehfilbox.com`. This is a manual step today, and
+re-checked while writing this: **§7's own "connecting the GitHub repo means every push to `main`
+deploys" turns out to describe an option, not the current state** — `vercel project inspect
+mehfilbox` prints no Git Repository section at all, and a real production deployment's own
+`vercel inspect` carries no commit/branch metadata, only a CLI signature. Production has only ever
+been deployed by running `./scripts/deploy-vercel.sh` (or plain `vercel --prod --yes`) by hand,
+confirmed live 18 September when two docs-only commits pushed to `main` produced no new deployment
+at all. So there is no git-branch wiring to point at for staging either, and none to lose by
+skipping it: every build, staging or production, needs its own manual deploy command until someone
+actually runs `vercel git connect` (production) and assigns `staging.mehfilbox.com` to a branch in
+the dashboard (staging) — neither done yet, and connecting either is a real decision about what
+should auto-deploy on a push, not a default to flip in passing.
 
 DNS is one **A record**, `staging` → `76.76.21.21` (`DOMAIN_A_RECORD` in §5) — confirmed live via
 `vercel domains inspect staging.mehfilbox.com`, not the CNAME this section previously said. SSL
