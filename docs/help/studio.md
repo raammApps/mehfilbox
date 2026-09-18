@@ -396,8 +396,10 @@ refused before a byte moves, with the figures in the message.
 overrides the 20 GB default for that one catalogue**, sized to the occasion rather than left flat.
 Every catalogue or org can also be granted more by hand, and **a catalogue's own grant always
 wins** — which matters after a handover, so a client who buys storage does not stay capped by a
-studio who has already left the relationship. Buying storage past a tier is not built yet; ask us
-in the meantime.
+studio who has already left the relationship.
+
+**When a wedding is full, an Ask for more space button appears** on its overview, next to the
+warning. We add it by hand, the same working day — buying it yourself is not built yet.
 
 ---
 

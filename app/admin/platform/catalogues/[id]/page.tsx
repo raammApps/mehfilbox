@@ -1,11 +1,13 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { StatusPill } from '@/components/admin/AdminChrome'
+import { CatalogueQuotaControl } from '@/components/admin/CatalogueQuotaControl'
 import { ExtendTermControl, OfflineControl } from '@/components/admin/CatalogueTermControls'
 import { PlatformNav } from '@/components/admin/PlatformNav'
 import { publicUrlOf } from '@/lib/address'
 import { getPlatformAdmin } from '@/lib/admin/platform'
 import { getRepository } from '@/lib/db'
+import { resolveLimits } from '@/lib/entitlements'
 import { formatWeddingDate } from '@/lib/format'
 
 export const dynamic = 'force-dynamic'
@@ -24,14 +26,18 @@ export default async function PlatformCataloguePage({ params }: { params: Promis
   const catalogue = await repository.getCatalogueById(id)
   if (!catalogue) notFound()
 
-  const [org, origin, audit] = await Promise.all([
+  const [org, origin, audit, catalogueEntitlement, orgEntitlement] = await Promise.all([
     repository.getOrg(catalogue.orgId),
     catalogue.originOrgId && catalogue.originOrgId !== catalogue.orgId
       ? repository.getOrg(catalogue.originOrgId)
       : Promise.resolve(null),
     repository.listPlatformAudit({ orgId: catalogue.orgId, limit: 50 }),
+    repository.getCatalogueEntitlement(catalogue.id),
+    repository.getOrgEntitlement(catalogue.orgId),
   ])
   const trail = audit.filter((entry) => entry.detail.catalogueId === catalogue.id)
+  // What this wedding would resolve to without its own grant — the org's, or the flat default.
+  const fallbackGb = resolveLimits(null, orgEntitlement).storageGb
 
   return (
     <div className="mx-auto min-h-svh w-full max-w-[1100px] p-6">
@@ -68,6 +74,12 @@ export default async function PlatformCataloguePage({ params }: { params: Promis
           catalogueId={catalogue.id}
           status={catalogue.status}
           everPublished={catalogue.publishedAt !== null}
+        />
+        <CatalogueQuotaControl
+          catalogueId={catalogue.id}
+          coupleName={catalogue.coupleName.en}
+          storageGb={catalogueEntitlement?.storageGb ?? null}
+          fallbackGb={fallbackGb}
         />
       </div>
 

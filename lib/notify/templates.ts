@@ -25,6 +25,8 @@ export const TEMPLATES = [
   'credential',
   /** Addressed to us: a studio with no credit left asked for one (D-38). */
   'credit-request',
+  /** Addressed to us: a catalogue out of storage asked for more (N-79, D-60). */
+  'storage-request',
 ] as const
 export type TemplateName = (typeof TEMPLATES)[number]
 

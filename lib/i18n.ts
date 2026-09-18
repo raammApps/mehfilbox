@@ -161,6 +161,12 @@ export const dictionary = {
     'notify.credit-request.html':
       '<p><strong>{studio}</strong> (<code>{slug}</code>) has no credit left and wants to publish “{couple}”.</p><p>Asked by {email}. Balance: {available} available, {consumed} used.</p><p><a href="{url}">Grant one from the platform console</a>.</p>',
 
+    'notify.storage-request.subject': 'Storage request: {couple} ({studio})',
+    'notify.storage-request.text':
+      '{studio} ({slug}) asked for more storage on "{couple}".\n\n{usedGb} GB used of {limitGb} GB.\n\nGrant more here: {url}',
+    'notify.storage-request.html':
+      '<p><strong>{studio}</strong> (<code>{slug}</code>) asked for more storage on “{couple}”.</p><p>{usedGb} GB used of {limitGb} GB.</p><p><a href="{url}">Grant more from the platform console</a>.</p>',
+
     'notify.credential.subject': 'Set your Mehfilbox password',
     'notify.credential.text':
       'Hello {name},\n\nUse this link to set your password:\n{url}\n\nIt works once and expires in {hours} hours. If you did not ask for it, ignore this message — nothing changes.',
@@ -332,6 +338,12 @@ export const dictionary = {
       '{studio} ({slug}) के पास कोई क्रेडिट नहीं बचा और वे "{couple}" प्रकाशित करना चाहते हैं।\n\nअनुरोध: {email}।\nशेष: {available} उपलब्ध, {consumed} उपयोग किए गए।\n\nयहाँ से दें: {url}',
     'notify.credit-request.html':
       '<p><strong>{studio}</strong> (<code>{slug}</code>) के पास कोई क्रेडिट नहीं बचा और वे “{couple}” प्रकाशित करना चाहते हैं।</p><p>अनुरोध: {email}। शेष: {available} उपलब्ध, {consumed} उपयोग किए गए।</p><p><a href="{url}">प्लेटफ़ॉर्म कंसोल से दें</a>।</p>',
+
+    'notify.storage-request.subject': 'स्टोरेज अनुरोध: {couple} ({studio})',
+    'notify.storage-request.text':
+      '{studio} ({slug}) ने "{couple}" के लिए अधिक स्टोरेज माँगी है।\n\n{limitGb} GB में से {usedGb} GB उपयोग किया गया।\n\nयहाँ से अधिक दें: {url}',
+    'notify.storage-request.html':
+      '<p><strong>{studio}</strong> (<code>{slug}</code>) ने “{couple}” के लिए अधिक स्टोरेज माँगी है।</p><p>{limitGb} GB में से {usedGb} GB उपयोग किया गया।</p><p><a href="{url}">प्लेटफ़ॉर्म कंसोल से अधिक दें</a>।</p>',
 
     'notify.credential.subject': 'अपना Mehfilbox पासवर्ड सेट करें',
     'notify.credential.text':

@@ -2658,3 +2658,54 @@ Files: `lib/entitlements.ts`, `lib/schema.ts`, `lib/db/repository.ts`,
 `supabase/migrations/0028_storage_tiers.sql` (new), `tests/unit/storage-tiers.test.ts` (new),
 `tests/integration/drivers.test.ts`, `e2e/admin.spec.ts`, `docs/PRODUCT.md`, `docs/PRICING.md`,
 `docs/NEXT.md`, `docs/help/studio.md`, `docs/help/client.md`.
+
+## N-79, interim step · Ask for more space — 18 September 2026
+
+Buying storage stays blocked on N-20's checkout; what was missing in the meantime was the
+credits' own trick — a request the platform answers by hand, same working day, rather than a
+refusal with nowhere to go. D-60 settled the one real question: since quota moved to the
+catalogue, the ask has to target *the catalogue's own grant*, not its studio's — a wedding at its
+cap must not make the platform reach for the org-wide control and accidentally raise every other
+wedding that studio has.
+
+**Studio side:** an **Ask for more space** button, placed in the overview's existing storage
+warning — only once `usage.level === 'full'`, not at the 80% caution, which still has real room.
+`POST /api/admin/storage/request` (mirrors `credits/request` closely) emails `SUPPORT_EMAIL` with
+the studio, the wedding, and what is used against what is held; `dedupeKey` is
+`storage-request:<catalogueId>:<day>`, so four clicks send one message, scoped per *catalogue*
+rather than per org the way the credit request is (a studio can be asking about two different
+weddings the same day and both should reach us).
+
+**Platform side, built rather than left as a dangling link:** `/admin/platform/catalogues/:id`
+gained `CatalogueQuotaControl`, `OrgQuotaControl`'s sibling one level down —
+`setCatalogueStorageQuota` (new on `Repository`, both drivers) mirrors `setOrgStorageQuota`
+exactly: find-and-update or create, `null` clears rather than zeroes so "back to normal" keeps
+following whatever the org or the default resolves to next rather than freezing at today's
+number. Never writes `planId` — a hand-set override is not a tier, the same way an org's own
+override never was. The email's link goes straight there, so the loop actually closes: ask →
+email → grant, all catalogue-scoped, all on the audit trail (`catalogue.quota.set` /
+`.clear`, with `from`/`to` in GB and the reason if one was given).
+
+7 new unit tests (`tests/unit/catalogue-quota.test.ts`): the repository level (grant beats org,
+replaces rather than stacks, clears rather than zeroes) and the two new routes (the platform
+route sets/audits/404s to an operator; the request route dedupes per catalogue per day and 404s
+on a catalogue this operator cannot see). Verified live: the button renders and the whole
+ask → queue → dedupe round-trip is real (confirmed `repeated: true` on a second call), the
+warning box's revert back to its normal conditional was checked by diff after testing. The
+platform-side control itself was verified through its route tests rather than a live click-through
+— the same pre-existing local platform-admin credential gap N-78 hit, not chased further for the
+same reason: the logic is exercised for real by the tests, against the real route handler.
+
+Also fixed in passing, found stale while updating this same table: `docs/PRODUCT.md` §9's row for
+N-78 still said "Not built" three tickets after N-78 shipped — `docs/PRODUCT.md` was never in that
+ticket's own file list, so nobody had gone back to close the loop. Corrected here since this
+change was already touching the adjacent row.
+
+Full suite: 749 unit/component (+7), 160 E2E passed / 57 skipped, unchanged.
+
+Files: `lib/db/repository.ts`, `lib/db/memory-repository.ts`, `lib/db/supabase-repository.ts`,
+`app/api/admin/platform/catalogues/[id]/quota/route.ts` (new), `app/api/admin/storage/request/route.ts`
+(new), `components/admin/CatalogueQuotaControl.tsx` (new), `components/admin/AskForSpaceButton.tsx`
+(new), `app/admin/platform/catalogues/[id]/page.tsx`, `app/admin/c/[id]/page.tsx`,
+`lib/notify/templates.ts`, `lib/i18n.ts`, `tests/unit/catalogue-quota.test.ts` (new),
+`docs/PRODUCT.md`, `docs/NEXT.md`, `docs/help/studio.md`.

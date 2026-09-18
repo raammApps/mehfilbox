@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 import { AdminChrome } from '@/components/admin/AdminChrome'
+import { AskForSpaceButton } from '@/components/admin/AskForSpaceButton'
 import { AttentionChip } from '@/components/admin/CatalogueBoard'
 import { CatalogueAnalytics } from '@/components/admin/CatalogueAnalytics'
 import { CoupleAccountPanel } from '@/components/admin/CoupleAccountPanel'
@@ -167,6 +168,8 @@ export default async function CatalogueOverviewPage({
                 Extra storage is ₹25 per GB per month, or keep the long functions at 720p and put
                 the films people rewatch in Full HD.
               </p>
+              {/* Only once uploads are actually refused (N-79) — the 80% warning still has room. */}
+              {usage.level === 'full' ? <AskForSpaceButton catalogueId={catalogue.id} /> : null}
             </div>
           ) : null}
 

@@ -245,6 +245,19 @@ export interface Repository {
    */
   setCatalogueEntitlement(catalogueId: string, planId: string, storageGb: number): Promise<Entitlement>
 
+  /** A catalogue's own entitlement, for the platform console to show and change (N-79). */
+  getCatalogueEntitlement(catalogueId: string): Promise<Entitlement | null>
+
+  /**
+   * Set or clear a catalogue's storage quota by hand (N-79) — the platform's answer to an "Ask
+   * for more space" request, mirroring `setOrgStorageQuota` exactly, one level down: find an
+   * existing row and update it, or create one; `null` removes the override rather than zeroing
+   * it, so "back to normal" keeps following whatever the catalogue's tier or the org's own grant
+   * resolves to next, rather than freezing at today's number. Never sets `planId` — a hand-set
+   * override is not a tier, the same way an org's own override never was.
+   */
+  setCatalogueStorageQuota(catalogueId: string, storageGb: number | null): Promise<Entitlement | null>
+
   // ── Transfers (doc 15 §2) ───────────────────────────────────────────────────
   createTransfer(transfer: Transfer): Promise<Transfer>
   /** Looked up by hash: the plaintext token exists only in the link. */

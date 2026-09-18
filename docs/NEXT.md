@@ -158,19 +158,20 @@ and `staging.mehfilbox.com` pointed at the preview branch. Then the ritual chang
 staging, and production only ever sees what staging survived. The variables file is the pattern
 already — `.env.staging.local` next to `.env.vercel.local`, both gitignored.
 
-### N-79 · Buying storage  ·  **blocked by N-20**; an interim step is ~1h
+### N-79 · Buying storage  ·  **interim step done, 18 September 2026**  ·  the checkout itself **blocked by N-20**
 
-The quota exists per org (`entitlements.storageGb`, N-27b), the console refuses an upload past it,
-and the platform can raise it by hand. `PRICING-MODEL.md` §3 already prices the add-on — ₹25/GB
-per month, co-terminus with the plan, small top-ups cheap and big ones pushed to the next tier. What
-does not exist is a way for a client to *buy* it, which is N-20's checkout.
+`PRICING-MODEL.md` §3 prices the add-on — ₹25/GB per month, co-terminus with the plan, small
+top-ups cheap and big ones pushed to the next tier. What does not exist is a way for a client to
+*buy* it, which is N-20's checkout — still blocked, still open.
 
-The interim step is the one credits already have: an **Ask for more space** control where the
-refusal is shown, which emails `SUPPORT_EMAIL` with the org, the current quota and what was tried,
-and lands in the platform console next to the quota control. When N-20 lands, the same control
-takes a payment instead. **Decided, D-60/N-80:** quota is per *catalogue* — a studio's weddings
-can sit on different tiers, and the interim control should refuse against and raise the
-catalogue's own grant, not the org's.
+**The interim step: done.** The shape credits already had — an **Ask for more space** button
+where the refusal is actually shown (the overview's storage-full warning, not the 80% one, which
+still has room) — posts to `POST /api/admin/storage/request`, which emails `SUPPORT_EMAIL` with
+the studio, the wedding, and what is used against what is held, once per catalogue per day. Per
+D-60, this targets the **catalogue's** own grant, not the org's: the email links to the platform's
+new per-catalogue quota control (`/admin/platform/catalogues/:id`, mirroring the org one from
+N-27b one level down, `setCatalogueStorageQuota`), so a studio's other weddings are never touched
+by granting this one more room.
 
 ### N-81 · Measure the limits  ·  ~2h  ·  **after three real weddings**
 

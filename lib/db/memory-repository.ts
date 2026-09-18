@@ -549,6 +549,41 @@ export class MemoryRepository implements Repository {
     return this.clone(entitlement)
   }
 
+  async getCatalogueEntitlement(catalogueId: string): Promise<Entitlement | null> {
+    return this.clone(this.data.entitlements.find((e) => e.catalogueId === catalogueId) ?? null)
+  }
+
+  async setCatalogueStorageQuota(catalogueId: string, storageGb: number | null): Promise<Entitlement | null> {
+    const existing = this.data.entitlements.find((e) => e.catalogueId === catalogueId)
+
+    if (storageGb === null) {
+      this.data.entitlements = this.data.entitlements.filter((e) => e.catalogueId !== catalogueId)
+      this.touched()
+      return null
+    }
+
+    if (existing) {
+      existing.storageGb = storageGb
+      this.touched()
+      return this.clone(existing)
+    }
+
+    const entitlement: Entitlement = {
+      id: randomUUID(),
+      orgId: null,
+      catalogueId,
+      planId: null,
+      maxTitles: null,
+      maxPhotos: null,
+      storageGb,
+      validUntil: null,
+      createdAt: new Date().toISOString(),
+    }
+    this.data.entitlements.push(this.clone(entitlement))
+    this.touched()
+    return this.clone(entitlement)
+  }
+
   // ── Transfers ───────────────────────────────────────────────────────────────
   async createTransfer(transfer: Transfer): Promise<Transfer> {
     // Mirrors the partial unique index: one live handover per catalogue, so a wedding can never

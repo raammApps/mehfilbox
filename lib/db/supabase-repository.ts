@@ -468,6 +468,39 @@ export class SupabaseRepository implements Repository {
     return SupabaseRepository.toEntitlement(SupabaseRepository.unwrap<Row>(result))!
   }
 
+  async getCatalogueEntitlement(catalogueId: string): Promise<Entitlement | null> {
+    const { data } = await this.db
+      .from('entitlements')
+      .select('*')
+      .eq('catalogue_id', catalogueId)
+      .maybeSingle()
+    return data ? SupabaseRepository.toEntitlement(data as Row) : null
+  }
+
+  async setCatalogueStorageQuota(catalogueId: string, storageGb: number | null): Promise<Entitlement | null> {
+    if (storageGb === null) {
+      const { error } = await this.db.from('entitlements').delete().eq('catalogue_id', catalogueId)
+      if (error) throw new ApiError('INTERNAL', error.message)
+      return null
+    }
+
+    const existing = await this.getCatalogueEntitlement(catalogueId)
+    const result = existing
+      ? await this.db
+          .from('entitlements')
+          .update({ storage_gb: storageGb })
+          .eq('id', existing.id)
+          .select('*')
+          .single()
+      : await this.db
+          .from('entitlements')
+          .insert({ catalogue_id: catalogueId, storage_gb: storageGb })
+          .select('*')
+          .single()
+
+    return SupabaseRepository.toEntitlement(SupabaseRepository.unwrap<Row>(result))
+  }
+
   // ── Transfers ───────────────────────────────────────────────────────────────
   private static toTransfer(r: Row): Transfer {
     return {
