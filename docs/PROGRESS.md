@@ -2673,6 +2673,20 @@ Files: `lib/entitlements.ts`, `lib/schema.ts`, `lib/db/repository.ts`,
 `tests/integration/drivers.test.ts`, `e2e/admin.spec.ts`, `docs/PRODUCT.md`, `docs/PRICING.md`,
 `docs/NEXT.md`, `docs/help/studio.md`, `docs/help/client.md`.
 
+**Also retired, stale rather than done: N-114** ("Storage quota from the org's plan"). It asked to
+reword `OrgQuotaControl`'s copy from "an exception" to "this org's plan," and to write the
+org-level override automatically once N-80 or N-113 gave the app something to write it *from* —
+reasonable when D-54 was the only decision on the books, since D-54 framed "quota follows what was
+purchased" entirely at the org level. D-60, decided the same day N-80 shipped, explicitly moved
+that: "D-54's 'quota follows what was purchased' still holds — it now follows what was purchased
+*for that catalogue* … the org-level override stays as the fallback for a catalogue that has not
+purchased its own tier." N-80 built exactly that redirection — `setCatalogueEntitlement`, written
+automatically the moment a wizard tier is chosen — so the "write it automatically" half is already
+done, one layer below where N-114 was aimed. The "reword the copy" half is now wrong to build: the
+org-level override is deliberately still an exception under D-60, not a studio's plan, so
+`OrgQuotaControl`'s existing "instead of the default" framing is the accurate one and does not want
+changing. Nothing here needed code; `docs/NEXT.md` no longer lists it.
+
 ## N-79, interim step · Ask for more space — 18 September 2026
 
 Buying storage stays blocked on N-20's checkout; what was missing in the meantime was the

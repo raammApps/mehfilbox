@@ -184,14 +184,6 @@ of thing. The direct-client variant is the identical flow on `orgKind = 'couple'
 Blocked on N-112's `none` becoming a real driver, which is blocked on the business bank account
 (`docs/15-sep-finding/04-startup-india.md`).
 
-### N-114 · Storage quota from the org's plan  ·  ~2h now, more with N-80  ·  D-54
-
-`resolveLimits`'s per-org override (`lib/entitlements.ts:84-87`) already wins over the flat 20 GB
-default — this ticket is mostly naming that the override is the mechanism, tightening
-`OrgQuotaControl`'s copy so it reads as "this org's plan" rather than "an exception," and writing
-the override automatically at the point a paid registration (N-113) or a plan purchase (N-80)
-happens, instead of a platform admin typing a number in by hand.
-
 ### N-115 · The theme store  ·  **studio half done, 18 September 2026**  ·  client half **blocked on N-113**  ·  D-57
 
 Two halves, buildable separately. **Studio half: done.** House styles' `duplicateOf`
