@@ -2724,7 +2724,7 @@ Files: `lib/db/repository.ts`, `lib/db/memory-repository.ts`, `lib/db/supabase-r
 `lib/notify/templates.ts`, `lib/i18n.ts`, `tests/unit/catalogue-quota.test.ts` (new),
 `docs/PRODUCT.md`, `docs/NEXT.md`, `docs/help/studio.md`.
 
-## N-87, script and docs half · A staging environment — 18 September 2026
+## N-87 · A staging environment — 18 September 2026
 
 Asked to "set up Turnstile and staging" — both need a real account only Sandeep can create
 (Cloudflare, a second Supabase project, a second Bunny library), so the actual scope here is
@@ -2769,5 +2769,58 @@ exist yet to verify it against, would be exactly the kind of unverified code thi
 repeatedly found real bugs in (N-88's file-tracing, N-80's E2E race). Named as real, undone scope
 instead, and pointed at N-117 — a browser-driven synthetic check against production — since the
 two want designing together rather than guessed at separately.
+
+**Staging itself, live — 18 September 2026, closing the ticket.** Both accounts made:
+a second Supabase project (`mehfilbox-staging`, Tokyo) and a second Bunny Stream library plus
+Edge Storage pull zone, token authentication on for both, referrer blocking off, IP pinning off —
+matched to production per §3's own checklist rather than assumed equivalent. `.env.staging.local`
+built from these, `VERCEL_TARGET=preview VERCEL_ENV_FILE=.env.staging.local
+./scripts/deploy-vercel.sh` pushed and deployed clean, `/api/health` came back green on the first
+try. Sign-in did not — three real bugs found live, in order, none of them the password:
+
+1. **The bootstrap SQL pasted into the SQL editor with a syntax error at the top** (`pnpm
+   bootstrap:sql > file.sql` captures pnpm's own banner lines ahead of the SQL), and Supabase's
+   editor runs statements up to the error rather than failing atomically — so the first, broken
+   paste had already created an org with its own `random_uuid()` before erroring. The corrected
+   file (`pnpm exec tsx scripts/bootstrap-supabase.ts > file.sql`, bypassing pnpm's wrapper output)
+   created a second org under a different id, and every operator insert after that had to use the
+   id actually in the table, found with a plain `select id from orgs`, not the one the regenerated
+   file printed.
+2. **`.env.staging.local`'s `NEXT_PUBLIC_SUPABASE_URL` pointed at a different, stale Supabase
+   project than the keys did.** Supabase's own token endpoint returned `"Invalid API key"` with
+   `"This API key might also be owned by another Supabase project"` for both the publishable and
+   the secret key — true on both counts, checked by `curl`ing `/auth/v1/token` directly rather than
+   guessing through the app's own opaque "Those details did not work." The keys were right for the
+   project actually being configured all evening (`qtjnparfxumumwozyybc`); the URL was a leftover
+   from an earlier, abandoned attempt (`ijkwhtfggjihjpykxhnh`). Every table, RLS policy, org and
+   operator row built that evening had been landing in the right project the whole time — the
+   *deployed app* was the thing pointed at the wrong one.
+3. **`service_role` had no grant on `public` schema tables in this project** — `select` on
+   `operators` and `orgs` came back `42501 permission denied`, even through the service-role key,
+   even after (1) and (2) were fixed. The migrations only ever `revoke ... from anon` on sensitive
+   tables (`0002_row_level_security.sql`), on the assumption that Supabase's own baseline grants to
+   `service_role` are automatic and project-wide; on this project they were not there to revoke
+   *from* in the first place. Fixed with one explicit `grant all on all tables in schema public to
+   service_role` plus a matching `alter default privileges`, run once by hand in the SQL editor.
+   `scripts/bootstrap-supabase.ts` does not issue this grant either — worth adding defensively the
+   next time that script changes, since nothing today explains why one fresh project has the
+   baseline grant and another does not.
+
+`staging.mehfilbox.com`'s DNS turned out to need an **A record** to `76.76.21.21`, not the CNAME
+`docs/DEPLOYMENT.md` §14 originally said — corrected there. Separately, `vercel domains add` with
+no branch given defaults a domain to `target: production`, so the domain briefly served
+*production*, silently, until pointed at the actual preview build with `vercel alias set
+<deployment-url> staging.mehfilbox.com`. No git branch is wired to auto-deploy and re-alias the
+domain the way `main` does for production — §14 now says so plainly instead of describing a
+branch-assignment flow that was never actually set up. Every future staging deploy needs that
+`alias set` re-run by hand against its new deployment URL until that wiring exists.
+
+**Verified live, not assumed:** signed in as the seeded operator against the real Supabase Auth
+user and `operators` row, landed on `/admin`, and the new-catalogue wizard's slug-availability
+check round-tripped the real database (`staging.mehfilbox.com/kalyanam/...`, `Available`). The
+Bunny library's webhook now points at `https://staging.mehfilbox.com/api/webhooks/bunny`.
+**Not exercised:** an actual upload reaching `ready` through that webhook — needs a real video
+file and is left for the first real use of the environment rather than manufactured here, the same
+call this session already made once for N-86's Turnstile widget.
 
 Files: `scripts/deploy-vercel.sh`, `docs/DEPLOYMENT.md`, `docs/NEXT.md`.

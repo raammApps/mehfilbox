@@ -514,11 +514,20 @@ It pushes every variable from that file into the Preview environment (never Prod
 governs which `vercel env add ... <target>` runs) and deploys without `--prod`, an ordinary
 preview build.
 
-**A stable URL, from one Vercel setting, not from this script.** Create a `staging` branch; in the
-Vercel dashboard, Project → Settings → Domains → add `staging.mehfilbox.com` and assign it to the
-`staging` git branch instead of Production — every push to that branch then deploys and re-aliases
-automatically, the same way pushing to `main` already does for production (§7). DNS is one CNAME,
-`staging` → `cname.vercel-dns.com` (§5's target, same one production's custom domains use).
+**A stable URL, but not an automatic one yet.** `vercel domains add staging.mehfilbox.com mehfilbox`
+attaches the domain to the project — with no branch given, Vercel defaults it to `target:
+production`, which silently serves the *production* deployment at `staging.mehfilbox.com` until
+corrected. Point it at a specific preview build instead with
+`vercel alias set <preview-deployment-url> staging.mehfilbox.com`. This is a manual step today: no
+git branch is wired to auto-deploy and re-alias the domain the way pushing to `main` does for
+production (§7), so every new staging build needs that `alias set` re-run by hand against its new
+deployment URL. Wiring a `staging` branch to auto-assign the domain (Vercel dashboard → Project →
+Settings → Domains) would remove this step; not done yet.
+
+DNS is one **A record**, `staging` → `76.76.21.21` (`DOMAIN_A_RECORD` in §5) — confirmed live via
+`vercel domains inspect staging.mehfilbox.com`, not the CNAME this section previously said. SSL
+provisions itself a few minutes after the record resolves; until then expect `SSL_ERROR_SYSCALL`
+at the TLS handshake, not a DNS failure.
 
 **Then the ritual changes.** A migration or an environment change lands on `staging` first,
 gets the same manual walk §8 describes against `https://staging.mehfilbox.com`, and only then

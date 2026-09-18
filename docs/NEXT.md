@@ -98,31 +98,6 @@ three came out of the security pass and two of them were verified live, not infe
 
 Three decisions are Sandeep's to make before their tickets can be taken up; each is marked.
 
-### N-87 · A staging environment  ·  **script and docs ready, 18 September 2026**  ·  **the two accounts are Sandeep's**
-
-Everything real is tested in production, and 12 September proved why that is a problem: applying
-migrations broke catalogue creation for the minutes before the deploy, and there was nowhere to
-find that out first. CI is deliberately hermetic (memory + fake); Vercel Preview has **zero**
-variables and `lib/env.ts` refuses a production build on an ephemeral driver, so preview
-deployments cannot boot against anything real and none exist.
-
-**Ready to use the moment the accounts exist.** `scripts/deploy-vercel.sh` now takes
-`VERCEL_TARGET`/`VERCEL_ENV_FILE` overrides — `VERCEL_TARGET=preview VERCEL_ENV_FILE=.env.staging.local
-./scripts/deploy-vercel.sh` pushes to Vercel's Preview environment from a second file and deploys
-without `--prod`. `docs/DEPLOYMENT.md` §14 has the full ritual: a second Supabase project (schema
-only via `pnpm bootstrap:sql` — no demo data exists to seed even in production, N-6), a second
-Bunny library and photo zone, `staging.mehfilbox.com` assigned to a `staging` branch in Vercel's
-own dashboard (one CNAME, no code), and the sequencing change once it exists — a migration or an
-env change lands on staging first, walked the way §8 already does, before it reaches `main`.
-
-**Still open, and not code:** the two accounts themselves — only Sandeep can create them. **Also
-still open, named rather than guessed at:** N-87's own ask for the E2E suite to get a `--base-url`
-so it can "walk staging" is more than a flag — every existing spec assumes the hermetic fixtures
-`playwright.config.ts` boots locally (a known demo catalogue, a fixed password, the `fake` video
-driver), none of which exist against a real staging environment. A second, staging-safe suite is
-real scope of its own and overlaps with N-117's synthetic production check closely enough that the
-two should be designed together, not each guessed at separately.
-
 ### N-79 · Buying storage  ·  **interim step done, 18 September 2026**  ·  the checkout itself **blocked by N-20**
 
 `PRICING-MODEL.md` §3 prices the add-on — ₹25/GB per month, co-terminus with the plan, small
@@ -170,6 +145,15 @@ N-25b reconciles the per-catalogue estimate against the same bill; build them to
   approval queue is ~2h if wanted; it costs every honest studio a wait.
 - **Plan tiers** (N-80) — decided, D-60. The remaining open figure is the tiers' actual prices,
   needed before the wizard's tier step can show them, not before the rest of the build.
+- **Turning 4K on, platform-wide.** Raised 18 September, setting up staging: `PRICING.md` §1
+  already sells Keep and Cinema with a 4K minute allowance (20 / 90 min), priced against Bunny's
+  premium encoding at $0.15/min — but nothing enables premium encoding anywhere. Every library,
+  including production's, is on standard encoding only (1080p, no extra cost), so a Keep or
+  Cinema catalogue's "4K included" is a price list promise with no lever behind it today. Needs a
+  decision on the mechanism before it is buildable: premium encoding is a **per-library** Bunny
+  setting, not per-video, so either every studio's library carries the $0.15/min cost structure
+  (and the allowance is enforced entirely in the app), or 4K-eligible catalogues need routing to
+  a *second* library that has it turned on — a bigger architectural change than a checkbox.
 
 ---
 
@@ -266,6 +250,11 @@ navigate, press play, assert `readyState >= 2` and `currentTime` advances — is
 would have caught that specific outage within minutes rather than by a person happening to press
 play. Low urgency while a human is watching every deploy closely; worth it the moment that stops
 being true.
+
+`staging.mehfilbox.com` is live now (N-87, closed 18 September) — a real target to point a
+`--base-url` Playwright run at, without touching production. The suite would still need writing
+against it rather than the hermetic local fixtures (no known demo catalogue, no fixed password,
+real Bunny rather than `fake`), the gap N-87 named without building.
 
 ### N-54 · Claim a notification row before sending it  ·  ~1h  ·  **paused, 7 September**
 
