@@ -3199,3 +3199,22 @@ not yet run — it needs `0031` on staging**), both help guides, `docs/PRODUCT.m
 **Before this is deployed:** apply `0031` to staging, run the integration suite against
 `.env.staging.local`, deploy staging, then apply it to production — without the columns the first
 Publish refuses, and without the `drop not null` a new wedding cannot be created.
+
+**Walked on staging, 19 September, against real Supabase.** `0031` was applied by hand to
+`mehfilbox-staging`; the integration suite (`-t Supabase`, project ref checked in code first) passed
+10 of 10, including the new N-120 case — a wedding with no term round-trips as null, a written end
+date reads back, the seeded lengths (Deliver 90 days; Keep and Cinema 12 months; a storage tier none)
+are what the migration left, and Postgres refuses a term in both units and one of zero. It left no
+rows behind and goes red when the driver stops reading `term_days`. `5ccf8bc` was deployed to
+`staging.mehfilbox.com` (`/api/health` version equal to `HEAD`). Through a real session: the
+"N119 Walk" draft left over from last time — a never-published draft — had its term emptied by the
+migration and now reads *term starts when you publish — 12 months* (it is on Cinema), its Settings say
+*Not started*; a new wedding is created with no term; and Publish with no credit is refused with the
+credit message (402), **not a 500**, which shows the strict term reader is satisfied by the real plan
+rows and that a refusal leaves the wedding a draft with no term. The live marketing page's plans table
+reads *90 days · 100 GB*, *12 months, renewable · 100 GB* and *12 months, renewable · 200 GB · 4K* from the
+database, with no "Ask us". **Not walked:** a *successful* first Publish setting the term on real
+Postgres — the studio has no credit and the session is not a platform admin, so it could not be
+granted one; the route is proven on the memory driver, and the driver write by the integration case.
+Left behind: the draft "N120 Walk", beside "N119 Walk". **Production:** `0031` is not applied there and
+`5ccf8bc` is not deployed.

@@ -578,7 +578,7 @@ regenerate without invalidating, so the revocation is the half worth checking.
 - **Credentials** live in `.env.local` (gitignored, verified). Both services are fully
   configured; `pnpm preflight` is all green.
 - **Supabase**: schema applied through `0025_occasions.sql` on 12 September; later migrations are recorded in
-  PROGRESS as they are applied — `0029_price_list.sql` is on **staging and production** (both 19 September); `0030_catalogue_plan.sql` (N-119) is on **staging and production** (both 19 September); `0031_term_at_publish.sql` (N-120) is **written, not yet applied anywhere** — apply it to staging, then production, *before* deploying: Publish and the price list now read `plans.term_*`, and without them the first Publish refuses. Six orgs exist, and the operator
+  PROGRESS as they are applied — `0029_price_list.sql` is on **staging and production** (both 19 September); `0030_catalogue_plan.sql` (N-119) is on **staging and production** (both 19 September); `0031_term_at_publish.sql` (N-120) is on **staging** (19 September) and **not yet on production** — apply it there *before* deploying `5ccf8bc` or later: Publish and the price list now read `plans.term_*`, and without them the first Publish refuses. Six orgs exist, and the operator
   rows are, read from the database on 7 September rather than remembered:
 
   | org | operator |
