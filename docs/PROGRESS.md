@@ -3334,3 +3334,40 @@ run; it needs `0032` on staging**), `docs/help/studio.md`, `docs/PRODUCT.md`, `d
 is deployed:** apply `0032` to staging, run the integration suite against `.env.staging.local`, deploy
 staging, then apply it to production — the console and the Studio box read the new tables, and the
 function moves credits.
+
+**Walked on staging, 19 September, against real Supabase.** `0032` was applied by hand to
+`mehfilbox-staging`; the integration suite (`-t Supabase`, project ref checked in code first) passed 11
+of 11, including the atomic-redemption case — **three simultaneous redemptions of a one-use code at real
+Postgres, exactly one winner, only the winner credited**, a double click by one payer is one
+redemption, a disabled or out-of-window coupon is refused by the database itself, a refused
+redemption stores neither row nor credits, the check constraints refuse a reward for couples, a
+percentage over 100, a reward over the ceiling, a lower-case code and a storage tier as a basket, and the
+anon key can neither read `coupons` nor run `redeem_coupon`. It left nothing behind, even after a run made
+to fail, and goes red when the driver stops sending the reward's credits. **Not provable here:** that the
+row lock is what makes the first assertion hold — removing `for update` means changing the function on the
+database, which was not done; the SQL drift test pins the lock's presence and the concurrency test pins the
+outcome. `ae6d2a1` was deployed to `staging.mehfilbox.com` (`/api/health` version equal to `HEAD`).
+
+Through a real session — **which is a platform admin, contrary to what N-119 and N-120 assumed** (they read
+a 404 on `/admin/platform/orgs`, a page that does not exist, as "not an admin") — the walk was: a coupon
+made through the route (code upper-cased, forced to studios, a duplicate typed in another case refused
+by the unique index); the redeem route answers `COUPON_INVALID` with the same status and words for unknown,
+malformed and empty codes; the ninth lookup inside the window is a 429 on the real rate-limit table; the
+console page renders from Postgres; then, once the window had reset, `n121-walk` typed into the real Studio
+box added **2 Deliver credits** (the box stayed on "Checking…" for a few seconds of real-network latency
+until the refreshed balance was on screen, which is what it is built to do) and a second use was
+refused. The console then read it back: 1 coupon, 1 redemption, 1 payer, 2 credits granted, with who and
+when. **That credit also closed the gap N-119 and N-120 left:** the first Publish of the staging wedding
+"N120 Walk" spent a Deliver credit (balance *1 available · 1 spent*), took its term from empty to exactly 90
+days out, an unpublish and republish left the term identical, and a plan change afterwards was refused
+(400) — all on real Postgres.
+
+**A mistake worth naming.** I probed the platform create route with a deliberately incomplete body
+expecting a refusal, and — because the session *is* a platform admin — it created a coupon (a 10% discount,
+campaign "x"). It was harmless (no discount can be used until N-20) and I switched it off through the
+console. What it taught: a probe of a write route against a session whose privilege you have not
+established is not read-only, and the way to test "does this refuse" is with a body that would be refused
+whichever way the privilege question falls. **Left on staging:** that disabled coupon (`CEG4H2J22K`), the
+coupon `N121-WALK` (used once), one unspent Deliver credit in the studio, and the wedding "N120 Walk" (now
+with a term, unpublished) beside "N119 Walk". **Production:** `0032` is not applied there and `ae6d2a1` is
+not deployed.
