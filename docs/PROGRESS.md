@@ -3218,3 +3218,17 @@ Postgres — the studio has no credit and the session is not a platform admin, s
 granted one; the route is proven on the memory driver, and the driver write by the integration case.
 Left behind: the draft "N120 Walk", beside "N119 Walk". **Production:** `0031` is not applied there and
 `5ccf8bc` is not deployed.
+
+**Deployed to production, 19 September.** `0031` was applied by hand to the production project first,
+then `dcbd96c` (code identical to `5ccf8bc`; the later commits are docs) went out through
+`deploy-vercel.sh`, aliased to `mehfilbox.com` and `mehfilbox.in` only, as Sandeep asked; `heirloomfilms.in`
+was not touched or probed this time. `/api/health` on both reports `dcbd96c`, drivers supabase + bunny.
+Anonymous smoke: `/` and the studio sign-in answer 200, an anonymous create is 401 (not a 500 from a
+missing column) and the pricing console is 404. The live plans table reads *90 days · 100 GB*,
+*12 months, renewable · 100 GB* and *12 months, renewable · 200 GB · 4K* from the **production** price list
+with no "Ask us" — which is also the evidence that `0031`'s columns exist there and were seeded, since an
+absent column would have left the cells empty. **Not walked on production:** a first Publish, the
+overview's *term starts when you publish* line, or a wedding created after the deploy — they need a
+signed-in studio session, which is Sandeep's to open. What to expect: every wedding that was ever
+published keeps its date exactly; any never-published draft now reads *term starts when you publish*;
+and a studio's *next* first Publish is the first one that starts a term.
