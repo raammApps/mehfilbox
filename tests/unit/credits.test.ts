@@ -93,14 +93,17 @@ describe('the trial', () => {
     const [credit] = await grantRegistrationCredit(ORG, new Date('2026-09-12T00:00:00.000Z'))
     expect(credit).toMatchObject({ grantedBy: 'registration', consumedAt: null })
     expect(credit!.expiresAt.slice(0, 10)).toBe('2028-09-12')
-    expect(await balance()).toEqual({ available: 1, consumed: 0, expired: 0 })
+    expect(await balance()).toMatchObject({ available: 1, consumed: 0, expired: 0 })
+    // The trial credit is a Deliver credit (N-119): every credit ever granted defaulted to it.
+    expect((await balance()).byPlan.deliver).toEqual({ available: 1, consumed: 0, expired: 0 })
+    expect(credit!.planId).toBe('deliver')
   })
 
   it('spends it on the first publish, refuses the second, and republishes for free', async () => {
     await grantRegistrationCredit(ORG)
 
     expect((await publishOf(A)).status).toBe(200)
-    expect(await balance()).toEqual({ available: 0, consumed: 1, expired: 0 })
+    expect(await balance()).toMatchObject({ available: 0, consumed: 1, expired: 0 })
     expect((await repo.listCredits(ORG))[0]!.consumedByCatalogueId).toBe(A)
 
     const refused = await publishOf(B)
@@ -111,11 +114,11 @@ describe('the trial', () => {
     // Down for a change and up again: no second credit.
     expect((await unpublishOf(A)).status).toBe(200)
     expect((await publishOf(A)).status).toBe(200)
-    expect(await balance()).toEqual({ available: 0, consumed: 1, expired: 0 })
+    expect(await balance()).toMatchObject({ available: 0, consumed: 1, expired: 0 })
   })
 
   it('leaves a wedding published before credits existed untouched', async () => {
-    expect(await balance()).toEqual({ available: 0, consumed: 0, expired: 0 })
+    expect(await balance()).toMatchObject({ available: 0, consumed: 0, expired: 0 })
     expect((await publishOf(OLD)).status).toBe(200)
   })
 
@@ -123,7 +126,7 @@ describe('the trial', () => {
     const twoYearsAgo = new Date('2024-01-01T00:00:00.000Z')
     await repo.grantCredits(makeCredits({ orgId: ORG, count: 1, grantedBy: 'test', now: twoYearsAgo }))
     expect((await publishOf(A)).status).toBe(402)
-    expect(await balance()).toEqual({ available: 0, consumed: 0, expired: 1 })
+    expect(await balance()).toMatchObject({ available: 0, consumed: 0, expired: 1 })
 
     const later = makeCredits({ orgId: ORG, count: 1, grantedBy: 'later', now: new Date('2026-06-01T00:00:00.000Z') })
     const sooner = makeCredits({ orgId: ORG, count: 1, grantedBy: 'sooner', now: new Date('2026-03-01T00:00:00.000Z') })
@@ -148,7 +151,7 @@ describe('the platform grants', () => {
       params(ORG),
     )
     expect(response.status).toBe(201)
-    expect((await response.json()).balance).toEqual({ available: 5, consumed: 0, expired: 0 })
+    expect((await response.json()).balance).toMatchObject({ available: 5, consumed: 0, expired: 0 })
     const audit = await repo.listPlatformAudit({ orgId: ORG, limit: 5 })
     expect(audit.map((entry) => entry.action)).toEqual(['credits.grant'])
     expect(audit[0]!.detail).toMatchObject({ count: 5, reason: 'Paid ₹7,999 by transfer' })
@@ -156,7 +159,7 @@ describe('the platform grants', () => {
 
     asOperator()
     expect((await publishOf(A)).status).toBe(200)
-    expect(await balance()).toEqual({ available: 4, consumed: 1, expired: 0 })
+    expect(await balance()).toMatchObject({ available: 4, consumed: 1, expired: 0 })
   })
 
   it('is a 404 to an operator', async () => {
@@ -169,7 +172,7 @@ describe('the platform grants', () => {
       params(ORG),
     )
     expect(response.status).toBe(404)
-    expect(await balance()).toEqual({ available: 0, consumed: 0, expired: 0 })
+    expect(await balance()).toMatchObject({ available: 0, consumed: 0, expired: 0 })
   })
 })
 
@@ -194,6 +197,7 @@ describe('asking for one', () => {
     expect(queued).toHaveLength(1)
     expect(queued[0]).toMatchObject({ template: 'credit-request', orgId: ORG, catalogueId: B })
     expect(queued[0]!.bodyText).toContain('second')
-    expect(queued[0]!.bodyText).toContain('0 available')
+    expect(queued[0]!.bodyText).toContain('has no Deliver credit left')
+    expect(queued[0]!.bodyText).toContain('none available')
   })
 })

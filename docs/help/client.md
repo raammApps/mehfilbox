@@ -90,8 +90,9 @@ day), there are no house styles to choose from since those belong to studios, an
 for "the couple's sign-in" — it is already you. You can also pick a storage size — Light (5 GB),
 Medium (50 GB) or Heavy (100 GB) — sized to what you are making; leave it unset for the default.
 
-A catalogue you start this way is a **draft until a credit is added**, by us or by a studio you
-ask — the same price a studio pays for its second-and-later wedding. Nothing about the page, the films
+On the first step you choose its **plan** — Deliver, Keep or Cinema — and you can change it until you
+publish. A catalogue you start this way is a **draft until a credit of that plan is added**, by us or
+by a studio you ask — the same price a studio pays for its second-and-later wedding. Nothing about the page, the films
 or the draft is lost while you wait; publishing works the moment a credit lands.
 
 ---

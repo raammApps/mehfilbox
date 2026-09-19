@@ -1,7 +1,7 @@
 import { requireEditableCatalogue } from '@/lib/admin/session'
 import { revalidateCatalogue } from '@/lib/catalogue-cache'
+import { creditRefusal } from '@/lib/admin/credits'
 import { getRepository } from '@/lib/db'
-import { ApiError } from '@/lib/http/errors'
 import { noStore, route } from '@/lib/http/handler'
 import { log } from '@/lib/log'
 
@@ -24,20 +24,28 @@ export async function POST(_request: Request, { params }: { params: Promise<{ id
     const now = new Date().toISOString()
 
     /**
-     * The first publish spends a credit (D-38). A republish after an unpublish spends nothing —
-     * `publishedAt` is already set — and so does a catalogue published before credits existed.
-     * The credit is the catalogue's org's: after a handover that is the couple's account, and a
-     * handed-over wedding has always been published already.
+     * The first publish spends a credit **of the wedding's plan** (D-38, N-119). A republish after
+     * an unpublish spends nothing — `publishedAt` is already set — and so does a catalogue
+     * published before credits existed. The credit is the catalogue's org's: after a handover that
+     * is the couple's account, and a handed-over wedding has always been published already.
+     *
+     * The plan is fixed from here on (`PATCH` refuses to change it once `publishedAt` is set),
+     * because a credit of *this* plan is what was just spent.
      */
     if (catalogue.publishedAt === null) {
-      const credit = await getRepository().consumeCredit(catalogue.orgId, catalogue.id, now)
-      if (!credit) {
-        throw new ApiError(
-          'CREDIT_REQUIRED',
-          'Publishing this wedding needs a credit, and there is none left to spend.',
-        )
-      }
-      log.info('credit consumed', { catalogueId: id, orgId: catalogue.orgId, creditId: credit.id })
+      const credit = await getRepository().consumeCredit(
+        catalogue.orgId,
+        catalogue.id,
+        catalogue.planId,
+        now,
+      )
+      if (!credit) throw await creditRefusal(catalogue.orgId, catalogue.planId, now)
+      log.info('credit consumed', {
+        catalogueId: id,
+        orgId: catalogue.orgId,
+        creditId: credit.id,
+        planId: credit.planId,
+      })
     }
 
     const published = await getRepository().updateCatalogue(id, catalogue.orgId, {

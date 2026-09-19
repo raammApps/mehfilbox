@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { CREDIT_PLAN_IDS, type CreditPlanId } from '@/lib/plans'
 
 /**
  * The domain vocabulary, mirroring the Postgres schema in doc 06 §1 and doc 14 §6.
@@ -270,7 +271,12 @@ export type Preset = z.infer<typeof presetSchema>
 export const publishCreditSchema = z.object({
   id: z.string().uuid(),
   orgId: z.string().uuid(),
-  planId: z.string().min(1).default('deliver'),
+  /**
+   * Which plan this credit pays for (N-119, D-61). It is spent only by a first publish of a wedding on
+   * the same plan — a Cinema credit does not publish a Deliver wedding, and an empty Deliver basket
+   * refuses a Deliver publish even while Cinema credits remain.
+   */
+  planId: z.enum(CREDIT_PLAN_IDS).default('deliver'),
   grantedBy: z.string().min(1).default('registration'),
   reason: z.string().max(500).default(''),
   purchasedAt: z.string(),
@@ -281,8 +287,15 @@ export const publishCreditSchema = z.object({
 })
 export type PublishCredit = z.infer<typeof publishCreditSchema>
 
-/** What a studio sees: how many it can spend, has spent, and let lapse. */
-export type CreditBalance = { available: number; consumed: number; expired: number }
+/** How many credits are spendable, spent, and lapsed. */
+export type CreditCounts = { available: number; consumed: number; expired: number }
+
+/**
+ * What a studio sees (N-119): the totals, and the same three numbers **per plan** — a studio holds
+ * a basket of Deliver, Keep and Cinema credits, not one pile. Every credit plan is present even at
+ * zero, so a caller never has to ask whether a basket exists before reading it.
+ */
+export type CreditBalance = CreditCounts & { byPlan: Record<CreditPlanId, CreditCounts> }
 
 /**
  * What a `plans` row is for, which is also how it is fulfilled (N-20): the Studio plan grants a
@@ -653,6 +666,13 @@ export const catalogueSchema = z.object({
   includedUntil: z.string(),
   subStatus: subStatusSchema.default('included'),
   subPlan: z.enum(['monthly', 'yearly']).nullable().default(null),
+  /**
+   * The plan this wedding is on — Deliver, Keep or Cinema (N-119, D-61). **Not `subPlan`**, which is
+   * a billing cadence and unrelated. It decides which basket the first publish spends from, and it
+   * may be changed until that publish, after which it is fixed: a credit of this plan was spent.
+   * Every catalogue that existed before this column is Deliver, because every credit ever granted was.
+   */
+  planId: z.enum(CREDIT_PLAN_IDS).default('deliver'),
   subUntil: z.string().nullable().default(null),
 
   createdAt: z.string(),

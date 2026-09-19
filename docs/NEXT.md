@@ -249,23 +249,12 @@ cheapest place to prove the direction looks right on the existing token system b
 
 Sandeep's walk-through of how money moves (`PRODUCT.md` §10, D-61), which replaced three documents
 that gave three answers and narrowed D-26. **In build order** — each is useful before the next
-exists, and the first three need no payment gateway at all. **N-118 (prices as settings) landed
-19 September** — see `PROGRESS.md`; `getPrice` and `getPriceListForDisplay` in `lib/pricing.ts` are what
-the rest read from. Two doors, both permanent: a studio
+exists, and the first three need no payment gateway at all. **N-118 (prices as settings) and N-119
+(typed credits) landed 19 September** — see `PROGRESS.md`; `getPrice` and `getPriceListForDisplay` in
+`lib/pricing.ts` are what the rest read prices from, and `CREDIT_PLAN_IDS` / `availableByPlan` in
+`lib/plans.ts` are what read a studio's baskets. Two doors, both permanent: a studio
 buys a typed basket of credits and spends one per wedding it delivers; a couple who signs up alone
 buys a plan for their one wedding. Prices and coupons are settings, never code.
-
-### N-119 · Typed credits  ·  ~1 session  ·  D-61
-
-`consumeCredit` ignores `planId` (`lib/db/memory-repository.ts:388` and its Supabase twin), spending
-whichever credit expires soonest. Make it take a plan: spend the soonest-expiring credit *of that
-plan*, and refuse with the plan named when that basket is empty even if others are not. Add the
-missing half — a catalogue's own `planId` (Deliver / Keep / Cinema; `subPlan` is an unrelated
-monthly/yearly cadence), chosen in the wizard's first step beside the storage tier (D-60) and
-changeable until first Publish. Show the balance **by type** in the studio's console, and have the
-refusal panel name the missing plan. Migration: `catalogues.plan_id`, existing catalogues backfilled
-`deliver` — stated in the migration rather than assumed, because every credit ever granted
-defaulted to it. Until N-113, registration keeps granting its one free credit, as `deliver`.
 
 ### N-120 · The term starts at first Publish  ·  ~half a session  ·  D-61
 
@@ -293,7 +282,7 @@ never sends a price or a discount. One per checkout, no stacking. A code is a pa
 rate-limit lookups the way the guest passcode is, and answer "invalid" identically for unknown,
 expired and exhausted so the answer cannot be used to probe which exist.
 
-### N-20 · The checkout  ·  ~2 sessions  ·  **needs N-118, N-119; the live proof needs Razorpay test keys**  ·  D-58a, D-61
+### N-20 · The checkout  ·  ~2 sessions  ·  **needs N-118 and N-119 (both landed); the live proof needs Razorpay test keys**  ·  D-58a, D-61
 
 One payment flow, two payers. A `payments` table (its id is the `reference` `createPayment`
 already expects; payer org, product, plan, list price, coupon, amount charged, status, provider
@@ -370,8 +359,8 @@ schedulers exist for however long it takes to delete the workflow.
 doc 15 asks for a prompt to phone rather than email when the renewal is a Cinema catalogue's
 ₹4,000. The banner exists (N-21b, 8 September); what does not is any way to know a catalogue *is*
 Cinema — `entitlements.planId` is there, and nothing assigns it. Build it after N-27b puts plan
-assignment in the platform console, or it is a prompt keyed on a plan nobody has. **N-119 (D-61) now
-gives every catalogue its own `planId`** — the thing this was waiting for.
+assignment in the platform console, or it is a prompt keyed on a plan nobody has. **N-119 (D-61, landed
+19 September) gave every catalogue its own `planId`** — the thing this was waiting for.
 
 ### N-24a · The encoding ladder  ·  ~1h  ·  operator task
 
@@ -470,7 +459,7 @@ Build it when a studio asks for a second look. Until then it is a list with one 
 
 ### N-27c · Plans, once anything reads one  ·  doc 15 §1  ·  **blocked by N-20/N-24**
 
-> **Largely absorbed by D-61.** N-118 seeds `plans` and reads prices from it; N-119 makes credits read
+> **Largely absorbed by D-61.** N-118 seeds `plans` and reads prices from it; N-119 (landed) made credits read
 > `planId`. Re-read this once those land and delete whatever is left.
 
 The storage quota landed on 8 September (N-27b). **Assigning a *plan* deliberately did not**, and
@@ -601,7 +590,7 @@ regenerate without invalidating, so the revocation is the half worth checking.
 - **Credentials** live in `.env.local` (gitignored, verified). Both services are fully
   configured; `pnpm preflight` is all green.
 - **Supabase**: schema applied through `0025_occasions.sql` on 12 September; later migrations are recorded in
-  PROGRESS as they are applied — `0029_price_list.sql` is on **staging and production** (both 19 September). Six orgs exist, and the operator
+  PROGRESS as they are applied — `0029_price_list.sql` is on **staging and production** (both 19 September); `0030_catalogue_plan.sql` (N-119) is **written, not yet applied anywhere** — apply it to staging, then production, *before* deploying the code that creates or edits a wedding, since those now write `plan_id`. Six orgs exist, and the operator
   rows are, read from the database on 7 September rather than remembered:
 
   | org | operator |

@@ -1,3 +1,4 @@
+import { CREDIT_PLAN_IDS, type CreditPlanId } from '@/lib/plans'
 import { randomUUID } from 'node:crypto'
 import { ApiError } from '@/lib/http/errors'
 import type {
@@ -21,6 +22,7 @@ import type {
   Title,
   Preset,
   CreditBalance,
+  CreditCounts,
   Plan,
   PublishCredit,
   JobRun,
@@ -37,17 +39,24 @@ import type {
   Repository,
 } from './repository'
 
-/** One definition of "available", so the two drivers cannot disagree about it. */
+/**
+ * One definition of "available", so the two drivers cannot disagree about it — now per plan as well
+ * as in total (N-119). Every credit plan is present even at zero, so a caller reads a basket
+ * without first asking whether it exists.
+ */
 export function balanceOf(credits: readonly PublishCredit[], nowIso: string): CreditBalance {
-  let available = 0
-  let consumed = 0
-  let expired = 0
+  const empty = (): CreditCounts => ({ available: 0, consumed: 0, expired: 0 })
+  const byPlan = Object.fromEntries(CREDIT_PLAN_IDS.map((id) => [id, empty()])) as Record<
+    CreditPlanId,
+    CreditCounts
+  >
+  const total = empty()
   for (const credit of credits) {
-    if (credit.consumedAt !== null) consumed += 1
-    else if (credit.expiresAt <= nowIso) expired += 1
-    else available += 1
+    const state = credit.consumedAt !== null ? 'consumed' : credit.expiresAt <= nowIso ? 'expired' : 'available'
+    total[state] += 1
+    byPlan[credit.planId][state] += 1
   }
-  return { available, consumed, expired }
+  return { ...total, byPlan }
 }
 
 export type Snapshot = {
@@ -388,9 +397,15 @@ export class MemoryRepository implements Repository {
     return this.clone(credits)
   }
 
-  async consumeCredit(orgId: string, catalogueId: string, nowIso: string): Promise<PublishCredit | null> {
+  async consumeCredit(
+    orgId: string,
+    catalogueId: string,
+    planId: CreditPlanId,
+    nowIso: string,
+  ): Promise<PublishCredit | null> {
     const credit = (this.data.credits ?? [])
-      .filter((c) => c.orgId === orgId && c.consumedAt === null && c.expiresAt > nowIso)
+      // Only this plan's basket: a Cinema credit does not publish a Deliver wedding (N-119).
+      .filter((c) => c.orgId === orgId && c.planId === planId && c.consumedAt === null && c.expiresAt > nowIso)
       // The one closest to expiring goes first, so nothing lapses while a later one is spent.
       .sort((a, b) => a.expiresAt.localeCompare(b.expiresAt))[0]
     if (!credit) return null

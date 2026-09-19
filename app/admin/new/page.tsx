@@ -4,6 +4,8 @@ import { CreateWizard } from '@/components/admin/CreateWizard'
 import { getOperatorSession, getSessionOrg } from '@/lib/admin/session'
 import { getRepository } from '@/lib/db'
 import { env } from '@/lib/env'
+import { CREDIT_PLAN_IDS, planLabel } from '@/lib/plans'
+import { getPriceListForDisplay } from '@/lib/pricing'
 import { DEFAULT_THEME_ID } from '@/themes/registry'
 import { allThemes } from '@/themes/resolve'
 
@@ -15,6 +17,18 @@ export default async function NewCataloguePage() {
 
   const org = await getSessionOrg(session)
   const styles = org ? await getRepository().listPresets(org.id) : []
+
+  // What each plan is called comes from the price list; how many credits of it the studio holds from
+  // its balance (N-119). A couple has no basket — they buy a plan, not credits (D-61) — so they are
+  // shown the plans without a count rather than a "0 credits" that would read as a problem.
+  const prices = await getPriceListForDisplay()
+  const balance =
+    org && org.kind !== 'couple' ? await getRepository().creditBalance(org.id, new Date().toISOString()) : null
+  const plans = CREDIT_PLAN_IDS.map((id) => ({
+    id,
+    name: planLabel(prices, id),
+    available: balance ? balance.byPlan[id].available : null,
+  }))
 
   return (
     <AdminChrome
@@ -43,6 +57,7 @@ export default async function NewCataloguePage() {
         themes={await allThemes()}
         studioTheme={org?.branding.theme ?? DEFAULT_THEME_ID}
         styles={styles}
+        plans={plans}
         mode={org?.kind === 'couple' ? 'couple' : 'studio'}
       />
     </AdminChrome>

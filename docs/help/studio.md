@@ -72,6 +72,7 @@ until the catalogue exists, which happens at the end of step 2.
 | City | Optional. |
 | **Web address** | Suggested from the names **and the year** — `aanya-and-vikram-2026`. Editable until you touch it, checked for availability as you type. |
 | App name | The wordmark on the guest's profile screen. Blank uses `<Couple> Originals`. |
+| **Plan** | **Deliver**, **Keep** or **Cinema** — which kind of credit publishing this wedding will spend. Each pill shows how many of that kind you hold. Deliver unless you choose. You can change it until you publish (see [Credits](#credits)). |
 | **Storage** | Optional — **Light** (5 GB), **Medium** (50 GB) or **Heavy** (100 GB), sized to the occasion. Leave it unset to keep the default (20 GB). Need more than 100 GB? Ask your platform for a custom amount. |
 
 > **The address is the one thing you cannot casually change later.** It goes into every guest's
@@ -277,11 +278,24 @@ The catalogue **overview** carries a checklist of what is left:
 
 ### Credits
 
-**Your first published wedding is free.** Every one after that spends one **Deliver credit**. What
-a credit costs — and the price for five — is on your **Credits** card under *Your studio*, and
-always shows today's price. Publish without one shows exactly what is short and an **Ask for a
-credit** button — nothing about the wedding is lost while you wait, and the platform adds credits
-the same working day. Online payment is not built yet (N-20); this is the interim.
+**Your first published wedding is free.** Every one after that spends one credit — and credits come
+in kinds: **Deliver**, **Keep** and **Cinema**. Each wedding is *on* one of those plans, and
+publishing it spends a credit **of that plan**. Having Deliver credits does not pay for a Cinema
+wedding, however many you hold; your balance is shown by kind — on the dashboard and on your
+**Credits** card under *Your studio* — for exactly that reason. The card also lists what each kind
+costs today, and always shows today's price.
+
+**Choose the plan when you create the wedding, or change it on the wedding's overview** (*Plan*,
+above *The link*). You can change it **until you first publish**. After that it is fixed and the
+overview says so: publishing spent a credit of that plan, and a plan that could drift afterwards
+would leave a Cinema wedding paid for with a Deliver credit. Taking a wedding offline and putting it
+back does not spend another credit, and does not unlock the plan.
+
+Publish without a credit of the wedding's plan shows exactly what is short — *"This wedding is on the
+Keep plan… and you have none left"* — and, if you hold credits of another kind, says so and where to
+change the plan. There is an **Ask for a credit** button, once a day per plan; nothing about the
+wedding is lost while you wait, and the platform adds credits the same working day. Online payment
+is not built yet (N-20); this is the interim.
 
 ---
 

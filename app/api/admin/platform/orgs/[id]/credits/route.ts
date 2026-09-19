@@ -5,6 +5,7 @@ import { getRepository } from '@/lib/db'
 import { ApiError } from '@/lib/http/errors'
 import { noStore, readJson, route } from '@/lib/http/handler'
 import { log } from '@/lib/log'
+import { CREDIT_PLAN_IDS } from '@/lib/plans'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -18,6 +19,8 @@ export const dynamic = 'force-dynamic'
  */
 const bodySchema = z.object({
   count: z.number().int().min(1).max(MAX_GRANT),
+  /** Which basket the credits go into (N-119). Deliver when unsaid, as every credit was before. */
+  planId: z.enum(CREDIT_PLAN_IDS).default('deliver'),
   reason: z.string().trim().min(1).max(500),
 })
 
@@ -32,16 +35,27 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     if (!org) throw new ApiError('NOT_FOUND', 'Org not found')
 
     const granted = await repository.grantCredits(
-      makeCredits({ orgId: org.id, count: body.count, grantedBy: admin.email, reason: body.reason }),
+      makeCredits({
+        orgId: org.id,
+        count: body.count,
+        planId: body.planId,
+        grantedBy: admin.email,
+        reason: body.reason,
+      }),
     )
 
     await recordPlatformAction({
       admin,
       action: 'credits.grant',
       org: { id: org.id, slug: org.slug },
-      detail: { count: body.count, reason: body.reason },
+      detail: { count: body.count, planId: body.planId, reason: body.reason },
     })
-    log.info('platform: credits granted', { orgId: org.id, count: body.count, actor: admin.email })
+    log.info('platform: credits granted', {
+      orgId: org.id,
+      count: body.count,
+      planId: body.planId,
+      actor: admin.email,
+    })
 
     const balance = await repository.creditBalance(org.id, new Date().toISOString())
     return noStore({ granted: granted.length, balance }, 201)

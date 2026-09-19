@@ -10,6 +10,8 @@ import { getPlatformAdmin } from '@/lib/admin/platform'
 import { getRepository } from '@/lib/db'
 import { DEFAULT_LIMITS } from '@/lib/entitlements'
 import { formatWeddingDate } from '@/lib/format'
+import { CREDIT_PLAN_IDS, planLabel, type CreditPlanId } from '@/lib/plans'
+import { getPriceListForDisplay } from '@/lib/pricing'
 import { publicUrlOf } from '@/lib/address'
 
 export const dynamic = 'force-dynamic'
@@ -38,6 +40,7 @@ export default async function PlatformOrgPage({ params }: { params: Promise<{ id
   // The one place an org id from the URL is trusted — and it is safe precisely because the
   // caller has already been proven to be a platform admin, who by design belongs to no org and
   // therefore cannot be "escalating" into one.
+  const planPrices = await getPriceListForDisplay()
   const [catalogues, operators, audit, entitlement, balance] = await Promise.all([
     repository.listCatalogues({ orgId: org.id }),
     repository.listOperators(org.id),
@@ -75,7 +78,16 @@ export default async function PlatformOrgPage({ params }: { params: Promise<{ id
         />
 
         {/* Studios spend credits; a couple's account starts with none and is granted one here too. */}
-        <OrgCreditsControl orgId={org.id} orgName={org.name} balance={balance} />
+        <OrgCreditsControl
+          orgId={org.id}
+          orgName={org.name}
+          balance={balance}
+          planNames={
+            Object.fromEntries(
+              CREDIT_PLAN_IDS.map((id) => [id, planLabel(planPrices, id)]),
+            ) as Record<CreditPlanId, string>
+          }
+        />
 
         <div className="rounded-[var(--radius-card)] border border-[var(--color-l-line)] bg-white p-4">
           <p className="mb-2 text-[15px] font-semibold">

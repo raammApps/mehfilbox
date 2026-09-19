@@ -4,6 +4,7 @@ import { AdminChrome } from '@/components/admin/AdminChrome'
 import { AskForSpaceButton } from '@/components/admin/AskForSpaceButton'
 import { AttentionChip } from '@/components/admin/CatalogueBoard'
 import { CatalogueAnalytics } from '@/components/admin/CatalogueAnalytics'
+import { CataloguePlan } from '@/components/admin/CataloguePlan'
 import { CoupleAccountPanel } from '@/components/admin/CoupleAccountPanel'
 import { HandoverPanel } from '@/components/admin/HandoverPanel'
 import { PublicLink } from '@/components/admin/PublicLink'
@@ -16,6 +17,7 @@ import { setupChecklist } from '@/lib/admin/setup-checklist'
 import { hoursFor, resolveLimits, storageTierFor, storageUsage } from '@/lib/entitlements'
 import { getRepository } from '@/lib/db'
 import { formatWeddingDate } from '@/lib/format'
+import { CREDIT_PLAN_IDS, planLabel } from '@/lib/plans'
 import { getPriceListForDisplay, priceLabel } from '@/lib/pricing'
 import { resolveLocalised } from '@/lib/i18n'
 import { render } from '@/lib/notify/templates'
@@ -48,7 +50,21 @@ export default async function CatalogueOverviewPage({
   ])
 
   // The couple's account, when the studio has issued one (D-37): who signs in, and to what.
-  const storagePrice = priceLabel(await getPriceListForDisplay(), 'extra-storage')
+  const prices = await getPriceListForDisplay()
+  const storagePrice = priceLabel(prices, 'extra-storage')
+
+  // The plan control (N-119): the owner may change it until first publish, alongside what each
+  // basket holds. A couple holds no basket (D-61), so no count is shown for them.
+  const isOwner = catalogue.orgId === session.orgId
+  const basket =
+    isOwner && org && org.kind !== 'couple'
+      ? await repository.creditBalance(catalogue.orgId, new Date().toISOString())
+      : null
+  const planOptions = CREDIT_PLAN_IDS.map((planId) => ({
+    id: planId,
+    name: planLabel(prices, planId),
+    available: basket ? basket.byPlan[planId].available : null,
+  }))
   const coupleOrg = catalogue.coupleOrgId ? await repository.getOrg(catalogue.coupleOrgId) : null
   const coupleOperator = coupleOrg ? (await repository.listOperators(coupleOrg.id))[0] ?? null : null
   const linkedCouple = coupleOperator ? { email: coupleOperator.email, name: coupleOperator.name } : null
@@ -196,6 +212,14 @@ export default async function CatalogueOverviewPage({
           <div className="mt-4">
             <CatalogueAnalytics titles={titles} />
           </div>
+
+          <CataloguePlan
+            catalogueId={catalogue.id}
+            planId={catalogue.planId}
+            fixed={catalogue.publishedAt !== null}
+            editable={isOwner}
+            plans={planOptions}
+          />
 
           <section className="mt-4 rounded-[var(--radius-card)] border border-[var(--color-l-line)] bg-white p-4">
             <h2 className="text-[15px] font-semibold">The link</h2>

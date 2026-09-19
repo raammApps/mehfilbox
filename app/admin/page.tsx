@@ -7,6 +7,8 @@ import { getOperatorSession, getSessionOrg } from '@/lib/admin/session'
 import { getRepository } from '@/lib/db'
 import { env } from '@/lib/env'
 import { formatWeddingDate } from '@/lib/format'
+import { availableByPlan, describeGrants } from '@/lib/plans'
+import { getPriceListForDisplay } from '@/lib/pricing'
 import { publicUrlOf } from '@/lib/address'
 
 export const dynamic = 'force-dynamic'
@@ -54,12 +56,13 @@ export default async function CatalogueListPage() {
   // Counts come from one method rather than `listTitles` per row: a partner with thirty weddings
   // would otherwise make sixty round trips to draw this screen, and it would get slower with
   // every wedding they sold.
-  const [catalogues, counts, org, delivered, balance] = await Promise.all([
+  const [catalogues, counts, org, delivered, balance, prices] = await Promise.all([
     repository.listCatalogues({ orgId: session.orgId }),
     repository.catalogueCounts({ orgId: session.orgId }),
     getSessionOrg(session),
     repository.listOriginatedCatalogues(session.orgId),
     repository.creditBalance(session.orgId, new Date().toISOString()),
+    getPriceListForDisplay(),
   ])
 
   // A couple's home is their account, not a studio's list (D-37).
@@ -100,7 +103,8 @@ export default async function CatalogueListPage() {
           {/* The number that decides whether the next Publish goes through (D-38). */}
           {' '}
           <span data-testid="credit-balance">
-            {balance.available} credit{balance.available === 1 ? '' : 's'} to publish with.
+            {/* By plan (N-119): "3 credits" is wrong the moment they are three Cinema credits and the next wedding is a Deliver. */}
+            {describeGrants(availableByPlan(balance), prices) ?? '0 credits'} to publish with.
           </span>
         </p>
       </div>

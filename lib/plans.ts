@@ -1,4 +1,4 @@
-import type { Plan, PlanKind } from '@/lib/schema'
+import type { CreditBalance, Plan, PlanKind } from '@/lib/schema'
 
 /**
  * The shape of the price list (N-118, D-61) — never a price.
@@ -54,6 +54,15 @@ export const MAX_PRICE_PAISE = 100_000_000
 export const MAX_BUNDLE_QUANTITY = 100
 
 /**
+ * A plan's name from the price list — or, when the list could not be read, its id capitalised, which
+ * is exactly what the three credit plans are called. Without this a studio told "you have no deliver
+ * credit left" (lowercase, an id) would be reading the database's outage in a sentence meant for them.
+ */
+export function planLabel(plans: Record<string, Pick<Plan, 'name'>>, id: string): string {
+  return plans[id]?.name ?? id.charAt(0).toUpperCase() + id.slice(1)
+}
+
+/**
  * "2 Deliver credits and 1 Cinema credit" — a typed bundle in words, or `null` when it is empty.
  *
  * Names come from the price list rather than being spelled here, so a plan's name is written in
@@ -62,9 +71,21 @@ export const MAX_BUNDLE_QUANTITY = 100
 export function describeGrants(grants: Record<string, number>, plans: Record<string, Plan>): string | null {
   const parts = CREDIT_PLAN_IDS.filter((id) => (grants[id] ?? 0) > 0).map((id) => {
     const count = grants[id] ?? 0
-    return `${count} ${plans[id]?.name ?? id} credit${count === 1 ? '' : 's'}`
+    return `${count} ${planLabel(plans, id)} credit${count === 1 ? '' : 's'}`
   })
   if (parts.length === 0) return null
   if (parts.length === 1) return parts[0] ?? null
   return `${parts.slice(0, -1).join(', ')} and ${parts[parts.length - 1]}`
 }
+
+/**
+ * `{ deliver: 2, keep: 0, cinema: 1 }` — what a studio can spend, per plan, ready for
+ * `describeGrants` (N-119). One place so every screen that says "you have…" counts the same thing.
+ */
+export function availableByPlan(balance: Pick<CreditBalance, 'byPlan'>): Record<CreditPlanId, number> {
+  return Object.fromEntries(CREDIT_PLAN_IDS.map((id) => [id, balance.byPlan[id].available])) as Record<
+    CreditPlanId,
+    number
+  >
+}
+

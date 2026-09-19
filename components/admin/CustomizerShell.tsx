@@ -51,6 +51,8 @@ type Props = {
   audience?: 'studio' | 'couple'
   /** What a credit costs, already formatted from the price list — the panel quotes it (N-118). */
   creditPrices?: { credit: string | null; pack: string | null }
+  /** The wedding's plan by name and what the studio holds of any other (N-119). */
+  creditPlan?: { planName: string; otherAvailable: string | null }
 }
 
 /**
@@ -71,6 +73,7 @@ export function CustomizerShell({
   themes,
   audience = 'studio',
   creditPrices,
+  creditPlan,
 }: Props) {
   const [modules, setModules] = useState<ModuleInstance[]>(initialModules)
   /**
@@ -497,7 +500,12 @@ export function CustomizerShell({
           </button>
         </div>
 
-        {creditRequired ? <CreditPanel catalogueId={catalogue.id} audience={audience} prices={creditPrices} /> : null}
+        {creditRequired ? <CreditPanel
+            catalogueId={catalogue.id}
+            audience={audience}
+            prices={creditPrices}
+            plan={creditPlan}
+          /> : null}
 
         {publishError ? (
           <p

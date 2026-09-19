@@ -1,3 +1,4 @@
+import type { CreditPlanId } from '@/lib/plans'
 import 'server-only'
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import { env } from '@/lib/env'
@@ -234,6 +235,8 @@ export class SupabaseRepository implements Repository {
       includedUntil: r.included_until,
       subStatus: r.sub_status,
       subPlan: r.sub_plan,
+      // Tolerant of a row from before the column existed: it is Deliver, as the migration backfills.
+      planId: r.plan_id ?? 'deliver',
       subUntil: r.sub_until,
       createdAt: r.created_at,
       publishedAt: r.published_at,
@@ -275,6 +278,7 @@ export class SupabaseRepository implements Repository {
       includedUntil: 'included_until',
       subStatus: 'sub_status',
       subPlan: 'sub_plan',
+      planId: 'plan_id',
       subUntil: 'sub_until',
       createdAt: 'created_at',
       publishedAt: 'published_at',
@@ -900,14 +904,21 @@ export class SupabaseRepository implements Repository {
     return (data ?? []).map(SupabaseRepository.toCredit)
   }
 
-  async consumeCredit(orgId: string, catalogueId: string, nowIso: string): Promise<PublishCredit | null> {
+  async consumeCredit(
+    orgId: string,
+    catalogueId: string,
+    planId: CreditPlanId,
+    nowIso: string,
+  ): Promise<PublishCredit | null> {
     // Pick, then claim with `consumed_at is null` as the guard: two publishes racing for the last
-    // credit cannot both win it, and the loser simply looks again.
+    // credit cannot both win it, and the loser simply looks again. Picked from this plan's basket
+    // only (N-119) — a Cinema credit never publishes a Deliver wedding.
     for (let attempt = 0; attempt < 3; attempt += 1) {
       const { data: candidate, error } = await this.db
         .from('credits')
         .select('id')
         .eq('org_id', orgId)
+        .eq('plan_id', planId)
         .is('consumed_at', null)
         .gt('expires_at', nowIso)
         .order('expires_at')

@@ -1,3 +1,4 @@
+import type { CreditPlanId } from '@/lib/plans'
 import type { Entitlement } from '@/lib/entitlements'
 import type { CustomTheme } from '@/themes/contract'
 import type {
@@ -166,10 +167,16 @@ export interface Repository {
   listCredits(orgId: string): Promise<PublishCredit[]>
   grantCredits(credits: PublishCredit[]): Promise<PublishCredit[]>
   /**
-   * Spend one: the soonest-to-expire credit that is unconsumed and unexpired, marked as spent by
-   * this catalogue. `null` when there is none — which is the publish gate's whole question.
+   * Spend one **of this plan** (N-119): the soonest-to-expire credit of `planId` that is unconsumed
+   * and unexpired, marked as spent by this catalogue. `null` when that basket is empty — even if
+   * others are not, which is the publish gate's whole question.
    */
-  consumeCredit(orgId: string, catalogueId: string, nowIso: string): Promise<PublishCredit | null>
+  consumeCredit(
+    orgId: string,
+    catalogueId: string,
+    planId: CreditPlanId,
+    nowIso: string,
+  ): Promise<PublishCredit | null>
   creditBalance(orgId: string, nowIso: string): Promise<CreditBalance>
 
   // ── The price list (N-118, D-61) ─────────────────────────────────────────

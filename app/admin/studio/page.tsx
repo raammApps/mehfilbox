@@ -6,6 +6,7 @@ import { getOperatorSession, getSessionOrg } from '@/lib/admin/session'
 import { DomainPanel } from '@/components/admin/DomainPanel'
 import { getRepository } from '@/lib/db'
 import { instructionsOf } from '@/lib/domains'
+import { availableByPlan, CREDIT_PLAN_IDS, describeGrants, planLabel } from '@/lib/plans'
 import { getPriceListForDisplay, priceLabel } from '@/lib/pricing'
 import { allThemes } from '@/themes/resolve'
 
@@ -31,7 +32,11 @@ export default async function StudioPage() {
     getPriceListForDisplay(),
   ])
   // From the price list, never typed here (N-118): what a credit costs is the platform's to change.
-  const creditPrice = priceLabel(prices, 'deliver')
+  // One price per plan, because a credit is of a plan and the plans do not cost the same (N-119).
+  const creditPrices = CREDIT_PLAN_IDS.flatMap((id) => {
+    const price = priceLabel(prices, id)
+    return price ? [`${planLabel(prices, id)} ${price}`] : []
+  })
   const packPrice = priceLabel(prices, 'deliver-5')
   const studioDomain = domains.find((domain) => domain.catalogueId === null) ?? null
 
@@ -55,12 +60,16 @@ export default async function StudioPage() {
         <section className="mt-6 rounded-[var(--radius-card)] border border-[var(--color-l-line)] bg-white p-4">
           <h2 className="text-[15px] font-semibold">Credits</h2>
           <p className="mt-1 text-[13px] text-[var(--color-l-text-mid)]">
-            <span className="font-semibold text-[var(--color-l-text-hi)]">{balance.available} available</span>
+            <span className="font-semibold text-[var(--color-l-text-hi)]">
+              {describeGrants(availableByPlan(balance), prices) ?? '0 credits'} available
+            </span>
             {' · '}
             {balance.consumed} spent{balance.expired > 0 ? ` · ${balance.expired} expired` : ''}. A
-            wedding&rsquo;s first publish spends one; publishing it again after a change is free.
-            Your first was on us; each after that is {creditPrice ?? 'priced on request'}
-            {packPrice ? `, or five for ${packPrice}` : ''}.
+            wedding&rsquo;s first publish spends one credit of the plan it is on; publishing it again
+            after a change is free.
+            Your first was on us; after that a credit is{' '}
+            {creditPrices.length > 0 ? creditPrices.join(', ') : 'priced on request'}
+            {packPrice ? `, and five Deliver credits are ${packPrice}` : ''}.
           </p>
         </section>
 

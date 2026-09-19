@@ -13,14 +13,26 @@ export function CreditPanel({
   catalogueId,
   audience = 'studio',
   prices,
+  plan,
 }: {
   catalogueId: string
   audience?: 'studio' | 'couple'
-  /** Formatted by the server from the price list (N-118); `null` means it is not for sale. */
+  /**
+   * Formatted by the server from the price list (N-118) **for this wedding's plan** — a Cinema
+   * credit costs what Cinema costs, and only Deliver has a five-pack. `null` means not for sale.
+   */
   prices?: { credit: string | null; pack: string | null }
+  /**
+   * The wedding's plan by name, and what the studio holds of any other plan (N-119). The second is
+   * the useful half: "no Keep credit" is an answer, "no Keep credit, but you hold a Deliver one" is a
+   * way forward, because the plan can be changed until the first publish.
+   */
+  plan?: { planName: string; otherAvailable: string | null }
 }) {
   const credit = prices?.credit ?? null
   const pack = prices?.pack ?? null
+  const planName = plan?.planName ?? 'Deliver'
+  const other = plan?.otherAvailable ?? null
   const [state, setState] = useState<'idle' | 'sending' | 'sent' | 'repeated' | 'error'>('idle')
 
   async function request() {
@@ -46,12 +58,14 @@ export function CreditPanel({
       className="mb-3 rounded-[var(--radius-card)] border border-[color-mix(in_srgb,var(--color-warn)_45%,white)] bg-[color-mix(in_srgb,var(--color-warn)_10%,white)] p-4"
     >
       <p className="text-[14px] font-semibold">
-        {audience === 'couple' ? 'This catalogue needs a credit to publish' : 'This wedding needs a credit to publish'}
+        {audience === 'couple'
+          ? `This catalogue needs a ${planName} credit to publish`
+          : `This wedding needs a ${planName} credit to publish`}
       </p>
       <p className="mt-1 text-[13px] text-[var(--color-l-text-mid)]">
         {audience === 'couple'
-          ? `A catalogue you start yourself publishes on a credit${credit ? ` — ${credit} —` : ','} which your studio can add for you, or we can. Nothing here is lost: the page, the films and the draft all keep, and publishing works the moment one is added.`
-          : `Your first wedding was on us. Each one after that is one Deliver credit${credit ? ` — ${credit}${pack ? `, or five for ${pack}` : ''} —` : ','} and you have none left. Nothing here is lost: the page, the films and the draft all keep, and publishing works the moment a credit is added.`}
+          ? `A catalogue you start yourself publishes on a ${planName} credit${credit ? ` — ${credit} —` : ','} which your studio can add for you, or we can. Nothing here is lost: the page, the films and the draft all keep, and publishing works the moment one is added.`
+          : `This wedding is on the ${planName} plan, so publishing it spends one ${planName} credit${credit ? ` — ${credit}${pack ? `, or five for ${pack}` : ''} —` : ','} and you have none left.${other ? ` You do hold ${other}: change this wedding’s plan on its overview to spend one of those.` : ''} Nothing here is lost: the page, the films and the draft all keep, and publishing works the moment a credit is added.`}
       </p>
       {state === 'sent' || state === 'repeated' ? (
         <p className="mt-3 text-[13px]">

@@ -3002,3 +3002,81 @@ Files: `supabase/migrations/0029_price_list.sql` (new), `lib/schema.ts`, `lib/pl
 `tests/unit/no-price-in-code.test.ts`, `tests/component/pricing-table.test.tsx`,
 `tests/component/credit-panel.test.tsx` (all new), `tests/integration/drivers.test.ts`, `CLAUDE.md`,
 `docs/PRODUCT.md`, `docs/PRICING.md`, `docs/NEXT.md`.
+
+
+## N-119 · Typed credits — 19 September 2026
+
+**What now exists.** A credit is *of a plan*, and so is a wedding. Migration `0030_catalogue_plan.sql`
+adds `catalogues.plan_id` (not null, default `deliver`), puts a check constraint on it and on the
+already-present `credits.plan_id` (`deliver`/`keep`/`cinema`), and an index for the per-plan spend
+query. The backfill is stated in the file rather than assumed — every credit ever granted defaulted to
+`deliver`, so every existing wedding is a Deliver wedding — and a test reads the SQL and fails if either
+check list drifts from `CREDIT_PLAN_IDS`, because the alternative is a check-constraint 500 at Publish.
+`consumeCredit` now takes the wedding's plan and spends the soonest-expiring credit **of that plan**
+on both drivers; `creditBalance` returns `byPlan` alongside the totals, all three baskets always
+present. An empty basket refuses with `CREDIT_REQUIRED` naming the plan, and — the part that makes it
+a way forward rather than a wall — if another basket holds credits, says which and how to use them
+("change this wedding's plan"). The plan is chosen in the wizard beside the storage tier (each pill
+shows what the studio holds of it; a couple, who hold no basket under D-61, see the plan without a
+count), changed on the wedding's overview (`CataloguePlan`: fixed / read-only / editable, told apart
+rather than blurred), and **refused once the wedding has ever been published** —
+`publishedAt` survives an unpublish, which is what makes "ever" the right test. The dashboard, the
+Studio page, the platform console's grant form (plan picker; the plan is on the audit row) and the
+credit-request email are typed; a request is deduplicated per studio **per plan** per day.
+
+**Decisions taken without asking — say so and they change.** A wedding defaults to Deliver, and the
+wizard does *not* pre-pick a basket the studio holds instead: silently choosing Cinema because Cinema
+is what is in stock would spend the wrong credit. The plan is the **owner's** to change — a studio
+inside a couple's support window can edit the page but not the plan (it is outside `SUPPORT_FIELDS`, so
+it falls to `requireOwnedCatalogue` without new code). A plan cannot be corrected after Publish, by
+anyone; there is no console path for it, on purpose, until there is a case for one. Registration's one
+free credit is a Deliver credit until N-113 reads the starter bundle. The platform's grant defaults to
+Deliver when no plan is sent, so an old client cannot mis-grant.
+
+**Four things went wrong, and what each taught.**
+(1) *A plan named from a price list that had not loaded read as an id.* The refusal and the request
+email took the plan's name from the list; with no list they said "no deliver credit left" in
+lowercase. A test with no seeded prices caught it. `planLabel` now falls back to the id capitalised,
+which is what the three plans are actually called, and is used by every caller — five files had the
+same `?? id`, which was the real finding.
+(2) *My mutation harness proved nothing for the first eight runs.* It passed the test files as one
+argument (`$T` is not word-split in zsh), so vitest found no files and exited 1 — which my script read
+as "caught", and which printed "0 failing" beside every one. The zero was the tell, and it was on the
+screen. Every mutation was re-run with the files as an array and each was then confirmed red *by name*.
+What it taught: a proof harness has to report *what* failed, not merely that something did.
+(3) *The Studio page still said "each after that is ₹1,999".* True when there was one kind of credit;
+wrong the moment a Keep credit costs more. No test could have seen it — the price came from the list, so
+the no-price guard was satisfied — and only reading the page in a browser did. It now lists the price
+of each plan. (4) *The integration test for the driver is written and not run.* `.env.local` points at
+the **production** Supabase project, so the integration suite must only ever be run with
+`.env.staging.local`, and staging does not yet have `0030` — the existing catalogue round-trip test
+writes `plan_id` too, so both need the migration first. Nothing was run against production.
+
+**Proof it is real, not just green.** Ten deliberate breakages of the server, each confirmed red by
+name and restored: the spend ignoring the plan (five tests), the refusal not pointing at the basket
+held, a plan change allowed after publish (two), the request deduped per studio rather than per plan,
+the create default changed, the grant ignoring its plan, the migration's check list drifting, the
+label fallback in lowercase, the balance losing its zero-filled baskets (fourteen), and the PATCH
+accepting an unknown plan. Five breakages of the components (a stray field on the wire, the fixed state
+still offering the control, the button live when nothing changed, the grant omitting its plan, the
+refusal hint shown with nothing to point at). On a production build the E2E journey went red when the
+spend filter was removed (`Expected 402, Received 200`) and green restored. **In a browser**, on a
+memory-driver dev server: the wizard's Plan card with per-plan counts and the no-credits note; a Keep
+wedding refused with the panel naming Keep, quoting its price from the list and pointing at the 40
+Deliver credits held; the plan changed on the overview and Publish then spent a Deliver credit (39
+left); the overview then showing "Fixed — publishing this wedding spent a Deliver credit" with no
+control, and a later change to Cinema refused with 400. **Not seen live:** the platform console's grant
+form — the demo fixture has no platform admin — so it rests on its component and route tests.
+
+Also seen and **not mine, not fixed**: the customizer logs a React hydration warning (`useId` values
+differ between server and client under `SectionInspector`'s lazily-loaded editor). It is dev-visible
+only and predates this ticket; it is worth its own look.
+
+Suite: 892 unit/component (+43: 27 typed-credit route/driver tests, 3 migration, 13 component);
+E2E **160 passed / 57 skipped**, the baseline, on
+the full run after the commit (the credits journey is one spec, extended rather than added). New: `tests/unit/typed-credits.test.ts`, `tests/unit/typed-credits-migration.test.ts`,
+`tests/component/typed-credits.test.tsx`, `components/admin/CataloguePlan.tsx`,
+`supabase/migrations/0030_catalogue_plan.sql`. Changed: `e2e/credits.spec.ts` (a Keep wedding refused
+while a Deliver credit is held, plan changed, published, fixed), `docs/help/studio.md`,
+`docs/help/client.md`, `docs/PRODUCT.md`, `docs/NEXT.md`. **Before this is deployed:** apply `0030` to
+staging, run the integration suite against staging, then production — create and edit write `plan_id`.

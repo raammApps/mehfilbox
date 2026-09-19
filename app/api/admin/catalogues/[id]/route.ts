@@ -7,6 +7,7 @@ import { getRepository } from '@/lib/db'
 import { resolveLimits } from '@/lib/entitlements'
 import { log } from '@/lib/log'
 import { getPhotoProvider, PHOTO_WIDTHS, signPhotos } from '@/lib/photos'
+import { CREDIT_PLAN_IDS } from '@/lib/plans'
 import { getVideoProvider } from '@/lib/video'
 import { ApiError } from '@/lib/http/errors'
 import { noStore, readJson, route } from '@/lib/http/handler'
@@ -50,6 +51,11 @@ const patchSchema = z.object({
   timezone: z.string().refine(isValidTimeZone, 'Unknown time zone').optional(),
   premiereAt: z.string().datetime().nullable().optional(),
   featuredTitleId: z.string().uuid().nullable().optional(),
+  /**
+   * The plan the first publish will spend a credit of (N-119). Changeable only until that publish —
+   * the handler refuses afterwards — and only by the owner: it is not one of the support fields.
+   */
+  planId: z.enum(CREDIT_PLAN_IDS).optional(),
   privacy: privacySchema.optional(),
   /**
    * `customDomain` is no longer accepted here (doc 16 §1). A domain is a `domains` row with a
@@ -105,6 +111,18 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       ? await requireEditableCatalogue(id)
       : await requireOwnedCatalogue(id)
     const repository = getRepository()
+
+    /**
+     * Fixed once published (N-119). The first publish spent a credit *of this plan*, and letting the
+     * plan change afterwards would leave a Cinema wedding that was paid for with a Deliver credit —
+     * the exact mismatch typed credits exist to prevent. `publishedAt` stays set through an
+     * unpublish, so "ever published" is the right question, not "published now".
+     */
+    if (body.planId !== undefined && body.planId !== catalogue.planId && catalogue.publishedAt !== null) {
+      throw new ApiError('VALIDATION_FAILED', 'A published wedding’s plan is fixed — publishing spent a credit of that plan.', {
+        fields: { planId: 'Fixed once the wedding has been published' },
+      })
+    }
 
     if (body.slug && body.slug !== catalogue.slug && !(await repository.slugAvailable(body.slug))) {
       throw new ApiError('VALIDATION_FAILED', 'That address is taken', {

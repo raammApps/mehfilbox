@@ -4,6 +4,7 @@ import { requireOperator } from '@/lib/admin/session'
 import { seedModules } from '@/lib/admin/templates'
 import { hashSecret } from '@/lib/crypto'
 import { STORAGE_TIERS } from '@/lib/entitlements'
+import { CREDIT_PLAN_IDS } from '@/lib/plans'
 import { generatePasscode } from '@/lib/passcode'
 import { isValidTimeZone } from '@/lib/time'
 import { getRepository } from '@/lib/db'
@@ -62,6 +63,13 @@ const createSchema = z.object({
     .string()
     .refine((id) => STORAGE_TIERS.some((tier) => tier.id === id), 'Unknown storage tier')
     .optional(),
+  /**
+   * The plan this wedding is on — Deliver, Keep or Cinema (N-119, D-61). It decides which basket of
+   * credits the first publish spends from, so it is asked for here, beside the storage tier, and may
+   * be changed until that publish. Deliver when unsaid: what every catalogue was before there was a
+   * choice, and the cheapest thing to have picked by accident.
+   */
+  planId: z.enum(CREDIT_PLAN_IDS).default('deliver'),
 })
 
 /**
@@ -152,6 +160,7 @@ export async function POST(request: Request) {
       includedUntil: includedUntil.toISOString(),
       subStatus: 'included',
       subPlan: null,
+      planId: body.planId,
       subUntil: null,
       createdAt: now.toISOString(),
       publishedAt: null,

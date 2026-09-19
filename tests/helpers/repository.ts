@@ -58,6 +58,7 @@ export function makeCatalogue(overrides: Partial<Catalogue> = {}): Catalogue {
     includedUntil: '2027-01-01T00:00:00.000Z',
     subStatus: 'included',
     subPlan: null,
+    planId: 'deliver',
     subUntil: null,
     createdAt: '2026-07-01T00:00:00.000Z',
     publishedAt: '2026-07-01T00:00:00.000Z',

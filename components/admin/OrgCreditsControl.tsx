@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
+import { CREDIT_PLAN_IDS, type CreditPlanId } from '@/lib/plans'
 import type { CreditBalance } from '@/lib/schema'
 
 /**
@@ -9,18 +10,23 @@ import type { CreditBalance } from '@/lib/schema'
  *
  * Additive only, and it asks for a reason because "why does this studio have twelve credits" is
  * a question somebody asks a year later. The balance beside it is what the studio itself sees,
- * so the two ends of a credit request are looking at the same number.
+ * so the two ends of a credit request are looking at the same number — and it is per plan (N-119),
+ * because a credit is for one plan and a request names which.
  */
 export function OrgCreditsControl({
   orgId,
   orgName,
   balance,
+  planNames,
 }: {
   orgId: string
   orgName: string
   balance: CreditBalance
+  /** What each plan is called, from the price list — never spelled here. */
+  planNames: Record<CreditPlanId, string>
 }) {
   const router = useRouter()
+  const [planId, setPlanId] = useState<CreditPlanId>('deliver')
   const [count, setCount] = useState('1')
   const [reason, setReason] = useState('')
   const [busy, setBusy] = useState(false)
@@ -34,7 +40,7 @@ export function OrgCreditsControl({
       const response = await fetch(`/api/admin/platform/orgs/${orgId}/credits`, {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ count: Number.parseInt(count, 10), reason: reason.trim() }),
+        body: JSON.stringify({ count: Number.parseInt(count, 10), planId, reason: reason.trim() }),
       })
       if (!response.ok) {
         const body = (await response.json().catch(() => null)) as { error?: { message?: string } } | null
@@ -60,10 +66,34 @@ export function OrgCreditsControl({
         <span className="font-semibold text-[var(--color-l-text-hi)]">{balance.available} available</span>
         {' · '}
         {balance.consumed} spent{balance.expired > 0 ? ` · ${balance.expired} expired` : ''}. A
-        credit is one wedding&rsquo;s first publish; {orgName} spends one each time.
+        credit is one wedding&rsquo;s first publish, of one plan; {orgName} spends one each time.
       </p>
+      <ul data-testid="credit-baskets" className="mb-3 flex flex-wrap gap-2 text-[13px]">
+        {CREDIT_PLAN_IDS.map((id) => (
+          <li
+            key={id}
+            className="rounded-[var(--radius-pill)] border border-[var(--color-l-line)] px-3 py-1"
+          >
+            {planNames[id]} · <span className="font-semibold">{balance.byPlan[id].available}</span>
+          </li>
+        ))}
+      </ul>
       <form onSubmit={(event) => void submit(event)} className="flex flex-col gap-2">
         <div className="flex flex-wrap gap-2">
+          <label className="text-[13px]">
+            <span className="mb-1 block font-medium">Plan</span>
+            <select
+              value={planId}
+              onChange={(event) => setPlanId(event.target.value as CreditPlanId)}
+              className="h-10 rounded-[var(--radius-input)] border border-[var(--color-l-line)] bg-white px-3 text-[14px]"
+            >
+              {CREDIT_PLAN_IDS.map((id) => (
+                <option key={id} value={id}>
+                  {planNames[id]}
+                </option>
+              ))}
+            </select>
+          </label>
           <label className="text-[13px]">
             <span className="mb-1 block font-medium">How many</span>
             <input
@@ -91,7 +121,7 @@ export function OrgCreditsControl({
             disabled={busy || !valid}
             className="h-10 rounded-[var(--radius-pill)] bg-[var(--color-l-text-hi)] px-5 text-[14px] font-semibold text-white disabled:opacity-60"
           >
-            {busy ? 'Granting…' : `Grant ${valid ? parsed : ''} credit${parsed === 1 ? '' : 's'}`}
+            {busy ? 'Granting…' : `Grant ${valid ? parsed : ''} ${planNames[planId]} credit${parsed === 1 ? '' : 's'}`}
           </button>
         </div>
       </form>

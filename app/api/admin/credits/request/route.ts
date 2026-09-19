@@ -6,6 +6,8 @@ import { ApiError } from '@/lib/http/errors'
 import { noStore, readJson, route } from '@/lib/http/handler'
 import { log } from '@/lib/log'
 import { enqueue } from '@/lib/notify/send'
+import { availableByPlan, describeGrants, planLabel } from '@/lib/plans'
+import { getPriceListForDisplay } from '@/lib/pricing'
 import { rootUrl } from '@/lib/tenant'
 
 export const runtime = 'nodejs'
@@ -33,6 +35,15 @@ export async function POST(request: Request) {
       : null
     const balance = await repository.creditBalance(session.orgId, new Date().toISOString())
 
+    /**
+     * Which credit is being asked for (N-119): the plan the wedding is on, or Deliver when the
+     * studio asks without naming a wedding. And what it holds instead, in words — "3 available" would
+     * be wrong the moment a studio has three Cinema credits and no Deliver one.
+     */
+    const prices = await getPriceListForDisplay()
+    const planId = catalogue?.planId ?? 'deliver'
+    const holds = describeGrants(availableByPlan(balance), prices) ?? 'none'
+
     const day = new Date().toISOString().slice(0, 10)
     const queued = await enqueue({
       template: 'credit-request',
@@ -42,13 +53,16 @@ export async function POST(request: Request) {
       locale: 'en',
       orgId: org.id,
       catalogueId: catalogue?.id ?? null,
-      dedupeKey: `credit-request:${org.id}:${day}`,
+      // Per plan: a Deliver credit asked for and a Cinema credit asked for the same day are two
+      // requests, and the second must not be swallowed as a repeat of the first.
+      dedupeKey: `credit-request:${org.id}:${planId}:${day}`,
       params: {
         studio: org.name,
         slug: org.slug,
         couple: catalogue?.coupleName.en ?? 'a wedding',
         email: session.operator.email,
-        available: balance.available,
+        plan: planLabel(prices, planId),
+        available: holds,
         consumed: balance.consumed,
         url: rootUrl(env.ROOT_DOMAIN, `/admin/platform/orgs/${org.id}`),
       },

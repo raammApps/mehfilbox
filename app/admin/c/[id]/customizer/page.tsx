@@ -7,6 +7,7 @@ import { getRepository } from '@/lib/db'
 import { effectiveModules } from '@/lib/db/repository'
 import { publicUrlOf } from '@/lib/address'
 import { signPhotos } from '@/lib/photos'
+import { creditContext } from '@/lib/admin/credits'
 import { getPriceListForDisplay, priceLabel } from '@/lib/pricing'
 import { allThemes } from '@/themes/resolve'
 
@@ -24,6 +25,7 @@ export default async function CustomizerPage({ params }: { params: Promise<{ id:
   const repository = getRepository()
   const org = await getSessionOrg(session)
   const prices = await getPriceListForDisplay()
+  const plan = await creditContext(catalogue.orgId, catalogue.planId, new Date().toISOString())
 
   const [titles, albums, photos, themes] = await Promise.all([
     repository.listTitles(catalogue.id),
@@ -64,7 +66,13 @@ export default async function CustomizerPage({ params }: { params: Promise<{ id:
         pendingContent={pending}
         themes={themes}
         audience={org?.kind === 'couple' ? 'couple' : 'studio'}
-        creditPrices={{ credit: priceLabel(prices, 'deliver'), pack: priceLabel(prices, 'deliver-5') }}
+        // This wedding's plan, not always Deliver (N-119): a Cinema credit costs what Cinema costs, and
+        // only Deliver has a five-pack.
+        creditPrices={{
+          credit: priceLabel(prices, catalogue.planId),
+          pack: catalogue.planId === 'deliver' ? priceLabel(prices, 'deliver-5') : null,
+        }}
+        creditPlan={plan}
       />
     </AdminChrome>
   )

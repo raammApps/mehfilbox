@@ -359,6 +359,7 @@ function buildCatalogue(): Catalogue {
     includedUntil: '2026-10-01T00:00:00.000Z',
     subStatus: 'included',
     subPlan: null,
+    planId: 'deliver',
     subUntil: null,
     createdAt: CREATED_AT,
     publishedAt: CREATED_AT,

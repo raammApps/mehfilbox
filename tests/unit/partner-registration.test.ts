@@ -124,6 +124,7 @@ describe('operator creation', () => {
       includedUntil: '2027-12-01',
       subStatus: 'included',
       subPlan: null,
+      planId: 'deliver',
       subUntil: null,
       createdAt: new Date().toISOString(),
       publishedAt: null,

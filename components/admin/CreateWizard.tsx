@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react'
 import { suggestSlug } from '@/lib/format'
 import { TEMPLATES } from '@/lib/admin/templates'
 import { STORAGE_TIERS } from '@/lib/entitlements'
+import type { CreditPlanId } from '@/lib/plans'
 import type { Preset } from '@/lib/schema'
 import type { ThemeDefinition } from '@/themes/contract'
 import { themeFrom } from '@/themes/registry'
@@ -63,6 +64,7 @@ export function CreateWizard({
   themes,
   studioTheme,
   styles,
+  plans,
   mode = 'studio',
 }: {
   /** Passed in rather than read here: `lib/env` is server-only, and this runs in the browser. */
@@ -78,6 +80,12 @@ export function CreateWizard({
   studioTheme: string
   /** The studio's house styles (D-36); the default one is preselected. */
   styles: Preset[]
+  /**
+   * The plans a wedding can be on, with how many credits of each the studio holds (N-119). `available`
+   * is `null` for a couple, who hold no basket — they buy a plan, not credits (D-61) — so no count is
+   * shown and none is implied.
+   */
+  plans: { id: CreditPlanId; name: string; available: number | null }[]
   /**
    * A couple starting a catalogue of their own (doc 16 §6, N-73) gets the same wizard with the
    * occasion first and without the two cards that only make sense for a studio — house styles
@@ -103,6 +111,8 @@ export function CreateWizard({
   } | null>(null)
   /** Unset by default (D-60, N-80): nothing chosen falls through to today's behaviour exactly. */
   const [tierId, setTierId] = useState<string | null>(null)
+  /** Deliver unless the studio says otherwise: what every wedding was before there was a choice (N-119). */
+  const [planId, setPlanId] = useState<CreditPlanId>('deliver')
   const [template, setTemplate] = useState(TEMPLATES[0]!.id)
   const [theme, setTheme] = useState(studioTheme)
   /**
@@ -217,6 +227,7 @@ export function CreateWizard({
         // sent and the rest of the studio's branding is inherited.
         ...(styleId ? { presetId: styleId } : { template, branding: { theme } }),
         ...(tierId ? { tierId } : {}),
+        planId,
       }),
     })
 
@@ -439,6 +450,46 @@ export function CreateWizard({
                   : errors['appName.en']
               }
             />
+          </Card>
+
+          <Card
+            title="Plan"
+            hint={
+              mode === 'couple'
+                ? 'Which plan this catalogue is on. You can change it until you publish.'
+                : 'Which credit publishing spends. You can change it until you publish.'
+            }
+          >
+            <fieldset className="mb-2">
+              <legend className="sr-only">Plan</legend>
+              <div className="flex flex-wrap gap-2">
+                {plans.map((plan) => (
+                  <label
+                    key={plan.id}
+                    className="cursor-pointer rounded-[var(--radius-pill)] border border-[var(--color-l-line)] px-3 py-1.5 text-[13px] has-[:checked]:border-[var(--color-accent)] has-[:checked]:font-semibold"
+                  >
+                    <input
+                      type="radio"
+                      name="plan"
+                      value={plan.id}
+                      checked={planId === plan.id}
+                      onChange={() => setPlanId(plan.id)}
+                      className="sr-only"
+                    />
+                    {plan.name}
+                    {plan.available === null
+                      ? ''
+                      : ` · ${plan.available} credit${plan.available === 1 ? '' : 's'}`}
+                  </label>
+                ))}
+              </div>
+              {plans.find((plan) => plan.id === planId)?.available === 0 ? (
+                <p className="mt-2 text-[12px] text-[var(--color-l-text-mid)]">
+                  You have no {plans.find((plan) => plan.id === planId)?.name} credits. Build the whole
+                  wedding regardless — publishing is where one is asked for.
+                </p>
+              ) : null}
+            </fieldset>
           </Card>
 
           <Card

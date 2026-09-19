@@ -136,7 +136,10 @@ describe('creating a studio', () => {
     expect(mail).toHaveLength(1)
     expect(mail[0]).toMatchObject({ template: 'credential', address: 'priya@lensa.test', locale: 'hi' })
 
-    expect(await repo.creditBalance(body.org.id, new Date().toISOString())).toEqual({ available: 3, consumed: 0, expired: 0 })
+    const opening = await repo.creditBalance(body.org.id, new Date().toISOString())
+    expect(opening).toMatchObject({ available: 3, consumed: 0, expired: 0 })
+    // Opening credits are Deliver credits unless someone says otherwise (N-119).
+    expect(opening.byPlan.deliver.available).toBe(3)
     const audit = await repo.listPlatformAudit({ limit: 5 })
     expect(audit[0]).toMatchObject({ action: 'org.create', orgSlug: 'lensa-films' })
     expect(audit[0]!.detail).toMatchObject({ email: 'priya@lensa.test', credits: 3 })

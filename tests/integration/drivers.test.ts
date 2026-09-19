@@ -196,6 +196,7 @@ describe.skipIf(!hasSupabase)('Supabase Postgres, for real', () => {
         includedUntil: new Date(Date.now() + 90 * 864e5).toISOString(),
         subStatus: 'included',
         subPlan: null,
+        planId: 'deliver',
         subUntil: null,
         createdAt: new Date().toISOString(),
         publishedAt: null,
@@ -212,6 +213,83 @@ describe.skipIf(!hasSupabase)('Supabase Postgres, for real', () => {
 
       // Another org must not see it. This is the isolation claim, tested rather than asserted.
       expect(await repository.getCatalogue(id, randomUUID())).toBeNull()
+    },
+    REMOTE_TIMEOUT,
+  )
+
+  it(
+    'spends a credit of the wedding’s own plan, in the database, and refuses a plan it does not know (N-119)',
+    async () => {
+      const { createClient } = await import('@supabase/supabase-js')
+      const { SupabaseRepository } = await import('@/lib/db/supabase-repository')
+      const { makeCredits } = await import('@/lib/admin/credits')
+      const { catalogueSchema, orgSchema } = await import('@/lib/schema')
+      const repository = new SupabaseRepository()
+      const db = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        (process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY)!,
+        { auth: { persistSession: false } },
+      )
+
+      // A studio of its own: credits are an org's balance, and this must not touch a real one.
+      const suffix = Date.now().toString(36)
+      const org = orgSchema.parse({
+        id: randomUUID(),
+        name: `Integration typed credits ${suffix}`,
+        slug: `itest-credits-${suffix}`,
+        createdAt: new Date().toISOString(),
+      })
+      const catalogueId = randomUUID()
+
+      try {
+        await repository.createOrg(org)
+        await repository.createCatalogue(
+          catalogueSchema.parse({
+            id: catalogueId,
+            orgId: org.id,
+            tenantSlug: org.slug,
+            slug: `itest-${suffix}`,
+            coupleName: { en: 'Typed & Credits' },
+            appName: { en: 'Typed Originals' },
+            weddingDate: '2026-12-01',
+            includedUntil: new Date(Date.now() + 90 * 864e5).toISOString(),
+            createdAt: new Date().toISOString(),
+            planId: 'keep',
+          }),
+        )
+        createdCatalogues.push(catalogueId)
+        expect((await repository.getCatalogue(catalogueId, org.id))?.planId).toBe('keep')
+
+        await repository.grantCredits([
+          ...makeCredits({ orgId: org.id, count: 1, planId: 'deliver', grantedBy: 'itest' }),
+          ...makeCredits({ orgId: org.id, count: 1, planId: 'keep', grantedBy: 'itest' }),
+        ])
+        const now = new Date().toISOString()
+
+        // The Deliver credit is not for a Keep wedding, however it is asked for.
+        const spent = await repository.consumeCredit(org.id, catalogueId, 'keep', now)
+        expect(spent?.planId).toBe('keep')
+        expect(await repository.consumeCredit(org.id, catalogueId, 'keep', now)).toBeNull()
+        expect(await repository.consumeCredit(org.id, catalogueId, 'cinema', now)).toBeNull()
+
+        const balance = await repository.creditBalance(org.id, now)
+        expect(balance.byPlan.deliver).toEqual({ available: 1, consumed: 0, expired: 0 })
+        expect(balance.byPlan.keep).toEqual({ available: 0, consumed: 1, expired: 0 })
+        expect(balance.byPlan.cinema).toEqual({ available: 0, consumed: 0, expired: 0 })
+
+        // The check constraints are the backstop under the route's validation: a storage tier
+        // (`light`) is a different ladder, and must not be writable as a credit plan by mistake.
+        const badCredit = await db
+          .from('credits')
+          .insert({ id: randomUUID(), org_id: org.id, plan_id: 'light', expires_at: now })
+        expect(badCredit.error?.code, 'credits.plan_id must refuse an unknown plan').toBe('23514')
+        const badCatalogue = await db.from('catalogues').update({ plan_id: 'light' }).eq('id', catalogueId)
+        expect(badCatalogue.error?.code, 'catalogues.plan_id must refuse an unknown plan').toBe('23514')
+      } finally {
+        await db.from('credits').delete().eq('org_id', org.id)
+        await db.from('catalogues').delete().eq('id', catalogueId)
+        await db.from('orgs').delete().eq('id', org.id)
+      }
     },
     REMOTE_TIMEOUT,
   )
