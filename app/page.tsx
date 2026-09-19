@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { env } from '@/lib/env'
-import { describeGrants } from '@/lib/plans'
+import { describeGrants, termLabel } from '@/lib/plans'
 import { getPriceListForDisplay, priceLabel, retailLabel, type PriceList } from '@/lib/pricing'
 
 /**
@@ -76,7 +76,7 @@ export default async function RootPage() {
         <Against />
         <How />
         <Pricing prices={prices} />
-        <Faq />
+        <Faq deliverTerm={termLabel(prices.deliver ?? { termMonths: null, termDays: null })} />
         <Closing />
       </main>
       <MarketingFooter />
@@ -242,6 +242,14 @@ function Pricing({ prices }: { prices: PriceList }) {
   const { price, included } = studioOffer(prices)
   const part = (lead: string, label: string | null) => (label ? `${lead} ${label}` : null)
   const youPay = (parts: (string | null)[]) => parts.filter(Boolean).join(' · ') || 'Ask us'
+  /**
+   * "What the couple keeps": the term is read from the plan row (N-120), so changing it there changes
+   * this table. A plan whose term could not be read simply omits it rather than printing a guess.
+   */
+  const keeps = (list: PriceList, id: string, rest: string, renewable = false) => {
+    const term = termLabel(list[id] ?? { termMonths: null, termDays: null })
+    return [term ? `${term}${renewable ? ', renewable' : ''}` : null, rest].filter(Boolean).join(' · ')
+  }
   return (
     <section id="pricing" className="scroll-mt-8 border-t border-surface-2 bg-surface-1 py-20">
       <div className="gutter-x mx-auto max-w-[1100px]">
@@ -275,7 +283,7 @@ function Pricing({ prices }: { prices: PriceList }) {
             <tbody>
               <tr className="border-b border-surface-2">
                 <th scope="row" className="py-4 pr-6 font-semibold text-text-hi">Deliver</th>
-                <td className="py-4 pr-6 text-text-mid">90 days · 100 GB</td>
+                <td className="py-4 pr-6 text-text-mid">{keeps(prices, 'deliver', '100 GB')}</td>
                 <td className="py-4 pr-6 text-text-hi">
                   {youPay([priceLabel(prices, 'deliver'), part('five for', priceLabel(prices, 'deliver-5'))])}
                 </td>
@@ -283,7 +291,7 @@ function Pricing({ prices }: { prices: PriceList }) {
               </tr>
               <tr className="border-b border-surface-2">
                 <th scope="row" className="py-4 pr-6 font-semibold text-text-hi">Keep</th>
-                <td className="py-4 pr-6 text-text-mid">12 months, renewable · 100 GB</td>
+                <td className="py-4 pr-6 text-text-mid">{keeps(prices, 'keep', '100 GB', true)}</td>
                 <td className="py-4 pr-6 text-text-hi">
                   {youPay([priceLabel(prices, 'keep'), part('three years', priceLabel(prices, 'keep-3y'))])}
                 </td>
@@ -291,7 +299,7 @@ function Pricing({ prices }: { prices: PriceList }) {
               </tr>
               <tr className="border-b border-surface-2">
                 <th scope="row" className="py-4 pr-6 font-semibold text-text-hi">Cinema</th>
-                <td className="py-4 pr-6 text-text-mid">12 months, renewable · 200 GB · 4K</td>
+                <td className="py-4 pr-6 text-text-mid">{keeps(prices, 'cinema', '200 GB · 4K', true)}</td>
                 <td className="py-4 pr-6 text-text-hi">
                   {youPay([priceLabel(prices, 'cinema'), part('three years', priceLabel(prices, 'cinema-3y'))])}
                 </td>
@@ -309,10 +317,11 @@ function Pricing({ prices }: { prices: PriceList }) {
   )
 }
 
-function Faq() {
+/** `deliverTerm` is read from the price list (N-120), so the question names the term the plan really has. */
+function Faq({ deliverTerm }: { deliverTerm: string | null }) {
   const qa: [string, string][] = [
     [
-      'What happens after 90 days?',
+      `What happens after ${deliverTerm ?? 'the term ends'}?`,
       'It archives. Nothing is deleted — streaming pauses, the files are kept, and a catalogue is restored when it is paid for again. A couple in grace can still download everything.',
     ],
     [

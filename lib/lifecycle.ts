@@ -40,6 +40,9 @@ export function nextSubStatus(
   catalogue: Pick<Catalogue, 'subStatus' | 'includedUntil'>,
   now: Date,
 ): SubStatus | null {
+  // No term yet (N-120) is not an expired one. `new Date(null)` is 1 January 1970, which would read
+  // as a term that ended fifty years ago and move a wedding to grace on its first published day.
+  if (!catalogue.includedUntil) return null
   const end = new Date(catalogue.includedUntil)
   if (Number.isNaN(end.getTime())) return null
 
@@ -112,7 +115,8 @@ export async function runLifecycle(now: Date = new Date()): Promise<LifecycleRes
  * couple will notice and the one `PRICING.md` §2 says must never happen quietly.
  */
 async function tell(catalogue: Catalogue, next: SubStatus): Promise<void> {
-  if (next !== 'cold') return
+  // Going cold needs a term that ended, so a missing one cannot get here; the check is for the type.
+  if (next !== 'cold' || !catalogue.includedUntil) return
 
   const repository = getRepository()
   const owner = await repository.getOrg(catalogue.orgId)

@@ -277,11 +277,12 @@ export function CatalogueSettings({ catalogue }: { catalogue: Catalogue }) {
       <section className="mb-6 rounded-[var(--radius-card)] border border-[var(--color-l-line)] bg-white p-4">
         <h2 className="mb-1 text-[15px] font-semibold">Serving until</h2>
         <p className="text-[15px] font-semibold tabular-nums" data-testid="serving-until">
-          {catalogue.includedUntil.slice(0, 10)}
+          {catalogue.includedUntil?.slice(0, 10) ?? 'Not started'}
         </p>
         <p className="mt-1 text-[13px] text-[var(--color-l-text-mid)]">
-          After this date guests see a renewal screen — never a broken link, and nothing is
-          deleted. A renewal extends it; the date moves when the renewal is paid.
+          {catalogue.includedUntil
+            ? 'After this date guests see a renewal screen — never a broken link, and nothing is deleted. A renewal extends it; the date moves when the renewal is paid.'
+            : 'The term starts the day this wedding is first published, and runs for as long as its plan says. Until then nothing counts down, and nothing can lapse.'}
         </p>
       </section>
 

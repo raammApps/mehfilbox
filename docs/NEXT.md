@@ -249,24 +249,12 @@ cheapest place to prove the direction looks right on the existing token system b
 
 Sandeep's walk-through of how money moves (`PRODUCT.md` §10, D-61), which replaced three documents
 that gave three answers and narrowed D-26. **In build order** — each is useful before the next
-exists, and the first three need no payment gateway at all. **N-118 (prices as settings) and N-119
-(typed credits) landed 19 September** — see `PROGRESS.md`; `getPrice` and `getPriceListForDisplay` in
+exists, and the first three need no payment gateway at all. **N-118 (prices as settings), N-119
+(typed credits) and N-120 (the term starts at first Publish) landed 19 September** — see `PROGRESS.md`; `getPrice` and `getPriceListForDisplay` in
 `lib/pricing.ts` are what the rest read prices from, and `CREDIT_PLAN_IDS` / `availableByPlan` in
 `lib/plans.ts` are what read a studio's baskets. Two doors, both permanent: a studio
 buys a typed basket of credits and spends one per wedding it delivers; a couple who signs up alone
 buys a plan for their one wedding. Prices and coupons are settings, never code.
-
-### N-120 · The term starts at first Publish  ·  ~half a session  ·  D-61
-
-`includedUntil` is set when a catalogue is *created* (`app/api/admin/catalogues/route.ts:91`, a
-flat `INCLUDED_MONTHS`), before anything has been delivered. Move it to first Publish
-(`publish/route.ts`, where the credit is spent) and take the length from the catalogue's plan —
-Deliver 90 days, Keep and Cinema 12 months, held on the plan row (N-118) rather than in code
-(`plans.retention_months` counts months; 90 days needs its own column). **The careful part is the
-readers, not the writer:** a catalogue that has never been published now has *no* term, and
-`resolveAccess`'s included → grace → cold ladder, the lapse jobs and the lapse dashboard must read
-null as "not started", never "expired" — grep every reader of `includedUntil` before changing the
-writer. Existing published catalogues keep their date; a republish never restarts it.
 
 ### N-121 · Coupon codes  ·  ~1 session  ·  D-61
 
@@ -590,7 +578,7 @@ regenerate without invalidating, so the revocation is the half worth checking.
 - **Credentials** live in `.env.local` (gitignored, verified). Both services are fully
   configured; `pnpm preflight` is all green.
 - **Supabase**: schema applied through `0025_occasions.sql` on 12 September; later migrations are recorded in
-  PROGRESS as they are applied — `0029_price_list.sql` is on **staging and production** (both 19 September); `0030_catalogue_plan.sql` (N-119) is on **staging and production** (both 19 September). Six orgs exist, and the operator
+  PROGRESS as they are applied — `0029_price_list.sql` is on **staging and production** (both 19 September); `0030_catalogue_plan.sql` (N-119) is on **staging and production** (both 19 September); `0031_term_at_publish.sql` (N-120) is **written, not yet applied anywhere** — apply it to staging, then production, *before* deploying: Publish and the price list now read `plans.term_*`, and without them the first Publish refuses. Six orgs exist, and the operator
   rows are, read from the database on 7 September rather than remembered:
 
   | org | operator |

@@ -232,7 +232,7 @@ export class SupabaseRepository implements Repository {
       status: r.status,
       privacy: r.privacy,
       passcodeHash: r.passcode_hash,
-      includedUntil: r.included_until,
+      includedUntil: r.included_until ?? null,
       subStatus: r.sub_status,
       subPlan: r.sub_plan,
       // Tolerant of a row from before the column existed: it is Deliver, as the migration backfills.
@@ -957,6 +957,8 @@ export class SupabaseRepository implements Repository {
       position: r.position ?? 100,
       retailMinPaise: r.retail_min_paise ?? null,
       retailMaxPaise: r.retail_max_paise ?? null,
+      termMonths: r.term_months ?? null,
+      termDays: r.term_days ?? null,
     }
   }
 

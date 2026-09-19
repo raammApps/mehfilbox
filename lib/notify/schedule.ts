@@ -50,9 +50,11 @@ function daysBetween(from: Date, to: Date): number {
  * date ladder through a cron, a repository and an email queue.
  */
 export function milestoneFor(
-  includedUntil: string,
+  includedUntil: string | null,
   now: Date,
 ): { template: 'expiry' | 'grace'; day: number } | null {
+  // A term that has not started (N-120) has no rung to be on — never "days into grace".
+  if (!includedUntil) return null
   const end = new Date(includedUntil)
   if (Number.isNaN(end.getTime())) return null
 
@@ -85,7 +87,7 @@ export async function queueDueWarnings(now: Date = new Date()): Promise<Schedule
     result.examined += 1
 
     const milestone = milestoneFor(catalogue.includedUntil, now)
-    if (!milestone) continue
+    if (!milestone || !catalogue.includedUntil) continue
 
     const params = {
       coupleName: resolveLocalised(catalogue.coupleName, catalogue.locale),

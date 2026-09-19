@@ -5,7 +5,7 @@ import { requireOwnedCatalogue } from '@/lib/admin/session'
 import { revalidateCatalogue } from '@/lib/catalogue-cache'
 import { getRepository } from '@/lib/db'
 import { env } from '@/lib/env'
-import { formatWeddingDate } from '@/lib/format'
+import { termPhrase } from '@/lib/term'
 import { ApiError } from '@/lib/http/errors'
 import { noStore, readJson, route } from '@/lib/http/handler'
 import { resolveLocalised } from '@/lib/i18n'
@@ -137,7 +137,7 @@ async function handOverNow(
         coupleName: resolveLocalised(catalogue.coupleName, catalogue.locale),
         studioName: studio?.name ?? 'your studio',
         url: rootUrl(env.ROOT_DOMAIN, '/my'),
-        date: formatWeddingDate(catalogue.includedUntil, catalogue.locale),
+        term: termPhrase(catalogue.includedUntil, catalogue.locale),
       },
     }).catch((error: unknown) => {
       log.error('handover: email could not be queued', { reason: String(error) })

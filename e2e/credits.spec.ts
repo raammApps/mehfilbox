@@ -7,6 +7,10 @@ import { expect, test } from '@playwright/test'
  * publish spends it, the second is refused with a panel that says why and offers the way to add
  * one, and the console says how many are left. What a studio meets on its second sale.
  *
+ * The term starts at the first Publish (N-120, D-61): until then the overview says it has not
+ * started and how long it will run — which follows the plan, so changing the plan changes the
+ * sentence — and after it, a real end date.
+ *
  * Credits are typed (N-119, D-61): the trial credit is a Deliver credit, so a wedding started on
  * Keep is refused *by name* while it is held, the plan is changed on the overview, and the same
  * publish then goes through. That is the journey a studio with the wrong basket actually takes.
@@ -77,17 +81,30 @@ test.describe('credits and the trial', () => {
 
     // Change its plan on the overview, and the same publish goes through — on the Deliver credit.
     await page.goto(`/admin/c/${keep.id}`)
+    // Nothing counts down while it is a draft, and the length is the plan's: Keep is twelve months.
+    await expect(page.getByText('term starts when you publish — 12 months')).toBeVisible()
     const control = page.getByTestId('catalogue-plan')
     await control.getByRole('combobox', { name: 'Plan' }).selectOption('deliver')
     await control.getByRole('button', { name: 'Change plan' }).click()
     await expect(control.getByRole('button', { name: 'Change plan' })).toBeDisabled()
     await expect(control.getByRole('combobox', { name: 'Plan' })).toHaveValue('deliver')
+    // The sentence followed the plan: Deliver is ninety days.
+    await expect(page.getByText('term starts when you publish — 90 days')).toBeVisible()
     const onDeliver = await page.request.post(`/api/admin/catalogues/${keep.id}/publish`)
     expect(onDeliver.ok(), await onDeliver.text()).toBe(true)
+
+    // The term started now, and runs ninety days — to the day, not "about".
+    const { catalogue: live } = (await onDeliver.json()) as { catalogue: { includedUntil: string } }
+    const daysAway = (new Date(live.includedUntil).getTime() - Date.now()) / 86_400_000
+    expect(daysAway).toBeGreaterThan(89.9)
+    expect(daysAway).toBeLessThan(90.1)
 
     // Published, the plan is a statement and not a control: a credit of it has been spent.
     await page.goto(`/admin/c/${keep.id}`)
     await expect(page.getByTestId('catalogue-plan')).toContainText('Fixed — publishing this wedding spent a Deliver credit')
+    // …and the overview now names the end date instead of saying it has not started.
+    await expect(page.getByText(/included until \d{1,2} \w+ \d{4}/)).toBeVisible()
+    await expect(page.getByText('term starts when you publish')).toHaveCount(0)
     await expect(page.getByTestId('catalogue-plan').getByRole('combobox')).toHaveCount(0)
     const locked = await page.request.patch(`/api/admin/catalogues/${keep.id}`, { data: { planId: 'cinema' } })
     expect(locked.status()).toBe(400)

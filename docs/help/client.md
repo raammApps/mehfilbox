@@ -128,7 +128,8 @@ Worth knowing:
   wedding was created.
 - If a **premiere** date was set, guests see a countdown until it rather than the wedding itself.
 - Past the *serving until* date, guests see a renewal screen — never a broken link — before
-  anything else.
+  anything else. That date counts from the day the wedding was first published, not from when it
+  was created.
 
 ---
 

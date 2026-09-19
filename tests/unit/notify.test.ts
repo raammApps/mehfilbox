@@ -44,7 +44,7 @@ describe('the notification seam', () => {
       coupleName: 'आन्या और विक्रम',
       studioName: 'Kalyanam',
       url: 'https://mehfilbox.com/c/x',
-      date: '14 Feb 2027',
+      term: 'यह 14 फ़रवरी 2027 तक चलेगा',
     })
     expect(out.subject).toContain('आन्या और विक्रम')
     expect(out.text).toContain('Kalyanam')

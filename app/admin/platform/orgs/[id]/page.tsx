@@ -10,6 +10,7 @@ import { getPlatformAdmin } from '@/lib/admin/platform'
 import { getRepository } from '@/lib/db'
 import { DEFAULT_LIMITS } from '@/lib/entitlements'
 import { formatWeddingDate } from '@/lib/format'
+import { termEnd } from '@/lib/term'
 import { CREDIT_PLAN_IDS, planLabel, type CreditPlanId } from '@/lib/plans'
 import { getPriceListForDisplay } from '@/lib/pricing'
 import { publicUrlOf } from '@/lib/address'
@@ -139,8 +140,8 @@ export default async function PlatformOrgPage({ params }: { params: Promise<{ id
                 <StatusPill status={catalogue.status} />
               </div>
               <p className="text-[13px] text-[var(--color-l-text-mid)]">
-                {formatWeddingDate(catalogue.weddingDate, 'en')} · included until{' '}
-                {formatWeddingDate(catalogue.includedUntil, 'en')}
+                {formatWeddingDate(catalogue.weddingDate, 'en')} · {catalogue.includedUntil ? 'included until ' : 'term starts at first publish'}
+                {termEnd(catalogue.includedUntil, 'en')}
               </p>
               <p className="mt-2">
                 {/* The guest page, which is what a partner is usually describing. */}

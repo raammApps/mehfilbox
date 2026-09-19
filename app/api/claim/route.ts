@@ -7,7 +7,7 @@ import { getRepository } from '@/lib/db'
 import { ApiError } from '@/lib/http/errors'
 import { readJson, route } from '@/lib/http/handler'
 import { clientIp, consume } from '@/lib/http/rate-limit'
-import { formatWeddingDate } from '@/lib/format'
+import { termPhrase } from '@/lib/term'
 import { resolveLocalised } from '@/lib/i18n'
 import { log } from '@/lib/log'
 import { enqueue } from '@/lib/notify/send'
@@ -203,7 +203,7 @@ async function attach(catalogue: Catalogue, transfer: Transfer, toOrgId: string)
         coupleName: resolveLocalised(catalogue.coupleName, catalogue.locale),
         studioName: partner?.name ?? 'your studio',
         url: publicUrlOf(catalogue),
-        date: formatWeddingDate(catalogue.includedUntil, catalogue.locale),
+        term: termPhrase(catalogue.includedUntil, catalogue.locale),
       },
     })
   } catch (error) {

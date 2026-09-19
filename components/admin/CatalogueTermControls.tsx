@@ -27,16 +27,19 @@ export function ExtendTermControl({
   includedUntil,
 }: {
   catalogueId: string
-  includedUntil: string
+  /** `null` while the wedding has not been published — its term has not started (N-120). */
+  includedUntil: string | null
 }) {
   const router = useRouter()
-  const [date, setDate] = useState(includedUntil.slice(0, 10))
+  const [date, setDate] = useState(includedUntil?.slice(0, 10) ?? '')
   const [reason, setReason] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const plusYear = () => {
-    const next = new Date(`${includedUntil.slice(0, 10)}T00:00:00.000Z`)
+    // From today when there is no term yet, so "+ 1 year" is a year from now rather than from nothing.
+    const base = includedUntil?.slice(0, 10) ?? new Date().toISOString().slice(0, 10)
+    const next = new Date(`${base}T00:00:00.000Z`)
     next.setUTCFullYear(next.getUTCFullYear() + 1)
     setDate(next.toISOString().slice(0, 10))
   }
@@ -60,8 +63,17 @@ export function ExtendTermControl({
     >
       <p className="mb-1 text-[15px] font-semibold">Serving until</p>
       <p className="mb-3 text-[13px] text-[var(--color-l-text-mid)]">
-        Currently <span className="font-semibold tabular-nums">{includedUntil.slice(0, 10)}</span>.
-        A renewal moves it; write what was paid.
+        {includedUntil ? (
+          <>
+            Currently <span className="font-semibold tabular-nums">{includedUntil.slice(0, 10)}</span>.
+            A renewal moves it; write what was paid.
+          </>
+        ) : (
+          <>
+            <span className="font-semibold">Not started</span> — the term begins when this wedding is
+            first published. Setting a date now fixes the end in advance, and Publish will not move it.
+          </>
+        )}
       </p>
       <div className="flex flex-wrap items-end gap-2">
         <label className="text-[13px]">

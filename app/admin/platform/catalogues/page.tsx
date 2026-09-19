@@ -34,8 +34,14 @@ export default async function PlatformCataloguesPage({
             .includes(needle)
         : true,
     )
-    // Soonest to lapse first: that is the order the renewal work is done in.
-    .sort((a, b) => a.includedUntil.localeCompare(b.includedUntil))
+    // Soonest to lapse first: that is the order the renewal work is done in. A term that has not
+    // started (N-120) has nothing to lapse, so it sorts after every one that has.
+    .sort((a, b) => {
+      if (a.includedUntil === null || b.includedUntil === null) {
+        return a.includedUntil === b.includedUntil ? 0 : a.includedUntil === null ? 1 : -1
+      }
+      return a.includedUntil.localeCompare(b.includedUntil)
+    })
 
   return (
     <div className="mx-auto min-h-svh w-full max-w-[1100px] p-6">
@@ -100,7 +106,7 @@ export default async function PlatformCataloguesPage({
                   <td className="px-3 py-2.5 text-[13px] text-[var(--color-l-text-mid)]">
                     {formatWeddingDate(catalogue.weddingDate, 'en')}
                   </td>
-                  <td className="px-3 py-2.5 text-[13px] tabular-nums">{catalogue.includedUntil.slice(0, 10)}</td>
+                  <td className="px-3 py-2.5 text-[13px] tabular-nums">{catalogue.includedUntil?.slice(0, 10) ?? 'Not started'}</td>
                   <td className="px-3 py-2.5 text-[13px] text-[var(--color-l-text-mid)]">{catalogue.subStatus}</td>
                 </tr>
               ))}

@@ -89,3 +89,58 @@ export function availableByPlan(balance: Pick<CreditBalance, 'byPlan'>): Record<
   >
 }
 
+
+/** The two columns a term lives in — the whole of what `addTerm` and `termLabel` need to know. */
+export type PlanTerm = Pick<Plan, 'termMonths' | 'termDays'>
+
+/**
+ * The length of a term as one number and its unit, or `null` when the plan has none — or when it is
+ * malformed with both set, which is treated as no term rather than guessed at (the database refuses
+ * it too; this is what stops a bad row becoming a wrong date).
+ */
+function termOf(term: PlanTerm): { months: number } | { days: number } | null {
+  const months = term.termMonths ?? null
+  const days = term.termDays ?? null
+  if (months !== null && days === null) return { months }
+  if (days !== null && months === null) return { days }
+  return null
+}
+
+/**
+ * When a term that starts at `from` ends, or `null` if the plan has no term.
+ *
+ * Months are **calendar months, clamped to the last day of the month** they land in: 31 August plus
+ * six months is 28 February, not 3 March, and 29 February plus twelve months is 28 February rather
+ * than 1 March — a wedding must never be served a day longer, or shorter, than the plan says. Days
+ * are days. Both are done in UTC so the answer does not depend on where the server happens to be.
+ */
+export function addTerm(from: Date, term: PlanTerm): Date | null {
+  const length = termOf(term)
+  if (!length) return null
+
+  if ('days' in length) {
+    return new Date(from.getTime() + length.days * 24 * 60 * 60 * 1000)
+  }
+
+  const month = from.getUTCMonth() + length.months
+  const lastDayOfTarget = new Date(Date.UTC(from.getUTCFullYear(), month + 1, 0)).getUTCDate()
+  return new Date(
+    Date.UTC(
+      from.getUTCFullYear(),
+      month,
+      Math.min(from.getUTCDate(), lastDayOfTarget),
+      from.getUTCHours(),
+      from.getUTCMinutes(),
+      from.getUTCSeconds(),
+      from.getUTCMilliseconds(),
+    ),
+  )
+}
+
+/** "90 days", "12 months", "1 month" — how a term reads in copy; `null` when the plan has none. */
+export function termLabel(term: PlanTerm): string | null {
+  const length = termOf(term)
+  if (!length) return null
+  if ('days' in length) return `${length.days} day${length.days === 1 ? '' : 's'}`
+  return `${length.months} month${length.months === 1 ? '' : 's'}`
+}

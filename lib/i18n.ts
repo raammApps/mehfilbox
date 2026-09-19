@@ -176,9 +176,16 @@ export const dictionary = {
 
     'notify.handover.subject': '{coupleName} is yours',
     'notify.handover.text':
-      '{coupleName} is now yours to watch, download and share.\n\nSign in: {url}\n\n{studioName} still manages the plan, and it runs to {date}. Nothing is ever deleted.',
+      '{coupleName} is now yours to watch, download and share.\n\nSign in: {url}\n\n{studioName} still manages the plan, and {term}. Nothing is ever deleted.',
     'notify.handover.html':
-      '<p><strong>{coupleName}</strong> is now yours to watch, download and share.</p><p><a href="{url}">Sign in</a></p><p>{studioName} still manages the plan, and it runs to {date}. Nothing is ever deleted.</p>',
+      '<p><strong>{coupleName}</strong> is now yours to watch, download and share.</p><p><a href="{url}">Sign in</a></p><p>{studioName} still manages the plan, and {term}. Nothing is ever deleted.</p>',
+
+    /**
+     * The clause `{term}` is filled with (N-120): a wedding has an end date, or its term has not
+     * started because it has not been published. `lib/term.ts` chooses.
+     */
+    'notify.term.until': 'it runs to {date}',
+    'notify.term.pending': 'its term starts the day it is first published',
 
     'notify.delivery.subject': '{coupleName} — now streaming',
     'notify.delivery.text':
@@ -355,9 +362,12 @@ export const dictionary = {
 
     'notify.handover.subject': '{coupleName} अब आपका है',
     'notify.handover.text':
-      '{coupleName} अब आपका है — देखिए, डाउनलोड कीजिए और साझा कीजिए।\n\nसाइन इन: {url}\n\nप्लान {studioName} संभालते हैं, और यह {date} तक चलेगा। कुछ भी कभी नहीं मिटाया जाता।',
+      '{coupleName} अब आपका है — देखिए, डाउनलोड कीजिए और साझा कीजिए।\n\nसाइन इन: {url}\n\nप्लान {studioName} संभालते हैं, और {term}। कुछ भी कभी नहीं मिटाया जाता।',
     'notify.handover.html':
-      '<p><strong>{coupleName}</strong> अब आपका है — देखिए, डाउनलोड कीजिए और साझा कीजिए।</p><p><a href="{url}">साइन इन करें</a></p><p>प्लान {studioName} संभालते हैं, और यह {date} तक चलेगा। कुछ भी कभी नहीं मिटाया जाता।</p>',
+      '<p><strong>{coupleName}</strong> अब आपका है — देखिए, डाउनलोड कीजिए और साझा कीजिए।</p><p><a href="{url}">साइन इन करें</a></p><p>प्लान {studioName} संभालते हैं, और {term}। कुछ भी कभी नहीं मिटाया जाता।</p>',
+
+    'notify.term.until': 'यह {date} तक चलेगा',
+    'notify.term.pending': 'इसकी अवधि पहली बार प्रकाशित होने के दिन से शुरू होगी',
 
     'notify.delivery.subject': '{coupleName} — अब देखने के लिए तैयार',
     'notify.delivery.text':

@@ -72,16 +72,6 @@ const createSchema = z.object({
   planId: z.enum(CREDIT_PLAN_IDS).default('deliver'),
 })
 
-/**
- * Twelve months, which is what the plans sell (`docs/PRICING.md`).
- *
- * It was three, from doc 01 §7's original model where the couple picked up a subscription in
- * month four. That model is superseded: a studio can sell "a year", and explaining a three-month
- * window plus a renewal conversation in the same breath is how a sale stalls. Every catalogue
- * created under the old constant expired nine months early.
- */
-const INCLUDED_MONTHS = 12
-
 export async function GET() {
   return route('admin/catalogues:list', async () => {
     const { orgId } = await requireOperator()
@@ -96,8 +86,6 @@ export async function POST(request: Request) {
     const repository = getRepository()
 
     const now = new Date()
-    const includedUntil = new Date(now)
-    includedUntil.setMonth(includedUntil.getMonth() + INCLUDED_MONTHS)
 
     const org = await repository.getOrg(orgId)
     // Scoped to the org, so another studio's style is a 404 rather than a copy.
@@ -157,7 +145,12 @@ export async function POST(request: Request) {
       timezone: body.timezone,
       premiereAt: body.premiereAt ?? null,
       servedAt: studioDomain ? `https://${studioDomain.host}/${body.slug}` : null,
-      includedUntil: includedUntil.toISOString(),
+      /**
+       * No term yet (N-120, D-61). It starts at the first Publish and its length comes from the
+       * wedding's plan — a draft built over three months has delivered nothing, so it has spent
+       * nothing. This was a flat twelve months from *creation* until then.
+       */
+      includedUntil: null,
       subStatus: 'included',
       subPlan: null,
       planId: body.planId,

@@ -54,16 +54,18 @@ const plan = (
   position,
   retailMinPaise: null,
   retailMaxPaise: null,
+  termMonths: null,
+  termDays: null,
   ...extra,
 })
 
 export const SEED_PLANS: Plan[] = [
   plan('studio', 'partner', 'Studio plan', 'year', 499900, 10, { grants: { deliver: 2, cinema: 1 } }),
-  plan('deliver', 'catalogue', 'Deliver', 'each', 199900, 20, { storageGb: 100, retailMinPaise: 500000, retailMaxPaise: 800000 }),
+  plan('deliver', 'catalogue', 'Deliver', 'each', 199900, 20, { storageGb: 100, retailMinPaise: 500000, retailMaxPaise: 800000, termDays: 90 }),
   plan('deliver-5', 'catalogue', 'Deliver — five credits', 'each', 799900, 25, { storageGb: 100 }),
-  plan('keep', 'catalogue', 'Keep', 'each', 600000, 30, { storageGb: 100, retailMinPaise: 1500000, retailMaxPaise: 2000000 }),
+  plan('keep', 'catalogue', 'Keep', 'each', 600000, 30, { storageGb: 100, retailMinPaise: 1500000, retailMaxPaise: 2000000, termMonths: 12 }),
   plan('keep-3y', 'catalogue', 'Keep — three years', 'each', 1200000, 35, { storageGb: 100 }),
-  plan('cinema', 'catalogue', 'Cinema', 'each', 1200000, 40, { storageGb: 200, retailMinPaise: 3000000, retailMaxPaise: 4000000 }),
+  plan('cinema', 'catalogue', 'Cinema', 'each', 1200000, 40, { storageGb: 200, retailMinPaise: 3000000, retailMaxPaise: 4000000, termMonths: 12 }),
   plan('cinema-3y', 'catalogue', 'Cinema — three years', 'each', 2400000, 45, { storageGb: 200 }),
   plan('light', 'catalogue', 'Light', 'each', null, 50, { storageGb: 5 }),
   plan('medium', 'catalogue', 'Medium', 'each', null, 55, { storageGb: 50 }),

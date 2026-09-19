@@ -3107,3 +3107,95 @@ us"), an anonymous create is 401 (not a 500 from a missing column) and the prici
 **Not walked on production:** the typed dashboard line, the plan control and a publish — they need a
 signed-in studio session, which is Sandeep's to open (`/admin` should read "N Deliver credits to
 publish with", and any existing studio's single balance is a Deliver one by the migration's backfill).
+
+
+## N-120 · The term starts at first Publish — 19 September 2026
+
+**What now exists.** A wedding has **no term** until its first Publish. `includedUntil` is nullable
+(migration `0031_term_at_publish.sql` drops the `not null`), a new wedding is created with it empty,
+and Publish sets it from the wedding's plan: Deliver 90 days, Keep and Cinema twelve calendar
+months, held as `plans.term_days` / `plans.term_months` — at most one is set, and a database check
+refuses both, or zero. `addTerm` and `termLabel` (`lib/plans.ts`, pure) do the arithmetic and the
+wording; months are **calendar months clamped to the last day of the month they land in** (31 Aug
++ 6 months is 28 Feb; 1 Mar 2027 + 12 months is 1 Mar 2028, where 365 days would be a day short),
+which is why the term is two columns and not one number of days. `termEndFor` (`lib/pricing.ts`) is
+the strict reader, like `getPrice`: a plan with no usable term **refuses the first Publish** rather
+than grant a guessed one, and it runs *before the credit is spent*, so the refusal costs the studio
+nothing. A term that already exists is never touched — a republish after an unpublish does not
+restart it, an end date the platform set on purpose before the first Publish is kept, and a wedding
+published before this ticket keeps its date. The marketing plans table and its FAQ now read the term
+from the plan row too, closing the "term lengths are still copy" note N-118 left.
+
+**The ticket said the careful part was the readers, and it was.** Sixteen places read the term.
+Making the field nullable let the compiler list them all, and reading each for what it *decides*
+found the one that mattered: `nextSubStatus` did `new Date(includedUntil)`, and `new Date(null)` is
+1 January 1970 — a term that ended fifty years ago, so a published wedding with no term would have
+fallen to *grace* on the first day it was live. Only `runLifecycle`'s "a draft has no term" skip had
+been hiding it. It now says plainly that no term is not an expired one, and the E2E, run against a
+build with Publish's writer removed, shows exactly that number: `-20715` days. The other readers:
+`resolveAccess` and `catalogueAttention` already treated a missing date as no date; the warning ladder
+gets an explicit guard; the platform lists sort "not started" last and say so; the studio's overview
+says *term starts when you publish — 90 days* (following the plan) and then *included until* a date;
+Settings says *Not started* and what it means.
+
+**One reader nobody would have grepped for:** the **handover email**. A studio may hand over a wedding
+that is still a draft, and the message said "…and it runs to {date}", which for no date would have
+printed "runs to ." to a couple. Its clause is now `{term}`, composed by `lib/term.ts` — either "it
+runs to 14 February 2027" or "its term starts the day it is first published" — in English and Hindi. **The Hindi
+phrasing is mine and wants a native reader's eye**; the i18n test only proves the keys exist. The
+delivery template never used the date at all, so that parameter is simply gone.
+
+**Decisions taken without asking — say so and they change.** Migration `0031` **empties the term of
+every wedding that is a draft and was never published** (`published_at is null`, `status = 'draft'`),
+because leaving a creation-time date would have a draft made eleven months ago lapse a month after it
+first goes live; every wedding that has ever been published keeps its date, because `published_at`
+survives an unpublish. If a platform admin had deliberately extended a never-published draft, that is
+lost — the audit trail (`catalogue.term`) would show it. **A term is not editable in the console**;
+it changes by migration until someone needs otherwise — the ticket asked for it to live on the plan
+row, not for a screen. The `-3y` plans have no term seeded: nothing spends a credit on them and
+N-20's checkout will decide. A plan with no term fails the publish with the generic error, not a
+message naming a plan, because it is our fault and is logged.
+
+**Four things went wrong, and what each taught.** (1) *My own arithmetic in a test was wrong* —
+"200 days on is 7 March"; it is 7 April, and the code was right. Worth saying because it is the
+same class of error the ticket is about: date sums by hand are where the bugs live, so the test now
+carries the working. (2) *One guard cannot be proven by a test.* `milestoneFor(null)` on the warning
+ladder behaves identically without its guard, because 1970 lands on no rung; the guard is for the
+type, not the behaviour, so it stays and is not claimed as tested. Every other guard was removed and
+seen red. (3) *A fixture that quietly relied on the old behaviour.* `couple-catalogues` published a
+wedding with no price list in its store; with the strict reader that became a 500 instead of the 402 it
+expected. The fixture was wrong, not the reader — no real deployment has an empty list — but it took a
+failing test to say it. (4) *Three lint errors turned up in test files I had not touched*
+(`downloads`, `progress`, `warning-schedule`); `pnpm verify` does not lint that directory. Left
+alone and named here.
+
+**Proof it is real, not just green.** Eleven deliberate breakages, each confirmed red by name and
+restored: Publish never setting a term; Publish restarting it every time (three tests); creation
+setting one; the lifecycle guard removed; the month clamp removed; a month computed as 30.4 days
+(seven); the handover phrase always printing a date; the migration emptying every draft-status row
+including published ones; the seed and the SQL disagreeing on Deliver's length (five); the platform
+control crashing on `null` (four); and — the one that matters most — the term computed *after* the
+credit is spent, which turned "refused and cost nothing" into a credit consumed. On a production
+build the E2E went red with Publish's writer removed, and the marketing check went red when the
+seeded Deliver term was changed to sixty days. **In a browser**, on a memory-driver dev server: a Keep
+draft's overview read *term starts when you publish — 12 months*, Settings read *Not started*; after
+changing the plan to Deliver and publishing, the date was exactly 90.00 days out, an unpublish and
+republish left it identical, and the overview and Settings then showed the date. Nothing on the
+dashboard counted down for the new wedding.
+
+Suite: 943 unit/component (+51: 13 term arithmetic, 25 behaviour, 9 migration, 4 component); E2E **161 passed / 1 failed / 57 skipped** on the full run after the commit (160 before, plus the new
+marketing check). **The one failure is not this ticket's and the run is therefore not fully green:** the
+photograph-caption spec (`upload.spec.ts:242`) uploads to the *real* Bunny storage zone (the E2E
+server inherits `PHOTO_DRIVER=bunny` from `.env.local`) and timed out waiting for its caption box.
+In isolation it passed 1 run in 3 here, and **the same spec run on the commit before N-120, in a
+separate worktree, passed 1 run in 3 as well** — so it predates this change and was already
+intermittent during N-118. It needs the harness pinned to the fake photo driver; spawned as its own
+task rather than folded into this commit. New: `lib/term.ts`, `supabase/migrations/0031_term_at_publish.sql`,
+`tests/unit/{plan-term,term-at-publish,term-migration}.test.ts`, `tests/component/term-control.test.tsx`.
+Changed: the publish and create routes, `lib/{lifecycle,pricing,plans,schema,i18n}.ts`,
+`lib/notify/schedule.ts`, the overview / Settings / platform pages, `app/page.tsx`,
+`e2e/{credits,marketing}.spec.ts`, `tests/integration/drivers.test.ts` (a Supabase case, **written and
+not yet run — it needs `0031` on staging**), both help guides, `docs/PRODUCT.md`, `docs/NEXT.md`.
+**Before this is deployed:** apply `0031` to staging, run the integration suite against
+`.env.staging.local`, deploy staging, then apply it to production — without the columns the first
+Publish refuses, and without the `drop not null` a new wedding cannot be created.

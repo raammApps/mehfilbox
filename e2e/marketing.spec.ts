@@ -17,6 +17,16 @@ test.describe('N-51 — the landing page sells, and its links work', () => {
     await expect(page.getByText('₹4,999').first()).toBeVisible()
   })
 
+  test('the plans table says how long each plan keeps a wedding, from the plan row (N-120)', async ({ page }) => {
+    await page.goto('/')
+    // Deliver is ninety days, Keep and Cinema twelve months — held on the price list, not typed here,
+    // so a term changed there changes this table with no deploy.
+    await expect(page.getByRole('cell', { name: '90 days · 100 GB' })).toBeVisible()
+    await expect(page.getByRole('cell', { name: '12 months, renewable · 100 GB', exact: true })).toBeVisible()
+    await expect(page.getByRole('cell', { name: '12 months, renewable · 200 GB · 4K' })).toBeVisible()
+    await expect(page.getByText('What happens after 90 days?')).toBeVisible()
+  })
+
   test('"open a demo wedding" reaches a real catalogue', async ({ page }) => {
     await page.goto('/')
     await page.getByRole('link', { name: 'Open a demo wedding' }).click()

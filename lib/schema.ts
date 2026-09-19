@@ -326,6 +326,15 @@ export const planSchema = z.object({
   position: z.number().int().default(100),
   retailMinPaise: z.number().int().nonnegative().nullable().default(null),
   retailMaxPaise: z.number().int().nonnegative().nullable().default(null),
+  /**
+   * How long a wedding on this plan is served, counted from its first Publish (N-120, D-61) — held
+   * here so the length is a setting, not a constant. **At most one is set.** Deliver is 90 *days*
+   * and Keep and Cinema are 12 *months*, and the two are not interchangeable: twelve months is
+   * calendar months (a wedding published on 1 March is served to 1 March), not 365 days. A plan
+   * with neither has no term — a storage tier, a renewal, an add-on.
+   */
+  termMonths: z.number().int().positive().nullable().default(null),
+  termDays: z.number().int().positive().nullable().default(null),
 })
 export type Plan = z.infer<typeof planSchema>
 
@@ -663,7 +672,15 @@ export const catalogueSchema = z.object({
    */
   passcodeVersion: z.number().int().positive().default(1),
 
-  includedUntil: z.string(),
+  /**
+   * When this wedding stops being served, or `null` while its term has not started (N-120, D-61).
+   *
+   * The term starts at the first Publish, not at creation — a wedding built over three months has
+   * delivered nothing yet, and charging it for the months it was a draft is the thing D-61 ended.
+   * **`null` means "not started", never "expired"**: every reader that compares this to a date must
+   * treat it as no date at all, which `new Date(null)` — 1 January 1970 — would get exactly backwards.
+   */
+  includedUntil: z.string().nullable(),
   subStatus: subStatusSchema.default('included'),
   subPlan: z.enum(['monthly', 'yearly']).nullable().default(null),
   /**

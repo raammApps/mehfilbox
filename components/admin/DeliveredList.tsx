@@ -32,8 +32,10 @@ export function DeliveredList({ catalogues }: { catalogues: Catalogue[] }) {
             <li key={catalogue.id} className="flex flex-col rounded-[var(--radius-card)] border border-[var(--color-l-line)] bg-white p-4">
               <p className="text-[17px] font-semibold leading-tight">{catalogue.coupleName.en}</p>
               <p className="mt-1 text-[13px] text-[var(--color-l-text-mid)]">
-                {paused ? 'Paused' : catalogue.status === 'published' ? 'Live' : 'Not published'} · runs to{' '}
-                {formatWeddingDate(catalogue.includedUntil, 'en')}
+                {paused ? 'Paused' : catalogue.status === 'published' ? 'Live' : 'Not published'} ·{' '}
+                {catalogue.includedUntil
+                  ? `runs to ${formatWeddingDate(catalogue.includedUntil, 'en')}`
+                  : 'term not started'}
               </p>
               <p className="mt-2 text-[13px]">
                 {windowOpen ? (

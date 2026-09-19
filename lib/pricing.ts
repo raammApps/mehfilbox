@@ -1,7 +1,9 @@
 import 'server-only'
 import { getRepository } from '@/lib/db'
 import { formatRupees } from '@/lib/format'
+import { ApiError } from '@/lib/http/errors'
 import { log } from '@/lib/log'
+import { addTerm } from '@/lib/plans'
 import type { Plan } from '@/lib/schema'
 
 /**
@@ -52,4 +54,23 @@ export function retailLabel(list: PriceList, planId: string): string | null {
   const plan = list[planId]
   if (!plan || plan.retailMinPaise === null || plan.retailMaxPaise === null) return null
   return `${formatRupees(plan.retailMinPaise)} – ${formatRupees(plan.retailMaxPaise)}`
+}
+
+/**
+ * When a wedding on `planId`, first published at `from`, stops being served (N-120, D-61).
+ *
+ * **Strict**, like `getPrice`, and for the same reason: this writes the date a couple's page will be
+ * switched off on. A plan with no term configured — a migration not applied, a row edited into
+ * nonsense — must stop the publish, not quietly grant a term of zero days or of forever. It is
+ * called *before* the credit is spent, so a refusal costs the studio nothing, and the message a
+ * studio sees is the generic one (`INTERNAL` is never shown): this is our fault, and is logged.
+ */
+export async function termEndFor(planId: string, from: Date): Promise<Date> {
+  const plan = await getRepository().getPlan(planId)
+  const end = plan ? addTerm(from, plan) : null
+  if (!end) {
+    log.error('pricing: a plan has no term; a first publish was refused', { planId })
+    throw new ApiError('INTERNAL', `Plan "${planId}" has no term configured`)
+  }
+  return end
 }

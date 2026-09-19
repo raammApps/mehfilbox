@@ -6,6 +6,7 @@ import { setAuthProvider } from '@/lib/admin/auth'
 import type { AuthProvider } from '@/lib/admin/auth-provider'
 import { setRepository } from '@/lib/db'
 import { MemoryRepository, emptySnapshot } from '@/lib/db/memory-repository'
+import { SEED_PLANS } from '@/lib/db/seed-data'
 import { relationOf } from '@/lib/my/session'
 import { operatorSchema, orgSchema, platformAdminSchema } from '@/lib/schema'
 
@@ -27,6 +28,8 @@ let current: { id: string; email: string }
 
 beforeEach(() => {
   const snapshot = emptySnapshot()
+  // A first publish reads its term from the price list (N-120), as it does in every real deployment.
+  snapshot.plans = structuredClone(SEED_PLANS)
   snapshot.platformAdmins.push(platformAdminSchema.parse({ id: ADMIN, email: 'root@mehfilbox.test', name: 'Root', createdAt: AT }))
   snapshot.orgs.push(orgSchema.parse({ id: COUPLE_ORG, name: 'Aanya & Vikram', slug: 'aanya-and-vikram', kind: 'couple', createdAt: AT }))
   snapshot.operators.push(

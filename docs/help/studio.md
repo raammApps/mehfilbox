@@ -327,7 +327,12 @@ project. **Until both are done this is stored but not served** — saving it alo
 ### Serving until
 
 After this date guests see a **renewal screen** — never a broken link, and nothing is deleted.
-Twelve months are included from creation.
+
+**The term starts the day you first publish, not the day you create the wedding.** Until then
+Settings says *Not started* and nothing counts down, so a wedding you spend weeks building has
+spent none of its time. Its length is set by the wedding's plan — **Deliver** runs ninety days,
+**Keep** and **Cinema** twelve months — and the overview says which while it is still a draft.
+Publishing it again after taking it offline never restarts the term.
 
 ### Take offline
 
@@ -401,7 +406,7 @@ holds.
 |---|---|
 | **Storage per catalogue** | **20 GB**, or a tier chosen at creation |
 | Per-file upload | 20 GB |
-| Included term | 12 months |
+| Included term | From the first Publish; ninety days on Deliver, twelve months on Keep and Cinema |
 
 Storage counts what the provider actually stores — the encoding ladder for a film, every
 rendition for a photograph — not the file that was uploaded. An upload that would not fit is

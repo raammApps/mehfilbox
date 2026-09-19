@@ -295,6 +295,62 @@ describe.skipIf(!hasSupabase)('Supabase Postgres, for real', () => {
   )
 
   it(
+    'holds a wedding with no term, and reads each plan’s term, in the database (N-120)',
+    async () => {
+      const { createClient } = await import('@supabase/supabase-js')
+      const { SupabaseRepository } = await import('@/lib/db/supabase-repository')
+      const { catalogueSchema } = await import('@/lib/schema')
+      const repository = new SupabaseRepository()
+      const db = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        (process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY)!,
+        { auth: { persistSession: false } },
+      )
+
+      // A wedding that has never been published has no term: the column has to accept null (it was
+      // `not null` until 0031), and a read must give null back rather than a date or an empty string.
+      const id = randomUUID()
+      await repository.createCatalogue(
+        catalogueSchema.parse({
+          id,
+          orgId,
+          tenantSlug: 'integration-studio',
+          slug: `itest-term-${Date.now().toString(36)}`,
+          coupleName: { en: 'No & Term' },
+          appName: { en: 'No Term Originals' },
+          weddingDate: '2026-12-01',
+          includedUntil: null,
+          createdAt: new Date().toISOString(),
+        }),
+      )
+      createdCatalogues.push(id)
+      expect((await repository.getCatalogue(id, orgId))?.includedUntil).toBeNull()
+
+      // What the first Publish writes.
+      const end = '2027-01-01T00:00:00.000Z'
+      await repository.updateCatalogue(id, orgId, { includedUntil: end })
+      const read = (await repository.getCatalogue(id, orgId))?.includedUntil
+      expect(new Date(read ?? 'invalid').getTime()).toBe(new Date(end).getTime())
+
+      // The lengths D-61 states, as the migration seeded them.
+      expect(await repository.getPlan('deliver')).toMatchObject({ termDays: 90, termMonths: null })
+      expect(await repository.getPlan('keep')).toMatchObject({ termMonths: 12, termDays: null })
+      expect(await repository.getPlan('cinema')).toMatchObject({ termMonths: 12, termDays: null })
+      // …and nothing a wedding is not first published on has one.
+      expect(await repository.getPlan('light')).toMatchObject({ termMonths: null, termDays: null })
+
+      // The constraint is the backstop under `addTerm`'s "both set means no term": Postgres refuses a
+      // term in both units, and one that is not positive. `light` has no term, so nothing is changed.
+      const both = await db.from('plans').update({ term_months: 1, term_days: 1 }).eq('id', 'light')
+      expect(both.error?.code, 'a plan must not carry a term in both units').toBe('23514')
+      const zero = await db.from('plans').update({ term_days: 0 }).eq('id', 'light')
+      expect(zero.error?.code, 'a term must be positive').toBe('23514')
+      expect(await repository.getPlan('light')).toMatchObject({ termMonths: null, termDays: null })
+    },
+    REMOTE_TIMEOUT,
+  )
+
+  it(
     'grants a catalogue its storage tier, and resolveLimits prefers it (D-60, N-80)',
     async () => {
       const { SupabaseRepository } = await import('@/lib/db/supabase-repository')

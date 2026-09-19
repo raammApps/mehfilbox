@@ -17,7 +17,7 @@ import { setupChecklist } from '@/lib/admin/setup-checklist'
 import { hoursFor, resolveLimits, storageTierFor, storageUsage } from '@/lib/entitlements'
 import { getRepository } from '@/lib/db'
 import { formatWeddingDate } from '@/lib/format'
-import { CREDIT_PLAN_IDS, planLabel } from '@/lib/plans'
+import { CREDIT_PLAN_IDS, planLabel, termLabel } from '@/lib/plans'
 import { getPriceListForDisplay, priceLabel } from '@/lib/pricing'
 import { resolveLocalised } from '@/lib/i18n'
 import { render } from '@/lib/notify/templates'
@@ -106,8 +106,16 @@ export default async function CatalogueOverviewPage({
     coupleName: resolveLocalised(catalogue.coupleName, catalogue.locale),
     studioName: catalogue.branding.presentedBy ?? 'your studio',
     url,
-    date: formatWeddingDate(catalogue.includedUntil, catalogue.locale),
   }).text
+
+  /**
+   * The term, said for what it is (N-120): an end date once the wedding has been published, and
+   * before that how long it will run and that nothing is counting down yet.
+   */
+  const planTerm = termLabel(prices[catalogue.planId] ?? { termMonths: null, termDays: null })
+  const termSentence = catalogue.includedUntil
+    ? `included until ${formatWeddingDate(catalogue.includedUntil, 'en')}`
+    : `term starts when you publish${planTerm ? ` — ${planTerm}` : ''}`
 
   // Prefilled from the couple's account, or from a handover already in flight: that address is
   // the couple's, and retyping it is a chance to get it wrong.
@@ -139,8 +147,7 @@ export default async function CatalogueOverviewPage({
       <div className="mb-5 flex flex-wrap items-center gap-3">
         <AttentionChip attention={attention} />
         <p className="text-[13px] text-[var(--color-l-text-mid)]">
-          Wedding {formatWeddingDate(catalogue.weddingDate, 'en')} · included until{' '}
-          {formatWeddingDate(catalogue.includedUntil, 'en')}
+          Wedding {formatWeddingDate(catalogue.weddingDate, 'en')} · {termSentence}
         </p>
       </div>
 

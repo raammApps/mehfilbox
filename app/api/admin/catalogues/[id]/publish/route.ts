@@ -2,6 +2,7 @@ import { requireEditableCatalogue } from '@/lib/admin/session'
 import { revalidateCatalogue } from '@/lib/catalogue-cache'
 import { creditRefusal } from '@/lib/admin/credits'
 import { getRepository } from '@/lib/db'
+import { termEndFor } from '@/lib/pricing'
 import { noStore, route } from '@/lib/http/handler'
 import { log } from '@/lib/log'
 
@@ -22,6 +23,18 @@ export async function POST(_request: Request, { params }: { params: Promise<{ id
 
     const modules = catalogue.draftModules ?? catalogue.modules
     const now = new Date().toISOString()
+
+    /**
+     * The term starts at the first Publish (N-120, D-61) and runs for as long as the wedding's plan
+     * says — so it is worked out here, **before the credit is spent**: a plan with no term refuses
+     * the publish, and a refusal must cost the studio nothing.
+     *
+     * Only when there is no term. A catalogue that already has one — published before, or given an
+     * explicit end date by the platform — keeps it; a republish after an unpublish never restarts
+     * the clock, and Publish never moves a date somebody set on purpose.
+     */
+    const includedUntil =
+      catalogue.includedUntil === null ? (await termEndFor(catalogue.planId, new Date(now))).toISOString() : null
 
     /**
      * The first publish spends a credit **of the wedding's plan** (D-38, N-119). A republish after
@@ -62,6 +75,7 @@ export async function POST(_request: Request, { params }: { params: Promise<{ id
       draftModules: null,
       status: 'published',
       publishedAt: catalogue.publishedAt ?? now,
+      ...(includedUntil ? { includedUntil } : {}),
     })
 
     /**
@@ -80,7 +94,11 @@ export async function POST(_request: Request, { params }: { params: Promise<{ id
     // The tag, not the path: this route renders per request for cookies, so there is no route
     // cache — the cached reads are what a guest would otherwise see stale.
     revalidateCatalogue(published.slug)
-    log.info('catalogue published', { catalogueId: id, sections: modules.length })
+    log.info('catalogue published', {
+      catalogueId: id,
+      sections: modules.length,
+      ...(includedUntil ? { termStarted: true, includedUntil } : {}),
+    })
 
     revalidateCatalogue(published.slug)
     return noStore({ catalogue: published })

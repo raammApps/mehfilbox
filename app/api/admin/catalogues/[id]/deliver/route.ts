@@ -1,6 +1,5 @@
 import { z } from 'zod'
 import { requireOwnedCatalogue } from '@/lib/admin/session'
-import { formatWeddingDate } from '@/lib/format'
 import { ApiError } from '@/lib/http/errors'
 import { noStore, route } from '@/lib/http/handler'
 import { resolveLocalised } from '@/lib/i18n'
@@ -49,7 +48,6 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
         coupleName: resolveLocalised(catalogue.coupleName, catalogue.locale),
         studioName: catalogue.branding.presentedBy ?? 'your studio',
         url: publicUrlOf(catalogue),
-        date: formatWeddingDate(catalogue.includedUntil, catalogue.locale),
       },
     })
 
