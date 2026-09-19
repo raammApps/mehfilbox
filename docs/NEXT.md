@@ -600,7 +600,9 @@ regenerate without invalidating, so the revocation is the half worth checking.
 
 - **Credentials** live in `.env.local` (gitignored, verified). Both services are fully
   configured; `pnpm preflight` is all green.
-- **Supabase**: schema applied through `0025_occasions.sql` (12 September). Six orgs exist, and the operator
+- **Supabase**: schema applied through `0025_occasions.sql` on 12 September; later migrations are recorded in
+  PROGRESS as they are applied — `0029_price_list.sql` is on **staging** (19 September) and **not yet on
+  production**. Six orgs exist, and the operator
   rows are, read from the database on 7 September rather than remembered:
 
   | org | operator |

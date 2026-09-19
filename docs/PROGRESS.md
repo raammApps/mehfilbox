@@ -2954,15 +2954,32 @@ the audit trail holds exactly the six changes made — none of the refused ones.
 no `plans` key at all, so that run also proved the file driver's fallback for a store written before
 this ticket. Everything was put back, and the dev store restored byte for byte.
 
-**Not verified — and this matters before deploy.** Migration `0029` has **not been applied to any
-Supabase project**, so `SupabaseRepository`'s five new methods and the anon lockout have only their
-integration tests (`tests/integration/drivers.test.ts`, two new cases), which have not been run; the
-console and route were exercised on the file driver only. **Apply `0029` to staging first**, run the
-integration tests against it, then production, *before* the deploy that ships this: the marketing
-page and credits card degrade to "Ask us" without it, but `/admin/platform/pricing` and the route
-would 500.
+**Walked on staging, 19 September, against real Supabase — and it found one more thing.**
+Migration `0029` was applied by hand to `mehfilbox-staging` and read back: 20 rows, all five kinds,
+the Studio bundle intact, the three tiers still off sale. The two new integration tests then ran
+against it and passed — the five new `SupabaseRepository` methods, the jsonb bundle and retail range
+round-tripping, an unknown id creating nothing, and the anon key unable either to read the list or
+to change a price — leaving every value as they found it. This commit was deployed to
+`staging.mehfilbox.com` (its `/api/health` version equal to `HEAD`); the marketing page rendered its
+prices from the staging database; and the console — through a real Supabase Auth session and a
+`platform_admins` row — saved a reprice that landed in Postgres (`price_paise` 149900) with an audit
+row (`org_id` null, the reason, paise and rupee labels), reached the marketing page and the studio's
+Credits card, and was restored. **What the walk found:** after a save the row kept showing the *old*
+price beside an enabled button for several seconds — a real cross-region round trip, where
+localhost had made the refresh look instant — which reads as "it did not save" and invites a second
+click. The row now stays locked, still saying "Saving…", until the refreshed data is on screen, and a
+test holds it. That is the kind of thing only a real deployment shows. `PricingTable` and
+`CreditPanel` had until then been checked only by browser clicks; they now have 19 component tests,
+nine breakages of which were each confirmed red.
 
-Suite: 830 unit/component (+71); E2E **160 passed / 57 skipped**, the baseline, on the final run — the
+**Still to do before this reaches production:** apply `0029` to the *production* Supabase project
+first — the marketing page and credits card degrade to "Ask us" without it, but
+`/admin/platform/pricing` and the route would 500 — then deploy. The console has not been exercised on
+production. Staging's `platform_admins` row is the operator's own auth user, added by hand for this
+walk; remove it with `delete from platform_admins where id = '<that user id>'` if unwanted.
+
+Suite: 849 unit/component (+90: 71 with the ticket, 19 component tests after the staging walk);
+E2E **160 passed / 57 skipped**, the baseline, on the final run — the
 marketing spec now reads its `₹4,999` from the price list, which is itself a check that the seed reached
 the production build. The first full run had the one Bunny-network timeout described above.
 
@@ -2976,5 +2993,6 @@ Files: `supabase/migrations/0029_price_list.sql` (new), `lib/schema.ts`, `lib/pl
 `components/admin/CatalogueTermControls.tsx`, `components/admin/OrgCreditsControl.tsx`,
 `docs/help/studio.md`, `docs/help/client.md`, `tests/unit/pricing.test.ts`,
 `tests/unit/pricing-route.test.ts`, `tests/unit/price-list-seed.test.ts`,
-`tests/unit/no-price-in-code.test.ts` (all new), `tests/integration/drivers.test.ts`, `CLAUDE.md`,
+`tests/unit/no-price-in-code.test.ts`, `tests/component/pricing-table.test.tsx`,
+`tests/component/credit-panel.test.tsx` (all new), `tests/integration/drivers.test.ts`, `CLAUDE.md`,
 `docs/PRODUCT.md`, `docs/PRICING.md`, `docs/NEXT.md`.

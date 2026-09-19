@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useState, useTransition } from 'react'
 import { formatRupees, rupeesToPaise } from '@/lib/format'
 import { CREDIT_PLAN_IDS, PLAN_SECTIONS, unitLabel } from '@/lib/plans'
 import type { Plan } from '@/lib/schema'
@@ -39,9 +39,20 @@ export function PricingTable({ plans }: { plans: Plan[] }) {
   const [reason, setReason] = useState('')
   const [busy, setBusy] = useState<string | null>(null)
   const [error, setError] = useState<{ id: string; message: string } | null>(null)
+  /**
+   * The write returns as soon as the database has it, but the screen catches up only when the
+   * refreshed page arrives — a second or more on a real network, when local development made it
+   * look instant. Until then the row would show the *old* price beside an enabled button, which
+   * reads as "it did not save" and invites a second click. So the row stays locked, still saying
+   * "Saving…", until the new data is actually on screen.
+   */
+  const [refreshing, startRefresh] = useTransition()
+  const [lastSaved, setLastSaved] = useState<string | null>(null)
+  const isBusy = (id: string) => busy === id || (refreshing && lastSaved === id)
 
   async function save(plan: Plan, change: Change): Promise<void> {
     setBusy(plan.id)
+    setLastSaved(plan.id)
     setError(null)
     try {
       const response = await fetch(`/api/admin/platform/pricing/${encodeURIComponent(plan.id)}`, {
@@ -54,7 +65,7 @@ export function PricingTable({ plans }: { plans: Plan[] }) {
         throw new Error(body?.error?.message ?? `Request failed (${response.status})`)
       }
       setReason('')
-      router.refresh()
+      startRefresh(() => router.refresh())
     } catch (cause) {
       setError({ id: plan.id, message: cause instanceof Error ? cause.message : 'Something went wrong' })
     } finally {
@@ -108,14 +119,14 @@ export function PricingTable({ plans }: { plans: Plan[] }) {
                   <PriceForm
                     key={`price:${plan.id}:${plan.pricePaise}`}
                     plan={plan}
-                    busy={busy === plan.id}
+                    busy={isBusy(plan.id)}
                     onSave={(change) => save(plan, change)}
                   />
                   {plan.kind === 'partner' ? (
                     <GrantsForm
                       key={`grants:${plan.id}:${JSON.stringify(plan.grants)}`}
                       plan={plan}
-                      busy={busy === plan.id}
+                      busy={isBusy(plan.id)}
                       onSave={(change) => save(plan, change)}
                     />
                   ) : null}
@@ -123,7 +134,7 @@ export function PricingTable({ plans }: { plans: Plan[] }) {
                     <RetailForm
                       key={`retail:${plan.id}:${plan.retailMinPaise}:${plan.retailMaxPaise}`}
                       plan={plan}
-                      busy={busy === plan.id}
+                      busy={isBusy(plan.id)}
                       onSave={(change) => save(plan, change)}
                     />
                   ) : null}
