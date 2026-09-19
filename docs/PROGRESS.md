@@ -2972,11 +2972,17 @@ test holds it. That is the kind of thing only a real deployment shows. `PricingT
 `CreditPanel` had until then been checked only by browser clicks; they now have 19 component tests,
 nine breakages of which were each confirmed red.
 
-**Still to do before this reaches production:** apply `0029` to the *production* Supabase project
-first — the marketing page and credits card degrade to "Ask us" without it, but
-`/admin/platform/pricing` and the route would 500 — then deploy. The console has not been exercised on
-production. Staging's `platform_admins` row is the operator's own auth user, added by hand for this
-walk; remove it with `delete from platform_admins where id = '<that user id>'` if unwanted.
+**Deployed to production, 19 September.** `0029` was applied by hand to the production Supabase
+project and read back first (20 rows, five kinds, the Studio bundle, the three tiers off sale); then
+`da19f24` went out through `deploy-vercel.sh`, which aliased all three domains itself — the step it was
+hardened to do after the GitHub-connect regression. `mehfilbox.com`, `mehfilbox.in` and
+`heirloomfilms.in` each report `da19f24`, the live marketing page quotes its prices from the production
+database (no "Ask us"), the neighbouring pages still load, and the console page and its route answer an
+anonymous caller with 404 and leave the price untouched. **The pricing console has not been used on
+production**: nobody has a `platform_admins` row there yet, and granting one is an access decision left
+to Sandeep — so its first real use will also be its first run against production data. Staging's row is
+the operator's own auth user, added by hand for the walk; remove it with
+`delete from platform_admins where id = '<that user id>'` if unwanted.
 
 Suite: 849 unit/component (+90: 71 with the ticket, 19 component tests after the staging walk);
 E2E **160 passed / 57 skipped**, the baseline, on the final run — the
