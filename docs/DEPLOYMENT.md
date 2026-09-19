@@ -291,11 +291,21 @@ vercel login                  # once; interactive, needs a browser
 The script links the project, replaces every variable (idempotent — safe to re-run), deploys,
 and prints the verification steps.
 
-After the first deploy, connecting the GitHub repo (`raammApps/mehfilbox`) to the project
-would mean every push to `main` deploys — **not done as of 18 September** (§14 found this live:
-`vercel project inspect` shows no Git Repository section, and two docs-only pushes to `main`
-produced no new deployment). Every deploy today, staging and production alike, is the manual
-`./scripts/deploy-vercel.sh` above.
+**Connecting the GitHub repo was tried on 18 September and reverted — leave it disconnected.**
+`vercel git connect` reported the project already linked, with the right production branch
+(`main`) and Vercel's GitHub App installed org-wide with `push` in its subscribed events — every
+setting looked correct. Two real things were still true regardless: GitHub delivered zero
+webhooks for it (`gh api repos/raammApps/mehfilbox/hooks` returned `[]` — likely the Vercel
+*team* itself, not just the project, needs its own Team → Git connection to the `raammApps` org,
+a dashboard setting the CLI cannot reach), and — found only by watching a real deploy —
+**connecting it silently broke `vercel --prod --yes`'s automatic domain aliasing.** A production
+deploy right after connecting built the correct commit but attached it to no domain at all;
+`mehfilbox.com`, `mehfilbox.in` and `heirloomfilms.in` kept serving the *previous* production
+deployment until `vercel alias set <deployment-url> <domain>` was run by hand for each one. So the
+connection cost the one thing that was working (reliable aliasing on a manual deploy) and never
+delivered the thing it promised (auto-deploy on push). `vercel git disconnect` restored it same
+day; every deploy, staging and production alike, is the manual `./scripts/deploy-vercel.sh` below,
+and the script now aliases explicitly rather than trusting Vercel to do it implicitly.
 
 > Production runs `ROOT_DOMAIN=heirloomfilms.in`. If the real URL differs, update it and redeploy
 > — in `path` mode a wrong value breaks share links and the OG card, not routing, so the site

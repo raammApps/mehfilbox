@@ -31,6 +31,12 @@ cd "$(dirname "$0")/.."
 ENV_FILE="${VERCEL_ENV_FILE:-.env.vercel.local}"
 PROJECT="${VERCEL_PROJECT:-mehfilbox}"
 TARGET="${VERCEL_TARGET:-production}"
+# `vercel --prod --yes` is not reliably enough on its own — 18 September found it building the
+# right commit and attaching it to *no* domain at all, right after the project's GitHub connection
+# was touched (tried, then reverted the same day: it broke this, and never delivered the auto-deploy
+# it promised — docs/DEPLOYMENT.md §7). So production always aliases explicitly below, regardless
+# of whatever Vercel's own git-linked state happens to be.
+IFS=',' read -ra PRODUCTION_DOMAINS <<< "${VERCEL_PRODUCTION_DOMAINS:-mehfilbox.com,mehfilbox.in,heirloomfilms.in}"
 
 command -v vercel >/dev/null 2>&1 || {
   echo "The Vercel CLI is not installed."
@@ -91,12 +97,29 @@ done < "$ENV_FILE"
 echo "→ $pushed variables set"
 echo "→ deploying ($TARGET)"
 if [ "$TARGET" = "production" ]; then
-  vercel --prod --yes
+  DEPLOY_LOG="$(vercel --prod --yes 2>&1 | tee /dev/stderr)"
 else
   # No --prod: an ordinary preview build. Its stable URL comes from the Vercel dashboard's own
   # branch-to-domain assignment (staging.mehfilbox.com → the branch this deploys from), configured
   # once — this script only ever pushes variables and triggers the build.
-  vercel --yes
+  DEPLOY_LOG="$(vercel --yes 2>&1 | tee /dev/stderr)"
+fi
+
+if [ "$TARGET" = "production" ]; then
+  # The deployment's own URL is the first `"url"` key in the JSON summary Vercel prints in this
+  # (non-interactive) mode — not `inspectorUrl` or `deploymentApiUrl`, which are different key
+  # names and so never match this exact pattern.
+  DEPLOY_URL="$(grep -oE '"url": *"[^"]+"' <<<"$DEPLOY_LOG" | head -1 | sed -E 's/.*"([^"]+)"$/\1/')"
+  if [ -z "$DEPLOY_URL" ]; then
+    echo "! Could not find the new deployment's URL in Vercel's own output — alias by hand:"
+    echo "    vercel alias set <deployment-url> <domain>   for each of: ${PRODUCTION_DOMAINS[*]}"
+  else
+    echo "→ aliasing production domains to $DEPLOY_URL"
+    for domain in "${PRODUCTION_DOMAINS[@]}"; do
+      vercel alias set "$DEPLOY_URL" "$domain"
+      echo "   ✓ $domain"
+    done
+  fi
 fi
 
 cat <<'NEXT'
