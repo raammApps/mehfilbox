@@ -590,7 +590,7 @@ regenerate without invalidating, so the revocation is the half worth checking.
 - **Credentials** live in `.env.local` (gitignored, verified). Both services are fully
   configured; `pnpm preflight` is all green.
 - **Supabase**: schema applied through `0025_occasions.sql` on 12 September; later migrations are recorded in
-  PROGRESS as they are applied — `0029_price_list.sql` is on **staging and production** (both 19 September); `0030_catalogue_plan.sql` (N-119) is on **staging** (19 September) and **not yet on production** — apply it there *before* deploying `afa6189` or later, since creating or editing a wedding now writes `plan_id`. Six orgs exist, and the operator
+  PROGRESS as they are applied — `0029_price_list.sql` is on **staging and production** (both 19 September); `0030_catalogue_plan.sql` (N-119) is on **staging and production** (both 19 September). Six orgs exist, and the operator
   rows are, read from the database on 7 September rather than remembered:
 
   | org | operator |

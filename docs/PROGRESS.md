@@ -3094,5 +3094,16 @@ refused naming Cinema (and, with no credits of any kind, offering no way forward
 success path through the deployed app and the platform grant form — the signed-in session is not a
 platform admin, so it could not put a credit in the studio; the success path is covered by the
 integration test against the same database. **Left behind:** one draft wedding, "N119 Walk", in the
-staging studio, which is harmless and can be deleted from the console. **Production:** `0030` is not
-applied there and `afa6189` is not deployed.
+staging studio, which is harmless and can be deleted from the console. 
+**Deployed to production, 19 September.** `0030` was applied by hand to the production project first,
+then `1f6f78d` (code identical to `afa6189`; the later commit is docs) went out through
+`deploy-vercel.sh`, told to alias only `mehfilbox.com` and `mehfilbox.in` (`VERCEL_PRODUCTION_DOMAINS`),
+at Sandeep's instruction to leave `heirloomfilms.in` out. **It made no difference to that domain:**
+`/api/health` on all three reports `1f6f78d`, because Vercel points every production domain attached to
+the project at the newest production deployment whether or not the script names it — so the exclusion
+governs what the script aliases and what is checked, not what `heirloomfilms.in` serves. Anonymous
+smoke: `/`, the studio sign-in and `/api/health` answer 200, the marketing page quotes prices (no "Ask
+us"), an anonymous create is 401 (not a 500 from a missing column) and the pricing console is 404.
+**Not walked on production:** the typed dashboard line, the plan control and a publish — they need a
+signed-in studio session, which is Sandeep's to open (`/admin` should read "N Deliver credits to
+publish with", and any existing studio's single balance is a Deliver one by the migration's backfill).
