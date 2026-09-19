@@ -25,6 +25,8 @@ import type {
   Title,
   Preset,
   CreditBalance,
+  Coupon,
+  CouponRedemption,
   Plan,
   PublishCredit,
   JobRun,
@@ -38,6 +40,7 @@ import type {
   CatalogueFilter,
   CreateTitleInput,
   LimitResult,
+  RedeemCoupon,
   Repository,
 } from './repository'
 
@@ -942,6 +945,154 @@ export class SupabaseRepository implements Repository {
 
   async creditBalance(orgId: string, nowIso: string): Promise<CreditBalance> {
     return balanceOf(await this.listCredits(orgId), nowIso)
+  }
+
+  // ── Coupons (N-121, D-61) ─────────────────────────────────────────────────
+  private static toCoupon(r: Row): Coupon {
+    return {
+      id: r.id,
+      code: r.code,
+      kind: r.kind,
+      value: r.value,
+      rewardPlanId: r.reward_plan_id ?? null,
+      campaign: r.campaign,
+      validFrom: r.valid_from ?? null,
+      validUntil: r.valid_until ?? null,
+      maxRedemptions: r.max_redemptions ?? null,
+      maxPerPayer: r.max_per_payer ?? null,
+      doors: r.doors ?? [],
+      planIds: r.plan_ids ?? [],
+      active: r.active,
+      createdBy: r.created_by,
+      createdAt: r.created_at,
+    }
+  }
+
+  private static toRedemption(r: Row): CouponRedemption {
+    return {
+      id: r.id,
+      couponId: r.coupon_id,
+      payerOrgId: r.payer_org_id,
+      paymentId: r.payment_id ?? null,
+      amountOffPaise: r.amount_off_paise ?? 0,
+      creditsGranted: r.credits_granted ?? 0,
+      createdAt: r.created_at,
+    }
+  }
+
+  async createCoupon(coupon: Coupon): Promise<Coupon> {
+    const { data, error } = await this.db
+      .from('coupons')
+      .insert({
+        id: coupon.id,
+        code: coupon.code,
+        kind: coupon.kind,
+        value: coupon.value,
+        reward_plan_id: coupon.rewardPlanId,
+        campaign: coupon.campaign,
+        valid_from: coupon.validFrom,
+        valid_until: coupon.validUntil,
+        max_redemptions: coupon.maxRedemptions,
+        max_per_payer: coupon.maxPerPayer,
+        doors: coupon.doors,
+        plan_ids: coupon.planIds,
+        active: coupon.active,
+        created_by: coupon.createdBy,
+        created_at: coupon.createdAt,
+      })
+      .select('*')
+      .single()
+    // The unique index on `code` is what settles two admins choosing the same one at once.
+    if (error?.code === '23505') {
+      throw new ApiError('VALIDATION_FAILED', 'That code is already in use', {
+        fields: { code: 'Another coupon already has this code' },
+      })
+    }
+    if (error) throw new ApiError('INTERNAL', error.message)
+    return SupabaseRepository.toCoupon(data as Row)
+  }
+
+  async listCoupons(): Promise<Coupon[]> {
+    const { data, error } = await this.db.from('coupons').select('*').order('created_at', { ascending: false })
+    if (error) throw new ApiError('INTERNAL', error.message)
+    return (data ?? []).map(SupabaseRepository.toCoupon)
+  }
+
+  async getCoupon(id: string): Promise<Coupon | null> {
+    const { data, error } = await this.db.from('coupons').select('*').eq('id', id).maybeSingle()
+    if (error) throw new ApiError('INTERNAL', error.message)
+    return data ? SupabaseRepository.toCoupon(data as Row) : null
+  }
+
+  async getCouponByCode(code: string): Promise<Coupon | null> {
+    const { data, error } = await this.db.from('coupons').select('*').eq('code', code).maybeSingle()
+    if (error) throw new ApiError('INTERNAL', error.message)
+    return data ? SupabaseRepository.toCoupon(data as Row) : null
+  }
+
+  async setCouponActive(id: string, active: boolean): Promise<Coupon | null> {
+    const { data, error } = await this.db.from('coupons').update({ active }).eq('id', id).select('*')
+    if (error) throw new ApiError('INTERNAL', error.message)
+    const row = (data as Row[] | null)?.[0]
+    return row ? SupabaseRepository.toCoupon(row) : null
+  }
+
+  async countCouponRedemptions(
+    couponId: string,
+    payerOrgId: string,
+  ): Promise<{ total: number; byPayer: number }> {
+    const [total, byPayer] = await Promise.all([
+      this.db.from('coupon_redemptions').select('id', { count: 'exact', head: true }).eq('coupon_id', couponId),
+      this.db
+        .from('coupon_redemptions')
+        .select('id', { count: 'exact', head: true })
+        .eq('coupon_id', couponId)
+        .eq('payer_org_id', payerOrgId),
+    ])
+    if (total.error) throw new ApiError('INTERNAL', total.error.message)
+    if (byPayer.error) throw new ApiError('INTERNAL', byPayer.error.message)
+    return { total: total.count ?? 0, byPayer: byPayer.count ?? 0 }
+  }
+
+  async redeemCoupon(input: RedeemCoupon): Promise<CouponRedemption | null> {
+    const { redemption, credits, nowIso } = input
+    // One function, one transaction: it locks the coupon row, checks every limit, and writes the
+    // redemption and the credits together. It answers with the redemption id, or null.
+    const { data, error } = await this.db.rpc('redeem_coupon', {
+      p_id: redemption.id,
+      p_coupon: redemption.couponId,
+      p_payer: redemption.payerOrgId,
+      p_payment: redemption.paymentId,
+      p_amount_off: redemption.amountOffPaise,
+      p_credits: credits.map((credit) => ({
+        id: credit.id,
+        plan_id: credit.planId,
+        granted_by: credit.grantedBy,
+        reason: credit.reason,
+        purchased_at: credit.purchasedAt,
+        expires_at: credit.expiresAt,
+      })),
+      p_now: nowIso,
+    })
+    if (error) throw new ApiError('INTERNAL', error.message)
+    if (!data) return null
+
+    const { data: row, error: readError } = await this.db
+      .from('coupon_redemptions')
+      .select('*')
+      .eq('id', redemption.id)
+      .single()
+    if (readError) throw new ApiError('INTERNAL', readError.message)
+    return SupabaseRepository.toRedemption(row as Row)
+  }
+
+  async listCouponRedemptions(): Promise<CouponRedemption[]> {
+    const { data, error } = await this.db
+      .from('coupon_redemptions')
+      .select('*')
+      .order('created_at', { ascending: false })
+    if (error) throw new ApiError('INTERNAL', error.message)
+    return (data ?? []).map(SupabaseRepository.toRedemption)
   }
 
   // ── The price list (N-118, D-61) ──────────────────────────────────────────

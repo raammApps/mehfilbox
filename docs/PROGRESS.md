@@ -3232,3 +3232,105 @@ overview's *term starts when you publish* line, or a wedding created after the d
 signed-in studio session, which is Sandeep's to open. What to expect: every wedding that was ever
 published keeps its date exactly; any never-published draft now reads *term starts when you publish*;
 and a studio's *next* first Publish is the first one that starts a term.
+
+
+## N-121 · Coupon codes — 19 September 2026
+
+**What now exists.** Migration `0032_coupons.sql` adds `coupons` and `coupon_redemptions`, both
+service-role only, and a `redeem_coupon` function. A coupon is one of three kinds — **percent** off,
+**fixed** amount off (paise, ex-GST), or a **reward** that grants typed credits and needs no payment —
+with a required **campaign** label, a validity window, an overall limit and a per-payer limit (default
+one), and a scope: which door (studio, direct couple) and, for a discount, which products. A reward is
+studio-only, because a direct couple holds no basket. `couponSchema` and the database's check
+constraints say the same thing, and a test reads the SQL and fails if a kind, a door, the code shape or
+the reward ceiling drifts. The platform console `/admin/platform/coupons` creates a coupon (a blank code
+generates a random one from an alphabet with nothing to misread), switches it off or on, shows a
+**campaigns** table that reads a cohort back — coupons, redemptions, payers, what was taken off, credits
+granted — and lists redemptions filterable by campaign; every change is on the audit trail. **A coupon is
+never edited or deleted** — a redeemed code is history — and the route exports no way to. A studio redeems
+a reward in *Your studio → Credits → Have a code?* (`POST /api/admin/coupons/redeem`).
+`applyCoupon(code, product, payer)` (`lib/admin/coupons.ts`) is the server-side quote N-20 will charge
+from: it reads the list price from N-118, works the discount out from the coupon row, never trusts the
+caller for either, takes one code (so nothing stacks), rounds a percentage **down**, never returns below
+zero, and reads only.
+
+**The two properties that matter, and how each is enforced.** *Every way a code can fail is one answer.*
+Mistyped, unknown, disabled, not yet valid, expired, used up, used already, the other door, another
+product, the wrong kind, a product not for sale: `{ ok: false }` and nothing else, and at the route
+`COUPON_INVALID` (a new error code) with one sentence — including for a malformed body, which is why the
+route accepts any string rather than validating a code shape and answering differently. The reason is
+logged with the coupon's id when there is one and **never the typed string**. And *lookups are counted*:
+every one, right or wrong, against the studio (8 per 15 minutes) and the address (20), consumed before
+anything is read, and not reset by success — a correct code typed after eight wrong ones is refused too.
+
+**The redemption is one atomic step, under a lock.** `Repository.redeemCoupon` checks that the coupon
+is enabled and inside its window and that both limits have room, then writes the redemption **and the
+reward's credits together** — in Postgres, `redeem_coupon` takes `select … for update` on the coupon's
+row first, so two people taking the last use, or one payer double-clicking, are serialised. The
+application checks first too, but that is a read; this is the decision, and it is re-checked in both
+drivers. N-20 will call the same method with a payment id.
+
+**Decisions taken without asking — say so and they change.** Coupons are immutable except for on/off
+(to change one, switch it off and make another) — an extension of a window is therefore a new code.
+Codes are six to thirty-two of `A–Z 0–9 -`, stored upper-case so uniqueness is case-insensitive and a
+typed "spring26" finds "SPRING26"; six because a code is a password for money. A reward is capped at 50
+credits, the same as a manual grant. Windows are **days in India's timezone** — "until 30 November"
+includes the whole of the 30th there. A percentage rounds down. Per-payer defaults to one, and a blank
+limit means none. Redeeming a reward is not a *platform* action, so it is not on the platform audit trail;
+the redemption row and each credit's `granted_by` (`coupon:CODE`) are its record. Redemptions cascade with
+their org (like credits), so a deleted studio takes its history with it — stated in the SQL. **Not built:**
+nothing calls `applyCoupon` until N-20, so **a discount code cannot be used by anyone yet** — only
+rewards can; the couple's side has nothing until then; and there is no way to edit a coupon.
+
+**Four things went wrong, and what each taught.** (1) *My in-memory driver had the race the database
+function exists to prevent.* `redeemCoupon` awaited between counting redemptions and writing one, so six
+simultaneous redemptions of a one-use code all succeeded. The test I wrote for the property — six at
+once — found it on its first run; an `await` is precisely where a second request gets in, and the driver
+now has none between the count and the write. What it taught: a single-threaded store is only atomic if
+nothing inside it yields, and the real proof of the lock is Postgres, below. (2) *Two layers hid each
+other.* Removing the application's window and disabled-check left "an expired code is refused" green,
+because the atomic step refuses it as well. That is the design working, but it meant the atomic step's
+own refusals were unproven; ten tests now call it directly with no application check in front of it. (3)
+*A mutation of mine proved nothing* — it referenced a variable that did not exist, so every test crashed
+red for the wrong reason; redone with the auth check genuinely bypassed. (4) *Two mistakes in my own
+tests:* a reward is a fine thing to redeem, so it does not belong in the "refused" list for redemption
+(it belongs in the quote's); and two studios cannot fill twenty lookups, because each hits its own limit at
+eight — the address test needed three.
+
+**The console could not be tested end to end by the harness.** No platform admin exists in the demo
+data, so the E2E cannot make a coupon. The demo and CI data now carry one reward, `DEMO-WELCOME`
+(unlimited per studio, so a retried run does not find it spent), and the E2E redeems it through the real
+Studio page. To *see* the console I added a platform admin to the seed temporarily — first with the wrong
+id, which 404s, because a platform admin is recognised by the signed-in user's id — and reverted it.
+
+**Proof it is real, not just green.** Thirty-three deliberate breakages, each confirmed red by name and
+restored: every refusal removed one at a time (window, disabled, scope, kind, per-payer, overall,
+each in the application *and* in the atomic step), an `await` put back between count and write, a
+percentage rounding instead of flooring, a fixed amount not clamped to the price, quoting that uses the
+coupon up, the rate limit and the address bucket each removed, the malformed-code answer made different,
+duplicate codes allowed, the window in UTC instead of India, the audit removed, both console routes opened
+to any operator, the reward ceiling raised in code only, and in the SQL the row lock removed, the cascade
+added, the function left runnable by anon, the studio-only rule and row-level security dropped — plus the
+form sending rupees as paise's opposite, a blank limit sent as zero, the switch sending what it already
+is, and the redeem box keeping a redeemed code. On a production build the E2E went red when a reward
+granted the wrong basket. **In a browser**, on a memory-driver server: the console lists the fixture and
+a coupon made through the form (random code shown, campaign row appears); a wrong code in the Studio box
+says *That code did not work.*; `demo-welcome` in lower case adds *1 Keep credit* and the card reads
+*40 Deliver credits and 1 Keep credit*; the console then reads the cohort back (1 redemption, 1 payer, 1
+credit) and the campaign filter names who and when; disabling a coupon updates its row, and the audit page
+holds both `coupon.create` and `coupon.disable` with the code and campaign.
+
+Suite: 1079 unit/component (+136: 72 behaviour and atomic-step, 30 console routes, 16 migration, 18
+component); E2E **163 passed / 58 skipped, exit 0** on the full run after the commit (the new spec is one desktop pass
+and one mobile skip). The photograph-caption spec — the known real-Bunny flake from N-118 and N-120, not
+yet pinned to the fake driver — happened to pass this time; that is luck, not a fix. New: `supabase/migrations/0032_coupons.sql`, `lib/coupons.ts`,
+`lib/admin/coupons.ts`, the redeem and platform coupon routes, `components/admin/{CouponConsole,RedeemCode}.tsx`,
+`app/admin/platform/coupons/page.tsx`, `tests/unit/{coupons,coupon-console,coupon-migration}.test.ts`,
+`tests/component/coupons.test.tsx`, `e2e/coupons.spec.ts`. Changed: both drivers and the `Repository`
+interface, `lib/schema.ts`, `lib/plans.ts`, `lib/http/errors.ts`, the Studio page, the platform nav,
+`lib/db/seed-data.ts`, `tests/integration/drivers.test.ts` (an atomic-redemption case that **fires three
+simultaneous redemptions of a one-use code at real Postgres and expects one winner — written and not yet
+run; it needs `0032` on staging**), `docs/help/studio.md`, `docs/PRODUCT.md`, `docs/NEXT.md`. **Before this
+is deployed:** apply `0032` to staging, run the integration suite against `.env.staging.local`, deploy
+staging, then apply it to production — the console and the Studio box read the new tables, and the
+function moves credits.

@@ -22,6 +22,8 @@ import type {
   Title,
   Preset,
   CreditBalance,
+  Coupon,
+  CouponRedemption,
   Plan,
   PublishCredit,
   JobRun,
@@ -72,6 +74,13 @@ export type CreateTitleInput = Omit<
 /** The verdict a rate-limit consume returns — defined here, not in `lib/http`, because a
  *  driver returns it and the http layer is the caller, not the source (N-86). */
 export type LimitResult = { allowed: boolean; remaining: number; retryAfterS: number }
+
+/** What `Repository.redeemCoupon` takes: the redemption to record, the credits it hands over, and "now". */
+export type RedeemCoupon = {
+  redemption: CouponRedemption
+  credits: PublishCredit[]
+  nowIso: string
+}
 
 export interface Repository {
   // ── Orgs & operators ────────────────────────────────────────────────────────
@@ -196,6 +205,29 @@ export interface Repository {
   setPlanRetail(id: string, range: { minPaise: number; maxPaise: number } | null): Promise<Plan | null>
   /** Replaces the typed credit bundle a purchase grants (`{ deliver: 2, cinema: 1 }`). Same return. */
   setPlanGrants(id: string, grants: Record<string, number>): Promise<Plan | null>
+
+  // ── Coupons (N-121, D-61) ─────────────────────────────────────────────────
+  /** Not scoped to an org: coupons are the platform's. A code already in use is a `VALIDATION_FAILED`. */
+  createCoupon(coupon: Coupon): Promise<Coupon>
+  listCoupons(): Promise<Coupon[]>
+  getCoupon(id: string): Promise<Coupon | null>
+  /** By the code as stored — upper-case (`normalizeCode`) — or `null`. */
+  getCouponByCode(code: string): Promise<Coupon | null>
+  /** The only edit a coupon allows: a redeemed code is history, so it is disabled, never changed or deleted. */
+  setCouponActive(id: string, active: boolean): Promise<Coupon | null>
+  /** How many times a coupon has been redeemed, in total and by one payer — the numbers a quote checks. */
+  countCouponRedemptions(couponId: string, payerOrgId: string): Promise<{ total: number; byPayer: number }>
+  /**
+   * The one atomic step for "may this be redeemed, and if so record it and hand over what it grants".
+   *
+   * Returns the redemption, or `null` when it may not be: unknown or disabled, outside its window, or a
+   * limit reached — deliberately one answer for all of them. The limits are checked *here*, under a lock,
+   * not just in the caller: a check followed by a write lets two requests for the last redemption both
+   * pass. `credits` (a reward's) are stored in the same step, so a redemption with no credits, or credits
+   * with no redemption, cannot exist.
+   */
+  redeemCoupon(input: RedeemCoupon): Promise<CouponRedemption | null>
+  listCouponRedemptions(): Promise<CouponRedemption[]>
 
   // ── House styles (D-36) ─────────────────────────────────────────────────
   listPresets(orgId: string): Promise<Preset[]>

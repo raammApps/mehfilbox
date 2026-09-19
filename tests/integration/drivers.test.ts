@@ -351,6 +351,132 @@ describe.skipIf(!hasSupabase)('Supabase Postgres, for real', () => {
   )
 
   it(
+    'redeems a coupon atomically, in the database — one winner for the last use, and nothing for the loser (N-121)',
+    async () => {
+      const { createClient } = await import('@supabase/supabase-js')
+      const { SupabaseRepository } = await import('@/lib/db/supabase-repository')
+      const { makeCredits } = await import('@/lib/admin/credits')
+      const { couponSchema, orgSchema } = await import('@/lib/schema')
+      const repository = new SupabaseRepository()
+      const db = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        (process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY)!,
+        { auth: { persistSession: false } },
+      )
+      const anonKey =
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+      const anon = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, anonKey!, { auth: { persistSession: false } })
+
+      // Studios of their own, so no real org's balance is touched; everything is removed in `finally`.
+      const suffix = Date.now().toString(36)
+      const tag = suffix.toUpperCase()
+      const orgs = ['a', 'b', 'c'].map((letter) =>
+        orgSchema.parse({
+          id: randomUUID(),
+          name: `Integration coupons ${letter} ${suffix}`,
+          slug: `itest-coupons-${letter}-${suffix}`,
+          createdAt: new Date().toISOString(),
+        }),
+      )
+      const now = new Date()
+      const couponIds: string[] = []
+      const make = async (over: Record<string, unknown>) => {
+        const coupon = couponSchema.parse({
+          id: randomUUID(),
+          kind: 'reward',
+          value: 1,
+          rewardPlanId: 'keep',
+          campaign: 'Integration',
+          doors: ['studio'],
+          createdBy: 'itest',
+          createdAt: now.toISOString(),
+          ...over,
+        })
+        couponIds.push(coupon.id)
+        return repository.createCoupon(coupon)
+      }
+      const attempt = (couponId: string, orgId: string) =>
+        repository.redeemCoupon({
+          redemption: {
+            id: randomUUID(),
+            couponId,
+            payerOrgId: orgId,
+            paymentId: null,
+            amountOffPaise: 0,
+            creditsGranted: 1,
+            createdAt: now.toISOString(),
+          },
+          credits: makeCredits({ orgId, count: 1, planId: 'keep', grantedBy: `coupon:ITEST-${tag}`, now }),
+          nowIso: now.toISOString(),
+        })
+      const credited = async (orgId: string) => (await repository.listCredits(orgId)).length
+
+      try {
+        for (const org of orgs) await repository.createOrg(org)
+
+        // The row lock: three studios race for the last use of a code, in parallel over the network.
+        // Without `for update` in the function, each would count zero and all three would win.
+        const scarce = await make({ code: `ITEST-LAST-${tag}`, maxRedemptions: 1, maxPerPayer: null })
+        const race = await Promise.all(orgs.map((org) => attempt(scarce.id, org.id)))
+        expect(race.filter(Boolean), 'exactly one of three simultaneous redemptions may win').toHaveLength(1)
+        const grants = await Promise.all(orgs.map((org) => credited(org.id)))
+        expect(grants.reduce((total, n) => total + n, 0), 'and only the winner is credited').toBe(1)
+        expect((await repository.listCouponRedemptions()).filter((row) => row.couponId === scarce.id)).toHaveLength(1)
+
+        // The same payer sending the same request twice at once, against a limit of one each.
+        const eachOne = await make({ code: `ITEST-EACH-${tag}`, maxRedemptions: null, maxPerPayer: 1 })
+        const double = await Promise.all([attempt(eachOne.id, orgs[0]!.id), attempt(eachOne.id, orgs[0]!.id)])
+        expect(double.filter(Boolean), 'a double click is one redemption').toHaveLength(1)
+
+        // Disabled, and outside its window: refused by the database, not only by the application.
+        const off = await make({ code: `ITEST-OFF-${tag}`, active: false })
+        const early = await make({ code: `ITEST-EARLY-${tag}`, validFrom: new Date(now.getTime() + 86_400_000).toISOString() })
+        const late = await make({ code: `ITEST-LATE-${tag}`, validUntil: new Date(now.getTime() - 86_400_000).toISOString() })
+        expect(await attempt(off.id, orgs[1]!.id)).toBeNull()
+        expect(await attempt(early.id, orgs[1]!.id)).toBeNull()
+        expect(await attempt(late.id, orgs[1]!.id)).toBeNull()
+
+        // A refused redemption stores nothing: not the row, and not the credits that came with it.
+        const before = await credited(orgs[1]!.id)
+        expect(await attempt(off.id, orgs[1]!.id)).toBeNull()
+        expect(await credited(orgs[1]!.id)).toBe(before)
+
+        // A code somebody has is refused with the sentence, however it was cased when typed.
+        await expect(make({ code: `ITEST-LAST-${tag}` })).rejects.toMatchObject({ code: 'VALIDATION_FAILED' })
+        expect((await repository.getCouponByCode(`ITEST-LAST-${tag}`))?.maxRedemptions).toBe(1)
+        expect(await repository.getCouponByCode('NO-SUCH-CODE-EXISTS')).toBeNull()
+
+        // The check constraints are the backstop under `couponSchema`.
+        const row = { id: randomUUID(), campaign: 'x', created_by: 'itest', kind: 'reward', value: 1, reward_plan_id: 'keep', doors: ['studio'] }
+        const refused = async (over: Record<string, unknown>) =>
+          (await db.from('coupons').insert({ ...row, id: randomUUID(), code: `ITEST-BAD-${tag}`, ...over })).error?.code
+        expect(await refused({ doors: ['couple'] }), 'a reward for couples').toBe('23514')
+        expect(await refused({ kind: 'percent', reward_plan_id: null, value: 101, doors: ['studio', 'couple'] }), 'over 100%').toBe('23514')
+        expect(await refused({ value: 51 }), 'a reward over the ceiling').toBe('23514')
+        expect(await refused({ code: 'lowercase-code' }), 'a code that is not upper-case').toBe('23514')
+        expect(await refused({ reward_plan_id: 'light' }), 'a basket that is a storage tier').toBe('23514')
+
+        // The public key reaches none of it: not the tables, and not the function that moves credits.
+        const read = await anon.from('coupons').select('*').limit(1)
+        expect(read.data ?? [], 'anon must read no coupons').toHaveLength(0)
+        const call = await anon.rpc('redeem_coupon', {
+          p_id: randomUUID(), p_coupon: scarce.id, p_payer: orgs[2]!.id, p_payment: null, p_amount_off: 0, p_credits: [], p_now: now.toISOString(),
+        })
+        expect(call.error, 'anon must not be able to run redeem_coupon').not.toBeNull()
+      } finally {
+        // A coupon is never deleted in the product; these are this test's own rows, and the only way out.
+        await db.from('coupon_redemptions').delete().in('coupon_id', couponIds)
+        await db.from('coupons').delete().in('id', couponIds)
+        for (const org of orgs) {
+          await db.from('credits').delete().eq('org_id', org.id)
+          await db.from('orgs').delete().eq('id', org.id)
+        }
+      }
+    },
+    REMOTE_TIMEOUT,
+  )
+
+  it(
     'grants a catalogue its storage tier, and resolveLimits prefers it (D-60, N-80)',
     async () => {
       const { SupabaseRepository } = await import('@/lib/db/supabase-repository')

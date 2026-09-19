@@ -6,6 +6,7 @@ import { getOperatorSession, getSessionOrg } from '@/lib/admin/session'
 import { DomainPanel } from '@/components/admin/DomainPanel'
 import { getRepository } from '@/lib/db'
 import { instructionsOf } from '@/lib/domains'
+import { RedeemCode } from '@/components/admin/RedeemCode'
 import { availableByPlan, CREDIT_PLAN_IDS, describeGrants, planLabel } from '@/lib/plans'
 import { getPriceListForDisplay, priceLabel } from '@/lib/pricing'
 import { allThemes } from '@/themes/resolve'
@@ -71,6 +72,17 @@ export default async function StudioPage() {
             {creditPrices.length > 0 ? creditPrices.join(', ') : 'priced on request'}
             {packPrice ? `, and five Deliver credits are ${packPrice}` : ''}.
           </p>
+          {/* A reward code (N-121). Studios only: a couple holds no basket, and the server refuses them the same way. */}
+          {org.kind === 'partner' ? (
+            <RedeemCode
+              planNames={
+                Object.fromEntries(CREDIT_PLAN_IDS.map((id) => [id, planLabel(prices, id)])) as Record<
+                  (typeof CREDIT_PLAN_IDS)[number],
+                  string
+                >
+              }
+            />
+          ) : null}
         </section>
 
         {/* films.yourstudio.in/<wedding> — every wedding this studio makes, from its own domain (doc 16 §1). */}

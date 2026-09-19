@@ -1,7 +1,7 @@
 import { hashSecret } from '@/lib/crypto'
 import type { Snapshot } from './memory-repository'
 import { emptySnapshot } from './memory-repository'
-import type { Album, Catalogue, ModuleInstance, Photo, Plan, Title } from '@/lib/schema'
+import type { Album, Catalogue, Coupon, ModuleInstance, Photo, Plan, Title } from '@/lib/schema'
 
 /**
  * The demo catalogue (doc 09 P0-29).
@@ -375,6 +375,35 @@ export type SeedOperator = { email: string; password: string }
  * from a plain Node script — the seed script is the main consumer, and it must not need the
  * server-only configuration module to write a JSON file.
  */
+/**
+ * One reward coupon in the demo and CI data (N-121), so the studio's "Have a code?" box has something to
+ * redeem: the E2E harness has no platform admin to make one, and a fixture is the honest way to give it
+ * one. Memory and file drivers only — production reads its coupons from the database, where none exists
+ * until the platform makes it.
+ */
+export const DEMO_REWARD_CODE = 'DEMO-WELCOME'
+
+const DEMO_COUPONS: Coupon[] = [
+  {
+    id: '55555555-5555-4555-8555-555555555501',
+    code: DEMO_REWARD_CODE,
+    kind: 'reward',
+    value: 1,
+    rewardPlanId: 'keep',
+    campaign: 'Demo fixture',
+    validFrom: null,
+    validUntil: null,
+    maxRedemptions: null,
+    // Unlimited each, unlike a real code: the E2E suite redeems it and a retried run must not find it spent.
+    maxPerPayer: null,
+    doors: ['studio'],
+    planIds: [],
+    active: true,
+    createdBy: 'seed',
+    createdAt: '2026-01-01T00:00:00.000Z',
+  },
+]
+
 export function demoSnapshot(
   operator: SeedOperator = { email: 'operator@mehfilbox.test', password: 'mehfilbox-dev' },
 ): Snapshot {
@@ -388,6 +417,7 @@ export function demoSnapshot(
   return {
     ...emptySnapshot(),
     plans: structuredClone(SEED_PLANS),
+    coupons: structuredClone(DEMO_COUPONS),
     orgs: [
       {
         id: ORG_ID,

@@ -297,6 +297,21 @@ change the plan. There is an **Ask for a credit** button, once a day per plan; n
 wedding is lost while you wait, and the platform adds credits the same working day. Online payment
 is not built yet (N-20); this is the interim.
 
+**Have a code?** If you have been given a reward code — from a campaign, a partnership, a thank-you —
+type it into **Have a code?** on your **Credits** card under *Your studio*. It adds credits of the kind
+the code names straight to your balance, with no payment, and the card updates as soon as it does.
+Capital letters do not matter.
+
+- **If a code does not work, you are told only that it did not work.** Mistyped, expired, switched
+  off, already used by you, used up by everyone, and not meant for your studio all read the same, on
+  purpose — a code is worth money, and telling them apart would let anyone find out which ones exist.
+  Check it against where you were given it, or ask whoever gave it to you.
+- **Most codes can be used once per studio**, and some run out or end on a date.
+- **After several tries in a row you are asked to wait a few minutes** before trying again.
+- Credits from a code last two years, like any other, and each is listed as coming from that code.
+- Codes that take money off a purchase are entered at checkout once online payment exists (N-20);
+  this box is for the ones that hand over credits.
+
 ---
 
 ## Settings

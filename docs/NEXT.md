@@ -250,32 +250,20 @@ cheapest place to prove the direction looks right on the existing token system b
 Sandeep's walk-through of how money moves (`PRODUCT.md` §10, D-61), which replaced three documents
 that gave three answers and narrowed D-26. **In build order** — each is useful before the next
 exists, and the first three need no payment gateway at all. **N-118 (prices as settings), N-119
-(typed credits) and N-120 (the term starts at first Publish) landed 19 September** — see `PROGRESS.md`; `getPrice` and `getPriceListForDisplay` in
+(typed credits), N-120 (the term starts at first Publish) and N-121 (coupon codes) landed 19 September** — see `PROGRESS.md`; `getPrice` and `getPriceListForDisplay` in
 `lib/pricing.ts` are what the rest read prices from, and `CREDIT_PLAN_IDS` / `availableByPlan` in
 `lib/plans.ts` are what read a studio's baskets. Two doors, both permanent: a studio
 buys a typed basket of credits and spends one per wedding it delivers; a couple who signs up alone
 buys a plan for their one wedding. Prices and coupons are settings, never code.
-
-### N-121 · Coupon codes  ·  ~1 session  ·  D-61
-
-So a marketing cohort or a reward is a code rather than a price change. `coupons` (code, kind,
-value, **campaign label**, valid from/until, maximum redemptions overall and per payer, scope: which
-plans and which door, active) and `coupon_redemptions` (coupon, payer, payment, amount taken off).
-Kinds: percent off, fixed amount off, and **reward** — grants credits of a chosen plan, studios
-only, needing no payment and so usable before N-20 exists. Platform console
-`/admin/platform/coupons`: create, disable (never delete — a redeemed code is history), and
-redemptions by campaign so a cohort can be read back; audited. `applyCoupon(code, product, payer)`
-is server-side only and returns the discounted amount for N-20's checkout to charge: the browser
-never sends a price or a discount. One per checkout, no stacking. A code is a password for money —
-rate-limit lookups the way the guest passcode is, and answer "invalid" identically for unknown,
-expired and exhausted so the answer cannot be used to probe which exist.
 
 ### N-20 · The checkout  ·  ~2 sessions  ·  **needs N-118 and N-119 (both landed); the live proof needs Razorpay test keys**  ·  D-58a, D-61
 
 One payment flow, two payers. A `payments` table (its id is the `reference` `createPayment`
 already expects; payer org, product, plan, list price, coupon, amount charged, status, provider
 refs, timestamps). `POST /api/payments/checkout` takes a product and an optional coupon, prices it
-from N-118, applies N-121 on the server, and calls `createPayment`. `POST /api/webhooks/razorpay`
+from N-118, applies N-121 on the server (`applyCoupon` in `lib/admin/coupons.ts` quotes it and reads only; once
+there is a payment, `Repository.redeemCoupon` records the redemption and re-checks every limit under a lock),
+and calls `createPayment`. `POST /api/webhooks/razorpay`
 verifies the raw body (`verifyWebhook`, built and tested in N-112) and, on paid, writes what the
 product means — **idempotently on `payments.id`**: typed credits granted (a studio top-up), a term
 extended (a renewal), a storage grant, a plan written onto a direct couple's catalogue, the Studio
@@ -578,7 +566,7 @@ regenerate without invalidating, so the revocation is the half worth checking.
 - **Credentials** live in `.env.local` (gitignored, verified). Both services are fully
   configured; `pnpm preflight` is all green.
 - **Supabase**: schema applied through `0025_occasions.sql` on 12 September; later migrations are recorded in
-  PROGRESS as they are applied — `0029_price_list.sql` is on **staging and production** (both 19 September); `0030_catalogue_plan.sql` (N-119) is on **staging and production** (both 19 September); `0031_term_at_publish.sql` (N-120) is on **staging and production** (both 19 September) — the price list and Publish read `plans.term_*` from it: Publish and the price list now read `plans.term_*`, and without them the first Publish refuses. Six orgs exist, and the operator
+  PROGRESS as they are applied — `0029_price_list.sql` is on **staging and production** (both 19 September); `0030_catalogue_plan.sql` (N-119) is on **staging and production** (both 19 September); `0031_term_at_publish.sql` (N-120) is on **staging and production** (both 19 September) — the price list and Publish read `plans.term_*` from it; `0032_coupons.sql` (N-121) is **written, not yet applied anywhere** — apply it to staging, then production, *before* deploying: the console and the redeem box read `coupons`, and the redeem function moves credits: Publish and the price list now read `plans.term_*`, and without them the first Publish refuses. Six orgs exist, and the operator
   rows are, read from the database on 7 September rather than remembered:
 
   | org | operator |

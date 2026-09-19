@@ -1,3 +1,4 @@
+import { windowOpen } from '@/lib/coupons'
 import { CREDIT_PLAN_IDS, type CreditPlanId } from '@/lib/plans'
 import { randomUUID } from 'node:crypto'
 import { ApiError } from '@/lib/http/errors'
@@ -25,6 +26,8 @@ import type {
   CreditCounts,
   Plan,
   PublishCredit,
+  Coupon,
+  CouponRedemption,
   JobRun,
   QueueStats,
   Domain,
@@ -36,6 +39,7 @@ import type {
   CatalogueFilter,
   CreateTitleInput,
   LimitResult,
+  RedeemCoupon,
   Repository,
 } from './repository'
 
@@ -68,6 +72,8 @@ export type Snapshot = {
   presets: Preset[]
   credits: PublishCredit[]
   plans: Plan[]
+  coupons: Coupon[]
+  couponRedemptions: CouponRedemption[]
   jobRuns: JobRun[]
   domains: Domain[]
   orgs: Org[]
@@ -102,6 +108,8 @@ export function emptySnapshot(): Snapshot {
     presets: [],
     credits: [],
     plans: [],
+    coupons: [],
+    couponRedemptions: [],
     jobRuns: [],
     domains: [],
     orgs: [],
@@ -417,6 +425,81 @@ export class MemoryRepository implements Repository {
 
   async creditBalance(orgId: string, nowIso: string): Promise<CreditBalance> {
     return balanceOf((this.data.credits ?? []).filter((c) => c.orgId === orgId), nowIso)
+  }
+
+  // ── Coupons (N-121, D-61) ─────────────────────────────────────────────────
+  async createCoupon(coupon: Coupon): Promise<Coupon> {
+    this.data.coupons ??= []
+    // The same refusal Postgres's unique index gives, so both drivers say the same thing.
+    if (this.data.coupons.some((existing) => existing.code === coupon.code)) {
+      throw new ApiError('VALIDATION_FAILED', 'That code is already in use', {
+        fields: { code: 'Another coupon already has this code' },
+      })
+    }
+    this.data.coupons.push(this.clone(coupon))
+    this.touched()
+    return this.clone(coupon)
+  }
+
+  async listCoupons(): Promise<Coupon[]> {
+    return this.clone([...(this.data.coupons ?? [])].sort((a, b) => b.createdAt.localeCompare(a.createdAt)))
+  }
+
+  async getCoupon(id: string): Promise<Coupon | null> {
+    const coupon = (this.data.coupons ?? []).find((candidate) => candidate.id === id)
+    return coupon ? this.clone(coupon) : null
+  }
+
+  async getCouponByCode(code: string): Promise<Coupon | null> {
+    const coupon = (this.data.coupons ?? []).find((candidate) => candidate.code === code)
+    return coupon ? this.clone(coupon) : null
+  }
+
+  async setCouponActive(id: string, active: boolean): Promise<Coupon | null> {
+    const coupon = (this.data.coupons ?? []).find((candidate) => candidate.id === id)
+    if (!coupon) return null
+    coupon.active = active
+    this.touched()
+    return this.clone(coupon)
+  }
+
+  /** Synchronous on purpose: `redeemCoupon` counts and writes with nothing in between to yield on. */
+  private couponUsage(couponId: string, payerOrgId: string): { total: number; byPayer: number } {
+    const mine = (this.data.couponRedemptions ?? []).filter((row) => row.couponId === couponId)
+    return { total: mine.length, byPayer: mine.filter((row) => row.payerOrgId === payerOrgId).length }
+  }
+
+  async countCouponRedemptions(
+    couponId: string,
+    payerOrgId: string,
+  ): Promise<{ total: number; byPayer: number }> {
+    return this.couponUsage(couponId, payerOrgId)
+  }
+
+  async redeemCoupon(input: RedeemCoupon): Promise<CouponRedemption | null> {
+    const { redemption, credits, nowIso } = input
+    const coupon = (this.data.coupons ?? []).find((candidate) => candidate.id === redemption.couponId)
+    // The same refusals as `redeem_coupon` in migration 0032, in the same order, with the same single
+    // answer. **Nothing here awaits** between the count and the write — an `await` is where a second
+    // request gets in, and six at once would each see zero redemptions — so on one process this is atomic.
+    if (!coupon || !coupon.active || !windowOpen(coupon, new Date(nowIso))) return null
+    const { total, byPayer } = this.couponUsage(coupon.id, redemption.payerOrgId)
+    if (coupon.maxRedemptions !== null && total >= coupon.maxRedemptions) return null
+    if (coupon.maxPerPayer !== null && byPayer >= coupon.maxPerPayer) return null
+
+    const stored = { ...redemption, creditsGranted: credits.length }
+    this.data.couponRedemptions ??= []
+    this.data.couponRedemptions.push(this.clone(stored))
+    this.data.credits ??= []
+    this.data.credits.push(...this.clone(credits))
+    this.touched()
+    return this.clone(stored)
+  }
+
+  async listCouponRedemptions(): Promise<CouponRedemption[]> {
+    return this.clone(
+      [...(this.data.couponRedemptions ?? [])].sort((a, b) => b.createdAt.localeCompare(a.createdAt)),
+    )
   }
 
   // ── The price list (N-118, D-61) ──────────────────────────────────────────

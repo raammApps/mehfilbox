@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { CREDIT_PLAN_IDS, type CreditPlanId } from '@/lib/plans'
+import { CREDIT_PLAN_IDS, MAX_PRICE_PAISE, MAX_REWARD_CREDITS, type CreditPlanId } from '@/lib/plans'
 
 /**
  * The domain vocabulary, mirroring the Postgres schema in doc 06 §1 and doc 14 §6.
@@ -337,6 +337,87 @@ export const planSchema = z.object({
   termDays: z.number().int().positive().nullable().default(null),
 })
 export type Plan = z.infer<typeof planSchema>
+
+/**
+ * What a coupon does (N-121, D-61). `percent` and `fixed` lower one checkout; `reward` grants credits
+ * of a chosen plan instead and needs no payment, so it is usable before N-20 exists.
+ */
+export const COUPON_KINDS = ['percent', 'fixed', 'reward'] as const
+export type CouponKind = (typeof COUPON_KINDS)[number]
+
+/** Who a coupon is for: a studio (org kind `partner`) or a direct couple (org kind `couple`). */
+export const COUPON_DOORS = ['studio', 'couple'] as const
+export type CouponDoor = (typeof COUPON_DOORS)[number]
+
+/**
+ * A code as stored: upper-case, six to thirty-two characters, letters, digits and hyphens, never
+ * starting or ending with a hyphen. Upper-case so uniqueness is case-insensitive for free and a typed
+ * "spring26" finds "SPRING26"; six characters at least because a code is a password for money and a
+ * short one is a guess.
+ */
+export const COUPON_CODE_PATTERN = /^[A-Z0-9][A-Z0-9-]{4,30}[A-Z0-9]$/
+
+/**
+ * One coupon (N-121). Immutable except for `active`: a redeemed code is history, so what it was
+ * worth is never edited after the fact — disable it and make another.
+ *
+ * `value` means one thing per kind: percent off (1–100), paise off ex-GST, or a count of credits.
+ * A reward names the basket it pays into and is for studios only.
+ */
+export const couponSchema = z
+  .object({
+    id: z.string().uuid(),
+    code: z.string().regex(COUPON_CODE_PATTERN, 'Six to thirty-two letters, digits or hyphens'),
+    kind: z.enum(COUPON_KINDS),
+    value: z.number().int().positive(),
+    rewardPlanId: z.enum(CREDIT_PLAN_IDS).nullable().default(null),
+    campaign: z.string().trim().min(1).max(80),
+    validFrom: z.string().nullable().default(null),
+    validUntil: z.string().nullable().default(null),
+    maxRedemptions: z.number().int().positive().nullable().default(null),
+    maxPerPayer: z.number().int().positive().nullable().default(1),
+    doors: z.array(z.enum(COUPON_DOORS)).min(1).default(['studio', 'couple']),
+    planIds: z.array(z.string().min(1)).default([]),
+    active: z.boolean().default(true),
+    createdBy: z.string().min(1),
+    createdAt: z.string(),
+  })
+  .superRefine((coupon, ctx) => {
+    const problem = (path: string, message: string) =>
+      ctx.addIssue({ code: z.ZodIssueCode.custom, path: [path], message })
+
+    if (coupon.kind === 'percent' && coupon.value > 100) problem('value', 'A percentage is 1 to 100')
+    if (coupon.kind === 'fixed' && coupon.value > MAX_PRICE_PAISE) problem('value', 'That is more than any price')
+    if (coupon.kind === 'reward') {
+      if (coupon.value > MAX_REWARD_CREDITS) problem('value', `A reward grants at most ${MAX_REWARD_CREDITS} credits`)
+      if (!coupon.rewardPlanId) problem('rewardPlanId', 'A reward says which credit it grants')
+      if (coupon.doors.length !== 1 || coupon.doors[0] !== 'studio') {
+        problem('doors', 'A reward is for studios only — a direct couple has no basket')
+      }
+    } else if (coupon.rewardPlanId) {
+      problem('rewardPlanId', 'Only a reward grants a credit')
+    }
+    if (coupon.validFrom && coupon.validUntil && Date.parse(coupon.validFrom) > Date.parse(coupon.validUntil)) {
+      problem('validUntil', 'It cannot end before it starts')
+    }
+  })
+export type Coupon = z.infer<typeof couponSchema>
+
+/**
+ * One redemption (N-121): who used which coupon, when, and what it was worth. `paymentId` is null for
+ * a reward — nothing was paid — and until N-20 gives payments a table. `amountOffPaise` is what was
+ * taken off a checkout, `creditsGranted` what a reward handed over; a row has one or the other.
+ */
+export const couponRedemptionSchema = z.object({
+  id: z.string().uuid(),
+  couponId: z.string().uuid(),
+  payerOrgId: z.string().uuid(),
+  paymentId: z.string().uuid().nullable().default(null),
+  amountOffPaise: z.number().int().nonnegative().default(0),
+  creditsGranted: z.number().int().nonnegative().default(0),
+  createdAt: z.string(),
+})
+export type CouponRedemption = z.infer<typeof couponRedemptionSchema>
 
 /** One run of a scheduled job (D-40): every cron writes one, the health page reads the newest. */
 export const jobRunSchema = z.object({

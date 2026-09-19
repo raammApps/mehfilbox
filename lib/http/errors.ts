@@ -6,6 +6,12 @@ import { NextResponse } from 'next/server'
  */
 export const ERROR_CODES = {
   VALIDATION_FAILED: 400,
+  /**
+   * A coupon code that cannot be used — and only that: unknown, disabled, expired, exhausted, for
+   * someone else and malformed all look the same, so the answer cannot be used to find out which codes
+   * exist (N-121).
+   */
+  COUPON_INVALID: 400,
   PASSCODE_REQUIRED: 401,
   UNAUTHORIZED: 401,
   SUBSCRIPTION_INACTIVE: 402,

@@ -54,6 +54,13 @@ export const MAX_PRICE_PAISE = 100_000_000
 export const MAX_BUNDLE_QUANTITY = 100
 
 /**
+ * Most credits one reward coupon may grant (N-121) — the ceiling a manual grant has, for the same
+ * reason: a code is a password for money, and one that could hand over a hundred credits is a bigger
+ * mistake than one that hands over five. Migration 0032's check constraint says the same number.
+ */
+export const MAX_REWARD_CREDITS = 50
+
+/**
  * A plan's name from the price list — or, when the list could not be read, its id capitalised, which
  * is exactly what the three credit plans are called. Without this a studio told "you have no deliver
  * credit left" (lowercase, an id) would be reading the database's outage in a sentence meant for them.
