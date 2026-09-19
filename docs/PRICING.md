@@ -9,7 +9,7 @@ All prices **exclude 18% GST** (SAC 998314).
 
 > **These figures are the *initial values*, not the live price list (D-61, 18 September 2026).**
 > No price lives in code: the live list is a platform setting, edited in the platform console and
-> audited, changeable at any time without a deploy (N-118). This page records where each number
+> audited, changeable at any time without a deploy (N-118, built 19 September — `/admin/platform/pricing`). This page records where each number
 > started and why; when the two disagree, the console is right. Discounts and rewards are coupon
 > codes (N-121), not edits to this table.
 

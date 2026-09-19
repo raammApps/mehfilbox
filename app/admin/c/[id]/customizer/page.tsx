@@ -7,6 +7,7 @@ import { getRepository } from '@/lib/db'
 import { effectiveModules } from '@/lib/db/repository'
 import { publicUrlOf } from '@/lib/address'
 import { signPhotos } from '@/lib/photos'
+import { getPriceListForDisplay, priceLabel } from '@/lib/pricing'
 import { allThemes } from '@/themes/resolve'
 
 export const dynamic = 'force-dynamic'
@@ -22,6 +23,7 @@ export default async function CustomizerPage({ params }: { params: Promise<{ id:
   const { session, catalogue } = editable
   const repository = getRepository()
   const org = await getSessionOrg(session)
+  const prices = await getPriceListForDisplay()
 
   const [titles, albums, photos, themes] = await Promise.all([
     repository.listTitles(catalogue.id),
@@ -62,6 +64,7 @@ export default async function CustomizerPage({ params }: { params: Promise<{ id:
         pendingContent={pending}
         themes={themes}
         audience={org?.kind === 'couple' ? 'couple' : 'studio'}
+        creditPrices={{ credit: priceLabel(prices, 'deliver'), pack: priceLabel(prices, 'deliver-5') }}
       />
     </AdminChrome>
   )

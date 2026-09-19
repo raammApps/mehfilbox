@@ -238,6 +238,88 @@ describe.skipIf(!hasSupabase)('Supabase Postgres, for real', () => {
     REMOTE_TIMEOUT,
   )
 
+  it(
+    'reads and edits the price list through the real driver, and puts every edit back (N-118)',
+    async () => {
+      const { SupabaseRepository } = await import('@/lib/db/supabase-repository')
+      const repository = new SupabaseRepository()
+
+      // If this throws `column "unit" does not exist`, migration 0029 has not been applied.
+      const list = await repository.listPlans()
+      const ids = list.map((plan) => plan.id)
+      for (const id of ['studio', 'deliver', 'keep', 'cinema', 'extra-4k', 'light']) {
+        expect(ids, `${id} should be seeded`).toContain(id)
+      }
+      expect(list.map((plan) => plan.position), 'console order').toEqual(
+        [...list.map((plan) => plan.position)].sort((a, b) => a - b),
+      )
+      // Editable values are not asserted — an admin may have changed them. Their *shape* is.
+      const studio = list.find((plan) => plan.id === 'studio')!
+      expect(studio.kind).toBe('partner')
+      expect(typeof studio.grants).toBe('object')
+
+      // Price: set, take off sale, and the unknown id that must not become a product. `extra-4k`
+      // because nothing quotes it yet, so a moment of a different price is seen by no one.
+      const original = await repository.getPlan('extra-4k')
+      try {
+        expect((await repository.setPlanPrice('extra-4k', 123_400))?.pricePaise).toBe(123_400)
+        expect((await repository.getPlan('extra-4k'))?.pricePaise).toBe(123_400)
+        expect((await repository.setPlanPrice('extra-4k', null))?.pricePaise).toBeNull()
+        expect(await repository.setPlanPrice('itest-not-a-product', 1)).toBeNull()
+        expect(await repository.getPlan('itest-not-a-product')).toBeNull()
+      } finally {
+        await repository.setPlanPrice('extra-4k', original?.pricePaise ?? null)
+      }
+      expect((await repository.getPlan('extra-4k'))?.pricePaise).toBe(original?.pricePaise ?? null)
+
+      // The retail range and the typed bundle (jsonb) — the two columns memory cannot prove.
+      const keep = await repository.getPlan('keep')
+      const studioBefore = await repository.getPlan('studio')
+      try {
+        const retail = await repository.setPlanRetail('keep', { minPaise: 111_100, maxPaise: 222_200 })
+        expect([retail?.retailMinPaise, retail?.retailMaxPaise]).toEqual([111_100, 222_200])
+
+        const granted = await repository.setPlanGrants('studio', { keep: 4 })
+        expect(granted?.grants).toEqual({ keep: 4 })
+      } finally {
+        await repository.setPlanRetail(
+          'keep',
+          keep?.retailMinPaise != null && keep.retailMaxPaise != null
+            ? { minPaise: keep.retailMinPaise, maxPaise: keep.retailMaxPaise }
+            : null,
+        )
+        await repository.setPlanGrants('studio', studioBefore?.grants ?? {})
+      }
+      expect((await repository.getPlan('studio'))?.grants).toEqual(studioBefore?.grants ?? {})
+    },
+    REMOTE_TIMEOUT,
+  )
+
+  it(
+    'keeps the price list unreadable and unwritable to the anon key printed into every page (N-118)',
+    async () => {
+      const anonKey =
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+      const { createClient } = await import('@supabase/supabase-js')
+      const { SupabaseRepository } = await import('@/lib/db/supabase-repository')
+      const anon = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, anonKey!, {
+        auth: { persistSession: false },
+      })
+      const repository = new SupabaseRepository()
+      const before = (await repository.getPlan('deliver'))?.pricePaise
+
+      // Prices are public on the marketing page, so *reading* is not the danger — but nothing
+      // reaches this table except through a route holding the service-role key, so anon gets nothing.
+      const { data } = await anon.from('plans').select('*').limit(1)
+      expect(data ?? [], 'anon must read no rows from plans').toHaveLength(0)
+
+      // The real property: a repricing attempt with the public key changes nothing.
+      await anon.from('plans').update({ price_paise: 1 }).eq('id', 'deliver')
+      expect((await repository.getPlan('deliver'))?.pricePaise).toBe(before)
+    },
+    REMOTE_TIMEOUT,
+  )
+
   it('round-trips a title, including the arrays and the nullable columns', async () => {
     const { SupabaseRepository } = await import('@/lib/db/supabase-repository')
     const repository = new SupabaseRepository()

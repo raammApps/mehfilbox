@@ -87,6 +87,35 @@ guest on a live film nothing extra. The un-ticked case stays refused to the owne
 status (`TITLE_NOT_READY`) stayed a wholly separate check throughout, exactly as before. 4 new
 unit tests, including cross-org refusal.
 
+### N-122 · The guest page is not ISR — measured, 19 September 2026
+
+Found while building N-118, by reading a build's own route table instead of assuming. `SCALE-PLAN.md`
+§3 says 300 guests on one link "mostly hit the edge cache because the guest page is ISR", doc 05 §6
+says the browse page is "ISR — revalidated explicitly on publish", and `app/c/[slug]/page.tsx`
+declares `revalidate = 3600`. **None of that is happening.** A production build prints `ƒ /c/[slug]`
+— and **zero** static or ISR routes in the whole app — and the live page answers every request with
+`cache-control: private, no-cache, no-store` and `x-vercel-cache: MISS`, `age: 0` (three in a row,
+`mehfilbox.com/c/aanya-and-vikram`). Every guest view is a serverless invocation plus its database
+reads, and function invocations are exactly the constraint `SCALE-PLAN.md` says binds first, at about
+333 weddings a month. The `revalidate` export is inert because the page is already dynamic.
+
+**Why.** Anything that reads a cookie or header opts a route out of caching, and there are four
+reads in the way: the root layout reads the locale cookie (`app/layout.tsx:24`, N-29 — this alone
+makes *every* page dynamic); `guestLocale` reads it again in the page; `resolveAccess` reads the
+passcode cookie; and, since 18 September, the page reads the signed-in session to decide whether to
+show a Download control (`isAuthorizedToDownload`, N-22b). Fixing one of them fixes nothing — all
+have to go.
+
+**What to do.** Take the guest render path off request data: carry the locale in the URL or a
+middleware rewrite rather than a cookie read in the layout (N-29 put it there so `<html lang>` is
+honest, which is a real constraint — keep it), and make N-22b's Download control a client fetch
+after hydration instead of a server-rendered prop. A passcode catalogue is dynamic by nature and
+already redirects to its own `/locked` route, so it need not block the rest. **Prove it the way it
+was found:** `ƒ` becomes `●` in the route table, then `x-vercel-cache: HIT` on the live page. ~1
+session; measure the invocation count before and after, because that number is what the scale model
+was written around and it has never been measured. Belongs with N-81 (measuring the limits), but it
+is a fix and not a measurement, and it should not wait for three real weddings.
+
 ---
 
 ## Tier 1c — the gaps of 13 September 2026
@@ -220,25 +249,11 @@ cheapest place to prove the direction looks right on the existing token system b
 
 Sandeep's walk-through of how money moves (`PRODUCT.md` §10, D-61), which replaced three documents
 that gave three answers and narrowed D-26. **In build order** — each is useful before the next
-exists, and the first four need no payment gateway at all. Two doors, both permanent: a studio
+exists, and the first three need no payment gateway at all. **N-118 (prices as settings) landed
+19 September** — see `PROGRESS.md`; `getPrice` and `getPriceListForDisplay` in `lib/pricing.ts` are what
+the rest read from. Two doors, both permanent: a studio
 buys a typed basket of credits and spends one per wedding it delivers; a couple who signs up alone
 buys a plan for their one wedding. Prices and coupons are settings, never code.
-
-### N-118 · Prices as platform settings  ·  ~1 session  ·  D-61
-
-No rupee figure in code. `plans` (`0006_entitlements.sql`: `kind`, `price_paise`,
-`catalogue_credits`, `storage_gb`, `retention_months`) is already the price list's shape and today
-holds only N-80's three tier rows, prices null. Seed Deliver, Keep, Cinema, the Studio plan, the
-renewals, archive, long-term archive, extra storage and 4K, and the Deliver → Keep upgrade from
-`PRICING.md` as **initial values**; add `/admin/platform/pricing` to edit any of them (null means
-not for sale), every change on the audit trail (`pricing.set`, from/to and a reason — the shape
-`catalogue.quota.set` already has). `getPrice(planId)` reads the database and is the only way code
-learns a price. A payment stores the amount actually charged (N-20), so an edit never rewrites what
-someone paid. The Studio plan's starter grant is a *typed* bundle (2 Deliver + 1 Cinema) that
-`plans.catalogue_credits`, one integer, cannot hold: give `plans` a grants column or table and edit
-it on the same page. Prove it by changing a price in the console and watching the next quote change
-with no deploy. Storage-tier prices (Light/Medium/Heavy, D-60) become settable here too — which
-retires that open decision as a blocker.
 
 ### N-119 · Typed credits  ·  ~1 session  ·  D-61
 

@@ -277,8 +277,9 @@ The catalogue **overview** carries a checklist of what is left:
 
 ### Credits
 
-**Your first published wedding is free.** Every one after that spends one **Deliver credit**
-(₹1,999, or five for ₹7,999). Publish without one shows exactly what is short and an **Ask for a
+**Your first published wedding is free.** Every one after that spends one **Deliver credit**. What
+a credit costs — and the price for five — is on your **Credits** card under *Your studio*, and
+always shows today's price. Publish without one shows exactly what is short and an **Ask for a
 credit** button — nothing about the wedding is lost while you wait, and the platform adds credits
 the same working day. Online payment is not built yet (N-20); this is the interim.
 

@@ -91,7 +91,7 @@ for "the couple's sign-in" — it is already you. You can also pick a storage si
 Medium (50 GB) or Heavy (100 GB) — sized to what you are making; leave it unset for the default.
 
 A catalogue you start this way is a **draft until a credit is added**, by us or by a studio you
-ask — the same ₹1,999 a studio's second-and-later wedding costs. Nothing about the page, the films
+ask — the same price a studio pays for its second-and-later wedding. Nothing about the page, the films
 or the draft is lost while you wait; publishing works the moment a credit lands.
 
 ---

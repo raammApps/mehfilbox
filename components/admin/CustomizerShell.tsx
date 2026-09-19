@@ -49,6 +49,8 @@ type Props = {
   themes: readonly ThemeDefinition[]
   /** Who is reading the console: the credit panel's words differ (N-73). */
   audience?: 'studio' | 'couple'
+  /** What a credit costs, already formatted from the price list — the panel quotes it (N-118). */
+  creditPrices?: { credit: string | null; pack: string | null }
 }
 
 /**
@@ -68,6 +70,7 @@ export function CustomizerShell({
   pendingContent,
   themes,
   audience = 'studio',
+  creditPrices,
 }: Props) {
   const [modules, setModules] = useState<ModuleInstance[]>(initialModules)
   /**
@@ -494,7 +497,7 @@ export function CustomizerShell({
           </button>
         </div>
 
-        {creditRequired ? <CreditPanel catalogueId={catalogue.id} audience={audience} /> : null}
+        {creditRequired ? <CreditPanel catalogueId={catalogue.id} audience={audience} prices={creditPrices} /> : null}
 
         {publishError ? (
           <p

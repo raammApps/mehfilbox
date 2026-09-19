@@ -35,6 +35,7 @@ the check will tell you before review does.
 | No `-flix` in a shipped app name | `appNameSchema` in `lib/schema.ts` |
 | Palette contrast | `pnpm check:contrast` |
 | Secrets never in the browser bundle | `server-only` on `lib/env.ts` and the driver modules |
+| No rupee figure in application code or the rendered help pages — a price is read from the price list (`lib/pricing.ts`), edited in the platform console | `tests/unit/no-price-in-code.test.ts` |
 
 Run `pnpm verify` before committing. One ticket from doc 09 per commit.
 

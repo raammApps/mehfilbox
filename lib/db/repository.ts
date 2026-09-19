@@ -21,6 +21,7 @@ import type {
   Title,
   Preset,
   CreditBalance,
+  Plan,
   PublishCredit,
   JobRun,
   QueueStats,
@@ -170,6 +171,24 @@ export interface Repository {
    */
   consumeCredit(orgId: string, catalogueId: string, nowIso: string): Promise<PublishCredit | null>
   creditBalance(orgId: string, nowIso: string): Promise<CreditBalance>
+
+  // ── The price list (N-118, D-61) ─────────────────────────────────────────
+  /**
+   * Every product the platform sells, in console order. Not scoped to an org: the price list is
+   * the platform's, and a studio and a direct couple read the same one.
+   */
+  listPlans(): Promise<Plan[]>
+  getPlan(id: string): Promise<Plan | null>
+  /**
+   * Whole paise, ex-GST. `null` takes the product **off sale** — which is not zero: a checkout must
+   * refuse a product with no price rather than sell it for nothing. Returns the updated row, or
+   * `null` for an id that is not on the list; a price cannot create a product.
+   */
+  setPlanPrice(id: string, pricePaise: number | null): Promise<Plan | null>
+  /** The advisory "studios typically charge" range, both ends or neither. Same return as above. */
+  setPlanRetail(id: string, range: { minPaise: number; maxPaise: number } | null): Promise<Plan | null>
+  /** Replaces the typed credit bundle a purchase grants (`{ deliver: 2, cinema: 1 }`). Same return. */
+  setPlanGrants(id: string, grants: Record<string, number>): Promise<Plan | null>
 
   // ── House styles (D-36) ─────────────────────────────────────────────────
   listPresets(orgId: string): Promise<Preset[]>

@@ -21,6 +21,7 @@ import type {
   Title,
   Preset,
   CreditBalance,
+  Plan,
   PublishCredit,
   JobRun,
   QueueStats,
@@ -57,6 +58,7 @@ export type Snapshot = {
   customThemes: CustomTheme[]
   presets: Preset[]
   credits: PublishCredit[]
+  plans: Plan[]
   jobRuns: JobRun[]
   domains: Domain[]
   orgs: Org[]
@@ -90,6 +92,7 @@ export function emptySnapshot(): Snapshot {
     customThemes: [],
     presets: [],
     credits: [],
+    plans: [],
     jobRuns: [],
     domains: [],
     orgs: [],
@@ -399,6 +402,48 @@ export class MemoryRepository implements Repository {
 
   async creditBalance(orgId: string, nowIso: string): Promise<CreditBalance> {
     return balanceOf((this.data.credits ?? []).filter((c) => c.orgId === orgId), nowIso)
+  }
+
+  // ── The price list (N-118, D-61) ──────────────────────────────────────────
+  async listPlans(): Promise<Plan[]> {
+    return this.clone(
+      [...(this.data.plans ?? [])].sort((a, b) => a.position - b.position || a.id.localeCompare(b.id)),
+    )
+  }
+
+  async getPlan(id: string): Promise<Plan | null> {
+    const plan = (this.data.plans ?? []).find((candidate) => candidate.id === id)
+    return plan ? this.clone(plan) : null
+  }
+
+  async setPlanPrice(id: string, pricePaise: number | null): Promise<Plan | null> {
+    return this.updatePlan(id, (plan) => {
+      plan.pricePaise = pricePaise
+    })
+  }
+
+  async setPlanRetail(
+    id: string,
+    range: { minPaise: number; maxPaise: number } | null,
+  ): Promise<Plan | null> {
+    return this.updatePlan(id, (plan) => {
+      plan.retailMinPaise = range?.minPaise ?? null
+      plan.retailMaxPaise = range?.maxPaise ?? null
+    })
+  }
+
+  async setPlanGrants(id: string, grants: Record<string, number>): Promise<Plan | null> {
+    return this.updatePlan(id, (plan) => {
+      plan.grants = { ...grants }
+    })
+  }
+
+  private updatePlan(id: string, change: (plan: Plan) => void): Plan | null {
+    const plan = (this.data.plans ?? []).find((candidate) => candidate.id === id)
+    if (!plan) return null
+    change(plan)
+    this.touched()
+    return this.clone(plan)
   }
 
   // ── House styles (D-36) ───────────────────────────────────────────────────

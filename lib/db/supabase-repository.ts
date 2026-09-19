@@ -24,6 +24,7 @@ import type {
   Title,
   Preset,
   CreditBalance,
+  Plan,
   PublishCredit,
   JobRun,
   QueueStats,
@@ -930,6 +931,67 @@ export class SupabaseRepository implements Repository {
 
   async creditBalance(orgId: string, nowIso: string): Promise<CreditBalance> {
     return balanceOf(await this.listCredits(orgId), nowIso)
+  }
+
+  // ── The price list (N-118, D-61) ──────────────────────────────────────────
+  private static toPlan(r: Row): Plan {
+    return {
+      id: r.id,
+      kind: r.kind,
+      name: r.name,
+      unit: r.unit ?? 'each',
+      pricePaise: r.price_paise ?? null,
+      storageGb: r.storage_gb ?? null,
+      grants: r.grants ?? {},
+      position: r.position ?? 100,
+      retailMinPaise: r.retail_min_paise ?? null,
+      retailMaxPaise: r.retail_max_paise ?? null,
+    }
+  }
+
+  async listPlans(): Promise<Plan[]> {
+    const { data, error } = await this.db
+      .from('plans')
+      .select('*')
+      .order('position')
+      .order('id')
+    if (error) throw new ApiError('INTERNAL', error.message)
+    return (data ?? []).map(SupabaseRepository.toPlan)
+  }
+
+  async getPlan(id: string): Promise<Plan | null> {
+    const { data, error } = await this.db.from('plans').select('*').eq('id', id).maybeSingle()
+    if (error) throw new ApiError('INTERNAL', error.message)
+    return data ? SupabaseRepository.toPlan(data as Row) : null
+  }
+
+  /**
+   * One column-set update by id, `null` when nothing matched. Never an upsert: a price edit must not
+   * be able to invent a product, so an id that is not on the list stays not on the list.
+   */
+  private async updatePlan(id: string, columns: Row): Promise<Plan | null> {
+    const { data, error } = await this.db.from('plans').update(columns).eq('id', id).select('*')
+    if (error) throw new ApiError('INTERNAL', error.message)
+    const row = (data as Row[] | null)?.[0]
+    return row ? SupabaseRepository.toPlan(row) : null
+  }
+
+  async setPlanPrice(id: string, pricePaise: number | null): Promise<Plan | null> {
+    return this.updatePlan(id, { price_paise: pricePaise })
+  }
+
+  async setPlanRetail(
+    id: string,
+    range: { minPaise: number; maxPaise: number } | null,
+  ): Promise<Plan | null> {
+    return this.updatePlan(id, {
+      retail_min_paise: range?.minPaise ?? null,
+      retail_max_paise: range?.maxPaise ?? null,
+    })
+  }
+
+  async setPlanGrants(id: string, grants: Record<string, number>): Promise<Plan | null> {
+    return this.updatePlan(id, { grants })
   }
 
   // ── House styles (D-36) ───────────────────────────────────────────────────

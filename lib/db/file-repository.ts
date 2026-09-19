@@ -4,6 +4,7 @@ import { dirname, join, resolve } from 'node:path'
 import { env } from '@/lib/env'
 import { log } from '@/lib/log'
 import { emptySnapshot, MemoryRepository, type Snapshot } from './memory-repository'
+import { SEED_PLANS } from './seed-data'
 
 /**
  * `MemoryRepository` plus a JSON file, so a local demo survives a dev-server restart and a
@@ -27,7 +28,14 @@ export class FileRepository extends MemoryRepository {
   private static read(path: string): Snapshot {
     try {
       if (!existsSync(path)) return emptySnapshot()
-      return { ...emptySnapshot(), ...(JSON.parse(readFileSync(path, 'utf8')) as Snapshot) }
+      // A store file written before the price list existed has no `plans` key, and an empty
+      // list would leave every page that quotes a price with nothing to quote. `pnpm seed` would
+      // fix it, but nobody should have to know that to see the marketing page.
+      return {
+        ...emptySnapshot(),
+        plans: structuredClone(SEED_PLANS),
+        ...(JSON.parse(readFileSync(path, 'utf8')) as Partial<Snapshot>),
+      }
     } catch (error) {
       log.error('file-repository: unreadable store, starting empty', {
         path,

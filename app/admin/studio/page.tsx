@@ -6,6 +6,7 @@ import { getOperatorSession, getSessionOrg } from '@/lib/admin/session'
 import { DomainPanel } from '@/components/admin/DomainPanel'
 import { getRepository } from '@/lib/db'
 import { instructionsOf } from '@/lib/domains'
+import { getPriceListForDisplay, priceLabel } from '@/lib/pricing'
 import { allThemes } from '@/themes/resolve'
 
 export const dynamic = 'force-dynamic'
@@ -23,11 +24,15 @@ export default async function StudioPage() {
 
   const org = await getSessionOrg(session)
   if (!org) redirect('/admin')
-  const [styles, balance, domains] = await Promise.all([
+  const [styles, balance, domains, prices] = await Promise.all([
     getRepository().listPresets(org.id),
     getRepository().creditBalance(org.id, new Date().toISOString()),
     getRepository().listDomains(org.id),
+    getPriceListForDisplay(),
   ])
+  // From the price list, never typed here (N-118): what a credit costs is the platform's to change.
+  const creditPrice = priceLabel(prices, 'deliver')
+  const packPrice = priceLabel(prices, 'deliver-5')
   const studioDomain = domains.find((domain) => domain.catalogueId === null) ?? null
 
   return (
@@ -54,7 +59,8 @@ export default async function StudioPage() {
             {' · '}
             {balance.consumed} spent{balance.expired > 0 ? ` · ${balance.expired} expired` : ''}. A
             wedding&rsquo;s first publish spends one; publishing it again after a change is free.
-            Your first was on us; each after that is ₹1,999, or five for ₹7,999.
+            Your first was on us; each after that is {creditPrice ?? 'priced on request'}
+            {packPrice ? `, or five for ${packPrice}` : ''}.
           </p>
         </section>
 

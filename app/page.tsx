@@ -1,16 +1,33 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { env } from '@/lib/env'
+import { describeGrants } from '@/lib/plans'
+import { getPriceListForDisplay, priceLabel, retailLabel, type PriceList } from '@/lib/pricing'
 
 /**
  * The root domain: the page that sells Mehfilbox to a studio (N-51).
  *
  * **It sells to studios, not to couples**, and that is a correction rather than a preference.
  * N-51 was written before D-26 settled studio-only and described a viddrop-shaped page pricing a
- * wedding at ₹1,999 to the couple. Under studio-only every rupee is invoiced to the studio at a
- * base they mark up, so a couple-facing price here would sit next to their studio's ₹8,000 and
- * undercut the partner this product depends on. The prices below are partner prices, labelled as
- * such, next to the retail they are meant to support.
+ * wedding to the couple. Under studio-only every rupee is invoiced to the studio at a base they
+ * mark up, so a couple-facing price here would sit next to their studio's own and undercut the
+ * partner this product depends on. The prices below are partner prices, labelled as such, next to
+ * the retail they are meant to support.
+ *
+ * **No figure on this page is typed here** (N-118, D-61): every price, the suggested-retail ranges
+ * and what the Studio plan includes are read from the platform's price list, so changing one in the
+ * console changes the page on the next visit. The list is read with the never-throwing reader: an
+ * unreadable list renders "Ask us" rather than a 500 on the page every ad lands on.
+ *
+ * **This page is rendered per request, and always was**: the root layout reads the locale cookie,
+ * which makes every route dynamic — `next build` prints `ƒ /`, and an earlier draft of this ticket
+ * assumed otherwise and added ISR plus a `revalidatePath` that did nothing. The upside is that an
+ * edit can never be stale; the cost is one small read of a twenty-row table per visit. If marketing
+ * traffic ever makes that worth caching, cache the read with a tag and revalidate the tag on save —
+ * do not reach for `revalidate` on this page, which the root layout overrides.
+ *
+ * D-61 adds a direct-couple door. When it opens (D-56's prerequisites), the line below saying we
+ * "never sell to them over your head" stops being true and this positioning needs a decision.
  *
  * Two claims are deliberately weaker than the competition's. We do not say "no compression" —
  * streaming renditions are transcoded, and the honest and better claim is that originals stay
@@ -24,28 +41,41 @@ import { env } from '@/lib/env'
 const DEMO = `/c/${env.DEMO_CATALOGUE_SLUG}`
 const REGISTER = '/admin/register'
 
-export const metadata: Metadata = {
-  title: 'Mehfilbox — hand over the wedding, not a folder of files',
-  description:
-    'A private streaming page for every wedding you deliver, under your studio’s name. ₹4,999 a year, first three weddings included.',
-  robots: { index: true, follow: true },
-  openGraph: {
-    title: 'Mehfilbox — for wedding studios',
-    description:
-      'Your films and photographs, delivered as the couple’s own streaming page. Your name on it, not ours.',
-    type: 'website',
-  },
+/** What the Studio plan costs and what comes with it, from the list — either may be absent. */
+function studioOffer(prices: PriceList) {
+  const studio = prices.studio
+  return {
+    price: priceLabel(prices, 'studio'),
+    included: studio ? describeGrants(studio.grants, prices) : null,
+  }
 }
 
-export default function RootPage() {
+export async function generateMetadata(): Promise<Metadata> {
+  const { price, included } = studioOffer(await getPriceListForDisplay())
+  const offer = price ? ` ${price} a year${included ? `, ${included} included` : ''}.` : ''
+  return {
+    title: 'Mehfilbox — hand over the wedding, not a folder of files',
+    description: `A private streaming page for every wedding you deliver, under your studio’s name.${offer}`,
+    robots: { index: true, follow: true },
+    openGraph: {
+      title: 'Mehfilbox — for wedding studios',
+      description:
+        'Your films and photographs, delivered as the couple’s own streaming page. Your name on it, not ours.',
+      type: 'website',
+    },
+  }
+}
+
+export default async function RootPage() {
+  const prices = await getPriceListForDisplay()
   return (
     <div className="min-h-svh bg-surface-0">
       <MarketingNav />
       <main>
-        <Hero />
+        <Hero prices={prices} />
         <Against />
         <How />
-        <Pricing />
+        <Pricing prices={prices} />
         <Faq />
         <Closing />
       </main>
@@ -73,7 +103,8 @@ function MarketingNav() {
   )
 }
 
-function Hero() {
+function Hero({ prices }: { prices: PriceList }) {
+  const { price, included } = studioOffer(prices)
   return (
     <section className="gutter-x mx-auto max-w-[1100px] pt-10 pb-20 sm:pt-20">
       <p className="type-label mb-4 text-accent-hi">For wedding studios</p>
@@ -86,11 +117,17 @@ function Hero() {
         guessing which file is the final cut.
       </p>
       <p className="type-body-lg mb-10 max-w-[52ch]">
-        <strong className="text-text-hi">₹4,999 a year</strong>
-        <span className="text-text-mid">
-          {' '}
-          for the studio plan, and your first three weddings are included in it.
-        </span>
+        {price ? (
+          <>
+            <strong className="text-text-hi">{price} a year</strong>
+            <span className="text-text-mid">
+              {' '}
+              for the studio plan{included ? `, with ${included} included.` : '.'}
+            </span>
+          </>
+        ) : (
+          <span className="text-text-mid">Ask us about the studio plan.</span>
+        )}
       </p>
       <div className="flex flex-wrap items-center gap-4">
         <Link
@@ -201,7 +238,10 @@ function How() {
   )
 }
 
-function Pricing() {
+function Pricing({ prices }: { prices: PriceList }) {
+  const { price, included } = studioOffer(prices)
+  const part = (lead: string, label: string | null) => (label ? `${lead} ${label}` : null)
+  const youPay = (parts: (string | null)[]) => parts.filter(Boolean).join(' · ') || 'Ask us'
   return (
     <section id="pricing" className="scroll-mt-8 border-t border-surface-2 bg-surface-1 py-20">
       <div className="gutter-x mx-auto max-w-[1100px]">
@@ -213,15 +253,12 @@ function Pricing() {
 
         <div className="mb-12 rounded-[var(--radius-card)] border border-accent-dim bg-surface-2 p-6 sm:p-8">
           <p className="type-label mb-2 text-text-mid">Required, once a year</p>
-          <p className="type-display-lg mb-2">₹4,999</p>
+          <p className="type-display-lg mb-2">{price ?? 'Ask us'}</p>
           <p className="mb-4 max-w-[52ch] text-text-mid">
             The studio plan: your branding and saved presets, team seats, a custom domain served as
             yours, and the dashboard that tells you which weddings are about to lapse.
           </p>
-          <p className="text-text-hi">
-            Three Deliver credits are included in the first year — deliver three weddings and the
-            platform has cost you nothing.
-          </p>
+          {included ? <p className="text-text-hi">Included in the first year: {included}.</p> : null}
         </div>
 
         <h3 className="type-title mb-4">Then, per wedding</h3>
@@ -239,20 +276,26 @@ function Pricing() {
               <tr className="border-b border-surface-2">
                 <th scope="row" className="py-4 pr-6 font-semibold text-text-hi">Deliver</th>
                 <td className="py-4 pr-6 text-text-mid">90 days · 100 GB</td>
-                <td className="py-4 pr-6 text-text-hi">₹1,999 · five for ₹7,999</td>
-                <td className="py-4 text-text-mid">₹5,000 – ₹8,000</td>
+                <td className="py-4 pr-6 text-text-hi">
+                  {youPay([priceLabel(prices, 'deliver'), part('five for', priceLabel(prices, 'deliver-5'))])}
+                </td>
+                <td className="py-4 text-text-mid">{retailLabel(prices, 'deliver') ?? '—'}</td>
               </tr>
               <tr className="border-b border-surface-2">
                 <th scope="row" className="py-4 pr-6 font-semibold text-text-hi">Keep</th>
                 <td className="py-4 pr-6 text-text-mid">12 months, renewable · 100 GB</td>
-                <td className="py-4 pr-6 text-text-hi">₹6,000 · three years ₹12,000</td>
-                <td className="py-4 text-text-mid">₹15,000 – ₹20,000</td>
+                <td className="py-4 pr-6 text-text-hi">
+                  {youPay([priceLabel(prices, 'keep'), part('three years', priceLabel(prices, 'keep-3y'))])}
+                </td>
+                <td className="py-4 text-text-mid">{retailLabel(prices, 'keep') ?? '—'}</td>
               </tr>
               <tr className="border-b border-surface-2">
                 <th scope="row" className="py-4 pr-6 font-semibold text-text-hi">Cinema</th>
                 <td className="py-4 pr-6 text-text-mid">12 months, renewable · 200 GB · 4K</td>
-                <td className="py-4 pr-6 text-text-hi">₹12,000 · three years ₹24,000</td>
-                <td className="py-4 text-text-mid">₹30,000 – ₹40,000</td>
+                <td className="py-4 pr-6 text-text-hi">
+                  {youPay([priceLabel(prices, 'cinema'), part('three years', priceLabel(prices, 'cinema-3y'))])}
+                </td>
+                <td className="py-4 text-text-mid">{retailLabel(prices, 'cinema') ?? '—'}</td>
               </tr>
             </tbody>
           </table>

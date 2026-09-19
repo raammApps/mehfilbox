@@ -2870,3 +2870,111 @@ Files: `lib/downloads.ts`, `app/api/download/title/route.ts` (new), `app/c/[slug
 `tests/unit/downloads.test.ts`, `tests/component/title-modal.test.tsx`, `docs/PRODUCT.md`
 (corrected a stale "Missing" row for N-22 itself, found while updating it for N-22b),
 `docs/help/client.md`, `docs/NEXT.md`.
+
+## N-118 · Prices as platform settings — 19 September 2026
+
+**What now exists.** `plans` is the price list. Migration `0029_price_list.sql` widens its `kind`
+check (renewal, archive, add-on join partner and catalogue), adds `unit`, `grants` (the typed credit
+bundle), `position` and an advisory retail range, and seeds twenty rows from `PRICING.md` as
+**initial values**. Its `on conflict do update` touches structure only — never a price, a bundle or
+a retail range — so re-applying it cannot undo an admin's edit; a test reads the SQL and fails if a
+column slips into that clause. `Repository` gains `listPlans`/`getPlan`/`setPlanPrice`/
+`setPlanRetail`/`setPlanGrants` on both drivers; an id that is not on the list stays off it, because
+a price edit must not be able to invent a product. `lib/pricing.ts` has two readers on purpose:
+`getPrice` is **strict** and throws (a checkout must never charge a guessed price), and
+`getPriceListForDisplay` **never throws** (copy renders "Ask us" and logs, rather than the page every
+ad lands on returning a 500 because a migration has not been applied yet). `POST
+/api/admin/platform/pricing/:id` takes exactly one of a price, a retail range or a credit bundle per
+request, is platform-admin only (404 to anyone else), and writes `pricing.set` / `.clear` /
+`.retail.set` / `.retail.clear` / `.grants.set` with from/to in paise *and* rupees — `199900` is
+unambiguous now and `₹1,999` is legible in a year. `/admin/platform/pricing` is the console. `null`
+means **not for sale**, which is not zero and is shown differently.
+
+**The ticket was bigger than its text.** It said "no rupee figure in code", and grepping for `₹`
+found the figures in six more places than the table: the marketing page (its meta description, hero,
+Studio card and the whole plans table, suggested-retail column included), the studio's Credits card,
+the extra-storage line on a wedding's overview, the credit-refusal panel (threaded through
+`CustomizerShell` as props, three components deep), two example placeholders, and two help pages
+that render from the repo and cannot read a database. All now read the list — or, for the help
+pages, say where to find today's price. What stops it coming back is
+`tests/unit/no-price-in-code.test.ts`, added to `CLAUDE.md`'s enforced-rules table: it walks the
+TypeScript syntax tree, so a rupee amount in a *comment* (a cost estimate, the history of a
+decision) is fine and the same amount in a string, template or JSX text fails. A grep would have
+either failed on the comments or, to spare them, been trivial to dodge.
+
+**Two marketing claims came out, because they were arithmetic that only held for the old grant:**
+"first three weddings included" and "deliver three weddings and the platform has cost you nothing".
+The page now states the grant *from the list* ("2 Deliver credits and 1 Cinema credit") and makes
+no claim about what it adds up to, since that sum moves whenever a price does.
+
+**Decisions taken without asking — say so and they change.** The suggested-retail ranges (advisory
+copy, not a price we bill) became settings too, so the guard test needs zero exemptions and no
+figure is left that an admin cannot reach. Storage-tier prices (D-60's open decision) are now
+settable in the console and no longer block anything. `unit` is a column because "25" on an admin's
+screen is a number, not a price. A price of `0` is accepted and means free; only `null` means off
+sale. **Not moved:** term lengths — the marketing table still says "90 days · 100 GB" as copy until
+N-120 puts terms on the plan row. **Not touched, and now in tension with D-61:** the marketing
+page's "we never sell to them over your head" — true until the direct-couple door opens, false after;
+left a breadcrumb in the file, because it is a positioning decision and not this ticket's.
+
+**Three things went wrong, and what each taught.**
+(1) *I designed for a page that was not there.* I assumed the marketing page was static and gave it
+`revalidate = 300` plus a `revalidatePath('/')` on save. A production build printed `ƒ /` and the
+response carried `Cache-Control: no-store` with no `x-nextjs-cache`: the root layout reads the
+locale cookie, which makes **every** route dynamic, and always did. The machinery did nothing and
+its test asserted a call to nothing. Removed, comments corrected — and the outcome is the better one
+(an edit cannot be stale; the cost is one twenty-row read per visit). What it taught: check the
+build's own route table before designing around a rendering mode. **And it was not only this
+page:** the build has zero static routes, and the live guest catalogue page answers `no-store` /
+`x-vercel-cache: MISS` every time — so `SCALE-PLAN.md` §3's "the guest page is ISR" has been false
+since N-29 put the locale cookie in the root layout. Ticketed as **N-122** with the evidence, not
+fixed here.
+(2) *A flaky test of mine hid behind a green run.* The retail test read the newest audit row after
+two writes in the same millisecond; the driver's newest-first sort is stable, so a tie lists the
+older row first. It passed while the process was cold and failed every time once warm — and it was
+the mutation runs (below) that warmed it. It now asserts the *set* of actions. (3) *One E2E failure,
+not mine, but checked rather than assumed:* the photograph-caption spec timed out at 15 s with the
+upload still "Uploading…". That spec uploads to the **real Bunny Storage zone** (the E2E server
+inherits `PHOTO_DRIVER=bunny` from `.env.local`), so it is a network dependency inside a "hermetic"
+suite. The spec alone passed 10/10 straight after; a full clean run is below.
+
+**Proof it is real, not just green.** Ten deliberate breakages, each confirmed red then restored:
+the auth check removed (anyone may reprice), the extra-zero ceiling, a bundle allowed on any plan,
+the change not audited, two changes in one request, the display reader throwing, `getPrice`
+swallowing an outage into "off sale", the raw-float multiply in the rupee parser, `formatRupees`
+always showing paise, and — separately — a re-run migration overwriting a price, the seed and the
+SQL disagreeing, and a price typed back into a page. **On a production build** (file driver, port
+3200): repricing Deliver through the real route with a real session showed ₹1,888 on the very next
+read of `/`, restoring showed ₹1,999, and an anonymous attempt got a 404. **In a browser**, on the
+dev server: a typo (`19.999`) is refused inline and its button stays disabled, a valid edit
+lands, the studio Credits card and the marketing page both change with no deploy, taking Keep off
+sale drops its single-year price from the table without breaking the row, a credit-bundle edit
+rewrites the marketing sentence with correct plurals, every refusal over real HTTP is a 400/404, and
+the audit trail holds exactly the six changes made — none of the refused ones. The local store had
+no `plans` key at all, so that run also proved the file driver's fallback for a store written before
+this ticket. Everything was put back, and the dev store restored byte for byte.
+
+**Not verified — and this matters before deploy.** Migration `0029` has **not been applied to any
+Supabase project**, so `SupabaseRepository`'s five new methods and the anon lockout have only their
+integration tests (`tests/integration/drivers.test.ts`, two new cases), which have not been run; the
+console and route were exercised on the file driver only. **Apply `0029` to staging first**, run the
+integration tests against it, then production, *before* the deploy that ships this: the marketing
+page and credits card degrade to "Ask us" without it, but `/admin/platform/pricing` and the route
+would 500.
+
+Suite: 830 unit/component (+71); E2E **160 passed / 57 skipped**, the baseline, on the final run — the
+marketing spec now reads its `₹4,999` from the price list, which is itself a check that the seed reached
+the production build. The first full run had the one Bunny-network timeout described above.
+
+Files: `supabase/migrations/0029_price_list.sql` (new), `lib/schema.ts`, `lib/plans.ts` (new),
+`lib/pricing.ts` (new), `lib/format.ts`, `lib/db/repository.ts`, `lib/db/memory-repository.ts`,
+`lib/db/supabase-repository.ts`, `lib/db/seed-data.ts`, `lib/db/file-repository.ts`,
+`app/api/admin/platform/pricing/[id]/route.ts` (new), `app/admin/platform/pricing/page.tsx` (new),
+`components/admin/PricingTable.tsx` (new), `components/admin/PlatformNav.tsx`, `app/page.tsx`,
+`app/admin/studio/page.tsx`, `app/admin/c/[id]/page.tsx`, `app/admin/c/[id]/customizer/page.tsx`,
+`components/admin/CustomizerShell.tsx`, `components/admin/CreditPanel.tsx`,
+`components/admin/CatalogueTermControls.tsx`, `components/admin/OrgCreditsControl.tsx`,
+`docs/help/studio.md`, `docs/help/client.md`, `tests/unit/pricing.test.ts`,
+`tests/unit/pricing-route.test.ts`, `tests/unit/price-list-seed.test.ts`,
+`tests/unit/no-price-in-code.test.ts` (all new), `tests/integration/drivers.test.ts`, `CLAUDE.md`,
+`docs/PRODUCT.md`, `docs/PRICING.md`, `docs/NEXT.md`.

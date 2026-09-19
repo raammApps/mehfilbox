@@ -16,6 +16,7 @@ import { setupChecklist } from '@/lib/admin/setup-checklist'
 import { hoursFor, resolveLimits, storageTierFor, storageUsage } from '@/lib/entitlements'
 import { getRepository } from '@/lib/db'
 import { formatWeddingDate } from '@/lib/format'
+import { getPriceListForDisplay, priceLabel } from '@/lib/pricing'
 import { resolveLocalised } from '@/lib/i18n'
 import { render } from '@/lib/notify/templates'
 import { publicUrlOf } from '@/lib/address'
@@ -47,6 +48,7 @@ export default async function CatalogueOverviewPage({
   ])
 
   // The couple's account, when the studio has issued one (D-37): who signs in, and to what.
+  const storagePrice = priceLabel(await getPriceListForDisplay(), 'extra-storage')
   const coupleOrg = catalogue.coupleOrgId ? await repository.getOrg(catalogue.coupleOrgId) : null
   const coupleOperator = coupleOrg ? (await repository.listOperators(coupleOrg.id))[0] ?? null : null
   const linkedCouple = coupleOperator ? { email: coupleOperator.email, name: coupleOperator.name } : null
@@ -165,8 +167,8 @@ export default async function CatalogueOverviewPage({
               <p className="mt-1 text-[13px] text-[var(--color-l-text-mid)]">
                 {(usage.limitGb - usage.usedGb).toFixed(1)} GB left — roughly{' '}
                 {hoursFor(Math.max(usage.limitGb - usage.usedGb, 0)).standard} hours more at 720p.
-                Extra storage is ₹25 per GB per month, or keep the long functions at 720p and put
-                the films people rewatch in Full HD.
+                Extra storage is {storagePrice ? `${storagePrice} per GB per month` : 'available on request'},
+                or keep the long functions at 720p and put the films people rewatch in Full HD.
               </p>
               {/* Only once uploads are actually refused (N-79) — the 80% warning still has room. */}
               {usage.level === 'full' ? <AskForSpaceButton catalogueId={catalogue.id} /> : null}

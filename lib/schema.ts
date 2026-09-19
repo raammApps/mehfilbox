@@ -284,6 +284,38 @@ export type PublishCredit = z.infer<typeof publishCreditSchema>
 /** What a studio sees: how many it can spend, has spent, and let lapse. */
 export type CreditBalance = { available: number; consumed: number; expired: number }
 
+/**
+ * What a `plans` row is for, which is also how it is fulfilled (N-20): the Studio plan grants a
+ * credit bundle; a catalogue plan or storage tier is what a wedding is *on*; a renewal extends a
+ * term; an archive keeps one cold; an add-on is bought on top of a wedding that already exists.
+ */
+export const PLAN_KINDS = ['partner', 'catalogue', 'renewal', 'archive', 'addon'] as const
+export type PlanKind = (typeof PLAN_KINDS)[number]
+
+/**
+ * One line of the platform's price list (N-118, D-61) — the only place a price lives.
+ *
+ * `pricePaise` is whole paise, **ex-GST**, and `null` means *not for sale*, which is a state an
+ * admin can put a product in and a checkout must respect — it is not zero, and zero is not "free
+ * until someone notices". `unit` says what one price buys, because "25" is a number and "₹25 per
+ * GB per month" is a price. `grants` is the typed credit bundle a purchase hands over (only the
+ * Studio plan has one); the retail range is advisory copy about what a studio might charge a
+ * couple, kept here purely so no rupee figure has to live in a source file.
+ */
+export const planSchema = z.object({
+  id: z.string().min(1),
+  kind: z.enum(PLAN_KINDS),
+  name: z.string().min(1),
+  unit: z.string().min(1).default('each'),
+  pricePaise: z.number().int().nonnegative().nullable().default(null),
+  storageGb: z.number().int().positive().nullable().default(null),
+  grants: z.record(z.string(), z.number().int().nonnegative()).default({}),
+  position: z.number().int().default(100),
+  retailMinPaise: z.number().int().nonnegative().nullable().default(null),
+  retailMaxPaise: z.number().int().nonnegative().nullable().default(null),
+})
+export type Plan = z.infer<typeof planSchema>
+
 /** One run of a scheduled job (D-40): every cron writes one, the health page reads the newest. */
 export const jobRunSchema = z.object({
   id: z.string().uuid(),

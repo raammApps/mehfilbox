@@ -80,7 +80,7 @@ export function OrgCreditsControl({
             <input
               value={reason}
               onChange={(event) => setReason(event.target.value)}
-              placeholder="Paid ₹7,999 by bank transfer on 12 Sept"
+              placeholder="Paid by bank transfer on 12 Sept"
               className="h-10 w-full rounded-[var(--radius-input)] border border-[var(--color-l-line)] px-3 text-[14px]"
             />
           </label>

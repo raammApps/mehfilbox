@@ -86,7 +86,7 @@ export function ExtendTermControl({
           <input
             value={reason}
             onChange={(event) => setReason(event.target.value)}
-            placeholder="Keep renewal, ₹2,500 paid 12 Sept"
+            placeholder="Keep renewal, paid 12 Sept"
             required
             className="h-10 w-full rounded-[var(--radius-input)] border border-[var(--color-l-line)] px-3 text-[14px]"
           />

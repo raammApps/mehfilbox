@@ -9,7 +9,18 @@ import { useState } from 'react'
  * panel says so plainly — a price, a button, and what happens next — rather than pretending to
  * be a checkout.
  */
-export function CreditPanel({ catalogueId, audience = 'studio' }: { catalogueId: string; audience?: 'studio' | 'couple' }) {
+export function CreditPanel({
+  catalogueId,
+  audience = 'studio',
+  prices,
+}: {
+  catalogueId: string
+  audience?: 'studio' | 'couple'
+  /** Formatted by the server from the price list (N-118); `null` means it is not for sale. */
+  prices?: { credit: string | null; pack: string | null }
+}) {
+  const credit = prices?.credit ?? null
+  const pack = prices?.pack ?? null
   const [state, setState] = useState<'idle' | 'sending' | 'sent' | 'repeated' | 'error'>('idle')
 
   async function request() {
@@ -39,8 +50,8 @@ export function CreditPanel({ catalogueId, audience = 'studio' }: { catalogueId:
       </p>
       <p className="mt-1 text-[13px] text-[var(--color-l-text-mid)]">
         {audience === 'couple'
-          ? 'A catalogue you start yourself publishes on a credit — ₹1,999 — which your studio can add for you, or we can. Nothing here is lost: the page, the films and the draft all keep, and publishing works the moment one is added.'
-          : 'Your first wedding was on us. Each one after that is one Deliver credit — ₹1,999, or five for ₹7,999 — and you have none left. Nothing here is lost: the page, the films and the draft all keep, and publishing works the moment a credit is added.'}
+          ? `A catalogue you start yourself publishes on a credit${credit ? ` — ${credit} —` : ','} which your studio can add for you, or we can. Nothing here is lost: the page, the films and the draft all keep, and publishing works the moment one is added.`
+          : `Your first wedding was on us. Each one after that is one Deliver credit${credit ? ` — ${credit}${pack ? `, or five for ${pack}` : ''} —` : ','} and you have none left. Nothing here is lost: the page, the films and the draft all keep, and publishing works the moment a credit is added.`}
       </p>
       {state === 'sent' || state === 'repeated' ? (
         <p className="mt-3 text-[13px]">

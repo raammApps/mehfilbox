@@ -146,3 +146,31 @@ export async function suggestOrgSlug(
 }
 
 
+
+/**
+ * Whole paise as rupees, the way an Indian price is written: `₹1,999`, `₹1,00,000`, and paise only
+ * when there are some (`₹1,999.50`) — a price that is a round number should not wear `.00`.
+ */
+export function formatRupees(paise: number): string {
+  const rupees = paise / 100
+  const whole = Number.isInteger(rupees)
+  return `₹${new Intl.NumberFormat('en-IN', {
+    minimumFractionDigits: whole ? 0 : 2,
+    maximumFractionDigits: 2,
+  }).format(rupees)}`
+}
+
+/**
+ * What an admin typed into a price box, as whole paise — or `null` when it is not a price.
+ *
+ * Strict on purpose: `1,999`, `₹1999`, `1999.5` and `1999.50` are prices; `19.999`, `-5`, `1e3`
+ * and `12k` are typos, and a typo that is quietly rounded into a live price is worse than a
+ * refusal. Done on the digits rather than as `Number(x) * 100`, which turns `1.15` into `114.99…`.
+ */
+export function rupeesToPaise(input: string): number | null {
+  const cleaned = input.replace(/[₹,\s]/g, '')
+  const match = /^(\d+)(?:\.(\d{1,2}))?$/.exec(cleaned)
+  if (!match) return null
+  const paise = Number(match[1]) * 100 + Number((match[2] ?? '').padEnd(2, '0'))
+  return Number.isSafeInteger(paise) ? paise : null
+}

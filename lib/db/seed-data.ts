@@ -1,7 +1,7 @@
 import { hashSecret } from '@/lib/crypto'
 import type { Snapshot } from './memory-repository'
 import { emptySnapshot } from './memory-repository'
-import type { Album, Catalogue, ModuleInstance, Photo, Title } from '@/lib/schema'
+import type { Album, Catalogue, ModuleInstance, Photo, Plan, Title } from '@/lib/schema'
 
 /**
  * The demo catalogue (doc 09 P0-29).
@@ -24,6 +24,61 @@ const titleId = (n: number) => `55555555-5555-4555-8555-${String(n).padStart(12,
 const photoId = (n: number) => `66666666-6666-4666-8666-${String(n).padStart(12, '0')}`
 
 const CREATED_AT = '2026-07-01T09:00:00.000Z'
+
+/**
+ * The price list's **initial values** (N-118, D-61) — a fixture, like the demo catalogue below.
+ *
+ * Production never reads this: its list lives in the `plans` table, seeded by
+ * `supabase/migrations/0029_price_list.sql` and edited in the platform console. This exists so the
+ * in-memory and file drivers — local development, the suite, the E2E server — start with the same
+ * list production started with, instead of an empty one that no page could quote. Application code
+ * never imports it; `tests/unit/price-list-seed.test.ts` reads the migration and fails if the two
+ * ever disagree, which is the only thing keeping a second copy of these numbers honest.
+ */
+const plan = (
+  id: string,
+  kind: Plan['kind'],
+  name: string,
+  unit: string,
+  pricePaise: number | null,
+  position: number,
+  extra: Partial<Plan> = {},
+): Plan => ({
+  id,
+  kind,
+  name,
+  unit,
+  pricePaise,
+  storageGb: null,
+  grants: {},
+  position,
+  retailMinPaise: null,
+  retailMaxPaise: null,
+  ...extra,
+})
+
+export const SEED_PLANS: Plan[] = [
+  plan('studio', 'partner', 'Studio plan', 'year', 499900, 10, { grants: { deliver: 2, cinema: 1 } }),
+  plan('deliver', 'catalogue', 'Deliver', 'each', 199900, 20, { storageGb: 100, retailMinPaise: 500000, retailMaxPaise: 800000 }),
+  plan('deliver-5', 'catalogue', 'Deliver — five credits', 'each', 799900, 25, { storageGb: 100 }),
+  plan('keep', 'catalogue', 'Keep', 'each', 600000, 30, { storageGb: 100, retailMinPaise: 1500000, retailMaxPaise: 2000000 }),
+  plan('keep-3y', 'catalogue', 'Keep — three years', 'each', 1200000, 35, { storageGb: 100 }),
+  plan('cinema', 'catalogue', 'Cinema', 'each', 1200000, 40, { storageGb: 200, retailMinPaise: 3000000, retailMaxPaise: 4000000 }),
+  plan('cinema-3y', 'catalogue', 'Cinema — three years', 'each', 2400000, 45, { storageGb: 200 }),
+  plan('light', 'catalogue', 'Light', 'each', null, 50, { storageGb: 5 }),
+  plan('medium', 'catalogue', 'Medium', 'each', null, 55, { storageGb: 50 }),
+  plan('heavy', 'catalogue', 'Heavy', 'each', null, 60, { storageGb: 100 }),
+  plan('renewal-keep', 'renewal', 'Keep renewal', 'year', 250000, 70),
+  plan('renewal-cinema', 'renewal', 'Cinema renewal', 'year', 400000, 75),
+  plan('archive-keep', 'archive', 'Archive — Keep', 'year', 99900, 80),
+  plan('archive-cinema', 'archive', 'Archive — Cinema', 'year', 149900, 85),
+  plan('archive-keep-5y', 'archive', 'Long-term archive — Keep, five years', 'each', 399900, 90),
+  plan('archive-keep-10y', 'archive', 'Long-term archive — Keep, ten years', 'each', 699900, 95),
+  plan('archive-cinema-5y', 'archive', 'Long-term archive — Cinema, five years', 'each', 599900, 100),
+  plan('upgrade-deliver-keep', 'addon', 'Deliver → Keep upgrade', 'each', 250000, 110),
+  plan('extra-storage', 'addon', 'Extra storage', 'gb_month', 2500, 120),
+  plan('extra-4k', 'addon', 'Extra 4K', 'min4k_20', 199900, 130),
+]
 
 type TitleSeed = {
   n: number
@@ -329,6 +384,7 @@ export function demoSnapshot(
 
   return {
     ...emptySnapshot(),
+    plans: structuredClone(SEED_PLANS),
     orgs: [
       {
         id: ORG_ID,
