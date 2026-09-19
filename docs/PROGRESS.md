@@ -3080,3 +3080,19 @@ the full run after the commit (the credits journey is one spec, extended rather 
 while a Deliver credit is held, plan changed, published, fixed), `docs/help/studio.md`,
 `docs/help/client.md`, `docs/PRODUCT.md`, `docs/NEXT.md`. **Before this is deployed:** apply `0030` to
 staging, run the integration suite against staging, then production — create and edit write `plan_id`.
+
+**Walked on staging, 19 September, against real Supabase.** `0030` was applied by hand to
+`mehfilbox-staging`. The integration suite (`-t Supabase`, run with `.env.staging.local` after checking
+the project ref — `.env.local` names production) passed 9 of 9, including the new typed-spend test,
+which also shows Postgres refusing `light` as a plan on both columns (`23514`); it left no rows behind
+and goes red (`expected 'deliver' to be 'keep'`) when the Supabase driver's `plan_id` filter is
+removed. `afa6189` was deployed to `staging.mehfilbox.com` (`/api/health` version equal to `HEAD`,
+`drivers` supabase + bunny). Through a real session: creating a wedding on Keep wrote `plan_id`, a read
+back returned it, a change to Cinema persisted across a reload and the overview showed Cinema selected
+with each basket's count, `light` was refused with 400, and Publish with an empty Cinema basket was
+refused naming Cinema (and, with no credits of any kind, offering no way forward). **Not walked:** the
+success path through the deployed app and the platform grant form — the signed-in session is not a
+platform admin, so it could not put a credit in the studio; the success path is covered by the
+integration test against the same database. **Left behind:** one draft wedding, "N119 Walk", in the
+staging studio, which is harmless and can be deleted from the console. **Production:** `0030` is not
+applied there and `afa6189` is not deployed.
