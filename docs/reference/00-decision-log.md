@@ -932,3 +932,62 @@ without them — an implementation detail, not a pricing question.
 Unblocks N-80's build (seed `plans`, `resolveLimits` reads a catalogue-level tier before the org
 override, the wizard gets a tier step) and, once that lands, N-79 (buying storage) and N-21c (the
 Cinema "call them" prompt, which needs `entitlements.planId` actually assigned to something).
+
+## D-61 · Two billing doors, typed credits, the term starts at Publish, prices and coupons are settings (18 Sept 2026)
+
+**Was:** D-26 billed studios only, with a rare "studio is gone" escape hatch. D-55 sold the Studio
+plan (configurable, default ₹4,999) for **2 untyped credits**, D-56 gave a direct client "the same
+shape as D-55," and `PRICING.md` said **three Deliver credits** — three documents, three answers.
+In code: `publishCreditSchema.planId` exists but `consumeCredit` ignores it and spends whichever
+credit expires soonest; a catalogue records no Deliver/Keep/Cinema plan at all (`subPlan` is a
+monthly/yearly cadence, unrelated); and `includedUntil` starts at catalogue **creation**
+(`app/api/admin/catalogues/route.ts`), before anything has been delivered — an accident of build
+order, not a decision. Every rupee figure lives in a markdown table.
+
+**Decided (Sandeep), six parts:**
+
+1. **Two doors, both permanent.** *Studio:* signs up, pays the Studio plan, receives a basket of
+   credits it spends on the weddings it delivers, and tops the basket up by buying more. *Direct
+   couple:* signs up alone — no studio anywhere — browses the platform and its themes, chooses a
+   plan (Deliver / Keep / Cinema), pays for it, and builds their own catalogue. This **narrows D-26
+   rather than reversing it**: a *studio-originated* catalogue is still billed to its studio, and
+   the studio-is-gone escape hatch stands for it; a couple who never had a studio is billed
+   directly. Why: digital marketing reaches studios and individuals alike (D-56), and a couple who
+   lands with no studio would otherwise have nothing to act on.
+2. **A studio's credits are typed, and spent by type.** Its balance is a basket — Deliver, Keep and
+   Cinema credits held separately. Publishing a catalogue on a plan spends one credit *of that
+   plan*; an empty Deliver basket refuses a Deliver publish even while Cinema credits remain.
+   Top-ups choose which plan they are buying.
+3. **The Studio plan's starter grant is 2 Deliver + 1 Cinema credit.** Replaces D-55's "2 credits"
+   and `PRICING.md`'s "three Deliver credits." The grant is a typed bundle, so it is itself a
+   setting (part 5), not a constant.
+4. **A catalogue's term starts at its first Publish** — not when a credit is bought or granted, and
+   not when the wizard is opened. A studio may hold a credit for as long as it likes; the couple's
+   90 days or 12 months begin when the couple can actually see the wedding.
+5. **No price is in code.** The price list is a **platform-level setting** in the platform admin
+   portal, editable at any time without a deploy, every change on the audit trail. The figures in
+   `PRICING.md` become the *initial values* seeded into it, nothing more. A purchase records the
+   amount actually charged, so changing a price never rewrites what someone already paid.
+6. **Coupon codes**, so a marketing cohort or a reward is a code rather than a price change:
+   created and disabled in the platform console, with a campaign label so a cohort can be read
+   back, a validity window, redemption limits, and a scope (which plans, which door).
+
+A direct couple buys a **plan, not credits** — they have one wedding, so the basket machinery is
+for studios only. Themes follow D-57 unchanged: a basic five free, the rest purchasable and freely
+switchable between owned and free.
+
+**Assumed, not asked — say so and it changes:** a catalogue's plan is chosen when it is created and
+may change until first Publish, when its credit is spent or its plan is paid; one coupon per
+checkout, no stacking, and the server computes the discount — never the browser; a **reward** is a
+coupon that grants credits of a chosen plan instead of a discount (studios only — a direct couple
+has no basket, and a 100% discount already covers them); the price setting is stored **ex-GST**, as
+`PRICING.md` quotes it.
+
+**Not decided here:** when the direct door *opens*. D-56's prerequisites (attribution locked, a
+couple's money requests routed to their studio, Razorpay live) are unchanged unless Sandeep says to
+launch ahead of them — this entry fixes what the door sells, not the date. Also open: whether and
+when GST is added at checkout, which waits on the company question (D-52c).
+
+Supersedes: D-26's "the couple is never the billing customer" (narrowed, above); D-55's grant of
+"2 credits" and D-56's "same shape as D-55" for a direct client. Re-scopes N-20, N-113 and N-115's
+client half, and adds N-118 to N-121 (`docs/NEXT.md`, Tier 1e).

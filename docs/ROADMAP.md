@@ -144,7 +144,8 @@ same commit as this file.
 manages branding on the platform and that is worth something. The competitor review also found
 that charging a studio *before* they have delivered a wedding is the thing most likely to lose
 them. The reconciliation: the ₹4,999 Studio plan includes three Deliver credits (₹6,000 of
-catalogue) in its first year. A studio that delivers three weddings has paid nothing net for the
+catalogue) in its first year *(superseded 18 September: the starter grant is 2 Deliver + 1
+Cinema, a console setting — D-61)*. A studio that delivers three weddings has paid nothing net for the
 platform; one that delivers none has paid for a branded console they did not use. Renewal of the
 plan in year two carries no credits.
 

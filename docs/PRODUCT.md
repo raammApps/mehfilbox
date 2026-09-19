@@ -316,6 +316,25 @@ it mattered, against production. Decided as D-42 to D-44; scheduled as N-77 to N
 | What the platform can support | **Analysed**, not measured | `SCALE-PLAN.md` §3: Vercel function invocations bind first at ~333 weddings/month; Supabase's 8 GB holds ~2,900; Bunny has no ceiling; concurrent viewers are Bunny's problem, not ours. No cap exists on catalogues or studios, only on storage. Reasoned numbers — N-81 measures them after real weddings. |
 | Costs | **Modelled**, not billed | `SCALE-PLAN.md` §1: ₹55,474 infrastructure against ₹3,30,000 revenue over six months, 83% margin, storage-never-deleted the risk. A live cost line on the platform dashboard is N-82, with N-25b. |
 | Security — is media reachable without the passcode? | **Photographs: yes.** Video: no. | **Verified live, 13 Sept.** The photo pull zone has no token auth, so a copied photo URL works forever for anyone; keys are UUIDs, so it cannot be guessed, only leaked. Video is signed and dies within hours. N-83. The "real filename in the URL" is the film's slug, set from the upload filename and kept after renaming — a metadata leak, not access: N-84. **N-86 closed, 18 Sept**: lockouts are durable across instances, CSP is present, and Turnstile is live (verified with a real click in an ordinary browser, not just the automated tool that hit Cloudflare's own bot-detection first). Guest pages are `noindex`. |
-| The passcode is view-only; downloading needs the account | **Not built** — D-43 | Today the guest code grants `/download`, originals included. N-85 makes it the client's or the studio's sign-in. |
-| A staging environment | **Not built** | CI is hermetic; Vercel Preview has no variables and cannot boot against real services; everything real is tested in production. N-87. |
+| The passcode is view-only; downloading needs the account | **Built** — D-43 | N-85, 18 Sept. The guest code watches; only the client's or the studio's own sign-in downloads, on the full page and on the per-film control (N-22b). *(This row said Not built until 18 Sept, three tickets after it shipped.)* |
+| A staging environment | **Built** | N-87, 18 Sept. `staging.mehfilbox.com` on its own Supabase project and Bunny library, deployed with `VERCEL_TARGET=preview VERCEL_ENV_FILE=.env.staging.local ./scripts/deploy-vercel.sh` and pointed at by hand (`docs/DEPLOYMENT.md` §14). No staging-safe E2E suite yet — N-117. |
 | Studio- and client-facing documentation | **Built** | N-88, 18 Sept. `docs/help/studio.md` and `docs/help/client.md`, rendered at `/help/studio` and `/help/client` straight from the repo — a deploy publishes whatever the markdown says. The `next-item` and `ship` skills now ask whether a `PRODUCT.md` change should also touch the guide. |
+
+---
+
+## 10. The billing model of 18 September 2026 (D-61)
+
+Sandeep's walk-through of how money moves, replacing three documents that gave three answers.
+Nothing below is built unless it says so; the sequence is `NEXT.md` Tier 1e.
+
+| | Status | Where it stands |
+|---|---|---|
+| Two billing doors | **Not built** — D-61 | A studio-originated wedding is billed to the studio (D-26 stands for it); a couple who signs up alone is billed directly. Both permanent. When the direct door *opens* is still gated by D-56's prerequisites. |
+| Prices are platform settings | **Not built** — D-61 | Today every figure is a markdown table (`PRICING.md`). Required: the live price list edited in the platform console, audited, changeable without a deploy, seeded from `PRICING.md`'s figures; a purchase records what was actually charged. N-118. |
+| Studio credits are typed | **Partial** — D-61 | `publishCreditSchema.planId` exists; `consumeCredit` ignores it, and a catalogue records no Deliver/Keep/Cinema plan. Required: a basket per plan, spent by type, a plan on the catalogue, the balance shown by type. N-119. |
+| Studio starter grant: 2 Deliver + 1 Cinema | **Not built** — D-61 | Today registration grants one untyped credit (N-65). D-55 said 2, `PRICING.md` said three Deliver; this replaces both, as a console setting. N-113 with N-118. |
+| Term starts at first Publish | **Not built** — D-61 | Today `includedUntil` starts at catalogue *creation*, before anything is delivered. N-120. |
+| Coupon codes — discounts and rewards | **Not built** — D-61 | Created in the platform console with a campaign label, window, limits and scope; a discount coupon lowers one checkout, a reward coupon grants credits (studios only). One per checkout, computed server-side. N-121. |
+| A studio buys credits, choosing the plan | **Not built** | N-20's checkout, on N-118's prices and N-119's baskets. |
+| A direct couple buys a plan | **Not built** | Sign up alone, browse, choose a plan, pay, build. No credits — one wedding. N-113's couple door, on N-20's checkout. |
+| A direct couple buys themes | **Not built** — D-57 | A basic five free; the rest purchasable and freely switchable. N-115's client half. |

@@ -7,6 +7,12 @@ shows where every number came from and what was tried and rejected.
 
 All prices **exclude 18% GST** (SAC 998314).
 
+> **These figures are the *initial values*, not the live price list (D-61, 18 September 2026).**
+> No price lives in code: the live list is a platform setting, edited in the platform console and
+> audited, changeable at any time without a deploy (N-118). This page records where each number
+> started and why; when the two disagree, the console is right. Discounts and rewards are coupon
+> codes (N-121), not edits to this table.
+
 ---
 
 ## The plans
@@ -36,7 +42,7 @@ All prices **exclude 18% GST** (SAC 998314).
 
 | Also | To whom | |
 |---|---|---|
-| Studio plan | Studio, yearly | **₹4,999** (₹5,899 incl.): registration, branding, presets, team seats, custom domain served, lapse dashboard. **Includes three Deliver credits in the first year**, so a studio that delivers three weddings has paid nothing for the platform. |
+| Studio plan | Studio, yearly | **₹4,999** (₹5,899 incl.): registration, branding, presets, team seats, custom domain served, lapse dashboard. **Grants a starter basket of credits — 2 Deliver + 1 Cinema (D-61)**, replacing the "three Deliver credits" this row used to say; the bundle is itself a console setting, not a constant. Credits are typed: each is spent on a wedding of its own plan, and the term starts when that wedding is first published, not when the credit is bought. |
 | Deliver → Keep, inside year one | Studio (marks up to the couple) | **₹2,500** base |
 | Keep renewal / Cinema renewal | **Studio** (marks up) | **₹2,500 / ₹4,000** per year |
 | Archive (storage only, restore on demand) | **Studio** (marks up) | **₹999 / ₹1,499** per year; free for the first 12 months after grace |
@@ -47,17 +53,27 @@ All prices **exclude 18% GST** (SAC 998314).
 
 The full list of what is sold, who pays and what each line needs built is `ROADMAP.md` §3.
 
-### Who is billed — the one rule
+### Who is billed — two doors (D-61, narrowing D-26)
 
-**The studio. Always.** (D-26.) Every rupee — delivery, the day-60 upgrade, renewal, archive,
-long-term archive, extra storage, extra 4K — is invoiced to the studio at a base price they mark
-up as they see fit. **The couple is never our billing customer**, and a couple who paid their
-studio never receives an invoice from a company they have not heard of.
+**A wedding a studio makes: the studio.** Every rupee — delivery, the day-60 upgrade, renewal,
+archive, long-term archive, extra storage, extra 4K — is invoiced to the studio at a base price
+they mark up as they see fit. A couple who paid their studio never receives an invoice from a
+company they have not heard of. The studio holds a **typed basket of credits** (Deliver, Keep,
+Cinema), tops it up by buying more of the plan it needs, and spends one of the matching type when
+it first publishes a wedding — which is also when that wedding's term begins. The markup is the
+studio's revenue, is never recorded here, and is nobody's business but theirs.
 
-One customer, one invoice shape, one payment flow. The markup is the studio's revenue, is never
-recorded here, and is nobody's business but theirs.
+**A wedding a couple makes alone: the couple.** A couple who signs up directly — no studio
+anywhere — browses the platform, chooses a plan (Deliver, Keep or Cinema), pays for it, and builds
+their own catalogue. They buy a **plan, not credits**: they have one wedding, so the basket exists
+for studios only. Themes follow D-57 — a basic five free, the rest purchasable, switchable at
+will between free and owned. This is a permanent second door, not a fallback: the same marketing
+that reaches studios reaches individuals.
 
-**The one exception — the escape hatch.** When a studio is *gone* — account closed, Studio plan
+Either way one payment flow underneath, one price list (a platform setting — see above), and
+coupon codes for cohorts and rewards.
+
+**A third, narrower case — the escape hatch.** When a studio is *gone* — account closed, Studio plan
 unpaid past its own grace, or unresponsive 90 days after a catalogue lapsed — the couple may pay
 us directly, at list price, to renew or archive. It is not a channel and is expected to be rare.
 It is what makes **"your wedding survives your studio"** true, which is the one line no competitor

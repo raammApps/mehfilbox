@@ -144,7 +144,7 @@ N-25b reconciles the per-catalogue estimate against the same bill; build them to
   after* over *approve before*, and the platform console can also create a studio directly. An
   approval queue is ~2h if wanted; it costs every honest studio a wait.
 - **Plan tiers** (N-80) — decided, D-60. The remaining open figure is the tiers' actual prices,
-  needed before the wizard's tier step can show them, not before the rest of the build.
+  needed before the wizard's tier step can show them, not before the rest of the build — and with N-118 they are a console setting, so this no longer blocks anything (D-61).
 - **Turning 4K on, platform-wide.** Raised 18 September, setting up staging: `PRICING.md` §1
   already sells Keep and Cinema with a 4K minute allowance (20 / 90 min), priced against Bunny's
   premium encoding at $0.15/min — but nothing enables premium encoding anywhere. Every library,
@@ -172,17 +172,18 @@ implemented — Razorpay, Cashfree and PhonePe are all still options — so `get
 throws on any driver name that has no class yet, rather than silently granting nothing while a
 deploy believes it is charging someone. 5 new unit tests.
 
-### N-113 · Paid registration, both doors  ·  ~1 session  ·  **needs N-20/a chosen gateway**  ·  D-55, D-56
+### N-113 · Registration, both doors  ·  ~1 session  ·  **after N-20**  ·  D-55, D-56, D-61
 
-The identity fields (business or individual name, logo, a contact photo, email, address, mobile,
-PAN), the configurable fee (`platform_settings` or an env value — no config store exists yet,
-build the smaller of the two), and the 2-credit/100 GB grant on confirmed payment. Registration
-already lets an unpaid account build a whole wedding before meeting `CREDIT_REQUIRED` at Publish
-(`app/api/admin/catalogues/[id]/publish/route.ts`); this ticket removes the free registration
-credit (`grantRegistrationCredit`, D-38) and replaces it with a payment that grants the same shape
-of thing. The direct-client variant is the identical flow on `orgKind = 'couple'` — build once.
-Blocked on N-112's `none` becoming a real driver, which is blocked on the business bank account
-(`docs/15-sep-finding/04-startup-india.md`).
+*Studio:* the identity fields (business name, logo, a contact photo, email, address, mobile, PAN);
+the fee is the Studio plan's price read from N-118 (initial value ₹4,999); confirmed payment grants
+N-118's starter bundle — **2 Deliver + 1 Cinema credit** (D-61, replacing D-55's "2 credits") — and
+removes the free registration credit (`grantRegistrationCredit`, D-38). An unpaid studio can still
+sign in and build everything up to Publish (`app/api/admin/catalogues/[id]/publish/route.ts` meets
+`CREDIT_REQUIRED` there). *Direct couple* (`orgKind = 'couple'`): the same identity fields, no fee
+at signup and **no credits** — they browse, choose a plan and pay per N-20, and the payment writes
+that plan onto their own catalogue. When this door opens to the public is gated by D-56's
+prerequisites (attribution locked, a couple's money requests routed to their studio, Razorpay
+live), not by this ticket being built. Blocked on N-20, and through it on N-112's real driver.
 
 ### N-115 · The theme store  ·  **studio half done, 18 September 2026**  ·  client half **blocked on N-113**  ·  D-57
 
@@ -194,11 +195,13 @@ style. No new schema, matching the ticket's own constraint: a theme has no `pres
 of its own, so those still seed from the studio's own branding, the same as a blank "New house
 style" already does.
 
-**Client half — still open.** A `tier` column on `themes`
-(`supabase/migrations/0019_themes.sql` has none today), a catalogue-scoped entitlement write (the
-seam `lib/entitlements.ts` was built to support and nothing has ever used, per `map-commerce.md`
-§7), a "locked until bought" state in the customizer picker, and the purchase itself, which is
-N-113/N-112's payment flow. Basic five free; everything past that priced and gated.
+**Client half — still open, and restated by D-61.** A `tier` column on `themes`
+(`supabase/migrations/0019_themes.sql` has none today); each paid theme's **price is a console
+setting** like every other (N-118), not a constant; a catalogue-scoped entitlement per purchased
+theme (the seam `lib/entitlements.ts` was built to support and nothing has ever used, per
+`map-commerce.md` §7); a "locked until bought" state in the customizer picker; and free, unlimited
+switching between the basic five and whatever the client owns. The purchase is N-20's checkout, for
+a direct couple only — a studio gets every theme free (D-57). Depends on N-118 and N-20.
 
 ### N-116 · The redesign, once it can actually be looked at  ·  **blocked on real reference material**  ·  D-59
 
@@ -210,6 +213,87 @@ path, or Sandeep sends screenshots directly. Either way, do the marketing site
 (`app/page.tsx`, one file, no auth surface at risk) before the three admin consoles — it is the
 cheapest place to prove the direction looks right on the existing token system before touching
 `components/admin/` (13,326 lines) or the guest-dark token set, which nothing here asks to change.
+
+---
+
+## Tier 1e — the billing model of 18 September 2026 · D-61
+
+Sandeep's walk-through of how money moves (`PRODUCT.md` §10, D-61), which replaced three documents
+that gave three answers and narrowed D-26. **In build order** — each is useful before the next
+exists, and the first four need no payment gateway at all. Two doors, both permanent: a studio
+buys a typed basket of credits and spends one per wedding it delivers; a couple who signs up alone
+buys a plan for their one wedding. Prices and coupons are settings, never code.
+
+### N-118 · Prices as platform settings  ·  ~1 session  ·  D-61
+
+No rupee figure in code. `plans` (`0006_entitlements.sql`: `kind`, `price_paise`,
+`catalogue_credits`, `storage_gb`, `retention_months`) is already the price list's shape and today
+holds only N-80's three tier rows, prices null. Seed Deliver, Keep, Cinema, the Studio plan, the
+renewals, archive, long-term archive, extra storage and 4K, and the Deliver → Keep upgrade from
+`PRICING.md` as **initial values**; add `/admin/platform/pricing` to edit any of them (null means
+not for sale), every change on the audit trail (`pricing.set`, from/to and a reason — the shape
+`catalogue.quota.set` already has). `getPrice(planId)` reads the database and is the only way code
+learns a price. A payment stores the amount actually charged (N-20), so an edit never rewrites what
+someone paid. The Studio plan's starter grant is a *typed* bundle (2 Deliver + 1 Cinema) that
+`plans.catalogue_credits`, one integer, cannot hold: give `plans` a grants column or table and edit
+it on the same page. Prove it by changing a price in the console and watching the next quote change
+with no deploy. Storage-tier prices (Light/Medium/Heavy, D-60) become settable here too — which
+retires that open decision as a blocker.
+
+### N-119 · Typed credits  ·  ~1 session  ·  D-61
+
+`consumeCredit` ignores `planId` (`lib/db/memory-repository.ts:388` and its Supabase twin), spending
+whichever credit expires soonest. Make it take a plan: spend the soonest-expiring credit *of that
+plan*, and refuse with the plan named when that basket is empty even if others are not. Add the
+missing half — a catalogue's own `planId` (Deliver / Keep / Cinema; `subPlan` is an unrelated
+monthly/yearly cadence), chosen in the wizard's first step beside the storage tier (D-60) and
+changeable until first Publish. Show the balance **by type** in the studio's console, and have the
+refusal panel name the missing plan. Migration: `catalogues.plan_id`, existing catalogues backfilled
+`deliver` — stated in the migration rather than assumed, because every credit ever granted
+defaulted to it. Until N-113, registration keeps granting its one free credit, as `deliver`.
+
+### N-120 · The term starts at first Publish  ·  ~half a session  ·  D-61
+
+`includedUntil` is set when a catalogue is *created* (`app/api/admin/catalogues/route.ts:91`, a
+flat `INCLUDED_MONTHS`), before anything has been delivered. Move it to first Publish
+(`publish/route.ts`, where the credit is spent) and take the length from the catalogue's plan —
+Deliver 90 days, Keep and Cinema 12 months, held on the plan row (N-118) rather than in code
+(`plans.retention_months` counts months; 90 days needs its own column). **The careful part is the
+readers, not the writer:** a catalogue that has never been published now has *no* term, and
+`resolveAccess`'s included → grace → cold ladder, the lapse jobs and the lapse dashboard must read
+null as "not started", never "expired" — grep every reader of `includedUntil` before changing the
+writer. Existing published catalogues keep their date; a republish never restarts it.
+
+### N-121 · Coupon codes  ·  ~1 session  ·  D-61
+
+So a marketing cohort or a reward is a code rather than a price change. `coupons` (code, kind,
+value, **campaign label**, valid from/until, maximum redemptions overall and per payer, scope: which
+plans and which door, active) and `coupon_redemptions` (coupon, payer, payment, amount taken off).
+Kinds: percent off, fixed amount off, and **reward** — grants credits of a chosen plan, studios
+only, needing no payment and so usable before N-20 exists. Platform console
+`/admin/platform/coupons`: create, disable (never delete — a redeemed code is history), and
+redemptions by campaign so a cohort can be read back; audited. `applyCoupon(code, product, payer)`
+is server-side only and returns the discounted amount for N-20's checkout to charge: the browser
+never sends a price or a discount. One per checkout, no stacking. A code is a password for money —
+rate-limit lookups the way the guest passcode is, and answer "invalid" identically for unknown,
+expired and exhausted so the answer cannot be used to probe which exist.
+
+### N-20 · The checkout  ·  ~2 sessions  ·  **needs N-118, N-119; the live proof needs Razorpay test keys**  ·  D-58a, D-61
+
+One payment flow, two payers. A `payments` table (its id is the `reference` `createPayment`
+already expects; payer org, product, plan, list price, coupon, amount charged, status, provider
+refs, timestamps). `POST /api/payments/checkout` takes a product and an optional coupon, prices it
+from N-118, applies N-121 on the server, and calls `createPayment`. `POST /api/webhooks/razorpay`
+verifies the raw body (`verifyWebhook`, built and tested in N-112) and, on paid, writes what the
+product means — **idempotently on `payments.id`**: typed credits granted (a studio top-up), a term
+extended (a renewal), a storage grant, a plan written onto a direct couple's catalogue, the Studio
+plan's bundle. Assume the webhook gets lost (N-53's lesson, already paid for): a cron reconciles
+`pending` payments against Razorpay's own API. Studio side: a *Buy credits* panel choosing plan and
+quantity. Couple side: choose a plan → pay → the plan is on the catalogue and its term starts at
+first Publish (N-120). Build all of it against the `fake` driver, so the suite needs no network,
+then one live test-mode payment — keys need sign-up only, no KYC (D-58a) — as the proof, the way
+Turnstile and Bunny were proved. **Deliberately not here:** the studio-is-gone escape hatch
+(N-24b), which needs this checkout to exist first.
 
 ---
 
@@ -271,7 +355,8 @@ schedulers exist for however long it takes to delete the workflow.
 doc 15 asks for a prompt to phone rather than email when the renewal is a Cinema catalogue's
 ₹4,000. The banner exists (N-21b, 8 September); what does not is any way to know a catalogue *is*
 Cinema — `entitlements.planId` is there, and nothing assigns it. Build it after N-27b puts plan
-assignment in the platform console, or it is a prompt keyed on a plan nobody has.
+assignment in the platform console, or it is a prompt keyed on a plan nobody has. **N-119 (D-61) now
+gives every catalogue its own `planId`** — the thing this was waiting for.
 
 ### N-24a · The encoding ladder  ·  ~1h  ·  operator task
 
@@ -297,7 +382,7 @@ silently and never to `deleted`. What is left all needs money to change hands:
 - **The renewal path.** Nothing writes `active`, because nothing takes a payment (N-20).
 - **The restore-on-payment screen** a cold catalogue's guests should see instead of the current
   renewal screen — the difference between them is a paid button.
-- **The `studio_gone` predicate** (D-26), which is only interesting when a couple can act on it:
+- **The `studio_gone` predicate** (D-26 — for studio-originated catalogues only: a couple who signed up alone was never behind a studio and is billed directly, D-61), which is only interesting when a couple can act on it:
   it exists to let them pay *us* directly. Computed rather than stored, and logged when it unlocks
   a purchase.
 - **Twelve months of archive at our cost after grace**, then the fee — a billing rule with no
@@ -370,6 +455,9 @@ Build it when a studio asks for a second look. Until then it is a list with one 
 
 ### N-27c · Plans, once anything reads one  ·  doc 15 §1  ·  **blocked by N-20/N-24**
 
+> **Largely absorbed by D-61.** N-118 seeds `plans` and reads prices from it; N-119 makes credits read
+> `planId`. Re-read this once those land and delete whatever is left.
+
 The storage quota landed on 8 September (N-27b). **Assigning a *plan* deliberately did not**, and
 the reason is worth keeping: `plans` has no rows, nothing anywhere reads `entitlements.plan_id`,
 and `resolveLimits` consumes `storage_gb` alone. A console that assigned a plan would write a
@@ -384,21 +472,6 @@ rows and the reader arrive together.
 `max_titles` and `max_photos` are in the same position — columns nothing reads. They were caps
 before storage replaced them (`lib/schema.ts` says so), and they should probably be dropped rather
 than wired up.
-
-### N-20 · Razorpay  ·  doc 15 §4  ·  **Phase 2**
-
-Two flows that should not share a code path: partners buy catalogue credits in advance, couples
-pay renewal, archive, long-term archive and storage after the included months — **and nothing is
-billed to a couple inside twelve months of delivery** (`PRICING.md`, "Who is billed when"). The
-`plans` rows for Deliver, Keep, Cinema, archive (₹999 / ₹1,499), the Studio plan with its three
-included credits, and the Deliver → Keep upgrade (`ROADMAP.md` §3) land here. The subscription state machine already exists
-and `resolveAccess` honours it — what is missing is only the thing that *writes* it. Verify the
-webhook the way the Bunny one is verified, and assume it gets lost, because that lesson is
-already paid for.
-
-The entitlement tables and the resolver now exist (N-19); what is missing is the thing that
-*writes* a row. `plans` is empty on purpose — the price list is a business decision, not a
-migration.
 
 ### N-14 · Real footage  ·  operator task  ·  **half answered**
 
